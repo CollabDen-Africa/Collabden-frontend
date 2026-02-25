@@ -21,10 +21,10 @@ const Navbar = () => {
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
                     <Image
-                        src="/collabden_logo.png"
+                        src="/logo-collabden.svg"
                         alt="CollabDen Logo"
-                        width={170}
-                        height={100}
+                        width={250}
+                        height={250}
                         className="h-8 w-auto object-contain"
                     />
                 </Link>
@@ -35,7 +35,7 @@ const Navbar = () => {
                         <Link
                             key={link.name}
                             href={link.href}
-                            className="text-white/80 hover:text-white transition-colors text-sm font-medium"
+                            className="text-white/80 hover:text-white transition-colors text-md font-semibold"
                         >
                             {link.name}
                         </Link>
@@ -44,7 +44,7 @@ const Navbar = () => {
 
                 {/* Desktop Actions */}
                 <div className="hidden md:flex items-center gap-6">
-                    <Link href="/login" className="text-white/90 hover:text-white text-sm font-semibold">
+                    <Link href="/login" className="text-white/90 hover:text-white text-md font-semibold">
                         Log in
                     </Link>
                     <Button variant="primary" size="sm">

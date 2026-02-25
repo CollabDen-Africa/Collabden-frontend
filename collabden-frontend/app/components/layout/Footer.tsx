@@ -5,13 +5,34 @@ import Image from 'next/image';
 
 const Footer = () => {
     return (
-        <footer
-            className="relative bg-white/20 backdrop-blur-md overflow-hidden"
-            style={{ clipPath: 'polygon(0 0, 75% 15%, 100% 0, 100% 100%, 0 100%)' }}
-        >
-            <div className="relative z-10 pt-28 pb-8 px-6">
+        <footer className="relative mt-24">
+            {/* SVG shape to replace the CSS clip-path so we can add a white top border stroke */}
+            <div className="absolute top-0 left-0 w-full overflow-hidden leading-0 transform -translate-y-[99%]">
+                <svg
+                    className="relative block w-full h-[8vw] min-h-[50px] max-h-[120px]"
+                    preserveAspectRatio="none"
+                    viewBox="0 0 100 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    {/* The stroke vector creates the white top border seamlessly */}
+                    <path
+                        d="M0 15V0L75 15L100 0V15H0Z"
+                        className="fill-white/10"
+                    />
+                    <path
+                        d="M0 0L75 15L100 0"
+                        stroke="white"
+                        strokeWidth="0.2"
+                        strokeOpacity="0.4"
+                        fill="none"
+                    />
+                </svg>
+            </div>
+
+            <div className="relative bg-white/10 backdrop-blur-md z-10 pt-10 pb-6 px-6">
                 <div className="container mx-auto max-w-7xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
                         {/* Company Info */}
                         <div className="space-y-8">
                             <div className="flex items-center">
@@ -28,7 +49,7 @@ const Footer = () => {
                             </p>
                             <div className="flex gap-3">
                                 {/* Instagram */}
-                                <div className="w-9 h-9 rounded-md bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center text-white transition-transform hover:scale-110">
+                                <div className="w-9 h-9 rounded-md bg-linear-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center text-white transition-transform hover:scale-110">
                                     <Image src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="IG" width={20} height={20} className="w-5 h-5 shadow-sm" />
                                 </div>
                                 {/* LinkedIn */}

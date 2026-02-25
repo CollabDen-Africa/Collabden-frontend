@@ -7,28 +7,29 @@ import Button from '../ui/Button';
 const Hero = () => {
     return (
         <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
-            {/* Video Background */}
-            <div className="absolute inset-0 z-0">
-                {/* Top Blue Glow */}
-                <div className="absolute top-[-25%] left-1/2 -translate-x-1/2 w-[120%] h-[100%] bg-[radial-gradient(circle_at_center,_var(--primary-blue)_0%,_transparent_70%)] opacity-40 blur-[120px] pointer-events-none" />
-
+            {/* Video Background Container - pushed down */}
+            <div className="absolute top-15 inset-x-0 bottom-0 z-0">
                 <video
                     autoPlay
                     loop
                     muted
                     playsInline
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover opacity-80"
                 >
                     <source src="hero_video.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
-                {/* Dark Overlay for contrast */}
-                <div className="absolute inset-0 bg-black/60 z-10" />
             </div>
+
+            {/* Overall Dark Overlay for video contrast */}
+            <div className="absolute inset-0 bg-black/70 z-10" />
+
+            {/* Top Blue Gradient - Rounded and centered behind navbar */}
+            <div className="absolute top-0 left-[50%] -translate-x-1/2 w-[90%] max-w-full h-[30vh] z-10 bg-[radial-gradient(ellipse_at_top,var(--primary-blue)_0%,transparent_70%)] opacity-80 blur-2xl" />
 
             {/* Hero Content */}
             <div className="relative z-20 container mx-auto px-6 text-center text-white">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold max-w-5xl mx-auto leading-tight md:leading-tight mb-8">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold max-w-5xl mx-auto mt-6 leading-tight md:leading-tight mb-8">
                     Where Africa&apos;s Music Professionals Collaborate, Get Paid, And Grow
                 </h1>
 

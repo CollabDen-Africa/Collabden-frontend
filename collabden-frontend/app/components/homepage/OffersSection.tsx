@@ -38,7 +38,7 @@ const OffersSection = () => {
     ];
 
     return (
-        <section className="relative py-24 px-6 bg-white/20 backdrop-blur-md overflow-hidden">
+        <section className="relative py-24 px-6 backdrop-blur-md overflow-hidden">
             <div className="container mx-auto max-w-6xl relative z-10">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
@@ -53,10 +53,10 @@ const OffersSection = () => {
                     {offers.map((offer, index) => (
                         <div
                             key={index}
-                            className="group relative bg-[#333333] rounded-[2rem] p-8 pt-12 overflow-hidden border border-white/5 hover:border-white/10 transition-all duration-300 min-h-[300px]"
+                            className="group relative bg-[#333333] rounded-4xl p-8 pt-12 overflow-hidden border border-white/5 hover:border-white/10 transition-all duration-300 min-h-[300px]"
                         >
                             {/* Top right gradient decoration */}
-                            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-primary-green/80 via-primary-blue/30 to-transparent opacity-60 pointer-events-none translate-x-8 -translate-y-8 blur-xl" />
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-linear-to-bl from-primary-green/80 via-primary-blue/30 to-transparent opacity-60 pointer-events-none translate-x-8 -translate-y-8 blur-xl" />
 
                             {/* Stars/Dots decoration */}
                             <div className="absolute top-6 right-6 w-24 h-24 pointer-events-none opacity-40">

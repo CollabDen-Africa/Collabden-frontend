@@ -63,7 +63,7 @@ const HowItWorks = () => {
     ];
 
     return (
-        <section className="relative py-24 px-6 bg-white/20 backdrop-blur-md overflow-hidden">
+        <section className="relative py-24 px-6 backdrop-blur-md overflow-hidden">
             <div className="container mx-auto max-w-6xl relative z-10">
                 {/* How It Works Section */}
                 <div className="text-center mb-20">

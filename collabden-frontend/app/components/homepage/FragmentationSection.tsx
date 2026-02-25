@@ -22,7 +22,7 @@ const FragmentationSection = () => {
     ];
 
     return (
-        <section className="relative py-20 px-6 bg-white/20 overflow-hidden">
+        <section className="relative py-20 px-6 overflow-hidden">
             <div className="container mx-auto max-w-6xl relative z-10">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">

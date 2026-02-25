@@ -16,7 +16,7 @@ const CollaborationSection = () => {
     return (
         <section className="relative overflow-hidden">
             {/* Part 1: Built with Musicians */}
-            <div className="relative py-24 px-6 bg-[#333333] backdrop-blur-md border-t border-white/10">
+            <div className="relative py-24 px-6 bg-white/10 backdrop-blur-md border-t border-white/10">
                 <div className="container mx-auto max-w-5xl text-center">
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
                         Built with musicians. Designed for <span className="text-primary-green">professional collaboration.</span>
@@ -38,7 +38,7 @@ const CollaborationSection = () => {
             </div>
 
             {/* Part 2: Waitlist Section */}
-            <div className="relative py-24 px-6 bg-gradient-to-b from-[#222222] to-primary-blue/20 overflow-hidden">
+            <div className="relative py-24 px-6 overflow-hidden">
                 {/* Map Watermark */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center">
                     <div className="relative w-full h-full max-w-4xl max-h-[600px]">
@@ -51,7 +51,7 @@ const CollaborationSection = () => {
                     </div>
                 </div>
 
-                <div className="container mx-auto max-w-5xl relative z-10">
+                <div className="container mx-auto max-w-5xl z-10">
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-12">
                         Be Among The First To Collaborate On <span className="text-primary-green">CollabDen Africa</span>
                     </h2>
@@ -63,7 +63,7 @@ const CollaborationSection = () => {
                     <ul className="space-y-6 mb-16 max-w-3xl">
                         {benefits.map((benefit, index) => (
                             <li key={index} className="flex items-start">
-                                <div className="flex-shrink-0 w-6 h-6 bg-primary-green rounded-full flex items-center justify-center mr-4 mt-1">
+                                <div className="shrink-0 w-6 h-6 bg-primary-green rounded-full flex items-center justify-center mr-4 mt-1">
                                     <CheckCircle2 className="w-4 h-4 text-white" />
                                 </div>
                                 <span className="text-white/90 text-lg">{benefit}</span>
@@ -79,9 +79,6 @@ const CollaborationSection = () => {
                     </button>
                 </div>
             </div>
-
-            {/* Overall glassy effect overlay if needed */}
-            <div className="absolute inset-0 bg-white/5 pointer-events-none" />
         </section>
     );
 };

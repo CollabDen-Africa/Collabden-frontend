@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${raleway.variable} antialiased`}
+        className={`${raleway.variable} antialiased relative overflow-x-hidden`}
         suppressHydrationWarning
       >
         <BackgroundPattern />

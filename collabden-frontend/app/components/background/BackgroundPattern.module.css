@@ -5,7 +5,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    overflow: visible;
+    overflow: hidden;
     pointer-events: none;
     z-index: 0;
 }
@@ -13,47 +13,47 @@
 /* Large blue glowing circles - base style */
 .bgCircle {
     position: absolute;
-    width: 568px;
-    height: 568px;
+    width: 468px;
+    height: 468px;
     border-radius: 50%;
     background: #204F99;
     filter: blur(100px);
     opacity: 1;
 }
 
-:root {
-    --bg-circle-gap: 700px;
-    --bg-circle-start: 45vh;
-}
+/* Base layout adjusted to percentage placing instead of fixed spacing */
+
 
 /* ========================================
    CENTER CIRCLES - Fully visible 
    ======================================== */
 
 /* First center circle - hero section */
+/* Starts right exactly half-shown after the first 100vh fold 
+   (100vh = 1 full screen. minus half circle radius 234px) */
 .bgCircleCenter1 {
-    top: var(--bg-circle-start);
+    top: calc(100vh - 234px);
     left: 50%;
     transform: translate(-50%);
 }
 
 /* Second center circle */
 .bgCircleCenter2 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 1.7);
+    top: 20%;
     left: 90%;
     transform: translateX(-50%);
 }
 
 /* Third center circle */
 .bgCircleCenter3 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 5);
+    top: 45%;
     left: 50%;
     transform: translateX(-50%);
 }
 
-/* Fourth center circle - Final, half-shown */
+/* Fourth center circle - Final, close to bottom */
 .bgCircleCenter4 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 10);
+    top: 85%;
     left: 50%;
     transform: translate(-50%, 50%);
 }
@@ -64,20 +64,20 @@
 
 /* First right edge */
 .bgCircleRight1 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 3);
+    top: 30%;
     left: 60%;
     transform: translateX(-50%);
 }
 
 /* Second right edge */
 .bgCircleRight2 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 6);
+    top: 61%;
     right: -200px;
 }
 
 /* Third right edge */
 .bgCircleRight3 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 9);
+    top: 95%;
     right: -200px;
 }
 
@@ -87,34 +87,24 @@
 
 /* First left edge */
 .bgCircleLeft1 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 1);
+    top: 15%;
     left: -352px;
 }
 
 /* Second left edge */
 .bgCircleLeft2 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 4);
+    top: 55%;
     left: -200px;
 }
 
 /* Third left edge */
 .bgCircleLeft3 {
-    top: calc(var(--bg-circle-start) + var(--bg-circle-gap) * 7);
+    top: 75%;
     left: -200px;
 }
 
 /* Responsive adjustments for scaling and padding */
-@media (max-width: 1024px) {
-    .bgPatternWrapper {
-        --bg-circle-gap: 800px;
-    }
-}
-
 @media (max-width: 768px) {
-    .bgPatternWrapper {
-        --bg-circle-gap: 500px;
-        --bg-circle-start: 40vh;
-    }
 
     .bgCircle {
         width: 350px;
