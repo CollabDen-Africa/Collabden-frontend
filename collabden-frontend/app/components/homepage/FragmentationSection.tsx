@@ -2,23 +2,22 @@
 
 const CARDS = [
     {
-        title: "Scattered tools across platforms",
+        title: "Scattered Tools Across Platforms",
         description:
             "Producers, vocalists, and engineers working with different software and services",
     },
     {
-        title: "File quality loss during sharing",
+        title: "File Quality Loss During Sharing",
         description:
             "Audio files compressed or corrupted when passed through email and messaging apps",
     },
     {
-        title: "Payment and agreement friction",
+        title: "Payment and Agreement Friction",
         description:
             "Complex contracts and slow payment processing slow down collaboration workflows",
     },
 ];
 
-/* ── Reusable card component ───────────────────────────────── */
 const FragCard = ({
     title,
     description,
@@ -29,7 +28,7 @@ const FragCard = ({
     isCenter?: boolean;
 }) => (
     <div
-        className={`rounded-[20px] p-10 md:p-10 flex flex-col justify-center h-full ${isCenter
+        className={`rounded-[20px] p-6 md:p-10 flex flex-col justify-center h-full ${isCenter
             ? "bg-primary-green shadow-2xl"
             : "bg-white/10 border border-white/70"
             }`}
@@ -41,7 +40,7 @@ const FragCard = ({
             {title}
         </h3>
         <p
-            className={`text-sm leading-relaxed ${isCenter ? "md:text-base text-white/90" : "text-white/60"
+            className={`text-md leading-relaxed ${isCenter ? "md:text-base text-white/90" : "text-white"
                 }`}
         >
             {description}
@@ -60,7 +59,7 @@ const FragmentationSection = () => {
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                         The Fragmentation Problem
                     </h2>
-                    <p className="text-lg text-white/60 max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-lg text-white max-w-3xl mx-auto leading-relaxed">
                         Music collaboration is broken. It currently relies on
                         juggling multiple disconnected tools for files,
                         communication, and payments.

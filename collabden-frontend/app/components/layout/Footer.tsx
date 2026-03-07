@@ -1,13 +1,32 @@
 "use client";
 
-import React from 'react';
 import Image from 'next/image';
+import { RiInstagramFill, RiLinkedinBoxFill, RiFacebookBoxFill, RiYoutubeFill, RiTwitterXFill, RiWhatsappFill, RiMailFill } from 'react-icons/ri';
+import Link from 'next/link';
 
 const Footer = () => {
+    const socialLinks = [
+        { Icon: RiInstagramFill, label: "Instagram", href: "https://instagram.com/collabdenafrica" },
+        { Icon: RiLinkedinBoxFill, label: "LinkedIn", href: "https://linkedin.com/company/collabdenafrica" },
+        { Icon: RiFacebookBoxFill, label: "Facebook", href: "https://facebook.com/collabdenafrica" },
+        { Icon: RiYoutubeFill, label: "YouTube", href: "https://youtube.com/@collabdenafrica" },
+        { Icon: RiTwitterXFill, label: "X", href: "https://x.com/collabdenafrica" },
+    ];
+
+    const linkSections = [
+        { title: "Explore", items: ["Home", "About", "Features", "How It Works", "Marketplace"], className: "lg:pl-8" },
+        { title: "Legal", items: ["Privacy Policy", "Terms Of Service"] },
+    ];
+
+    const contactItems = [
+        { Icon: RiWhatsappFill, text: "+234 816 2345 678", href: "https://wa.me/2348162345678" },
+        { Icon: RiMailFill, text: "Collabdenafrica@gmail.com", href: "mailto:Collabdenafrica@gmail.com" },
+    ];
+
     return (
         <footer className="relative mt-24">
             {/* SVG shape to replace the CSS clip-path so we can add a white top border stroke */}
-            <div className="absolute top-0 left-0 w-full overflow-hidden leading-0 transform -translate-y-[99%]">
+            <div className="hidden md:block absolute top-0 left-0 w-full overflow-hidden leading-0 transform -translate-y-[99%]">
                 <svg
                     className="relative block w-full h-[8vw] min-h-[50px] max-h-[120px]"
                     preserveAspectRatio="none"
@@ -15,7 +34,6 @@ const Footer = () => {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                 >
-                    {/* The stroke vector creates the white top border seamlessly */}
                     <path
                         d="M0 15V0L75 15L100 0V15H0Z"
                         className="fill-white/10"
@@ -30,92 +48,66 @@ const Footer = () => {
                 </svg>
             </div>
 
-            <div className="relative bg-white/10 backdrop-blur-md z-10 pt-10 pb-6 px-6">
+            <div className="relative bg-white/10 backdrop-blur-md z-10 pt-6 pb-4 px-6">
                 <div className="container mx-auto max-w-7xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                         {/* Company Info */}
-                        <div className="space-y-8">
-                            <div className="flex items-center">
+                        <div className="space-y-2">
+                            <Link href="/" className="relative flex items-center">
                                 <Image
-                                    src="/collabden_logo.png"
+                                    src="/collabden-logo.png"
                                     alt="CollabDen Logo"
-                                    width={180}
-                                    height={50}
-                                    className="w-48 h-auto object-contain"
+                                    width={500}
+                                    height={500}
+                                    className="h-14 w-auto object-contain"
+                                    priority
                                 />
-                            </div>
-                            <p className="text-white/90 max-w-xs text-lg leading-snug">
+                            </Link>
+                            <p className="text-white max-w-xs text-sm leading-snug">
                                 All-in-one collaboration platform for music professionals
                             </p>
-                            <div className="flex gap-3">
-                                {/* Instagram */}
-                                <div className="w-9 h-9 rounded-md bg-linear-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] flex items-center justify-center text-white transition-transform hover:scale-110">
-                                    <Image src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="IG" width={20} height={20} className="w-5 h-5 shadow-sm" />
-                                </div>
-                                {/* LinkedIn */}
-                                <div className="w-9 h-9 rounded-md bg-[#0077B5] flex items-center justify-center transition-transform hover:scale-110">
-                                    <Image src="https://upload.wikimedia.org/wikipedia/commons/8/81/LinkedIn_icon.svg" alt="LI" width={20} height={20} className="w-5 h-5 invert shadow-sm" />
-                                </div>
-                                {/* Facebook */}
-                                <div className="w-9 h-9 rounded-md bg-[#1877F2] flex items-center justify-center transition-transform hover:scale-110">
-                                    <Image src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="FB" width={20} height={20} className="w-5 h-5 invert shadow-sm" />
-                                </div>
-                                {/* YouTube */}
-                                <div className="w-9 h-9 rounded-md bg-[#FF0000] flex items-center justify-center transition-transform hover:scale-110">
-                                    <Image src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YT" width={20} height={20} className="w-5 h-5 invert shadow-sm" />
-                                </div>
-                                {/* X */}
-                                <div className="w-9 h-9 rounded-md bg-black flex items-center justify-center transition-transform hover:scale-110">
-                                    <span className="text-white font-bold text-xl leading-none">𝕏</span>
-                                </div>
+                            <div className="flex gap-2">
+                                {socialLinks.map(({ Icon, label, href }) => (
+                                    <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center text-white transition-transform hover:scale-110 hover:text-primary-green" aria-label={label}>
+                                        <Icon className="w-6 h-6" />
+                                    </a>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Explore */}
-                        <div className="lg:pl-8">
-                            <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">Explore</h3>
-                            <ul className="space-y-4">
-                                {["Home", "About", "Features", "How It Works", "Marketplace"].map((item) => (
-                                    <li key={item}>
-                                        <a href="#" className="text-white/80 hover:text-white transition-colors text-lg">{item}</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Legal */}
-                        <div>
-                            <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">Legal</h3>
-                            <ul className="space-y-4">
-                                {["Privacy Policy", "Terms Of Service"].map((item) => (
-                                    <li key={item}>
-                                        <a href="#" className="text-white/80 hover:text-white transition-colors text-lg">{item}</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {/* Link Sections (Explore & Legal) */}
+                        {linkSections.map(({ title, items, className: sectionClass }) => (
+                            <div key={title} className={`space-y-2 ${sectionClass || ""}`}>
+                                <h3 className="text-lg font-semibold text-white tracking-wider">{title}</h3>
+                                <ul className="space-y-2">
+                                    {items.map((item) => (
+                                        <li key={item}>
+                                            <a href="#" className="text-sm text-white hover:text-primary-green hover:underline transition-colors">{item}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
 
                         {/* Contact */}
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">Contact</h3>
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
-                                    <Image src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" width={20} height={20} className="w-5 h-5 invert" />
-                                </div>
-                                <span className="text-white/90 text-lg font-medium">+234 816 2345 678</span>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 flex items-center justify-center transform hover:scale-110 transition-transform">
-                                    <Image src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail" width={28} height={28} className="w-7 h-auto" />
-                                </div>
-                                <span className="text-white/90 text-lg font-medium">Collabdenafrica@gmail.com</span>
-                            </div>
+                        <div className="space-y-3">
+                            <h3 className="text-lg font-semibold text-white tracking-wider">Contact</h3>
+                            {contactItems.map(({ Icon, text, href }) => (
+                                <a key={text} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                                    <div className="flex items-center justify-center text-white transform group-hover:scale-110 transition-transform">
+                                        <Icon className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-white/90 text-sm font-medium group-hover:text-primary-green hover:underline transition-colors">{text}</span>
+                                </a>
+                            ))}
                         </div>
                     </div>
+                </div>
 
-                    {/* Bottom Bar */}
-                    <div className="pt-8 border-t border-white/20">
-                        <p className="text-white/80 font-medium text-lg">
+                {/* Bottom Bar */}
+                <div className="border-t border-white/80 px-6 py-3">
+                    <div className="max-w-5xl">
+                        <p className="text-white flex items-start font-medium text-sm">
                             ©2026 CollabDen. All rights reserved.
                         </p>
                     </div>
