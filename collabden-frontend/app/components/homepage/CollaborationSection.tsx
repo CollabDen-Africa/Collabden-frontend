@@ -95,7 +95,6 @@ const CollaborationSection = () => {
 
             {/* Part 2: Waitlist Section */}
             <div className="relative py-24 px-6 overflow-hidden">
-                {/* Map Watermark with floating animation */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 0.8, scale: 1 }}
