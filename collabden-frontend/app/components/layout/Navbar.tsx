@@ -37,7 +37,12 @@ const Navbar = () => {
 
     return (
         <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-7xl z-50">
-            <div className="bg-white/40 backdrop-blur-md border border-white/10 rounded-full px-4 md:px-8 py-3 flex items-center justify-between shadow-2xl">
+            <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="bg-white/40 backdrop-blur-md border border-white/10 rounded-full px-4 md:px-8 py-3 flex items-center justify-between shadow-2xl"
+            >
                 {/* Logo */}
                 <Link href="/" className="relative flex items-center h-full min-w-[120px] md:min-w-[180px]">
                     <div className="absolute left-0 top-1/2 -translate-y-1/2">
@@ -83,7 +88,7 @@ const Navbar = () => {
                 >
                     {isOpen ? <HiX size={20} /> : <HiMenu size={20} />}
                 </button>
-            </div>
+            </motion.div>
 
             {/* Mobile Menu Dropdown */}
             <AnimatePresence>

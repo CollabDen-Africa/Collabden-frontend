@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { RiInstagramFill, RiLinkedinBoxFill, RiFacebookBoxFill, RiYoutubeFill, RiTwitterXFill, RiWhatsappFill, RiMailFill } from 'react-icons/ri';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 const Footer = () => {
     const socialLinks = [
@@ -24,7 +25,13 @@ const Footer = () => {
     ];
 
     return (
-        <footer className="relative mt-24">
+        <motion.footer
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative mt-24"
+        >
             {/* SVG shape to replace the CSS clip-path so we can add a white top border stroke */}
             <div className="hidden md:block absolute top-0 left-0 w-full overflow-hidden leading-0 transform -translate-y-[99%]">
                 <svg
@@ -113,7 +120,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-        </footer>
+        </motion.footer>
     );
 };
 

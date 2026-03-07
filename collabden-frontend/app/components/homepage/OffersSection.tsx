@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { FaListCheck, FaWallet } from "react-icons/fa6";
 import { RiSendPlaneFill, RiHeadphoneFill } from "react-icons/ri";
 import { IoChatbubblesSharp, IoSparklesSharp } from "react-icons/io5";
@@ -45,23 +46,56 @@ const OffersSection = () => {
         },
     ];
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5 }
+        }
+    };
+
     return (
         <section className="relative py-24 px-6 backdrop-blur-md overflow-hidden">
             <div className="container mx-auto max-w-6xl relative z-10">
-                <div className="text-center mb-16">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-16"
+                >
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                         What We Offer
                     </h2>
                     <p className="text-lg text-white max-w-4xl mx-auto leading-relaxed">
                         From the first file upload to the final payment, CollabDen supports the full music collaboration process in one place.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <motion.div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                >
                     {offers.map((offer, index) => (
-                        <div
+                        <motion.div
                             key={index}
-                            className="group relative bg-card-bg rounded-tl-none rounded-tr-[29px] rounded-br-none rounded-bl-[29px] p-8 pt-16 overflow-hidden transition-all duration-300 min-h-[373px] border border-white/10 shadow-lg"
+                            variants={itemVariants}
+                            whileHover={{ y: -10, transition: { duration: 0.2 } }}
+                            className="group relative bg-card-bg rounded-tl-none rounded-tr-[29px] rounded-br-none rounded-bl-[29px] p-8 pt-16 overflow-hidden transition-all duration-300 min-h-[373px] border border-white/10 shadow-lg cursor-default"
                         >
                             {/* Gradient blur ellipse */}
                             <div className="absolute w-[283px] h-[283px] left-[149px] -top-[148px] bg-linear-to-r from-primary-blue to-primary-green blur-[36px] -rotate-69 pointer-events-none" />
@@ -83,10 +117,13 @@ const OffersSection = () => {
                                 </div>
                             )}
 
-                            {/* Icon Circle */}
-                            <div className="relative z-10 w-14 h-14 bg-primary-green rounded-full flex items-center justify-center mb-8 shadow-lg shadow-primary-green/20">
+                            {/* Icon Circle with animation */}
+                            <motion.div
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                className="relative z-10 w-14 h-14 bg-primary-green rounded-full flex items-center justify-center mb-8 shadow-lg shadow-primary-green/20"
+                            >
                                 <offer.icon className="w-7 h-7 text-white" />
-                            </div>
+                            </motion.div>
 
                             {/* Content */}
                             <div className="relative z-10">
@@ -97,9 +134,9 @@ const OffersSection = () => {
                                     {offer.description}
                                 </p>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </div>
         </section>
     );

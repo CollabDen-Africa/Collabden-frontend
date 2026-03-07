@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 
 const CARDS = [
     {
@@ -22,13 +23,20 @@ const FragCard = ({
     title,
     description,
     isCenter,
+    index,
 }: {
     title: string;
     description: string;
     isCenter?: boolean;
+    index: number;
 }) => (
-    <div
-        className={`rounded-[20px] p-6 md:p-10 flex flex-col justify-center h-full ${isCenter
+    <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+        className={`rounded-[20px] p-6 md:p-10 flex flex-col justify-center h-full cursor-default ${isCenter
             ? "bg-primary-green shadow-2xl"
             : "bg-white/10 border border-white/70"
             }`}
@@ -45,7 +53,7 @@ const FragCard = ({
         >
             {description}
         </p>
-    </div>
+    </motion.div>
 );
 
 const FragmentationSection = () => {
@@ -55,7 +63,13 @@ const FragmentationSection = () => {
         <section className="relative py-24 px-6 overflow-hidden">
             <div className="container mx-auto max-w-6xl relative z-10">
                 {/* Heading */}
-                <div className="text-center mb-20">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-20"
+                >
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
                         The Fragmentation Problem
                     </h2>
@@ -64,31 +78,31 @@ const FragmentationSection = () => {
                         juggling multiple disconnected tools for files,
                         communication, and payments.
                     </p>
-                </div>
+                </motion.div>
 
                 {/* ── Desktop: 3-column overlapping layout ─────────── */}
                 <div className="hidden md:grid md:grid-cols-[1fr_auto_1fr] max-w-6xl mx-auto items-end">
                     {/* Left card */}
                     <div className="rounded-l-[20px] overflow-hidden border-r-0 h-[260px]">
-                        <FragCard {...left} />
+                        <FragCard {...left} index={0} />
                     </div>
 
                     {/* Center green card — taller than side cards */}
                     <div className="z-10 h-[340px] w-[400px] -mx-5 -mb-2">
-                        <FragCard {...center} isCenter />
+                        <FragCard {...center} index={1} isCenter />
                     </div>
 
                     {/* Right card */}
                     <div className="rounded-r-[20px] overflow-hidden border-l-0 h-[260px]">
-                        <FragCard {...right} />
+                        <FragCard {...right} index={2} />
                     </div>
                 </div>
 
                 {/* ── Mobile: stacked layout ───────────────────────── */}
                 <div className="flex flex-col gap-5 md:hidden">
-                    <FragCard {...left} />
-                    <FragCard {...center} isCenter />
-                    <FragCard {...right} />
+                    <FragCard {...left} index={0} />
+                    <FragCard {...center} index={1} isCenter />
+                    <FragCard {...right} index={2} />
                 </div>
             </div>
         </section>

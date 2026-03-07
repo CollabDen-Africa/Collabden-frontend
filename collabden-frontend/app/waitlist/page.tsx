@@ -59,9 +59,29 @@ export default function WaitlistPage() {
                 </Link>
             </div>
 
-            <div className="relative w-full max-w-2xl z-10 text-center flex flex-col items-center flex-1 justify-center">
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                        opacity: 1,
+                        transition: {
+                            staggerChildren: 0.15,
+                            delayChildren: 0.2
+                        }
+                    }
+                }}
+                className="relative w-full max-w-2xl z-10 text-center flex flex-col items-center flex-1 justify-center"
+            >
                 {/* Logo Section */}
-                <div className="flex items-center justify-center mb-3">
+                <motion.div
+                    variants={{
+                        hidden: { opacity: 0, y: -10 },
+                        visible: { opacity: 1, y: 0 }
+                    }}
+                    className="flex items-center justify-center mb-3"
+                >
                     <Link href="/">
                         <div className="relative">
                             <Image
@@ -74,12 +94,13 @@ export default function WaitlistPage() {
                             />
                         </div>
                     </Link>
-                </div>
+                </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    variants={{
+                        hidden: { opacity: 0, y: 15 },
+                        visible: { opacity: 1, y: 0 }
+                    }}
                 >
                     <h1 className="text-2xl md:text-4xl font-bold text-white mb-4 tracking-tight">
                         Get Early Access
@@ -94,9 +115,10 @@ export default function WaitlistPage() {
                     {!submitted ? (
                         <motion.form
                             key="form"
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
+                            variants={{
+                                hidden: { opacity: 0, scale: 0.98 },
+                                visible: { opacity: 1, scale: 1 }
+                            }}
                             onSubmit={handleSubmit}
                             className="w-full max-w-lg relative mb-4"
                         >
@@ -110,12 +132,14 @@ export default function WaitlistPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    className="bg-primary-green text-white font-semibold px-5 py-2 rounded-full transition-all shrink-0 ml-2"
+                                    className="bg-primary-green text-white font-semibold px-5 py-2 rounded-full transition-all shrink-0 ml-2 shadow-lg shadow-primary-green/20"
                                 >
                                     Join Waitlist
-                                </button>
+                                </motion.button>
                             </div>
                         </motion.form>
                     ) : (
@@ -135,7 +159,13 @@ export default function WaitlistPage() {
                 </AnimatePresence>
 
                 {/* Social Proof */}
-                <div className="flex items-center gap-3 mb-4">
+                <motion.div
+                    variants={{
+                        hidden: { opacity: 0 },
+                        visible: { opacity: 1 }
+                    }}
+                    className="flex items-center gap-3 mb-4"
+                >
                     <div className='relative z-10 pointer-events-none flex items-center'>
                         <Image
                             src="/profile.png"
@@ -148,10 +178,22 @@ export default function WaitlistPage() {
                     <span className="text-white text-sm md:text-base">
                         Join +50 others on the waitlist
                     </span>
-                </div>
+                </motion.div>
 
                 {/* Countdown Timer */}
-                <div className="flex items-center justify-center gap-2 w-full max-w-lg mb-0 px-4">
+                <motion.div
+                    variants={{
+                        hidden: { opacity: 0, y: 10 },
+                        visible: {
+                            opacity: 1,
+                            y: 0,
+                            transition: {
+                                staggerChildren: 0.1
+                            }
+                        }
+                    }}
+                    className="flex items-center justify-center gap-2 w-full max-w-lg mb-0 px-4"
+                >
                     {[
                         { label: 'Days', value: timeLeft.days },
                         { label: 'Hours', value: timeLeft.hours },
@@ -159,7 +201,13 @@ export default function WaitlistPage() {
                         { label: 'Seconds', value: timeLeft.seconds },
                     ].map((item, index, arr) => (
                         <React.Fragment key={item.label}>
-                            <div className="flex flex-col items-center">
+                            <motion.div
+                                variants={{
+                                    hidden: { opacity: 0, scale: 0.5 },
+                                    visible: { opacity: 1, scale: 1 }
+                                }}
+                                className="flex flex-col items-center"
+                            >
                                 <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/30 rounded-lg md:rounded-xl border-2 border-primary-green/60 mb-1 shadow-2xl">
                                     <span className="text-base md:text-lg font-bold text-white">
                                         {item.value}
@@ -168,7 +216,7 @@ export default function WaitlistPage() {
                                 <span className="text-white/50 text-[8px] md:text-[9px] uppercase tracking-wider font-bold">
                                     {item.label}
                                 </span>
-                            </div>
+                            </motion.div>
                             {index < arr.length - 1 && (
                                 <div className="flex items-center justify-center -mt-3 mx-0.5">
                                     <span className="text-white/30 font-bold text-lg md:text-xl">:</span>
@@ -176,19 +224,18 @@ export default function WaitlistPage() {
                             )}
                         </React.Fragment>
                     ))}
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
 
             {/* Dashboard Preview - Anchored to bottom with fixed height ratio */}
             <div className="relative w-full max-w-6xl px-4 z-0 pointer-events-none mt-[-45]">
                 <motion.div
-                    initial={{ opacity: 0, y: 100 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.8 }}
+                    initial={{ opacity: 0, y: 100, rotateX: 20 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 8 }}
+                    transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
                     className="relative w-full aspect-16/10 rounded-t-3xl overflow-hidden border-t border-x border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.6)] transform translate-y-[15%] md:translate-y-[10%]"
                     style={{
                         perspective: '2000px',
-                        transform: 'rotateX(8deg)',
                         transformOrigin: 'bottom'
                     }}
                 >
