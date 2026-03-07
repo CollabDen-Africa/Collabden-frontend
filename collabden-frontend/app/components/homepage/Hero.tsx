@@ -1,11 +1,12 @@
-"use client";
-
 import { BsArrowUpRightCircleFill } from "react-icons/bs";
+import Link from "next/link";
 import Button from '../ui/Button';
 
 const Hero = () => {
+
     return (
         <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
+
             {/* Video Background Container - pushed down */}
             <div className="absolute top-15 inset-x-0 bottom-0 z-0">
                 <video
@@ -13,9 +14,10 @@ const Hero = () => {
                     loop
                     muted
                     playsInline
+                    preload="auto"
                     className="h-full w-full object-cover opacity-80"
                 >
-                    <source src="hero_video.mp4" type="video/mp4" />
+                    <source src="/Collabden-hero.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -44,14 +46,16 @@ const Hero = () => {
                     >
                         Learn how it works
                     </Button>
-                    <Button
-                        variant="primary"
-                        size="md"
-                        icon={BsArrowUpRightCircleFill}
-                        className="w-64 sm:w-auto"
-                    >
-                        Join the Waitlist
-                    </Button>
+                    <Link href="/waitlist">
+                        <Button
+                            variant="primary"
+                            size="md"
+                            icon={BsArrowUpRightCircleFill}
+                            className="w-64 sm:w-auto"
+                        >
+                            Join the Waitlist
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </section>

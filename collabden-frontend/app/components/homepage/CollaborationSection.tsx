@@ -1,21 +1,21 @@
-"use client";
-
 import { BsArrowUpRightCircleFill, BsFillPatchCheckFill } from "react-icons/bs";
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '../ui/Button';
 
 const CollaborationSection = () => {
+
     const benefits = [
         "Centralized collaboration built for music project",
         "High-quality file sharing without loss",
         "Clear project coordination and communication",
         "Secure payments and standardized agreements",
-        "Secure payments and standar Access to trusted collaborators beyond your networkized agreements",
+        "Access to trusted collaborators beyond your networkized agreements",
     ];
 
     return (
         <section className="relative overflow-hidden">
+
             {/* Part 1: Built with Musicians */}
             <div className="relative py-24 px-6 bg-white/10 backdrop-blur-md border-t border-white/10">
                 <div className="container mx-auto max-w-6xl text-left">
@@ -75,9 +75,15 @@ const CollaborationSection = () => {
                         ))}
                     </ul>
 
-                    <Button variant="white" size="lg" icon={BsArrowUpRightCircleFill}>
-                        Join the Waitlist
-                    </Button>
+                    <Link href="/waitlist">
+                        <Button
+                            variant="white"
+                            size="lg"
+                            icon={BsArrowUpRightCircleFill}
+                        >
+                            Join the Waitlist
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </section>
