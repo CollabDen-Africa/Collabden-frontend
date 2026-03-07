@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleArrowRight } from 'lucide-react';
+import { BsArrowUpRightCircleFill } from "react-icons/bs";
 import Button from '../ui/Button';
 
 const Hero = () => {
@@ -47,7 +47,7 @@ const Hero = () => {
                     <Button
                         variant="primary"
                         size="md"
-                        icon={CircleArrowRight}
+                        icon={BsArrowUpRightCircleFill}
                         className="w-64 sm:w-auto"
                     >
                         Join the Waitlist

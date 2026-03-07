@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { HiArrowRight, HiCheck } from 'react-icons/hi';
 import Image from 'next/image';
 
 const CollaborationSection = () => {
@@ -64,7 +64,7 @@ const CollaborationSection = () => {
                         {benefits.map((benefit, index) => (
                             <li key={index} className="flex items-start">
                                 <div className="shrink-0 w-6 h-6 bg-primary-green rounded-full flex items-center justify-center mr-4 mt-1">
-                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                    <HiCheck className="w-4 h-4 text-white" />
                                 </div>
                                 <span className="text-white/90 text-lg">{benefit}</span>
                             </li>
@@ -74,7 +74,7 @@ const CollaborationSection = () => {
                     <button className="flex items-center gap-3 bg-white text-primary-green px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-xl">
                         Join the Waitlist
                         <div className="w-6 h-6 bg-primary-green rounded-full flex items-center justify-center">
-                            <ArrowRight className="w-4 h-4 text-white" />
+                            <HiArrowRight className="w-4 h-4 text-white" />
                         </div>
                     </button>
                 </div>

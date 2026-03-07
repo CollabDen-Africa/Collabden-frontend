@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-// import { UserPlus, Search, Users, Wallet } from 'lucide-react';
+
 
 const HowItWorks = () => {
     const steps = [
@@ -79,7 +79,7 @@ const HowItWorks = () => {
                     {steps.map((step, index) => (
                         <div
                             key={index}
-                            className={`relative bg-[#444444] border border-primary-green/30 rounded-2xl p-8 pt-10 min-h-[250px] transition-transform duration-500 hover:scale-105 hover:z-50 ${step.rotation} max-md:rotate-0 max-md:translate-y-0 shadow-xl`}
+                            className={`relative bg-card-bg-alt border border-primary-green/30 rounded-2xl p-8 pt-10 min-h-[250px] transition-transform duration-500 hover:scale-105 hover:z-50 ${step.rotation} max-md:rotate-0 max-md:translate-y-0 shadow-xl`}
                         >
                             <h3 className="text-xl font-bold text-white mb-4">
                                 {step.title}

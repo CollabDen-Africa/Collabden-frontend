@@ -22,6 +22,10 @@
   --accent-yellow: #FBBC04;
   --accent-gray: #7D7D7F;
 
+  /* Card / Surface Colors */
+  --card-bg: #505050;
+  --card-bg-alt: #444444;
+
   /* Legacy fallbacks */
   --background: #000000;
   --foreground: #FFFFFF;
@@ -32,6 +36,8 @@
   --color-foreground: var(--foreground);
   --color-primary-blue: var(--primary-blue);
   --color-primary-green: var(--primary-green);
+  --color-card-bg: var(--card-bg);
+  --color-card-bg-alt: var(--card-bg-alt);
   --font-sans: var(--font-raleway);
   --font-mono: var(--font-geist-mono);
 }
