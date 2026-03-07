@@ -4,6 +4,12 @@ import React from 'react';
 import { Upload, ListTodo, Headphones, MessageSquare, Sparkles, CreditCard } from 'lucide-react';
 
 const OffersSection = () => {
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const offers = [
         {
             title: "File Sharing",
@@ -59,21 +65,23 @@ const OffersSection = () => {
                             <div className="absolute top-0 right-0 w-48 h-48 bg-linear-to-bl from-primary-green/80 via-primary-blue/30 to-transparent opacity-60 pointer-events-none translate-x-8 -translate-y-8 blur-xl" />
 
                             {/* Stars/Dots decoration */}
-                            <div className="absolute top-6 right-6 w-24 h-24 pointer-events-none opacity-40">
-                                {[...Array(15)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="absolute bg-white rounded-full translate-x-1"
-                                        style={{
-                                            width: Math.random() * 2 + 1 + 'px',
-                                            height: Math.random() * 2 + 1 + 'px',
-                                            top: Math.random() * 80 + '%',
-                                            right: Math.random() * 80 + '%',
-                                            opacity: Math.random() * 0.8 + 0.2
-                                        }}
-                                    />
-                                ))}
-                            </div>
+                            {mounted && (
+                                <div className="absolute top-6 right-6 w-24 h-24 pointer-events-none opacity-40">
+                                    {[...Array(15)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="absolute bg-white rounded-full translate-x-1"
+                                            style={{
+                                                width: Math.random() * 2 + 1 + 'px',
+                                                height: Math.random() * 2 + 1 + 'px',
+                                                top: Math.random() * 80 + '%',
+                                                right: Math.random() * 80 + '%',
+                                                opacity: Math.random() * 0.8 + 0.2
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            )}
 
                             {/* Icon Circle */}
                             <div className="relative z-10 w-12 h-12 bg-primary-green rounded-full flex items-center justify-center mb-8 shadow-lg shadow-primary-green/20">
