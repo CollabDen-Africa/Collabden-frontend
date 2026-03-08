@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../ui/Button';
@@ -10,6 +11,7 @@ import Button from '../ui/Button';
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const navRef = useRef<HTMLElement>(null);
+    const pathname = usePathname();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -32,7 +34,7 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', href: '/' },
         { name: 'About Us', href: '/about' },
-        { name: 'Community', href: '/community' },
+        { name: 'Community', href: '/waitlist' },
     ];
 
     return (
@@ -59,15 +61,26 @@ const Navbar = () => {
 
                 {/* Desktop Links */}
                 <div className="hidden md:flex items-center gap-8">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.name}
-                            href={link.href}
-                            className="text-white/80 hover:text-primary-green transition-colors text-md font-semibold"
-                        >
-                            {link.name}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) => {
+                        const isActive = pathname === link.href;
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                className={`relative py-1 text-md font-semibold transition-colors ${isActive ? 'text-white/80' : 'text-white/80 hover:text-primary-green'
+                                    }`}
+                            >
+                                {link.name}
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeTab"
+                                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-green rounded-full"
+                                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                    />
+                                )}
+                            </Link>
+                        );
+                    })}
                 </div>
 
                 {/* Desktop Actions */}
@@ -101,16 +114,20 @@ const Navbar = () => {
                         className="absolute top-20 left-0 right-0 z-40 bg-primary-blue/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:hidden shadow-2xl overflow-hidden"
                     >
                         <div className="flex flex-col gap-2">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.name}
-                                    href={link.href}
-                                    className="text-white hover:text-primary-green transition-colors py-3 px-4 rounded-xl hover:bg-white/5 text-lg font-medium"
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    {link.name}
-                                </Link>
-                            ))}
+                            {navLinks.map((link) => {
+                                const isActive = pathname === link.href;
+                                return (
+                                    <Link
+                                        key={link.name}
+                                        href={link.href}
+                                        className={`transition-colors py-3 px-4 rounded-xl hover:bg-white/5 text-lg font-medium ${isActive ? 'text-primary-green' : 'text-white hover:text-primary-green'
+                                            }`}
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                );
+                            })}
 
                             <div className="mt-4 pt-6 border-t border-white/10 flex flex-col gap-4 px-2">
                                 <Link
