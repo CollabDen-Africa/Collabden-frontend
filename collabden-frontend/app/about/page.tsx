@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { BsArrowUpRightCircleFill } from "react-icons/bs";
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import Hero from '../components/homepage/Hero';
+import AboutHero from '../components/about/AboutHero';
 import AboutSection from '../components/about/AboutSection';
 import Button from '../components/ui/Button';
 
@@ -33,7 +33,7 @@ export default function AboutPage() {
         <main className="min-h-screen overflow-x-hidden">
             <Navbar />
 
-            <Hero />
+            <AboutHero />
 
             <div className="bg-black/50 flex flex-col">
                 <AboutSection

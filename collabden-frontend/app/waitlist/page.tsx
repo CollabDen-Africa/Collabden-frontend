@@ -7,8 +7,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 
-// Set target date to 5 months from now (August 7, 2026)
-const TARGET_DATE = new Date('2026-08-07T00:00:00');
+// Set target date to 6 months from now (September 9, 2026)
+const TARGET_DATE = new Date('2026-09-09T00:00:00');
 
 export default function WaitlistPage() {
     const [email, setEmail] = useState('');
@@ -122,13 +122,13 @@ export default function WaitlistPage() {
                             onSubmit={handleSubmit}
                             className="w-full max-w-lg relative mb-4"
                         >
-                            <div className="flex items-center bg-black/30 border border-white/10 rounded-full p-2 pl-6 focus-within:border-primary-green transition-all shadow-xl group">
-                                <IoMailOutline className="text-white group-focus-within:text-white/60 mr-3 shrink-0" size={24} />
+                            <div className="flex items-center bg-black/30 border border-white/10 rounded-full p-1.5 md:p-2 pl-4 md:pl-6 focus-within:border-primary-green transition-all shadow-xl group">
+                                <IoMailOutline className="text-white group-focus-within:text-white/60 mr-2 md:mr-3 shrink-0" size={20} />
                                 <input
                                     type="email"
                                     required
                                     placeholder="Enter your e-mail"
-                                    className="bg-transparent border-none outline-none text-white w-full py-3 text-base placeholder:text-white"
+                                    className="bg-transparent border-none outline-none text-white w-full py-2 md:py-3 text-sm md:text-base placeholder:text-white"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
@@ -136,7 +136,7 @@ export default function WaitlistPage() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    className="bg-primary-green text-white font-semibold px-5 py-2 rounded-full transition-all shrink-0 ml-2 shadow-lg shadow-primary-green/20"
+                                    className="bg-primary-green text-white font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all shrink-0 ml-2 shadow-lg shadow-primary-green/20 text-sm md:text-base"
                                 >
                                     Join Waitlist
                                 </motion.button>
