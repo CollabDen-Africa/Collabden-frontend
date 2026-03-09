@@ -35,13 +35,13 @@ const OffersSection = () => {
             icon: IoChatbubblesSharp,
         },
         {
-            title: "AI Key & Tempo Detection",
-            description: "Automatically detect key, tempo, and time signature of any audio file using advanced AI.",
+            title: "Legal Agreements",
+            description: "Upload legal agreements and collect secure e-signatures from collaborators directly within your project workspace.",
             icon: IoSparklesSharp,
         },
         {
             title: "Secure Payments",
-            description: "Send and receive payments securely with automatic royalty splits and invoicing.",
+            description: "Send and receive payments securely with the escrow payment system and direct payment system",
             icon: FaWallet,
         },
     ];

@@ -85,11 +85,11 @@ export default function WaitlistPage() {
                     <Link href="/">
                         <div className="relative">
                             <Image
-                                src="/collabden-logo.png"
+                                src="/Green-logo.png"
                                 alt="CollabDen Logo"
                                 width={180}
                                 height={180}
-                                className="h-10 md:h-15 w-auto object-contain"
+                                className="h-10 md:h-12 w-auto object-contain"
                                 priority
                             />
                         </div>
@@ -168,7 +168,7 @@ export default function WaitlistPage() {
                 >
                     <div className='relative z-10 pointer-events-none flex items-center'>
                         <Image
-                            src="/profile.png"
+                            src="/avatar.svg"
                             alt="User"
                             width={20}
                             height={20}
@@ -240,7 +240,7 @@ export default function WaitlistPage() {
                     }}
                 >
                     <Image
-                        src="/dashboard-template.png"
+                        src="/Dashboard preview.png"
                         alt="CollabDen Dashboard"
                         fill
                         className="object-cover object-top"

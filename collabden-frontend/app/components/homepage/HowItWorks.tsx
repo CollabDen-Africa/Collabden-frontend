@@ -33,7 +33,7 @@ const HowItWorks = () => {
         },
         {
             title: "Get Paid",
-            description: "Automatic royalty splitting. Instant payments to your wallet",
+            description: "Escrow payment system according to signed agreements",
             icon: 4,
         },
     ];

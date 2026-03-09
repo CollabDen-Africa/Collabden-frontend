@@ -7,9 +7,11 @@ import { usePathname } from 'next/navigation';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../ui/Button';
+import UpcomingModal from '../ui/UpcomingModal';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isUpcomingModalOpen, setIsUpcomingModalOpen] = useState(false);
     const navRef = useRef<HTMLElement>(null);
     const pathname = usePathname();
 
@@ -85,10 +87,13 @@ const Navbar = () => {
 
                 {/* Desktop Actions */}
                 <div className="hidden md:flex items-center gap-6">
-                    <Link href="/login" className="text-white/90 hover:text-white text-md font-semibold">
+                    <button
+                        onClick={() => setIsUpcomingModalOpen(true)}
+                        className="text-white/90 hover:text-white text-md font-semibold cursor-pointer"
+                    >
                         Log in
-                    </Link>
-                    <Button variant="primary" size="sm">
+                    </button>
+                    <Button variant="primary" size="sm" onClick={() => setIsUpcomingModalOpen(true)}>
                         Sign Up
                     </Button>
                 </div>
@@ -130,14 +135,24 @@ const Navbar = () => {
                             })}
 
                             <div className="mt-4 pt-6 border-t border-white/10 flex flex-col gap-4 px-2">
-                                <Link
-                                    href="/login"
-                                    className="text-white/90 text-lg font-semibold py-2"
-                                    onClick={() => setIsOpen(false)}
+                                <button
+                                    className="text-white/90 text-lg font-semibold py-2 text-left"
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        setIsUpcomingModalOpen(true);
+                                    }}
                                 >
                                     Log in
-                                </Link>
-                                <Button variant="primary" size="md" className="w-full">
+                                </button>
+                                <Button
+                                    variant="primary"
+                                    size="md"
+                                    className="w-full"
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        setIsUpcomingModalOpen(true);
+                                    }}
+                                >
                                     Sign Up
                                 </Button>
                             </div>
@@ -145,6 +160,10 @@ const Navbar = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            <UpcomingModal
+                isOpen={isUpcomingModalOpen}
+                onClose={() => setIsUpcomingModalOpen(false)}
+            />
         </nav>
     );
 };

@@ -35,7 +35,7 @@ export default function AboutPage() {
 
             <Hero />
 
-            <div className="flex flex-col">
+            <div className="bg-black/50 flex flex-col">
                 <AboutSection
                     pillText="The Problem"
                     title="Why We Built CollabDen"
