@@ -1,7 +1,7 @@
 "use client";
 
 import Image from 'next/image';
-import { RiInstagramFill, RiLinkedinBoxFill, RiFacebookBoxFill, RiYoutubeFill, RiTwitterXFill, RiWhatsappFill, RiMailFill } from 'react-icons/ri';
+import { RiInstagramFill, RiLinkedinBoxFill, RiFacebookBoxFill, RiTwitterXFill, RiWhatsappFill, RiMailFill } from 'react-icons/ri';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -10,13 +10,28 @@ const Footer = () => {
         { Icon: RiInstagramFill, label: "Instagram", href: "https://instagram.com/collabdenafrica" },
         { Icon: RiLinkedinBoxFill, label: "LinkedIn", href: "https://linkedin.com/company/collabdenafrica" },
         { Icon: RiFacebookBoxFill, label: "Facebook", href: "https://facebook.com/collabdenafrica" },
-        { Icon: RiYoutubeFill, label: "YouTube", href: "https://youtube.com/@collabdenafrica" },
         { Icon: RiTwitterXFill, label: "X", href: "https://x.com/collabdenafrica" },
     ];
 
     const linkSections = [
-        { title: "Explore", items: ["Home", "About", "Features", "How It Works", "Marketplace"], className: "lg:pl-8" },
-        { title: "Legal", items: ["Privacy Policy", "Terms Of Service"] },
+        {
+            title: "Explore",
+            links: [
+                { label: "Home", href: "/" },
+                { label: "About", href: "/about" },
+                { label: "Features", href: "/#what-we-offer" },
+                { label: "How It Works", href: "/#how-it-works" },
+                { label: "Community", href: "/community" },
+            ],
+            className: "lg:pl-8"
+        },
+        {
+            title: "Legal",
+            links: [
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms Of Service", href: "/terms" },
+            ]
+        },
     ];
 
     const contactItems = [
@@ -83,13 +98,18 @@ const Footer = () => {
                         </div>
 
                         {/* Link Sections (Explore & Legal) */}
-                        {linkSections.map(({ title, items, className: sectionClass }) => (
+                        {linkSections.map(({ title, links, className: sectionClass }) => (
                             <div key={title} className={`space-y-2 ${sectionClass || ""}`}>
                                 <h3 className="text-lg font-semibold text-white tracking-wider">{title}</h3>
                                 <ul className="space-y-2">
-                                    {items.map((item) => (
-                                        <li key={item}>
-                                            <a href="#" className="text-sm text-white hover:text-primary-green hover:underline transition-colors">{item}</a>
+                                    {links.map(({ label, href }) => (
+                                        <li key={label}>
+                                            <Link
+                                                href={href}
+                                                className="text-sm text-white hover:text-primary-green hover:underline transition-colors"
+                                            >
+                                                {label}
+                                            </Link>
                                         </li>
                                     ))}
                                 </ul>

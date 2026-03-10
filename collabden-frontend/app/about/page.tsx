@@ -30,12 +30,12 @@ export default function AboutPage() {
     ];
 
     return (
-        <main className="min-h-screen overflow-x-hidden">
+        <main className="min-h-screen bg-black/50 overflow-x-hidden">
             <Navbar />
 
             <AboutHero />
 
-            <div className="bg-black/50 flex flex-col">
+            <div className="flex flex-col">
                 <AboutSection
                     pillText="The Problem"
                     title="Why We Built CollabDen"

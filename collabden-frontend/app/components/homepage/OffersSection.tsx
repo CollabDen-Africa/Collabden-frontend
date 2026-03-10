@@ -66,7 +66,7 @@ const OffersSection = () => {
     };
 
     return (
-        <section className="relative py-24 px-6 backdrop-blur-md overflow-hidden">
+        <section id="what-we-offer" className="relative py-24 px-6 backdrop-blur-md overflow-hidden">
             <div className="container mx-auto max-w-6xl relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
