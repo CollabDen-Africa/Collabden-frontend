@@ -77,13 +77,15 @@ const Hero = () => {
                     className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6"
                     variants={itemVariants}
                 >
-                    <Button
-                        variant="white"
-                        size="md"
-                        className="w-64 sm:w-auto"
-                    >
-                        Learn how it works
-                    </Button>
+                    <Link href="/#how-it-works">
+                        <Button
+                            variant="white"
+                            size="md"
+                            className="w-64 sm:w-auto"
+                        >
+                            Learn how it works
+                        </Button>
+                    </Link>
                     <Link href="/waitlist">
                         <Button
                             variant="primary"
