@@ -233,7 +233,7 @@ export default function WaitlistPage() {
                     initial={{ opacity: 0, y: 100, rotateX: 20 }}
                     animate={{ opacity: 1, y: 0, rotateX: 8 }}
                     transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-                    className="relative w-full aspect-16/10 rounded-t-3xl overflow-hidden border-t border-x border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.6)] transform translate-y-[15%] md:translate-y-[10%]"
+                    className="relative w-full aspect-26/10 rounded-t-3xl overflow-hidden border-t border-x border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.6)] transform translate-y-[15%] md:translate-y-[10%]"
                     style={{
                         perspective: '2000px',
                         transformOrigin: 'bottom'
@@ -243,11 +243,11 @@ export default function WaitlistPage() {
                         src="/Dashboard preview.png"
                         alt="CollabDen Dashboard"
                         fill
-                        className="object-cover object-top"
+                        className="object-cover object-top mr-55"
                         priority
                     />
                     {/* Gradient overlay to fade it into the bottom */}
-                    <div className="absolute inset-0 bg-linear-to-t from-black via-white to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-white to-transparent opacity-50" />
                 </motion.div>
             </div>
         </main>
