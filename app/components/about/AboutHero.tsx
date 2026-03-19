@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { BsArrowUpRightCircleFill } from "react-icons/bs";
+import Image from 'next/image';
 
 const Hotspot = ({ x, y, label, position = "top" }: { x: string, y: string, label: string, position?: "top" | "bottom" | "left" | "right" }) => (
     <div
@@ -53,14 +54,13 @@ const AboutHero = () => {
                     className="relative z-10 w-full min-h-125 lg:min-h-140 lg:max-h-full md:min-h-0 md:aspect-video  rounded-[30px] md:rounded-[40px] shadow-[0_0_80px_rgba(18,46,90,0.6)] overflow-hidden mb-8 md:mb-12"
                 >
                     {/* Background Image */}
-                    <div 
-                        className="absolute inset-0 z-0"
-                        style={{
-                            backgroundImage: "url('/about-hero.png')",
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                        }}
-                    />
+                    <Image 
+                                            src="/about-hero.png"
+                                            alt="CollabDen hero image"
+                                            fill
+                                            priority
+                                            className="object-cover object-center z-0"
+                                        />
                     
                     {/* Light gradient for image */}
                     <div className="absolute inset-0 z-0 bg-linear-to-r from-[#02050A] via-blue-900/50 to-[#02050A] pointer-events-none" />
@@ -130,7 +130,7 @@ const AboutHero = () => {
                               className="md:hidden mt-8 w-full px-2 relative z-10"
                           >
                               <h2 className="text-2xl font-semibold text-white tracking-tight leading-[1.2]">
-                                  Unifying music collaboration for creators In Africa
+                                  Unifying music collaboration for <br /> creators In Africa
                               </h2>
                           </motion.div>
             </div>
