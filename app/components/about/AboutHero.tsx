@@ -31,9 +31,12 @@ const Hotspot = ({ x, y, label, position = "top" }: { x: string, y: string, labe
 const AboutHero = () => {
     return (
         <section className="relative w-full flex flex-col overflow-hidden pt-28 md:pt-32">
-            {/* COLLABDEN Header Area */}
-            <div className="w-full shrink-0 select-none pointer-events-none z-0 flex justify-center px-4 bg-linear-to-r from-black/10 from-20% via-blue-800/50 via-50% to-black/10 to-80%">
-                <h1 className="w-full max-w-6xl h-auto md:h-50 font-bold text-center uppercase tracking-tighter leading-none mb-0">
+            {/* COLLABDEN Header Area with blurred background */}
+            <div className="w-full shrink-0 select-none pointer-events-none z-0 flex justify-center px-4 relative">
+                {/* Blurred glow layer */}
+                <div className="absolute inset-0 z-0 bg-linear-to-r from-transparent via-blue-800/40 to-transparent blur-[80px] opacity-70" />
+                
+                <h1 className="w-full max-w-6xl h-auto md:h-50 font-bold text-center uppercase tracking-tighter leading-none mb-0 relative z-10">
                     <span className="text-[12vw] md:text-[190.476px] md:leading-50 bg-linear-to-b from-white from-[24.89%] to-[#122E5A]/21 to-[60.82%] bg-clip-text text-transparent">
                         COLLABDEN
                     </span>
@@ -44,7 +47,7 @@ const AboutHero = () => {
             <div className="relative flex-1 -mt-5 md:-mt-13 w-full z-10 flex flex-col px-6 md:px-10 lg:px-20 pb-4 md:pb-8 max-w-7xl mx-auto">
                 
                 {/* --- The Ambient Blue Glow --- */}
-                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] md:w-[70%] h-[60%] bg-black opacity-80 blur-[120px] rounded-full pointer-events-none z-0" />
+                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] md:w-[85%] h-[70%] bg-blue-900/40 opacity-60 blur-[150px] md:blur-[180px] rounded-full pointer-events-none z-0" />
 
                 {/* --- Sub-content Area--- */}
                 <motion.div

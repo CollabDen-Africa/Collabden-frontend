@@ -33,7 +33,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ pillText, title, paragraphs
                     {title}
                 </motion.h2>
 
-                <div className="space-y-4 max-w-6xl mx-auto text-left">
+                <div className="space-y-4 max-w-6xl mx-auto text-justify">
                     {paragraphs.map((para, index) => (
                         <motion.p
                             key={index}
@@ -41,7 +41,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({ pillText, title, paragraphs
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
-                            className="text-base md:text-md text-white/90 leading-relaxed"
+                            className="text-base md:text-lg text-white/90 leading-relaxed"
                         >
                             {para}
                         </motion.p>

@@ -15,6 +15,7 @@ export default function WaitlistPage() {
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
@@ -44,8 +45,21 @@ export default function WaitlistPage() {
     return () => clearInterval(timer);
   }, []);
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+
+    if (!validateEmail(email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setStatus("loading");
+
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
@@ -53,15 +67,25 @@ export default function WaitlistPage() {
         body: JSON.stringify({ email }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         setStatus("success");
         setEmail("");
         setSubmitted(true);
+
+        // Automatically show form again after 5 seconds
+        setTimeout(() => {
+          setSubmitted(false);
+          setStatus("idle");
+        }, 5000);
       } else {
         setStatus("error");
+        setErrorMessage(data.error || "Something went wrong. Please try again.");
       }
     } catch {
       setStatus("error");
+      setErrorMessage("Failed to connect to the server.");
     }
   };
 
@@ -154,8 +178,9 @@ export default function WaitlistPage() {
                 <input
                   type="email"
                   required
+                  disabled={status === "loading"}
                   placeholder="Enter your e-mail"
-                  className="bg-transparent border-none outline-none text-white w-full py-2 md:py-3 text-sm md:text-base placeholder:text-white"
+                  className="bg-transparent border-none outline-none text-white w-full py-2 md:py-3 text-sm md:text-base placeholder:text-white disabled:opacity-50"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -163,11 +188,32 @@ export default function WaitlistPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  className="bg-primary-green text-white font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all shrink-0 ml-2 shadow-lg shadow-primary-green/20 text-sm md:text-base"
+                  disabled={status === "loading"}
+                  className="bg-primary-green text-white font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all shrink-0 ml-2 shadow-lg shadow-primary-green/20 text-sm md:text-base disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Join Waitlist
+                  {status === "loading" ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                      />
+                      Joining...
+                    </>
+                  ) : (
+                    "Join Waitlist"
+                  )}
                 </motion.button>
               </div>
+              {errorMessage && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-400 text-sm mt-3 ml-4 text-left"
+                >
+                  {errorMessage}
+                </motion.p>
+              )}
             </motion.form>
           ) : (
             <motion.div
