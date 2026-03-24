@@ -11,6 +11,9 @@ const raleway = Raleway({
 export const metadata: Metadata = {
   title: "CollabDen",
   description: "CollabDen Platform",
+  icons: {
+    icon: "/Green-logo.png",
+  },
 };
 
 export default function RootLayout({
