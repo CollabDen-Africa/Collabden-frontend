@@ -246,7 +246,7 @@ export default function WaitlistPage() {
         >
           <div className="relative z-10 pointer-events-none flex items-center">
             <Image
-              src="/avatar.svg"
+              src="/afro-avatar.svg"
               alt="User"
               width={20}
               height={20}
