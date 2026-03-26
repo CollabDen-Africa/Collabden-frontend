@@ -35,8 +35,8 @@ const Footer = () => {
     ];
 
     const contactItems = [
-        { Icon: RiWhatsappFill, text: "+234 816 2345 678", href: "https://wa.me/2348162345678" },
-        { Icon: RiMailFill, text: "Collabdenafrica@gmail.com", href: "mailto:Collabdenafrica@gmail.com" },
+        { Icon: RiWhatsappFill, text: "+234 705 557 3598", href: "https://wa.me/2347055573598" },
+        { Icon: RiMailFill, text: "collabdenafrica@gmail.com", href: "mailto:collabdenafrica@gmail.com" },
     ];
 
     return (

@@ -55,7 +55,7 @@ const Navbar = () => {
                             alt="CollabDen Logo"
                             width={500}
                             height={500}
-                            className="h-15 w-auto object-contain"
+                            className="h-12 md:h-15 w-auto object-contain"
                             priority
                         />
                     </div>

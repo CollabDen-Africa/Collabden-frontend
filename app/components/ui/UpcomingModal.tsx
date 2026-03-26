@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiX } from 'react-icons/hi';
 import Button from './Button';
@@ -22,16 +22,47 @@ const UpcomingModal = ({ isOpen, onClose }: UpcomingModalProps) => {
         () => false
     );
 
+    const modalRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
+            // Simple focus trapping
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') onClose();
+                if (e.key === 'Tab' && modalRef.current) {
+                    const focusableElements = modalRef.current.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstElement = focusableElements[0] as HTMLElement;
+                    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+                    if (e.shiftKey) {
+                        if (document.activeElement === firstElement) {
+                            lastElement.focus();
+                            e.preventDefault();
+                        }
+                    } else {
+                        if (document.activeElement === lastElement) {
+                            firstElement.focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            };
+            document.addEventListener('keydown', handleKeyDown);
+            // Autofocus on open
+            setTimeout(() => {
+                const firstElement = modalRef.current?.querySelectorAll('button, [href]')[0] as HTMLElement;
+                firstElement?.focus();
+            }, 100);
+
+            return () => {
+                document.body.style.overflow = 'unset';
+                document.removeEventListener('keydown', handleKeyDown);
+            };
         }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     if (!isMounted) return null;
 
@@ -50,10 +81,14 @@ const UpcomingModal = ({ isOpen, onClose }: UpcomingModalProps) => {
 
                     {/* Modal Content */}
                     <motion.div
+                        ref={modalRef}
                         initial={{ opacity: 0, scale: 0.9, y: 30 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 30 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="modal-title"
                         className="bg-black/90 border border-white/10 w-full max-w-xl rounded-[2.5rem] px-6 py-8 relative shadow-[0_0_100px_rgba(31,253,5,0.1)] pointer-events-auto overflow-hidden"
                     >
                         {/* Decorative Background Glows */}
@@ -78,7 +113,7 @@ const UpcomingModal = ({ isOpen, onClose }: UpcomingModalProps) => {
                                 <IoRocketOutline className="text-primary-green animate-bounce" size={40} />
                             </motion.div>
 
-                            <h2 className="text-2xl md:text-4xl font-black text-white mb-6 tracking-tight leading-tight">
+                            <h2 id="modal-title" className="text-2xl md:text-4xl font-black text-white mb-6 tracking-tight leading-tight">
                                 We are almost <span className="text-primary-green">ready!</span>
                             </h2>
 
