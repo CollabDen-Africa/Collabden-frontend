@@ -70,7 +70,7 @@ export default function IntroSlideshowPage() {
                 <div 
                     className="absolute inset-0 w-full h-full bg-cover bg-left"
                     style={{ 
-                        backgroundImage: "url('/Mask I.png')", // Update with your asset path
+                        backgroundImage: "url('/Mask I.png')", 
                     }}
                 />
             </div>
