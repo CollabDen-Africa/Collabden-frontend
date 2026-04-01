@@ -6,11 +6,11 @@ CollabDen is a specialized collaboration platform designed specifically for the 
 
 ---
 
-## 🚀 Vision
+## Vision
 
 Stop juggling disconnected tools. CollabDen solves the industry's fragmentation by providing music professionals with a unified space to manage their creative workflow from start to finish.
 
-## ✨ Key Features
+## Key Features
 
 - **Seamless Collaboration**: Share high-quality audio files and project assets effortlessly.
 - **Unified Communication**: Keep all project-related discussions in one place.
@@ -18,7 +18,7 @@ Stop juggling disconnected tools. CollabDen solves the industry's fragmentation 
 - **Secure Payments**: Get paid for your work directly through the platform.
 - **African-Centric**: Built from the ground up to address the unique needs and challenges of the African music landscape.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
@@ -27,7 +27,7 @@ Stop juggling disconnected tools. CollabDen solves the industry's fragmentation 
 - **Typography**: Raleway (Google Fonts)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -54,7 +54,7 @@ Stop juggling disconnected tools. CollabDen solves the industry's fragmentation 
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📁 Project Structure
+## Project Structure
 
 - `app/`: Contains the Next.js App Router routes and page definitions.
   - `about/`: About page.
@@ -65,7 +65,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
     - `ui/`: Fundamental UI elements (Buttons, Cards, etc.)
 - `public/`: Static assets (Videos, Images, Fonts).
 
-## 🌐 Deployment
+## Deployment
 
 The project is optimized for deployment on the [Vercel Platform](https://vercel.com).
 
@@ -74,6 +74,6 @@ If deploying to Vercel, ensure the **Root Directory** in Project Settings is set
 
 ---
 
-## 📄 License
+## License
 
 This project is private and proprietary. Copyright © 2026 CollabDen-Africa.
