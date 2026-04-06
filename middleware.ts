@@ -3,6 +3,12 @@ import type { NextRequest } from 'next/server';
 import { ROUTES } from './constants/routes';
 
 export function middleware(request: NextRequest) {
+  
+  //Dev bypass for localhost
+  if (process.env.NODE_ENV === 'development') {
+      return NextResponse.next();
+  }
+  
   const { pathname } = request.nextUrl;
 
   // Check if the route is a dashboard route

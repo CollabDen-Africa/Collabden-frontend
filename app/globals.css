@@ -46,6 +46,20 @@
   --color-text-muted: var(--text-muted);
   --color-border-muted: var(--border-muted);
   --color-border-light: var(--border-light);
+  
+  --color-accent-green-bright: var(--accent-green-bright);
+    --color-accent-green-success: var(--accent-green-success);
+    --color-accent-red: var(--accent-red);
+    --color-accent-red-alt: var(--accent-red-alt);
+    --color-accent-red-google: var(--accent-red-google);
+    --color-accent-red-youtube: var(--accent-red-youtube);
+    --color-accent-pink: var(--accent-pink);
+    --color-accent-soft-red: var(--accent-soft-red);
+    --color-accent-soft-pink: var(--accent-soft-pink);
+    --color-accent-soft-blue: var(--accent-soft-blue);
+    --color-accent-soft-green: var(--accent-soft-green);
+    --color-accent-yellow: var(--accent-yellow);
+    --color-accent-gray: var(--accent-gray);
 
   --shadow-btn-primary: 0 10px 25px rgba(115, 191, 68, 0.25);
   --shadow-btn-hover: 0 15px 35px rgba(115, 191, 68, 0.35);

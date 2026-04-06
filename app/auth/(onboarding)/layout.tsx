@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 export default function OnboardingLayout({
   children,
@@ -13,14 +14,18 @@ export default function OnboardingLayout({
         <div className="absolute top-[30%] right-[-10%] w-[800px] h-[800px] bg-[#204F99]/50 rounded-full mix-blend-screen filter blur-[230px] pointer-events-none z-0" />
         
         {/* Background Cyberpunk Headphones Image */}
-        <div 
-            className="absolute inset-0 z-0 opacity-40 bg-no-repeat bg-center"
-            style={{ 
-                backgroundImage: "url('/headphone.svg')", 
-                backgroundSize: '700px',
-                backgroundPosition: 'center 50%'
-            }}
-        />
+        <div className="absolute inset-0 z-0 opacity-40 flex items-center justify-center pointer-events-none">
+            {/* 700px container */}
+            <div className="relative w-[700px] h-[700px] shrink-0">
+                <Image 
+                    src="/headphone.svg"
+                    alt="Cyberpunk Headphones Background"
+                    fill
+                    priority
+                    className="object-contain object-center"
+                />
+            </div>
+        </div>
 
         {/* Main Glassmorphism Card Wrapper */}
         <div className="relative z-10 w-full max-w-[1008px] min-h-[600px] lg:min-h-[858px] bg-white/15 backdrop-blur-xl border-2 border-white rounded-[40px] md:rounded-[50px] flex flex-col items-center justify-center p-8 md:p-16 shadow-2xl">

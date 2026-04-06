@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { HiArrowRight } from "react-icons/hi";
 
 export default function IntroSlideshowPage() {
@@ -7,7 +8,7 @@ export default function IntroSlideshowPage() {
         <main className="relative min-h-screen w-full flex bg-white overflow-hidden font-raleway">
             
             {/* Left Column (Content) */}
-            <div className="w-full lg:w-[520px] relative flex flex-col justify-center items-center px-6 py-20 shrink-0">
+            <div className="w-full lg:w-[520px] relative flex flex-col justify-center items-center px-6 py-20 shrink-0 border-r border-gray-100 z-10">
                 
                 {/* Skip Button - Top Left */}
                 <Link 
@@ -20,7 +21,7 @@ export default function IntroSlideshowPage() {
                 </Link>
 
                 {/* Main Content Wrapper */}
-                <div className="w-full max-w-[401px] flex flex-col items-center gap-[48px]">
+                <div className="w-full max-w-[401px] flex flex-col items-center gap-[48px] pt-88">
                     
                     {/* Text & Progress Group */}
                     <div className="flex flex-col items-center gap-[40px] w-full">
@@ -62,16 +63,16 @@ export default function IntroSlideshowPage() {
                 </div>
             </div>
 
-            {/* Illustration Mask */}
-            {/* Hidden on mobile, takes up remaining space on desktop */}
+            {/* Right Column (Illustration) */}
             <div className="hidden lg:block flex-1 relative overflow-hidden my-0">
                 
-                {/* Graphic Image*/}
-                <div 
-                    className="absolute inset-0 w-full h-full bg-cover bg-left"
-                    style={{ 
-                        backgroundImage: "url('/Mask I.png')", // Update with your asset path
-                    }}
+                {/* Image */}
+                <Image 
+                    src="/Mask I.png"
+                    alt="CollabDen high quality audio sharing"
+                    fill
+                    priority
+                    className="object-cover animate-in fade-in duration-700"
                 />
             </div>
 

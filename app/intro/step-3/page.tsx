@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { HiArrowRight } from "react-icons/hi";
 
@@ -13,7 +14,7 @@ export default function IntroSlideThreePage() {
                 <div className="w-full max-w-[419px] flex flex-col items-center gap-[48px]">
                     
                     {/* Text & Progress Group */}
-                    <div className="flex flex-col items-center gap-[40px] w-full">
+                    <div className="flex flex-col items-center gap-[40px] w-full pt-88">
                         
                         {/* Progress Indicators */}
                         <div className="flex flex-row items-center gap-[19px]">
@@ -57,12 +58,13 @@ export default function IntroSlideThreePage() {
             <div className="hidden lg:block flex-1 relative overflow-hidden my-0">
                 
                 {/* Graphic Image */}
-                <div 
-                    className="absolute inset-0 w-full h-full bg-cover bg-bottom animate-in fade-in duration-700"
-                    style={{ 
-                        backgroundImage: "url('/Mask III.png')", 
-                    }}
-                />
+                <Image 
+                    src="/Mask III.png"
+                    alt="CollabDen high quality audio sharing"
+                    fill
+                    priority
+                    className="object-cover object-bottom animate-in fade-in duration-700"
+          /> 
             </div>
 
         </main>
