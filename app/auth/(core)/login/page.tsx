@@ -4,14 +4,13 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 
 export default function LoginPage() {
   const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [localError, setLocalError] = useState("");
 
   const isFormValid = useMemo(() => {
     return email.trim().length > 0 && password.trim().length > 0;
@@ -19,19 +18,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocalError("");
     clearError();
 
     if (!isFormValid) return;
 
     try {
       await login({ email, password });
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setLocalError(err.message || "Login failed. Please check your credentials.");
-      } else {
-        setLocalError("Login failed. Please check your credentials.");
-      }
+    } catch {
+      // Silent catch, error is now managed globally by AuthContext via mutations
     }
   };
 
@@ -46,9 +40,9 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {(authError || localError) && (
+      {authError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
-          {authError || localError}
+          {authError}
         </div>
       )}
 
@@ -126,25 +120,14 @@ export default function LoginPage() {
           <div className="grow border-t border-border-light"></div>
         </div>
 
-        {/* Social Logins */}
-        <div className="flex items-center justify-center gap-6">
+        {/* Social Login*/}
+        <div className="space-y-4">
           <button
             type="button"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-border-light bg-white text-black hover:bg-gray-50 transition-all cursor-pointer"
+            className="w-full py-3.5 flex items-center justify-center gap-3 rounded-full border border-border-light bg-white hover:bg-gray-50 transition-all cursor-pointer font-semibold text-text-main shadow-sm hover:shadow-md"
           >
-            <FaApple size={24} />
-          </button>
-          <button
-            type="button"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-border-light bg-white hover:bg-gray-50 transition-all cursor-pointer"
-          >
-            <FaGoogle className="text-red-500" size={20} />
-          </button>
-          <button
-            type="button"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-border-light bg-white text-blue-600 hover:bg-gray-50 transition-all cursor-pointer"
-          >
-            <FaFacebook size={22} />
+            <FaGoogle className="text-red-500" size={18} />
+            <span>Sign in with Google</span>
           </button>
         </div>
 

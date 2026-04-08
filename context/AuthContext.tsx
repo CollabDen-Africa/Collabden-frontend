@@ -2,9 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import authService, { SignupPayload, LoginPayload } from '@/services/auth.service';
-import { ROUTES } from '@/constants/routes';
 import axios from 'axios';
+import authService, { LoginPayload, SignupPayload } from '@/services/auth.service';
+import { ROUTES } from '@/constants/routes';
+import { useLogin } from '@/hooks/auth/useLogin';
+import { useSignup } from '@/hooks/auth/useSignup';
+import { useLogout } from '@/hooks/auth/useLogout';
 
 interface User {
   id: string;
@@ -27,15 +30,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [manualError, setManualError] = useState<string | null>(null);
+  
   const router = useRouter();
+
+  // Integrated TanStack Mutations
+  const loginMutation = useLogin();
+  const signupMutation = useSignup();
+  const logoutMutation = useLogout();
 
   // On mount, check if user is already authenticated
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        setIsLoading(true);
+        setIsInitializing(true);
         const data = await authService.getProfile();
         setUser(data.user || data.data);
         setIsAuthenticated(true);
@@ -44,75 +53,78 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setIsAuthenticated(false);
       } finally {
-        setIsLoading(false);
+        setIsInitializing(false);
       }
     };
 
     fetchProfile();
   }, []);
 
-  const clearError = () => setError(null);
+  const clearError = () => setManualError(null);
 
   const login = async (data: LoginPayload) => {
     try {
-      setIsLoading(true);
-      setError(null);
-      // Note: We're calling our Next.js proxy route for secure cookie handling
-      const response = await axios.post('/api/auth/login', data);
-
-      if (response.data.success) {
-        setUser(response.data.user);
+      const response = await loginMutation.mutateAsync(data);
+      if (response.success) {
+        setUser(response.user);
         setIsAuthenticated(true);
         router.push(ROUTES.DASHBOARD.ROOT);
       }
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || err.message || 'Login failed');
-      } else {
-        setError('Login failed');
-      }
-      throw err;
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // Error is managed globally by AuthContext via mutations
     }
   };
 
   const signup = async (data: SignupPayload) => {
     try {
-      setIsLoading(true);
-      setError(null);
-      await authService.signup(data);
-
+      await signupMutation.mutateAsync(data);
       // After signup, redirect to verify email
       router.push(ROUTES.AUTH.VERIFY_EMAIL);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message || 'Signup failed');
-      } else {
-        setError('Signup failed');
-      }
-      throw err;
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // Error is managed globally by AuthContext via mutations
     }
   };
 
   const logout = async () => {
     try {
-      setIsLoading(true);
-      await axios.post('/api/auth/logout');
+      await logoutMutation.mutateAsync();
       setUser(null);
       setIsAuthenticated(false);
       router.push(ROUTES.AUTH.LOGIN);
     } catch (err) {
       console.error('Logout error:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  // Compute overall states
+  const isLoading = isInitializing || loginMutation.isPending || signupMutation.isPending || logoutMutation.isPending;
+  
+  const getErrorMessage = (err: unknown) => {
+    if (axios.isAxiosError(err)) {
+      return (err.response?.data as { error?: string })?.error || err.message;
+    }
+    if (err instanceof Error) {
+      return err.message;
+    }
+    return null;
+  };
+
+  const error = manualError || 
+               getErrorMessage(loginMutation.error) || 
+               getErrorMessage(signupMutation.error) || 
+               null;
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, error, login, signup, logout, clearError }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated, 
+      isLoading, 
+      error, 
+      login, 
+      signup, 
+      logout, 
+      clearError 
+    }}>
       {children}
     </AuthContext.Provider>
   );
