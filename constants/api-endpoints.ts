@@ -22,7 +22,5 @@ export interface API_RESPONSE<T = unknown> {
 export interface USER_PROFILE {
   id: string;
   email: string;
-  role: string;
-  name?: string;
   isVerified: boolean;
 }

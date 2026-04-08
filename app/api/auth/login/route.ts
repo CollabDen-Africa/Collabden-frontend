@@ -5,14 +5,14 @@ import axios from 'axios';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     const response = await axios.post(API_ENDPOINTS.AUTH.LOGIN, body, {
       headers: { 'Content-Type': 'application/json' },
     });
 
     if (response.status === 200) {
       const data = response.data;
-      const token = data.token; // Assuming the backend returns the token in a 'token' field
+      const token = data.token;
 
       if (!token) {
         return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
@@ -37,11 +37,18 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-  } catch (error: any) {
-    console.error('Login error:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Login error:', error.response?.data || error.message);
+      return NextResponse.json(
+        { error: error.response?.data?.message || 'Authentication failed' },
+        { status: error.response?.status || 500 }
+      );
+    }
+    console.error('Login error:', error);
     return NextResponse.json(
-      { error: error.response?.data?.message || 'Authentication failed' },
-      { status: error.response?.status || 500 }
+      { error: 'Authentication failed' },
+      { status: 500 }
     );
   }
 }

@@ -23,7 +23,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-500 font-medium">
-              Welcome back, <span className="text-primary-green">{user?.name || user?.email?.split('@')[0] || 'User'}</span>
+              Welcome back, <span className="text-primary-green">{user?.email?.split('@')[0] || 'User'}</span>
             </p>
           </div>
           
@@ -55,14 +55,11 @@ export default function DashboardPage() {
 
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 h-96 flex flex-col items-center justify-center space-y-4">
             <div className="w-20 h-20 bg-primary-green/10 rounded-full flex items-center justify-center text-primary-green">
-              <span className="text-3xl font-bold">{user?.name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}</span>
+              <span className="text-3xl font-bold">{user?.email?.[0]?.toUpperCase() || 'U'}</span>
             </div>
             <div className="text-center">
-              <p className="text-gray-900 font-bold text-xl">{user?.name || 'Collaborator'}</p>
+              <p className="text-gray-900 font-bold text-xl">Collaborator</p>
               <p className="text-gray-400 font-medium">{user?.email || 'email@example.com'}</p>
-              <p className="inline-block mt-2 px-3 py-1 bg-primary-blue/10 text-primary-blue rounded-full text-xs font-bold uppercase tracking-wider">
-                {user?.role || 'Creator'}
-              </p>
             </div>
             <p className="text-gray-400 font-medium mt-6">Your CollabDen dashboard is ready!</p>
         </div>
