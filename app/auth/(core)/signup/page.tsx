@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 
 
 export default function SignupPage() {
@@ -14,7 +14,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   // const [role, setRole] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [localError, setLocalError] = useState("");
 
   const isFormValid = useMemo(() => {
     return (
@@ -26,19 +25,14 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLocalError("");
     clearError();
 
     if (!isFormValid) return;
 
     try {
       await signup({ email, password });
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setLocalError(err.message || "Signup failed. Please try again.");
-      } else {
-        setLocalError("Signup failed. Please try again.");
-      }
+    } catch {
+      // Error is managed globally by AuthContext via mutations
     }
   };
 
@@ -53,9 +47,9 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {(authError || localError) && (
+      {authError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
-          {authError || localError}
+          {authError}
         </div>
       )}
 
@@ -101,33 +95,6 @@ export default function SignupPage() {
             At least 8 characters, include a number
           </p>
         </div>
-
-        {/* Role Dropdown */}
-        {/* <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-text-main block">
-            Your role
-          </label>
-          <div className="relative w-full">
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              disabled={authLoading}
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white appearance-none cursor-pointer disabled:opacity-50"
-            >
-              <option value="" disabled>
-                Select a role
-              </option>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-              <FaChevronDown size={14} />
-            </div>
-          </div>
-        </div> */}
 
         {/* Terms Checkbox */}
         <div
@@ -190,25 +157,14 @@ export default function SignupPage() {
           <div className="grow border-t border-border-light"></div>
         </div>
 
-        {/* Social Logins */}
-        <div className="flex items-center justify-center gap-6">
+        {/* Social Login - Google Only */}
+        <div className="space-y-4">
           <button
             type="button"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-border-light bg-white text-black hover:bg-gray-50 transition-all cursor-pointer"
+            className="w-full py-3.5 flex items-center justify-center gap-3 rounded-full border border-border-light bg-white hover:bg-gray-50 transition-all cursor-pointer font-semibold text-text-main shadow-sm hover:shadow-md"
           >
-            <FaApple size={24} />
-          </button>
-          <button
-            type="button"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-border-light bg-white hover:bg-gray-50 transition-all cursor-pointer"
-          >
-            <FaGoogle className="text-red-500" size={20} />
-          </button>
-          <button
-            type="button"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-border-light bg-white text-blue-600 hover:bg-gray-50 transition-all cursor-pointer"
-          >
-            <FaFacebook size={22} />
+            <FaGoogle className="text-red-500" size={18} />
+            <span>Sign up with Google</span>
           </button>
         </div>
 
