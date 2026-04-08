@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 import BackgroundPattern from "./components/background/BackgroundPattern";
 
 const raleway = Raleway({
@@ -27,10 +28,12 @@ export default function RootLayout({
         className={`${raleway.variable} antialiased relative overflow-x-hidden`}
         suppressHydrationWarning
       >
-        <BackgroundPattern />
-        <div className="content-wrapper">
-          {children}
-        </div>
+        <AuthProvider>
+          <BackgroundPattern />
+          <div className="content-wrapper">
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

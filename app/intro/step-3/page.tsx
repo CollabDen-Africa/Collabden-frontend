@@ -1,20 +1,21 @@
 import React from 'react';
 import Link from 'next/link';
 import { HiArrowRight } from "react-icons/hi";
+import { ROUTES } from '@/constants/routes';
 
 export default function IntroSlideThreePage() {
     return (
         <main className="relative min-h-screen w-full flex bg-white overflow-hidden font-raleway">
-            
+
             {/* Left Column */}
             <div className="w-full lg:w-[520px] relative flex flex-col justify-center items-center px-6 py-20 shrink-0">
 
                 {/* Main Content Wrapper */}
                 <div className="w-full max-w-[419px] flex flex-col items-center gap-[48px]">
-                    
+
                     {/* Text & Progress Group */}
                     <div className="flex flex-col items-center gap-[40px] w-full">
-                        
+
                         {/* Progress Indicators */}
                         <div className="flex flex-row items-center gap-[19px]">
                             {/* Inactive */}
@@ -38,7 +39,7 @@ export default function IntroSlideThreePage() {
                     </div>
 
                     {/* Final Button */}
-                    <Link href="/dashboard">
+                    <Link href={ROUTES.DASHBOARD.ROOT}>
                         <button className="flex flex-row items-center justify-center px-[28px] py-[14px] gap-[10px] bg-[#73BF44] hover:bg-[#62a538] transition-colors rounded-[50px] shadow-[0px_4px_4px_rgba(0,0,0,0.25)] group">
                             <span className="text-[18px] leading-[21px] font-bold text-white whitespace-nowrap">
                                 Start Exploring
@@ -55,12 +56,12 @@ export default function IntroSlideThreePage() {
 
             {/* Illustration Mask */}
             <div className="hidden lg:block flex-1 relative overflow-hidden my-0">
-                
+
                 {/* Graphic Image */}
-                <div 
+                <div
                     className="absolute inset-0 w-full h-full bg-cover bg-bottom animate-in fade-in duration-700"
-                    style={{ 
-                        backgroundImage: "url('/Mask III.png')", 
+                    style={{
+                        backgroundImage: "url('/Mask III.png')",
                     }}
                 />
             </div>

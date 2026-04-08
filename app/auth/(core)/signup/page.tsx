@@ -3,25 +3,44 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaApple, FaChevronDown } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
+import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
 
-const ROLES = ["Producer", "Artist", "Manager", "Sound Engineer", "DJ", "Other"];
 
 export default function SignupPage() {
+  const { signup, isLoading: authLoading, error: authError, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  // const [role, setRole] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [localError, setLocalError] = useState("");
 
   const isFormValid = useMemo(() => {
     return (
       email.trim().length > 0 &&
       password.trim().length >= 8 &&
-      role.length > 0 &&
       agreedToTerms
     );
-  }, [email, password, role, agreedToTerms]);
+  }, [email, password, agreedToTerms]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError("");
+    clearError();
+
+    if (!isFormValid) return;
+
+    try {
+      await signup({ email, password });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setLocalError(err.message || "Signup failed. Please try again.");
+      } else {
+        setLocalError("Signup failed. Please try again.");
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -34,7 +53,13 @@ export default function SignupPage() {
         </p>
       </div>
 
-      <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+      {(authError || localError) && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          {authError || localError}
+        </div>
+      )}
+
+      <form className="space-y-5" onSubmit={handleSubmit}>
         {/* Email Field */}
         <div className="space-y-1.5">
           <label className="text-sm font-semibold text-text-main block">
@@ -44,8 +69,9 @@ export default function SignupPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={authLoading}
             placeholder="abc@youremail.com"
-            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white"
+            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white disabled:opacity-50"
           />
         </div>
 
@@ -59,8 +85,9 @@ export default function SignupPage() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={authLoading}
               placeholder="............"
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12"
+              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12 disabled:opacity-50"
             />
             <button
               type="button"
@@ -76,7 +103,7 @@ export default function SignupPage() {
         </div>
 
         {/* Role Dropdown */}
-        <div className="space-y-1.5">
+        {/* <div className="space-y-1.5">
           <label className="text-sm font-semibold text-text-main block">
             Your role
           </label>
@@ -84,7 +111,8 @@ export default function SignupPage() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white appearance-none cursor-pointer"
+              disabled={authLoading}
+              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white appearance-none cursor-pointer disabled:opacity-50"
             >
               <option value="" disabled>
                 Select a role
@@ -99,11 +127,11 @@ export default function SignupPage() {
               <FaChevronDown size={14} />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Terms Checkbox */}
         <div
-          className="flex items-start gap-3 cursor-pointer group select-none"
+          className={`flex items-start gap-3 cursor-pointer group select-none ${authLoading ? "pointer-events-none opacity-50" : ""}`}
           onClick={() => setAgreedToTerms(!agreedToTerms)}
         >
           <div
@@ -121,7 +149,7 @@ export default function SignupPage() {
             <Link
               href="#"
               className="underline font-semibold decoration-primary-green/30 hover:decoration-primary-green transition-colors text-primary-green"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
               terms of use
             </Link>{" "}
@@ -129,7 +157,7 @@ export default function SignupPage() {
             <Link
               href="#"
               className="underline font-semibold decoration-primary-green/30 hover:decoration-primary-green transition-colors text-primary-green"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
               privacy policy
             </Link>
@@ -139,14 +167,18 @@ export default function SignupPage() {
         {/* Sign Up Button */}
         <button
           type="submit"
-          disabled={!isFormValid}
-          className={`w-full py-4 text-white font-bold rounded-full transition-all cursor-pointer disabled:cursor-not-allowed 
-            ${isFormValid
+          disabled={!isFormValid || authLoading}
+          className={`w-full py-4 text-white font-bold rounded-full transition-all cursor-pointer disabled:cursor-not-allowed flex justify-center items-center gap-2
+            ${isFormValid && !authLoading
               ? "bg-primary-green shadow-btn-primary hover:shadow-btn-hover hover:-translate-y-1 hover:brightness-90 active:scale-[0.98]"
               : "bg-primary-green/60 shadow-none"
             }`}
         >
-          Sign Up
+          {authLoading ? (
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            "Sign Up"
+          )}
         </button>
 
         {/* Divider */}

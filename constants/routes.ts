@@ -4,6 +4,11 @@ export const ROUTES = {
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
     FORGOT_PASSWORD: '/auth/forgot-password',
+    VERIFY_EMAIL: '/auth/verifyemail',
+    PASSWORD_RESET: '/auth/password-reset',
+    NEW_PASSWORD: '/auth/new-password',
+    PASSWORD_UPDATED: '/auth/password-updated',
+    ONBOARDING_SUCCESS: '/auth/onboardingsuccess',
   },
   DASHBOARD: {
     ROOT: '/dashboard',

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { HiArrowRight } from "react-icons/hi";
+import { ROUTES } from '@/constants/routes';
 
 export default function IntroSlideTwoPage() {
     return (
@@ -11,7 +12,7 @@ export default function IntroSlideTwoPage() {
                 
                 {/* Skip Button */}
                 <Link 
-                    href="/dashboard" 
+                    href={ROUTES.DASHBOARD.ROOT} 
                     className="absolute top-8 left-8 md:top-[63px] md:left-[41px] flex justify-center items-center px-[15px] py-[4px] border border-dashed border-[#878A8B] rounded-[50px] hover:bg-gray-50 transition-colors z-10"
                 >
                     <span className="text-[16px] leading-[22px] text-[#878A8B] font-sfpro">

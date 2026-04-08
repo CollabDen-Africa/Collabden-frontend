@@ -3,16 +3,37 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/context/AuthContext";
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
 
 export default function LoginPage() {
+  const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [localError, setLocalError] = useState("");
 
   const isFormValid = useMemo(() => {
     return email.trim().length > 0 && password.trim().length > 0;
   }, [email, password]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError("");
+    clearError();
+
+    if (!isFormValid) return;
+
+    try {
+      await login({ email, password });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setLocalError(err.message || "Login failed. Please check your credentials.");
+      } else {
+        setLocalError("Login failed. Please check your credentials.");
+      }
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -25,7 +46,13 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+      {(authError || localError) && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          {authError || localError}
+        </div>
+      )}
+
+      <form className="space-y-6" onSubmit={handleSubmit}>
         {/* Email Field */}
         <div className="space-y-2">
           <label className="text-sm font-semibold text-text-main block">
@@ -35,8 +62,9 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={authLoading}
             placeholder="johndoe@example.com"
-            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white"
+            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white disabled:opacity-50"
           />
         </div>
 
@@ -50,8 +78,9 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={authLoading}
               placeholder="............"
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12"
+              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12 disabled:opacity-50"
             />
             <button
               type="button"
@@ -64,7 +93,7 @@ export default function LoginPage() {
           <div className="flex justify-start">
             <Link
               href={ROUTES.AUTH.FORGOT_PASSWORD}
-              className="text-xs font-semibold hover:underline text-primary-green"
+              className="text-sm font-semibold hover:underline text-primary-green"
             >
               Forgot password?
             </Link>
@@ -74,14 +103,18 @@ export default function LoginPage() {
         {/* Log In Button */}
         <button
           type="submit"
-          disabled={!isFormValid}
-          className={`w-full py-4 text-white font-bold rounded-full transition-all cursor-pointer disabled:cursor-not-allowed 
-            ${isFormValid
+          disabled={!isFormValid || authLoading}
+          className={`w-full py-4 text-white font-bold rounded-full transition-all cursor-pointer disabled:cursor-not-allowed flex justify-center items-center gap-2
+            ${isFormValid && !authLoading
               ? "bg-primary-green shadow-btn-primary hover:shadow-btn-hover hover:-translate-y-1 hover:brightness-90 active:scale-[0.98]"
               : "bg-primary-green/60 shadow-none"
             }`}
         >
-          Log In
+          {authLoading ? (
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            "Log In"
+          )}
         </button>
 
         {/* Divider */}
