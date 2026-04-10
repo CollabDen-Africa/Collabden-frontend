@@ -1,4 +1,4 @@
-# CollabDen 🎵
+# CollabDen
 
 **Where Africa's Music Professionals Collaborate, Get Paid, and Grow.**
 

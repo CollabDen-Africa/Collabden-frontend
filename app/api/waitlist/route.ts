@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { email, name } = await request.json();
+    const { email: rawEmail, name } = await request.json();
+    const email = rawEmail?.trim();
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
@@ -17,7 +18,6 @@ export async function POST(request: Request) {
     const sheetUrl = process.env.SHEET_BEST_URL;
 
     if (!sheetUrl) {
-      console.error("SHEET_BEST_URL is not defined in environment variables");
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
@@ -32,14 +32,11 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("SheetBest Error:", errorText);
       throw new Error('Failed to save to sheet');
     }
 
     return NextResponse.json({ message: 'Success' }, { status: 200 });
-  } catch (error) {
-    console.error("Waitlist API Error:", error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

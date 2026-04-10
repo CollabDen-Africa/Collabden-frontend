@@ -10,8 +10,8 @@ const Hero = () => {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.2,
-                delayChildren: 0.3,
+                staggerChildren: 0.1,
+                delayChildren: 0.1,
             }
         }
     };
@@ -22,7 +22,7 @@ const Hero = () => {
             opacity: 1,
             y: 0,
             transition: {
-                duration: 0.8,
+                duration: 0.5,
                 ease: [0.21, 0.47, 0.32, 0.98]
             }
         }
@@ -38,7 +38,7 @@ const Hero = () => {
                     loop
                     muted
                     playsInline
-                    preload="auto"
+                    preload="metadata"
                     className="h-full w-full object-cover opacity-80"
                 >
                     <source src="/Collabden-hero.mp4" type="video/mp4" />

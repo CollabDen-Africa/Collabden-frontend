@@ -246,11 +246,12 @@ export default function WaitlistPage() {
         >
           <div className="relative z-10 pointer-events-none flex items-center">
             <Image
-              src="/avatar.svg"
+              src="/afro-avatar.svg"
               alt="User"
               width={20}
               height={20}
               className="w-auto h-8 rounded-full object-cover"
+              priority
             />
           </div>
           <span className="text-white text-sm md:text-base">
@@ -312,7 +313,7 @@ export default function WaitlistPage() {
         <motion.div
           initial={{ opacity: 0, y: 100, rotateX: 20 }}
           animate={{ opacity: 1, y: 0, rotateX: 8 }}
-          transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
+          transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
           className="relative w-full aspect-26/10 rounded-t-3xl overflow-hidden border-t border-x border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.6)] transform translate-y-[15%] md:translate-y-[10%]"
           style={{
             perspective: "2000px",

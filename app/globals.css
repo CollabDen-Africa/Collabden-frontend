@@ -22,9 +22,13 @@
   --accent-yellow: #FBBC04;
   --accent-gray: #7D7D7F;
 
-  /* Card / Surface Colors */
+  /* Surface / Border Colors */
   --card-bg: #505050;
   --card-bg-alt: #444444;
+  --text-main: #101618;
+  --text-muted: #AEB2B4;
+  --border-muted: #AEB2B4;
+  --border-light: #C0C3C4;
 
   /* Legacy fallbacks */
   --background: #000000;
@@ -38,6 +42,15 @@
   --color-primary-green: var(--primary-green);
   --color-card-bg: var(--card-bg);
   --color-card-bg-alt: var(--card-bg-alt);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-border-muted: var(--border-muted);
+  --color-border-light: var(--border-light);
+
+  --shadow-btn-primary: 0 10px 25px rgba(115, 191, 68, 0.25);
+  --shadow-btn-hover: 0 15px 35px rgba(115, 191, 68, 0.35);
+  --shadow-circle-check: 0 0 8px rgba(115, 191, 68, 0.4);
+
   --font-sans: var(--font-raleway);
   --font-mono: var(--font-geist-mono);
 }

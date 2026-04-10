@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import QueryProvider from "@/components/providers/QueryProvider";
 import BackgroundPattern from "./components/background/BackgroundPattern";
 
 const raleway = Raleway({
@@ -11,6 +13,9 @@ const raleway = Raleway({
 export const metadata: Metadata = {
   title: "CollabDen",
   description: "CollabDen Platform",
+  icons: {
+    icon: "/Green-logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -24,10 +29,14 @@ export default function RootLayout({
         className={`${raleway.variable} antialiased relative overflow-x-hidden`}
         suppressHydrationWarning
       >
-        <BackgroundPattern />
-        <div className="content-wrapper">
-          {children}
-        </div>
+        <QueryProvider>
+          <AuthProvider>
+            <BackgroundPattern />
+            <div className="content-wrapper">
+              {children}
+            </div>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
