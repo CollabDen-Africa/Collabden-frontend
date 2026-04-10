@@ -35,7 +35,7 @@ function VerifyEmailForm() {
         } catch (err: unknown) {
             if (err instanceof Error) {
               setError(
-                err?.response?.data?.message || "Verification failed. Please check the code.");
+                err.message) 
             } else {
                 setError("Verification failed. Please check the code.");
             }

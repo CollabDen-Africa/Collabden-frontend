@@ -61,6 +61,7 @@ const authService = {
    * Verify user email via OTP/code
    */
   verifyEmail: async (data: VerifyPayload) => {
+    try {
     const payload = {
       verificationToken: data.code,
     };
@@ -69,7 +70,11 @@ const authService = {
       payload,
     );
     return response.data;
-  },
+  } catch (err: any) {
+        const backendMessage = err.response?.data?.message || err.response?.data?.error || "Verification failed. Please check the code.";
+        throw new Error(backendMessage); 
+      }
+    },
 
   /**
    * Request password reset link
