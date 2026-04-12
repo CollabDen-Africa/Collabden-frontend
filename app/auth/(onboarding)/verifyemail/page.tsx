@@ -49,10 +49,14 @@ function VerifyEmailForm() {
             setResending(true);
             setError('');
             setMessage('');
-            // Placeholder resend logic
+            await authService.resendVerification(email);
             setMessage("Verification code sent back to your email.");
-        } catch {
-            setError("Failed to resend code.");
+        } catch (err: unknown) {
+                    if (err instanceof Error) {
+                        setError(err.message);
+                    } else {
+                      setError("Failed to resend code.");
+                    }
         } finally {
             setResending(false);
         }

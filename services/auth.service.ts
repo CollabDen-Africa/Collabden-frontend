@@ -62,7 +62,8 @@ const authService = {
    */
   verifyEmail: async (data: VerifyPayload) => {
     try {
-    const payload = {
+      const payload = {
+      email: data.email,
       verificationToken: data.code,
     };
     const response = await axiosInstance.post(
@@ -76,7 +77,26 @@ const authService = {
       }
     },
 
-  /**
+    /**
+       * Resend verification email
+       */
+  resendVerification: async (email: string) => {
+        try {
+          const response = await axiosInstance.post(
+            API_ENDPOINTS.AUTH.RESEND_VERIFY, 
+            { email },
+          );
+          return response.data;
+        } catch (err: any) {
+              const backendMessage = 
+                err.response?.data?.message || 
+                err.response?.data?.error || 
+                "Failed to resend code.";
+              throw new Error(backendMessage); 
+            }
+   },
+        
+    /**
    * Request password reset link
    */
   forgotPassword: async (email: string) => {
