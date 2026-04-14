@@ -8,11 +8,17 @@ import { ROUTES } from '@/constants/routes';
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const token = searchParams.get('token');
+  // Check common parameter names for the token (Backend might use token, accessToken, or wrap in data)
+  const token = searchParams.get('token') || 
+                searchParams.get('accessToken') || 
+                searchParams.get('auth_token');
+
+  console.log('Google Auth Callback: Initializing callback process');
+  console.log('Available Search Params:', Array.from(searchParams.keys()));
 
   if (!token) {
-    console.error('Google Auth Callback: No token provided');
-    return NextResponse.redirect(new URL(`${ROUTES.AUTH.LOGIN}?error=Authentication failed`, request.url));
+    console.error('Google Auth Callback: No token provided in URL. Available params:', Array.from(searchParams.keys()));
+    return NextResponse.redirect(new URL(`${ROUTES.AUTH.LOGIN}?error=${encodeURIComponent('Authentication failed: Missing token')}`, request.url));
   }
 
   // Create the response and redirect to dashboard

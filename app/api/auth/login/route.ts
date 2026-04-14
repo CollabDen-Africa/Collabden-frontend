@@ -12,16 +12,20 @@ export async function POST(request: Request) {
 
     if (response.status === 200) {
       const data = response.data;
-      const token = data.token;
+      
+      // Audit Response Structure: Checking for token in root, .data, and common variants
+      const token = data.token || data.data?.token || data.accessToken || data.data?.accessToken;
 
       if (!token) {
-        return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
+        console.error('Login Error: No token found in response', data);
+        return NextResponse.json({ error: 'Authentication failed: No token received' }, { status: 401 });
       }
 
-      // Create the response with user data
+      // Create the response with standardized user extraction
       const nextResponse = NextResponse.json({
         success: true,
-        user: data.user || data.data, // Adjust based on actual backend response structure
+        user: data.user || data.data?.user || data.data,
+        message: data.message || 'Login successful',
       });
 
       // Set the HTTP-only cookie

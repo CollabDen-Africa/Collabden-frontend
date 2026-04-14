@@ -9,11 +9,13 @@ export const ROUTES = {
     NEW_PASSWORD: "/auth/new-password",
     PASSWORD_UPDATED: "/auth/password-updated",
     ONBOARDING_SUCCESS: "/auth/onboardingsuccess",
+    CALLBACK: "/auth-callback",
   },
   DASHBOARD: {
     ROOT: "/dashboard",
     SETTINGS: "/dashboard/settings",
     PROFILE: "/dashboard/profile",
+    SETUP: "/intro/step-1",
   },
 };
 

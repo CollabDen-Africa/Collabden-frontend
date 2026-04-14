@@ -78,8 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (data: SignupPayload) => {
     try {
       await signupMutation.mutateAsync(data);
-      // After signup, redirect to verify email
-      router.push(ROUTES.AUTH.VERIFY_EMAIL);
+      // After signup, redirect to verify email with the email in query params
+      router.push(`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(data.email)}`);
     } catch {
       // Error is managed globally by AuthContext via mutations
     }

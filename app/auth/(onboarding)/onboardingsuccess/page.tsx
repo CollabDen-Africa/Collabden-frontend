@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { HiCheckCircle } from "react-icons/hi";
+import { ROUTES } from '@/constants/routes';
 
 
 export default function SuccessPage() {
@@ -23,7 +24,7 @@ export default function SuccessPage() {
                       </p>
           
                       {/* Primary Button */}
-                      <Link href="/dashboard/setup" className="w-full">
+                      <Link href={ROUTES.DASHBOARD.SETUP} className="w-full">
                           <button 
                               type="button"
                               className="w-full flex justify-center items-center py-[16px] px-[24px] bg-[#73BF44] hover:bg-[#62a538] transition-colors rounded-[24px] text-[#F8F8F8] text-[18px] leading-[20px] font-normal font-raleway shadow-lg"

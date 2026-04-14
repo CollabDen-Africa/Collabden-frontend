@@ -6,19 +6,20 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import { HugeiconsIcon } from '@hugeicons/react';
 import { MailOpenIcon } from '@hugeicons/core-free-icons';
-import authService from '@/services/auth.service';
+import { useVerifyEmail, useResendVerification } from '@/hooks/auth/useVerifyEmail';
 import { ROUTES } from '@/constants/routes';
 
 function VerifyEmailForm() {
     const [code, setCode] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [resending, setResending] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || '';
+
+    const verifyMutation = useVerifyEmail();
+    const resendMutation = useResendVerification();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,39 +29,32 @@ function VerifyEmailForm() {
         }
 
         try {
-            setIsLoading(true);
             setError('');
-            await authService.verifyEmail({ email, code });
+            await verifyMutation.mutateAsync({ email, code });
             router.push(ROUTES.AUTH.ONBOARDING_SUCCESS);
         } catch (err: unknown) {
-            if (err instanceof Error) {
-              setError(
-                err.message) 
-            } else {
-                setError("Verification failed. Please check the code.");
-            }
-        } finally {
-            setIsLoading(false);
+            setError(err instanceof Error ? err.message : "Verification failed. Please check the code.");
         }
     };
 
     const handleResend = async () => {
+        if (!email) {
+            setError("Email is missing. Please try signing up again.");
+            return;
+        }
+
         try {
-            setResending(true);
             setError('');
             setMessage('');
-            await authService.resendVerification(email);
+            await resendMutation.mutateAsync(email);
             setMessage("Verification code sent back to your email.");
         } catch (err: unknown) {
-                    if (err instanceof Error) {
-                        setError(err.message);
-                    } else {
-                      setError("Failed to resend code.");
-                    }
-        } finally {
-            setResending(false);
+            setError(err instanceof Error ? err.message : "Failed to resend code.");
         }
     };
+
+    const isLoading = verifyMutation.isPending;
+    const resending = resendMutation.isPending;
 
     return (
         <div className="w-full max-w-[517px] flex flex-col items-center animate-in fade-in zoom-in-95 duration-500">

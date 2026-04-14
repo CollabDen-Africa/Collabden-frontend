@@ -1,25 +1,25 @@
 import axiosInstance from "@/lib/axios";
+import axios from "axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export interface SignupPayload {
   email: string;
-  password?: string;
+  password: string;
 }
 
 export interface LoginPayload {
   email: string;
-  password?: string;
+  password: string;
 }
 
 export interface VerifyPayload {
   email: string;
   code: string;
-  token?: string;
 }
 
 export interface ResetPasswordPayload {
-  password?: string;
-  token?: string;
+  password: string;
+  token: string;
 }
 
 const authService = {
@@ -50,10 +50,11 @@ const authService = {
   },
 
   /**
-   * Get current user profile
+   * Get current user profile via local proxy
    */
   getProfile: async () => {
-    const response = await axiosInstance.get(API_ENDPOINTS.AUTH.PROFILE);
+    // Calling local proxy to use HTTP-only cookies
+    const response = await axios.get('/api/auth/profile');
     return response.data;
   },
 
@@ -61,39 +62,48 @@ const authService = {
    * Verify user email via OTP/code
    */
   verifyEmail: async (data: VerifyPayload) => {
+    if (!data.email) {
+      throw new Error("Email is required for verification.");
+    }
     try {
       const payload = {
-      email: data.email,
-      verificationToken: data.code,
-    };
+        email: data.email.trim(),
+        code: data.code, // Matching backend expectation: 'code' instead of 'verificationToken'
+      };
     const response = await axiosInstance.post(
       API_ENDPOINTS.AUTH.VERIFY,
       payload,
     );
     return response.data;
-  } catch (err: any) {
-        const backendMessage = err.response?.data?.message || err.response?.data?.error || "Verification failed. Please check the code.";
-        throw new Error(backendMessage); 
+    } catch (err: unknown) {
+      let backendMessage = "Verification failed. Please check the code.";
+      if (axios.isAxiosError(err)) {
+        backendMessage = err.response?.data?.message || err.response?.data?.error || backendMessage;
       }
+      throw new Error(backendMessage); 
+    }
     },
 
     /**
        * Resend verification email
        */
   resendVerification: async (email: string) => {
-        try {
+    if (!email) {
+      throw new Error("Email is required to resend verification code.");
+    }
+    try {
           const response = await axiosInstance.post(
             API_ENDPOINTS.AUTH.RESEND_VERIFY, 
-            { email },
+            { email: email.trim() },
           );
           return response.data;
-        } catch (err: any) {
-              const backendMessage = 
-                err.response?.data?.message || 
-                err.response?.data?.error || 
-                "Failed to resend code.";
-              throw new Error(backendMessage); 
-            }
+    } catch (err: unknown) {
+      let backendMessage = "Failed to resend code.";
+      if (axios.isAxiosError(err)) {
+        backendMessage = err.response?.data?.message || err.response?.data?.error || backendMessage;
+      }
+      throw new Error(backendMessage); 
+    }
    },
         
     /**

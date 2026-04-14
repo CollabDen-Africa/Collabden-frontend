@@ -1,9 +1,9 @@
 # CollabDen Backend API Documentation Reference
 
-Extraction Date: 2026-04-09
+Extraction Date: 2026-04-14
 Source: [Swagger UI](https://collabden-backend.onrender.com/api-docs/#/)
 
-## Authentication Endpoints
+## 🔐 Authentication Endpoints
 
 ### 1. Register User
 - **Endpoint:** `POST /api/v1/user/signup`
@@ -32,7 +32,7 @@ Source: [Swagger UI](https://collabden-backend.onrender.com/api-docs/#/)
 - **Google Auth Callback**
   - **Endpoint:** `GET /api/v1/user/auth/google/callback`
   - **Query Parameters:** `code` (string)
-  - **Response:** Redirects to the frontend with an authentication token (usually as a query param or cookie).
+  - **Response:** Backend redirects to `http://localhost:3000/auth-callback?token=...`
 
 ### 4. Verify Email
 - **Endpoint:** `POST /api/v1/user/verify`
@@ -44,7 +44,16 @@ Source: [Swagger UI](https://collabden-backend.onrender.com/api-docs/#/)
   }
   ```
 
-### 5. Forgot Password
+### 5. Resend Verification Code
+- **Endpoint:** `POST /api/v1/user/resend-verify`
+- **Payload:**
+  ```json
+  {
+    "email": "string"
+  }
+  ```
+
+### 6. Forgot Password
 - **Endpoint:** `POST /api/v1/user/forgot-password`
 - **Payload:**
   ```json
@@ -53,7 +62,7 @@ Source: [Swagger UI](https://collabden-backend.onrender.com/api-docs/#/)
   }
   ```
 
-### 6. Reset Password
+### 7. Reset Password
 - **Endpoint:** `POST /api/v1/user/reset-password`
 - **Payload:**
   ```json
@@ -63,6 +72,7 @@ Source: [Swagger UI](https://collabden-backend.onrender.com/api-docs/#/)
   }
   ```
 
-### 7. User Profile
+### 8. User Profile
 - **Endpoint:** `GET /api/v1/user/profile`
+- **Description:** Retrieve the authenticated user's profile details.
 - **Headers:** `Authorization: Bearer <token>`

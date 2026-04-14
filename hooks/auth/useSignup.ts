@@ -1,8 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
-import authService, { SignupPayload } from '@/services/auth.service';
+import { SignupPayload } from '@/services/auth.service';
+import axios from 'axios';
 
 export const useSignup = () => {
   return useMutation({
-    mutationFn: (data: SignupPayload) => authService.signup(data),
+    mutationFn: async (data: SignupPayload) => {
+      const response = await axios.post('/api/auth/signup', data);
+      return response.data;
+    },
   });
 };
