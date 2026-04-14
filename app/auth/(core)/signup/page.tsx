@@ -16,6 +16,12 @@ export default function SignupPage() {
   // const [role, setRole] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+  const handleGoogleSignup = () => {
+    // Redirect to the same proxy route used for Google login
+    // The backend handles both signup and login flows via the same OAuth callback
+    window.location.href = "/api/auth/google";
+  };
+
   const isFormValid = useMemo(() => {
     return (
       email.trim().length > 0 &&
@@ -162,7 +168,9 @@ export default function SignupPage() {
         <div className="space-y-4">
           <button
             type="button"
-            className="w-full py-3.5 flex items-center justify-center gap-3 rounded-full border border-border-light bg-white hover:bg-gray-50 transition-all cursor-pointer font-semibold text-text-main shadow-sm hover:shadow-md"
+            onClick={handleGoogleSignup}
+            disabled={authLoading}
+            className="w-full py-3.5 flex items-center justify-center gap-3 rounded-full border border-border-light bg-white hover:bg-gray-50 transition-all cursor-pointer font-semibold text-text-main shadow-sm hover:shadow-md disabled:opacity-50"
           >
             <FcGoogle size={27} />
             <span>Sign up with Google</span>
