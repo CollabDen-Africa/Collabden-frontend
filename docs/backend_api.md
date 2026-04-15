@@ -40,7 +40,7 @@ Source: [Swagger UI](https://collabden-backend.onrender.com/api-docs/#/)
   ```json
   {
     "email": "string",
-    "code": "string"
+    "verificationToken": "string"
   }
   ```
 

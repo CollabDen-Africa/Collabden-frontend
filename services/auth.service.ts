@@ -14,7 +14,7 @@ export interface LoginPayload {
 
 export interface VerifyPayload {
   email: string;
-  code: string;
+  verificationToken: string;
 }
 
 export interface ResetPasswordPayload {
@@ -68,47 +68,47 @@ const authService = {
     try {
       const payload = {
         email: data.email.trim(),
-        code: data.code, // Matching backend expectation: 'code' instead of 'verificationToken'
+        verificationToken: data.verificationToken,
       };
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.VERIFY,
-      payload,
-    );
-    return response.data;
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.AUTH.VERIFY,
+        payload,
+      );
+      return response.data;
     } catch (err: unknown) {
       let backendMessage = "Verification failed. Please check the code.";
       if (axios.isAxiosError(err)) {
         backendMessage = err.response?.data?.message || err.response?.data?.error || backendMessage;
       }
-      throw new Error(backendMessage); 
+      throw new Error(backendMessage);
     }
-    },
+  },
 
-    /**
-       * Resend verification email
-       */
+  /**
+     * Resend verification email
+     */
   resendVerification: async (email: string) => {
     if (!email) {
       throw new Error("Email is required to resend verification code.");
     }
     try {
-          const response = await axiosInstance.post(
-            API_ENDPOINTS.AUTH.RESEND_VERIFY, 
-            { email: email.trim() },
-          );
-          return response.data;
+      const response = await axiosInstance.post(
+        API_ENDPOINTS.AUTH.RESEND_VERIFY,
+        { email: email.trim() },
+      );
+      return response.data;
     } catch (err: unknown) {
       let backendMessage = "Failed to resend code.";
       if (axios.isAxiosError(err)) {
         backendMessage = err.response?.data?.message || err.response?.data?.error || backendMessage;
       }
-      throw new Error(backendMessage); 
+      throw new Error(backendMessage);
     }
-   },
-        
-    /**
-   * Request password reset link
-   */
+  },
+
+  /**
+ * Request password reset link
+ */
   forgotPassword: async (email: string) => {
     const response = await axiosInstance.post(
       API_ENDPOINTS.AUTH.FORGOT_PASSWORD,

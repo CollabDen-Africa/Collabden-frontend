@@ -30,7 +30,7 @@ function VerifyEmailForm() {
 
         try {
             setError('');
-            await verifyMutation.mutateAsync({ email, code });
+            await verifyMutation.mutateAsync({ email, verificationToken: code });
             router.push(ROUTES.AUTH.ONBOARDING_SUCCESS);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Verification failed. Please check the code.");
