@@ -10,12 +10,12 @@ export interface AvatarProps {
 // Generates a consistent background color string based on the user's name
 const getAvatarColor = (name: string): string => {
   const colors = [
-    'bg-[#204F99]', // primary-blue
-    'bg-[#73BF44]', // primary-green
-    'bg-[#800080]', // purple
-    'bg-[#FC110A]', // accent-red
-    'bg-[#E67E22]', // orange
-    'bg-[#0000FF]', // pure blue
+    'bg-primary-blue',
+    'bg-primary-green',
+    'bg-accent-pink',
+    'bg-accent-red',
+    'bg-accent-yellow',
+    'bg-accent-green-success',
   ];
   
   let hash = 0;
@@ -26,7 +26,7 @@ const getAvatarColor = (name: string): string => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-// Extracts up to 2 initials from the name
+// Extract up to 2 initials from the name
 const getInitials = (name: string): string => {
   if (!name) return '?';
   const parts = name.trim().split(' ');
@@ -40,7 +40,7 @@ export default function Avatar({ name, src, className = "w-10 h-10" }: AvatarPro
   // If a valid image URL is provided, render the image
   if (src) {
     return (
-      <div className={`relative rounded-full overflow-hidden shrink-0 bg-gray-200 ${className}`}>
+      <div className={`relative rounded-full overflow-hidden shrink-0 bg-card-bg ${className}`}>
         <Image src={src} alt={`${name}'s profile picture`} fill className="object-cover" sizes="100px" />
       </div>
     );
@@ -52,7 +52,7 @@ export default function Avatar({ name, src, className = "w-10 h-10" }: AvatarPro
 
   return (
     <div 
-      className={`flex items-center justify-center rounded-full text-white font-bold shrink-0 ${bgColor} ${className}`}
+      className={`flex items-center justify-center rounded-full text-primary-white font-bold shrink-0 ${bgColor} ${className}`}
       title={name}
     >
       <span className="opacity-95">{initials}</span>

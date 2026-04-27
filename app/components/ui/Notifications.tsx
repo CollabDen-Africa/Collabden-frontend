@@ -2,107 +2,113 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { LuBell } from "react-icons/lu";
-import {
-  FaHandshake,
-  FaCheck,
-  FaUserPlus,
-  FaMessage
-} from 'react-icons/fa6';
-import NotificationItem from '../dashboard/NotificationsItem';
+import NotificationItem from '../dashboard/NotificationsItem'; 
+import OnboardingTooltip from './Tooltip'; 
 
+export interface NotificationData {
+  id: number;
+  user?: string;
+  action: string;
+  target?: string;
+  time: string;
+  type?: string; 
+  icon?: any; 
+}
 
+interface NotificationBellProps {
+  notifications?: NotificationData[];
+  unreadCount?: number;
+  isOpenExternally?: boolean;
+  onToggle?: () => void;
+  currentStep?: number; 
+  setStep?: (s: number) => void;
+  onSkip?: () => void;
+}
 
-// Mock Data (To be replaced with database fetch)
-const NOTIFICATIONS = [
-  {
-    id: 1,
-    user: "John Ike",
-    action: "commented on",
-    target: "“Summer Vibes Ep”",
-    time: "15 minutes ago",
-    iconWrapperClass: "bg-[#800080]/20 text-[#800080]",
-    icon: FaMessage
-  },
-  {
-    id: 2,
-    user: "Tobi Alao",
-    action: "approved your mix",
-    target: "",
-    time: "1 hour ago",
-    iconWrapperClass: "bg-accent-green-success/20 text-accent-green-success",
-    icon: FaCheck
-  },
-  {
-    id: 3,
-    user: "Isa Ali",
-    action: "joined your project",
-    target: "",
-    time: "3 hours ago",
-    iconWrapperClass: "bg-primary-blue/20 text-primary-blue", 
-    icon: FaUserPlus
-  },
-  { 
-      id: 4, 
-      action: "Agreement has been signed for", 
-      target: "“Urban Beats”", 
-      time: "5 hours ago", 
-      iconWrapperClass: "bg-accent-green-success/20 text-accent-green-success", 
-      icon: FaHandshake
-    },
-];
-
-export default function NotificationBell() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function NotificationBell({ 
+  notifications = [], 
+  unreadCount = 5, 
+  isOpenExternally,
+  onToggle,
+  currentStep, 
+  setStep,
+  onSkip
+}: NotificationBellProps) {
+  
+  const [internalOpen, setInternalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside of it
+  const isOpen = isOpenExternally !== undefined ? isOpenExternally : internalOpen;
+  const setIsOpen = onToggle || setInternalOpen;
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        if (isOpenExternally === undefined) setInternalOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpenExternally]);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div ref={dropdownRef} className="relative z-[60]">
       
-      {/* The Bell Trigger */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative p-2 rounded-full transition-colors ${isOpen ? 'bg-gray-100' : 'hover:bg-gray-100'}`}
+        className={`relative w-[52px] h-[52px] rounded-full flex items-center justify-center transition-colors ${
+          isOpen ? 'bg-white/10' : 'bg-black/30 hover:bg-white/5'
+        }`}
       >
-        <LuBell className="w-6 h-6 text-black fill-background" />
-        <div className="absolute top-2 right-2 w-[12px] h-[12px] bg-accent-red rounded-full border-2 border-white" />
+        <LuBell className="w-[20px] h-[20px] text-foreground" />
+        {unreadCount > 0 && (
+          <div className="absolute top-[13px] right-[14px] w-[7px] h-[7px] bg-accent-red rounded-full" />
+        )}
       </button>
 
-      {/* The Dropdown Panel */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-4 w-[413px] bg-white border border-gray-300 rounded-[30px] p-7 shadow-2xl z-50 flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="max-lg:fixed max-lg:top-[100px] max-lg:left-[18px] max-lg:right-[18px] max-lg:w-auto max-lg:max-w-[500px] max-lg:mx-auto lg:absolute lg:top-[calc(100%+24px)] lg:right-0 lg:w-[413px] bg-black/10 border border-white/10 shadow-[0_25px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md rounded-[30px] p-[20px] sm:p-[28px] z-[100] flex flex-col gap-[32px] animate-in fade-in slide-in-from-top-4 duration-200">
           
-          <div className="flex justify-between items-center">
-            <h2 className="font-bold text-[20px] text-black">Notifications</h2>
-            <div className="bg-accent-red/10 text-accent-red px-3 py-1 rounded-full text-[10px] font-medium">
-              5 new
-            </div>
+          <div className="flex justify-between items-center w-full">
+            <h2 className="font-semibold text-[18px] leading-[21px] text-foreground">
+              Notifications
+            </h2>
+            {unreadCount > 0 && (
+              <div className="bg-accent-red px-[10px] py-[4px] rounded-[30px] flex items-center justify-center">
+                <span className="font-semibold text-[10px] leading-[12px] text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+                  {unreadCount} new
+                </span>
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col gap-4">
-            {NOTIFICATIONS.map((notif, index) => (
-              <React.Fragment key={notif.id}>
-                <NotificationItem {...notif} />
-                {index < NOTIFICATIONS.length - 1 && <hr className="border-gray-200" />}
-              </React.Fragment>
+          <div className="flex flex-col gap-[16px]">
+            {notifications.map((notif) => (
+              <NotificationItem key={notif.id} {...notif} />
             ))}
-            
-            <hr className="border-gray-200" />
-            
-            <button className="text-primary-green font-semibold text-[16px] text-center w-full mt-2 hover:underline">
-              View All Notifications
-            </button>
+            {notifications.length === 0 && (
+              <p className="text-foreground/40 text-sm text-center py-4 italic">
+                You're all caught up!
+              </p>
+            )}
           </div>
+          
+          <button className="w-full text-center font-semibold text-[16px] leading-[19px] text-primary-green hover:opacity-80 transition-opacity">
+            View All Notifications
+          </button>
+
+          {/* STEP 5 ANCHOR */}
+          {currentStep === 5 && (
+            <OnboardingTooltip 
+              step={5}
+              title="Stay in the loop"
+              description="Get updates on activity, messages, and project changes"
+              onNext={() => setStep?.(6)}
+              onSkip={() => onSkip?.()}
+              direction="left-of"
+              arrowOffset="40px" 
+            />
+          )}
           
         </div>
       )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import CollaboratorItem from './CollaboratorItem';
 
+// Data structure
 export interface SuggestedCollaborator {
   id: number;
   name: string;
@@ -10,21 +11,27 @@ export interface SuggestedCollaborator {
   avatarUrl?: string;
 }
 
-const SUGGESTED_COLLABORATORS: SuggestedCollaborator[] = [
-  { id: 1, name: "David Chen", role: "Mixing Engineer", members: 15, rating: "5.0", avatarUrl: "/mock-profiles/David.png" },
-  { id: 2, name: "Emma Wilson", role: "Vocalist", members: 10, rating: "4.8", avatarUrl: "/mock-profiles/Tayo.png" },
-  { id: 3, name: "Lizz Torres", role: "Producer", members: 8, rating: "4.8", avatarUrl: "/mock-profiles/Tayo.png" },
-];
 
-export default function SuggestedCollaboratorsPanel() {
+export default function SuggestedCollaboratorsPanel({ collaborators = [] }: { collaborators?: SuggestedCollaborator[] }) {
   return (
-    <section className="border border-gray-300 rounded-[30px] p-8 flex flex-col gap-8 bg-white">
-      <h2 className="font-bold text-[20px] text-black">Suggested Collaborators</h2>
-      <div className="flex flex-col gap-6">
-        {SUGGESTED_COLLABORATORS.map((collab) => (
+    <section className="w-full bg-black/10 rounded-[30px] p-[28px] xl:p-[32px] flex flex-col gap-[32px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md">
+      <h2 className="font-semibold text-[18px] leading-[21px] text-foreground">
+        Suggested Collaborators
+      </h2>
+      
+      <div className="flex flex-col gap-[32px]">
+        {collaborators.map((collab) => (
           <CollaboratorItem key={collab.id} {...collab} />
         ))}
+
+        {/* Empty array */}
+        {collaborators.length === 0 && (
+          <p className="text-foreground/40 text-sm italic text-center">
+            No suggested collaborators at this time.
+          </p>
+        )}
       </div>
+      
     </section>
   );
 }

@@ -1,47 +1,59 @@
 import React from 'react';
-import Image from 'next/image';
 import Avatar from '../ui/Avatar';
 
+//Activity Item structure
 export interface ActivityItem {
   id: number;
-  name: string;
+  user: string;
   action: string;
   time: string;
   avatarUrl?: string;
 }
 
-const RECENT_ACTIVITY: ActivityItem[] = [
-  { id: 1, name: "Michael Awe", action: "Uploaded new track", time: "2h", avatarUrl: "/mock-profiles/Matt.png" },
-  { id: 2, name: "Tayo Oni", action: "Completed mastering", time: "4h", avatarUrl: "/mock-profiles/Tayo.png" },
-  { id: 3, name: "Sam Martin", action: "Added vocals", time: "6h", avatarUrl: "/mock-profiles/Sam.png" },
-  { id: 4, name: "Chris Morgan", action: "Shared feedback", time: "6h", avatarUrl: "/mock-profiles/Chris.png" },
-];
 
-export default function RecentCollaboratorActivityPanel() {
+export default function RecentCollaboratorActivityPanel({ activities = [] }: { activities?: ActivityItem[] }) {
   return (
-    <section className="border border-gray-300 rounded-[30px] p-8 flex flex-col gap-8 bg-white">
-      <h2 className="font-bold text-[20px] text-black">Recent Collaborator Activity</h2>
+    <section className="w-full flex flex-col gap-[32px] bg-black/10 rounded-[30px] p-[28px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md">
+      <h2 className="font-semibold text-[18px] leading-[21px] text-foreground">
+        Recent Collaborator Activity
+      </h2>
       
-      <div className="flex flex-col gap-6">
-        {RECENT_ACTIVITY.map((item) => (
-          <div key={item.id} className="flex justify-between items-center">
-            
-            {/* Left Side: Avatar + Info */}
-            <div className="flex gap-4 items-center">
-              <Avatar name={item.name} src={item.avatarUrl} className="w-[55px] h-[55px] text-[18px]" />
-              
-              <div className="flex flex-col gap-1">
-                <h4 className="font-bold text-[16px] text-black">{item.name}</h4>
-                <p className="font-medium text-[14px] text-black/60">{item.action}</p>
+      <div className="flex flex-col gap-[24px]">
+        {activities.map((activity) => (
+          <div key={activity.id} className="flex items-center justify-between w-full">
+            {/* Avatar + Info */}
+            <div className="flex items-center gap-[12px]">
+              <Avatar 
+                name={activity.user} 
+                src={activity.avatarUrl} 
+                className="w-[55px] h-[55px] text-[18px] shrink-0" 
+              />
+              <div className="flex flex-col gap-[4px]">
+                <h4 className="font-bold text-[16px] leading-[19px] text-foreground">
+                  {activity.user}
+                </h4>
+                <p className="font-medium text-[14px] leading-[16px] text-foreground/60">
+                  {activity.action}
+                </p>
               </div>
             </div>
 
-            {/* Right Side: Timestamp */}
-            <span className="font-medium text-[14px] text-black/60">{item.time}</span>
+            {/* Timestamp */}
+            <span className="font-medium text-[14px] leading-[16px] text-foreground/60 shrink-0">
+              {activity.time}
+            </span>
             
           </div>
         ))}
+        
+        {/* Empty Array */}
+        {activities.length === 0 && (
+          <p className="text-foreground/40 text-sm text-center italic py-4">
+            No recent activity to show.
+          </p>
+        )}
       </div>
+      
     </section>
   );
 }
