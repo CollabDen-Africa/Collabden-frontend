@@ -7,7 +7,8 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
  */
 export async function GET(request: Request) {
   try {
-    const { origin } = new URL(request.url);
+    const { origin, searchParams } = new URL(request.url);
+    const mode = searchParams.get('mode') || 'login';
     
     // Construct the backend URL with origin information
     const backendUrl = new URL(API_ENDPOINTS.AUTH.GOOGLE_AUTH);
@@ -16,9 +17,21 @@ export async function GET(request: Request) {
     backendUrl.searchParams.set('frontend_url', origin);
     backendUrl.searchParams.set('redirect_uri', `${origin}/auth-callback`);
     
-    console.log('Google Auth Initiation: Redirecting to', backendUrl.toString());
+    console.log(`Google Auth Initiation (${mode}): Redirecting to`, backendUrl.toString());
     
-    return NextResponse.redirect(backendUrl.toString());
+    const response = NextResponse.redirect(backendUrl.toString());
+    
+    // Set a short-lived cookie to track flow mode (signup vs login)
+    // This is more reliable than passing params to the backend if the backend doesn't return them
+    response.cookies.set('auth_mode', mode, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 5 * 60, // 5 minutes is plenty for the OAuth handshake
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Google Auth redirect error:', error);
     return NextResponse.json(

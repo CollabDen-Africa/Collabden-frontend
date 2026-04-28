@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { ROUTES } from './constants/routes';
 
-export function middleware(request: NextRequest) {
+/**
+ * Proxy (formerly Middleware) for Next.js 16
+ * This handles request interception and routing at the edge.
+ */
+export function proxy(request: NextRequest) {
   
-  //Dev bypass for localhost
+  // Dev bypass for localhost
   if (process.env.NODE_ENV === 'development') {
       return NextResponse.next();
   }
@@ -12,14 +16,11 @@ export function middleware(request: NextRequest) {
 
   // Check if the route is a dashboard route
   if (pathname.startsWith(ROUTES.DASHBOARD.ROOT)) {
-    // Basic placeholder for auth check
-    // In a real app, you would check for a session or token cookie
+    // Check for session token cookie
     const token = request.cookies.get('auth-token');
 
     if (!token) {
       const loginUrl = new URL(ROUTES.AUTH.LOGIN, request.url);
-      // Optional: Add a redirect parameter to return to the original page after login
-      // loginUrl.searchParams.set('from', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }

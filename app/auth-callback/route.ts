@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ROUTES } from '@/constants/routes';
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
 
@@ -7,7 +7,7 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
  * Expected URL: /auth-callback?token=...
  * This is used because cookies can only be modified in a Server Action or Route Handler.
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   
   // Robust token detection: Check all possible parameter names
@@ -38,15 +38,22 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`${ROUTES.AUTH.LOGIN}?error=${encodeURIComponent('Authentication failed: No token received')}`, origin));
   }
 
-  // Set the HTTP-only cookie on a baseline response first
+  // Determine redirect destination based on flow mode or profile completeness
+  const authMode = searchParams.get('signup') === 'true' 
+                 ? 'signup' 
+                 : request.cookies?.get('auth_mode')?.value || 'login';
+                 
   const dashboardUrl = new URL(ROUTES.DASHBOARD.ROOT, origin);
   const response = NextResponse.redirect(dashboardUrl);
   response.cookies.set('auth-token', token, cookieOptions);
+  
+  // Always clear the temporary auth_mode cookie
+  response.cookies.delete('auth_mode');
 
   try {
     // Fetch profile to determine if user is new or returning
     const profileUrl = `${API_ENDPOINTS.AUTH.PROFILE}`;
-    console.log('AuthCallback: Fetching profile from:', profileUrl);
+    console.log(`AuthCallback (${authMode}): Fetching profile from:`, profileUrl);
     
     const profileResponse = await fetch(profileUrl, {
       headers: {
@@ -59,21 +66,27 @@ export async function GET(request: Request) {
         const profileData = await profileResponse.json();
         const user = profileData?.data || profileData?.user;
         
-        // Use a more nuanced check for "new user"
-        // If they just signed up via Google, they might be 'verified' but still 'new'
-        // Check if they have a profile, or use a specific flag if available
-        const isNewUser = user && (!user.isVerified || !user.firstName); 
+        // Use a combination of the explicit authMode and profile completeness
+        // If they explicitly clicked Signup, or if they are unverified and have no firstName
+        const isExplicitSignup = authMode === 'signup';
+        const isProfileIncomplete = user && (!user.isVerified || !user.firstName);
+        
+        // We only force onboarding if it's an explicit signup OR it's a new user without a profile
+        // This ensures returning users (authMode='login') go to dashboard even if they haven't finished a profile detail
+        const shouldShowOnboarding = isExplicitSignup || (authMode !== 'login' && isProfileIncomplete);
         
         console.log('AuthCallback: Profile check:', { 
           email: user?.email, 
           isVerified: user?.isVerified, 
-          isNewUser 
+          authMode,
+          shouldShowOnboarding 
         });
 
-        if (isNewUser) {
+        if (shouldShowOnboarding) {
           console.log('AuthCallback: Redirecting to onboarding/intro');
           const onboardResponse = NextResponse.redirect(new URL(ROUTES.DASHBOARD.SETUP, origin));
           onboardResponse.cookies.set('auth-token', token, cookieOptions);
+          onboardResponse.cookies.delete('auth_mode'); // Ensure it's cleared here too
           return onboardResponse;
         }
     } else {

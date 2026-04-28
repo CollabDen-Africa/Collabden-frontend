@@ -27,8 +27,8 @@ export default function SignupPage() {
 
   const handleGoogleSignup = () => {
     // Redirect to the same proxy route used for Google login
-    // The backend handles both signup and login flows via the same OAuth callback
-    window.location.href = "/api/auth/google";
+    // Append mode=signup to distinguish signup from login
+    window.location.href = "/api/auth/google?mode=signup";
   };
 
   const isFormValid = useMemo(() => {
