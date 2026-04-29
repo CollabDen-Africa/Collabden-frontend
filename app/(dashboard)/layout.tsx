@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleSkip = () => {
     setIsTourActive(false);
     setTourStep(0);
-    setIsMobileMenuOpen(false); // The mobile drawer closes if they hit skip
+    setIsMobileMenuOpen(false); 
     localStorage.setItem('collabden_onboarding_complete', 'true');
   };
 
@@ -43,12 +43,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen w-full relative font-sans bg-background text-foreground overflow-x-hidden">
       
-      {/* 1. GLOBAL ONBOARDING OVERLAY */}
+      {/* GLOBAL ONBOARDING OVERLAY */}
       {isTourActive && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-500 pointer-events-none" />
       )}
 
-      {/* 2. BACKGROUND GLOW */}
+      {/* BACKGROUND GLOW */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute w-[868px] h-[868px] left-[278px] top-[-156px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
         <div className="absolute w-[868px] h-[868px] left-[652px] top-[896px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute inset-0 bg-white/20" />
       </div>
 
-      {/* 3. Desktop Sidebar */}
+      {/* Desktop Sidebar */}
       <div className={`hidden lg:block relative shrink-0 pl-[18px] pt-[52px] pb-8 transition-all ${
         isTourActive && [2, 3].includes(tourStep) ? "z-50" : "z-10"
       }`}>
@@ -114,6 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               currentStep={tourStep} 
               setStep={setTourStep} 
               onSkip={handleSkip} 
+              isMobileMenuOpen={isMobileMenuOpen}
             />
           </div>
           

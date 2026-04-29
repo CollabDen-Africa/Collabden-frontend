@@ -29,7 +29,7 @@ export default function ActiveProjectsPanel({
   onSkip?: () => void;
 }) {
   return (
-    <section className="flex flex-col gap-[16px] w-full max-w-[684px]">
+    <section className="flex flex-col gap-[16px] w-full max-w-[684px] md:ml-[53px]">
       
       {/* Header */}
       <div className="relative flex justify-between items-center w-full mb-2">

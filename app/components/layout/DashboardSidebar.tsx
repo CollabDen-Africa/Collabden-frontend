@@ -33,7 +33,7 @@ export default function DashboardSidebar({
 
   const navItems = [
     { name: "Dashboard", icon: HiViewGrid, path: "/dashboard" },
-    { name: "Projects", icon: FaFolderOpen, path: "/dashboard/projects" },
+    { name: "Projects", icon: FaFolderOpen, path: "/projects" },
     { name: "Marketplace", icon: FaStore, path: "/dashboard/marketplace" },
     { name: "Messages", icon: IoIosChatbubbles, path: "/dashboard/messages" },
     { name: "Agreements", icon: FaHandshake, path: "/dashboard/agreements" },

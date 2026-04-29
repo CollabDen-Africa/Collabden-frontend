@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import NotificationBell from "../ui/Notifications";
 import Avatar from "../ui/Avatar";
 import OnboardingTooltip from "../ui/Tooltip"; 
@@ -25,14 +25,17 @@ export default function DashboardHeader({
   },
   currentStep,
   setStep,
-  onSkip
+  onSkip,
+  isMobileMenuOpen = false
 }: { 
   user?: UserProfile;
   currentStep?: number;
   setStep?: (s: number) => void;
-  onSkip?: () => void;
+    onSkip?: () => void;
+  isMobileMenuOpen?: boolean;
 }) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
   const displayName = `${user.firstName} ${user.lastName}`;
 
   // Auto-open notification dropdown for Step 5
@@ -43,6 +46,19 @@ export default function DashboardHeader({
       setIsNotifOpen(false);
     }
   }, [currentStep]);
+  
+  // To close the notification dropdown
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+          if (currentStep !== 5) {
+            setIsNotifOpen(false);
+          }
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [currentStep]);
 
   return (
     <header className="w-full pt-[20px] lg:pt-[58px] pb-[20px] lg:pb-[40px] shrink-0">
@@ -80,7 +96,10 @@ export default function DashboardHeader({
             <div className="relative flex items-center gap-[20px] md:gap-[40px] lg:gap-[75px] mt-1">
               
               {/* Notification Bell Area - Anchor for Step 5 */}
-              <div className={`transition-all duration-300 ${currentStep === 5 ? "relative z-[90]" : ""}`}>
+              <div
+                ref={notifRef}
+                 className={`transition-all duration-300 ${currentStep === 5 ? "relative z-[90]" : ""} ${isMobileMenuOpen && currentStep !== 5 ? "opacity-50 pointer-events-none" : ""}`}
+              >
                 <NotificationBell 
                   notifications={MOCK_NOTIFICATIONS} 
                   unreadCount={MOCK_NOTIFICATIONS.length}
