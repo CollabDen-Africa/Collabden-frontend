@@ -15,7 +15,7 @@ export const ROUTES = {
     ROOT: "/dashboard",
     SETTINGS: "/dashboard/settings",
     PROFILE: "/dashboard/profile",
-    SETUP: "/intro/step-1",
+    SETUP: "/intro",
   },
   PROJECTS: {
     LIST: "/projects",

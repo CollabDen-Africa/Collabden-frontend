@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, SignUpInput } from "@/lib/validations/auth.schema";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import Input from "@/components/ui/Input";
+import PasswordInput from "@/components/ui/PasswordInput";
+import Checkbox from "@/components/ui/Checkbox";
 
 export default function SignupPage() {
   const { signup, isLoading: authLoading, error: authError, clearError } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -50,7 +51,7 @@ export default function SignupPage() {
     try {
       await signup({ email: data.email, password: data.password });
     } catch {
-      // Error is managed globally by AuthContext via mutations
+      // Error is managed globally by AuthContext
     }
   };
 
@@ -84,50 +85,27 @@ export default function SignupPage() {
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         {/* Email Field */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-text-main block">
-            Email
-          </label>
-          <input
-            type="email"
-            {...register("email")}
-            disabled={authLoading}
-            placeholder="abc@youremail.com"
-            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white disabled:opacity-50"
-          />
-          {errors.email && (
-            <p className="text-xs text-red-500 font-medium pl-3 mt-1">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
+        <Input
+          type="email"
+          label="Email"
+          error={errors.email?.message}
+          variant="light"
+          disabled={authLoading}
+          placeholder="abc@youremail.com"
+          {...register("email")}
+        />
 
         {/* Password Field */}
         <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-text-main block">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              {...register("password")}
-              disabled={authLoading}
-              placeholder="............"
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12 disabled:opacity-50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-            </button>
-          </div>
-          {errors.password ? (
-            <p className="text-xs text-red-500 font-medium pl-3 mt-1">
-              {errors.password.message}
-            </p>
-          ) : (
+          <PasswordInput
+            label="Password"
+            error={errors.password?.message}
+            variant="light"
+            disabled={authLoading}
+            placeholder="............"
+            {...register("password")}
+          />
+          {!errors.password && (
             <p className="text-xs text-gray-400 mt-1 pl-3">
               At least 8 characters, include a number
             </p>
@@ -135,22 +113,13 @@ export default function SignupPage() {
         </div>
 
         {/* Terms Checkbox */}
-        <div className="space-y-1.5">
-          <div
-            className={`flex items-start gap-3 cursor-pointer group select-none ${authLoading ? "pointer-events-none opacity-50" : ""}`}
-            onClick={() => setValue("agreedToTerms", !watchedAgreedToTerms, { shouldValidate: true })}
-          >
-            <div
-              className={`mt-0.5 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${watchedAgreedToTerms
-                ? "bg-primary-green border-primary-green shadow-circle-check"
-                : "border-border-muted group-hover:border-primary-green"
-                }`}
-            >
-              {watchedAgreedToTerms && (
-                <div className="h-2 w-2 rounded-full bg-white transition-all scale-100" />
-              )}
-            </div>
-            <span className="text-sm text-gray-500 leading-tight">
+        <Checkbox
+          checked={watchedAgreedToTerms}
+          onChange={(checked) => setValue("agreedToTerms", checked, { shouldValidate: true })}
+          disabled={authLoading}
+          error={errors.agreedToTerms?.message}
+          label={
+            <>
               I have read and agree to Collabden&apos;s{" "}
               <Link
                 href="#"
@@ -167,14 +136,9 @@ export default function SignupPage() {
               >
                 privacy policy
               </Link>
-            </span>
-          </div>
-          {errors.agreedToTerms && (
-            <p className="text-xs text-red-500 font-medium pl-3 mt-1">
-              {errors.agreedToTerms.message}
-            </p>
-          )}
-        </div>
+            </>
+          }
+        />
 
         {/* Sign Up Button */}
         <button
@@ -221,7 +185,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href={ROUTES.AUTH.LOGIN}
-              className="text-bold hover:underline text-primary-green"
+              className="font-bold hover:underline text-primary-green"
             >
               Log In
             </Link>

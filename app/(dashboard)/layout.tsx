@@ -1,53 +1,94 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import DashboardSidebar from ".././components/layout/DashboardSidebar";
-import DashboardHeader from ".././components/layout/DashboardHeader";
-import { HiMenu } from "react-icons/hi";
+import { useRouter, usePathname } from "next/navigation";
 import { TourContext } from "@/context/TourContext";
+import { useAuth } from "@/context/AuthContext";
+import { ROUTES } from "@/constants/routes";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // --- ONBOARDING STATE ---
-  const [tourStep, setTourStep] = useState(1);
-  const [isTourActive, setIsTourActive] = useState(true);
+export default function BaseDashboardLayout({ children }: { children: React.ReactNode }) {
+  const [tourStep, setTourStep] = useState(0);
+  const [isTourActive, setIsTourActive] = useState(false);
+  
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const completed = localStorage.getItem('collabden_onboarding_complete');
-    if (completed) {
+    if (isLoading || !user) return;
+
+    const isOnboarded = user.hasCompletedOnboarding === true || user.onboardingCompleted === true;
+    const tourCompleted = localStorage.getItem('collabden_tour_complete') === 'true';
+
+    if (!isOnboarded) {
+      // FORCE ONBOARDING ROUTE GUARD: Lock unonboarded user in /intro
       setIsTourActive(false);
       setTourStep(0);
+      
+      if (pathname !== ROUTES.DASHBOARD.SETUP) {
+        router.push(ROUTES.DASHBOARD.SETUP);
+      }
+    } else {
+      // PREVENT REVISITING ONBOARDING: Redirect onboarded user away from /intro to dashboard
+      if (pathname === ROUTES.DASHBOARD.SETUP) {
+        router.push(ROUTES.DASHBOARD.ROOT);
+      } else {
+        // ENFORCE SEQUENCE: Show tour guide on dashboard only AFTER onboarding is complete
+        if (tourCompleted) {
+          setIsTourActive(false);
+          setTourStep(0);
+        } else {
+          setIsTourActive(true);
+          setTourStep(1);
+        }
+      }
     }
-  }, []);
+  }, [user, isLoading, pathname, router]);
 
   const handleSkip = () => {
     setIsTourActive(false);
     setTourStep(0);
-    setIsMobileMenuOpen(false);
-    localStorage.setItem('collabden_onboarding_complete', 'true');
+    localStorage.setItem('collabden_tour_complete', 'true');
   };
 
-
-  // This automatically slides the mobile drawer open/closed based on the tour step
-  useEffect(() => {
-    if (!isTourActive) return;
-
-    if (tourStep === 2 || tourStep === 3) {
-      setIsMobileMenuOpen(true);
-    } else if (tourStep === 4) {
-      setIsMobileMenuOpen(false);
-    }
-  }, [tourStep, isTourActive]);
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#0d0f10]">
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes bounceEqualizer {
+            0%, 100% { transform: scaleY(0.3); }
+            50% { transform: scaleY(1); }
+          }
+          .eq-bar {
+            transform-origin: bottom;
+            animation: bounceEqualizer 1.2s ease-in-out infinite;
+          }
+          .eq-bar-1 { animation-delay: 0.1s; }
+          .eq-bar-2 { animation-delay: 0.3s; }
+          .eq-bar-3 { animation-delay: 0.5s; }
+          .eq-bar-4 { animation-delay: 0.2s; }
+          .eq-bar-5 { animation-delay: 0.4s; }
+        `}} />
+        <div className="flex flex-col items-center gap-5">
+          <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col items-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+            <div className="flex items-end gap-1.5 h-10 w-20 justify-center mb-4">
+              <span className="w-1.5 h-8 bg-[#73BF44] rounded-full eq-bar eq-bar-1" />
+              <span className="w-1.5 h-5 bg-[#73BF44]/80 rounded-full eq-bar eq-bar-2" />
+              <span className="w-1.5 h-10 bg-[#73BF44] rounded-full eq-bar eq-bar-3" />
+              <span className="w-1.5 h-6 bg-[#73BF44]/80 rounded-full eq-bar eq-bar-4" />
+              <span className="w-1.5 h-8 bg-[#73BF44] rounded-full eq-bar eq-bar-5" />
+            </div>
+            <p className="text-white/70 text-[15px] font-raleway tracking-widest font-medium animate-pulse">
+              SYNCING PROFILE...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full relative font-sans bg-background text-foreground overflow-x-hidden">
-
-      {/* GLOBAL ONBOARDING OVERLAY */}
-      {isTourActive && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-500 pointer-events-none" />
-      )}
-
       {/* BACKGROUND GLOW */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute w-[868px] h-[868px] left-[278px] top-[-156px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
@@ -56,76 +97,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="absolute w-[868px] h-[868px] left-[756px] top-[1843px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
         <div className="absolute inset-0 bg-white/20" />
       </div>
-
-      {/* Desktop Sidebar */}
-      <div className={`hidden lg:block relative shrink-0 pl-[18px] pt-[52px] pb-8 transition-all ${isTourActive && [2, 3].includes(tourStep) ? "z-50" : "z-10"
-        }`}>
-        <div className="sticky top-[52px] h-[788px] w-[209px]">
-          <DashboardSidebar
-            currentStep={tourStep}
-            setStep={setTourStep}
-            onSkip={handleSkip}
-          />
-        </div>
-      </div>
-
-      {/* Mobile Sidebar */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-60 lg:hidden backdrop-blur-sm transition-opacity"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-      <div className={`fixed top-0 left-0 h-full w-[250px] z-70 p-[18px] transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}>
-        <DashboardSidebar
-          onClose={() => setIsMobileMenuOpen(false)}
-          currentStep={tourStep}
-          setStep={setTourStep}
-          onSkip={handleSkip}
-        />
-      </div>
-
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col relative min-h-screen px-[18px] lg:px-0 lg:pl-[34px] lg:pr-[34px] xl:pr-[60px] w-full">
-
-        <div className="lg:hidden flex items-center justify-between pt-[20px] pb-[10px] w-full max-w-[1200px] mx-auto">
-          <div className="flex items-center gap-[6px]">
-            <div className="w-[36px] h-[36px] bg-primary-green rounded-[9.47px] flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-xl leading-none">C</span>
-            </div>
-            <span className="text-white font-bold text-[20px] leading-tight">CollabDen</span>
-          </div>
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 bg-white/10 rounded-lg border border-white/10 relative z-60"
-          >
-            <HiMenu size={24} className="text-white" />
-          </button>
-        </div>
-
-        <div className="w-full max-w-[1200px] mx-auto pb-[100px]">
-
-          {/* HEADER WRAPPER */}
-          <div className={`w-full transition-all duration-300 ${isTourActive && tourStep === 1 ? 'relative z-50' : ''}`}>
-            <DashboardHeader
-              currentStep={tourStep}
-              setStep={setTourStep}
-              onSkip={handleSkip}
-              isMobileMenuOpen={isMobileMenuOpen}
-            />
-          </div>
-
-          {/* PAGE CONTENT WRAPPER */}
-          <div className="relative transition-all w-full">
-            <TourContext.Provider value={{ currentStep: tourStep, setStep: setTourStep, onSkip: handleSkip, isTourActive }}>
-              {children}
-            </TourContext.Provider>
-          </div>
-
-        </div>
-
-      </main>
+      
+      <TourContext.Provider value={{ currentStep: tourStep, setStep: setTourStep, onSkip: handleSkip, isTourActive }}>
+        {children}
+      </TourContext.Provider>
     </div>
   );
 }

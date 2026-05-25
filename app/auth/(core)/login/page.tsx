@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/validations/auth.schema";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import Input from "@/components/ui/Input";
+import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function LoginPage() {
   const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -36,7 +36,6 @@ export default function LoginPage() {
   const isNotFoundError = useMemo(() => {
     if (!authError) return false;
     const lowerError = authError.toLowerCase();
-    // Broad match for "not found", "doesn't exist", "no account"
     return lowerError.includes("not found") || 
            lowerError.includes("exist") || 
            lowerError.includes("no account") ||
@@ -44,7 +43,6 @@ export default function LoginPage() {
   }, [authError]);
 
   const handleGoogleLogin = () => {
-    // Redirect to the proxy route which handles Google initiation
     window.location.href = "/api/auth/google";
   };
 
@@ -53,7 +51,7 @@ export default function LoginPage() {
     try {
       await login({ email: data.email, password: data.password });
     } catch {
-      // Silent catch, error is now managed globally by AuthContext via mutations
+      // Error is managed globally by AuthContext
     }
   };
 
@@ -97,54 +95,30 @@ export default function LoginPage() {
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         {/* Email Field */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-text-main block">
-            Email
-          </label>
-          <input
-            type="email"
-            {...register("email")}
-            disabled={authLoading}
-            placeholder="johndoe@example.com"
-            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white disabled:opacity-50"
-          />
-          {errors.email && (
-            <p className="text-xs text-red-500 font-medium pl-3 mt-1">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
+        <Input
+          type="email"
+          label="Email"
+          error={errors.email?.message}
+          variant="light"
+          disabled={authLoading}
+          placeholder="johndoe@example.com"
+          {...register("email")}
+        />
 
         {/* Password Field */}
-        <div className="space-y-2 relative">
-          <label className="text-sm font-semibold text-text-main block">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              {...register("password")}
-              disabled={authLoading}
-              placeholder="............"
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12 disabled:opacity-50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-            </button>
-          </div>
-          {errors.password && (
-            <p className="text-xs text-red-500 font-medium pl-3 mt-1">
-              {errors.password.message}
-            </p>
-          )}
+        <div className="space-y-2">
+          <PasswordInput
+            label="Password"
+            error={errors.password?.message}
+            variant="light"
+            disabled={authLoading}
+            placeholder="............"
+            {...register("password")}
+          />
           <div className="flex justify-start">
             <Link
               href={ROUTES.AUTH.FORGOT_PASSWORD}
-              className="text-sm font-semibold hover:underline text-primary-green"
+              className="text-sm font-semibold hover:underline text-primary-green pl-1"
             >
               Forgot password?
             </Link>

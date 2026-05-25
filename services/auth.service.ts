@@ -62,8 +62,8 @@ const authService = {
     if (!data.email) {
       throw new Error("Email is required for verification.");
     }
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.VERIFY,
+    const response = await localApi.post(
+      '/api/auth/verify',
       {
         email: data.email.trim(),
         verificationToken: data.verificationToken,
@@ -79,8 +79,8 @@ const authService = {
     if (!email) {
       throw new Error("Email is required to resend verification code.");
     }
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.RESEND_VERIFY,
+    const response = await localApi.post(
+      '/api/auth/resend-verify',
       { email: email.trim() }
     );
     return response.data;
@@ -90,8 +90,8 @@ const authService = {
    * Request password reset link
    */
   forgotPassword: async (email: string) => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
+    const response = await localApi.post(
+      '/api/auth/forgot-password',
       { email }
     );
     return response.data;
@@ -101,8 +101,8 @@ const authService = {
    * Reset password with token
    */
   resetPassword: async (data: ResetPasswordPayload) => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.RESET_PASSWORD,
+    const response = await localApi.post(
+      '/api/auth/reset-password',
       data
     );
     return response.data;

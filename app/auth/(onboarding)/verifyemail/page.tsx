@@ -8,6 +8,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { MailOpenIcon } from '@hugeicons/core-free-icons';
 import { useVerifyEmail, useResendVerification } from '@/hooks/auth/useVerifyEmail';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/context/AuthContext';
 
 function VerifyEmailForm() {
     const [code, setCode] = useState('');
@@ -20,6 +21,7 @@ function VerifyEmailForm() {
 
     const verifyMutation = useVerifyEmail();
     const resendMutation = useResendVerification();
+    const { verify } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +32,7 @@ function VerifyEmailForm() {
 
         try {
             setError('');
-            await verifyMutation.mutateAsync({ email, verificationToken: code });
+            await verify({ email, verificationToken: code });
             router.push(ROUTES.AUTH.ONBOARDING_SUCCESS);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Verification failed. Please check the code.");

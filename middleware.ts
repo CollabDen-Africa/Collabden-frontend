@@ -15,6 +15,7 @@ export default function middleware(request: NextRequest) {
     ROUTES.PROJECTS.LIST,
     '/projects', // Catch-all for projects subroutes
     '/workspace', // Protected workspace
+    '/intro',     // Protected onboarding intro
   ];
 
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
