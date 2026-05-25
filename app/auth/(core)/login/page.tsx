@@ -1,17 +1,31 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, LoginInput } from "@/lib/validations/auth.schema";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import Input from "@/components/ui/Input";
+import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function LoginPage() {
   const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const isUnverifiedError = useMemo(() => {
     if (!authError) return false;
@@ -22,7 +36,6 @@ export default function LoginPage() {
   const isNotFoundError = useMemo(() => {
     if (!authError) return false;
     const lowerError = authError.toLowerCase();
-    // Broad match for "not found", "doesn't exist", "no account"
     return lowerError.includes("not found") || 
            lowerError.includes("exist") || 
            lowerError.includes("no account") ||
@@ -30,24 +43,15 @@ export default function LoginPage() {
   }, [authError]);
 
   const handleGoogleLogin = () => {
-    // Redirect to the proxy route which handles Google initiation
     window.location.href = "/api/auth/google";
   };
 
-  const isFormValid = useMemo(() => {
-    return email.trim().length > 0 && password.trim().length > 0;
-  }, [email, password]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginInput) => {
     clearError();
-
-    if (!isFormValid) return;
-
     try {
-      await login({ email, password });
+      await login({ email: data.email, password: data.password });
     } catch {
-      // Silent catch, error is now managed globally by AuthContext via mutations
+      // Error is managed globally by AuthContext
     }
   };
 
@@ -68,7 +72,7 @@ export default function LoginPage() {
           {isUnverifiedError && (
             <div className="mt-2">
               <Link
-                href={`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(email)}`}
+                href={`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(errors.email?.message || "")}`}
                 className="text-primary-green font-bold underline hover:no-underline"
               >
                 Click here to verify your account
@@ -89,48 +93,32 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         {/* Email Field */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-text-main block">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={authLoading}
-            placeholder="johndoe@example.com"
-            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white disabled:opacity-50"
-          />
-        </div>
+        <Input
+          type="email"
+          label="Email"
+          error={errors.email?.message}
+          variant="light"
+          disabled={authLoading}
+          placeholder="johndoe@example.com"
+          {...register("email")}
+        />
 
         {/* Password Field */}
-        <div className="space-y-2 relative">
-          <label className="text-sm font-semibold text-text-main block">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={authLoading}
-              placeholder="............"
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12 disabled:opacity-50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-            </button>
-          </div>
+        <div className="space-y-2">
+          <PasswordInput
+            label="Password"
+            error={errors.password?.message}
+            variant="light"
+            disabled={authLoading}
+            placeholder="............"
+            {...register("password")}
+          />
           <div className="flex justify-start">
             <Link
               href={ROUTES.AUTH.FORGOT_PASSWORD}
-              className="text-sm font-semibold hover:underline text-primary-green"
+              className="text-sm font-semibold hover:underline text-primary-green pl-1"
             >
               Forgot password?
             </Link>
@@ -140,9 +128,9 @@ export default function LoginPage() {
         {/* Log In Button */}
         <button
           type="submit"
-          disabled={!isFormValid || authLoading}
+          disabled={!isValid || authLoading}
           className={`w-full py-4 text-white font-bold rounded-full transition-all cursor-pointer disabled:cursor-not-allowed flex justify-center items-center gap-2
-            ${isFormValid && !authLoading
+            ${isValid && !authLoading
               ? "bg-primary-green shadow-btn-primary hover:shadow-btn-hover hover:-translate-y-1 hover:brightness-90 active:scale-[0.98]"
               : "bg-primary-green/60 shadow-none"
             }`}

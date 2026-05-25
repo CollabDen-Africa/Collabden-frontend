@@ -3,6 +3,7 @@ import type {
   Project,
   CreateProjectPayload,
   InviteCollaboratorPayload,
+  ProjectMetadata,
 } from "@/types/api.types";
 
 const projectService = {
@@ -69,6 +70,14 @@ const projectService = {
    */
   removeCollaborator: async (projectId: string, collaboratorId: string): Promise<void> => {
     await localApi.delete(`/api/proxy/projects/${projectId}/collaborators/${collaboratorId}`);
+  },
+
+  /**
+   * Get project metadata and statistics (task, file, agreement, collaborator counts).
+   */
+  getMetadata: async (id: string): Promise<ProjectMetadata> => {
+    const response = await localApi.get(`/api/proxy/projects/${id}/metadata`);
+    return response.data;
   },
 };
 

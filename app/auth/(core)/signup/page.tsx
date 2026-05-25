@@ -1,19 +1,37 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpSchema, SignUpInput } from "@/lib/validations/auth.schema";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-
+import Input from "@/components/ui/Input";
+import PasswordInput from "@/components/ui/PasswordInput";
+import Checkbox from "@/components/ui/Checkbox";
 
 export default function SignupPage() {
   const { signup, isLoading: authLoading, error: authError, clearError } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+      agreedToTerms: false,
+    },
+  });
+
+  const watchedAgreedToTerms = watch("agreedToTerms");
 
   const isAlreadyExistsError = useMemo(() => {
     if (!authError) return false;
@@ -28,24 +46,12 @@ export default function SignupPage() {
     window.location.href = "/api/auth/google?mode=signup";
   };
 
-  const isFormValid = useMemo(() => {
-    return (
-      email.trim().length > 0 &&
-      password.trim().length >= 8 &&
-      agreedToTerms
-    );
-  }, [email, password, agreedToTerms]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: SignUpInput) => {
     clearError();
-
-    if (!isFormValid) return;
-
     try {
-      await signup({ email, password });
+      await signup({ email: data.email, password: data.password });
     } catch {
-      // Error is managed globally by AuthContext via mutations
+      // Error is managed globally by AuthContext
     }
   };
 
@@ -77,90 +83,69 @@ export default function SignupPage() {
         </div>
       )}
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         {/* Email Field */}
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-text-main block">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={authLoading}
-            placeholder="abc@youremail.com"
-            className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white disabled:opacity-50"
-          />
-        </div>
+        <Input
+          type="email"
+          label="Email"
+          error={errors.email?.message}
+          variant="light"
+          disabled={authLoading}
+          placeholder="abc@youremail.com"
+          {...register("email")}
+        />
 
         {/* Password Field */}
         <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-text-main block">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={authLoading}
-              placeholder="............"
-              className="w-full px-4 py-3 rounded-full border border-border-muted focus:border-primary-green focus:ring-4 focus:ring-(--primary-green)/10 transition-all outline-none text-text-main placeholder:text-text-muted font-medium bg-white pr-12 disabled:opacity-50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-            </button>
-          </div>
-          <p className="text-xs text-gray-400 mt-1">
-            At least 8 characters, include a number
-          </p>
+          <PasswordInput
+            label="Password"
+            error={errors.password?.message}
+            variant="light"
+            disabled={authLoading}
+            placeholder="............"
+            {...register("password")}
+          />
+          {!errors.password && (
+            <p className="text-xs text-gray-400 mt-1 pl-3">
+              At least 8 characters, include a number
+            </p>
+          )}
         </div>
 
         {/* Terms Checkbox */}
-        <div
-          className={`flex items-start gap-3 cursor-pointer group select-none ${authLoading ? "pointer-events-none opacity-50" : ""}`}
-          onClick={() => setAgreedToTerms(!agreedToTerms)}
-        >
-          <div
-            className={`mt-0.5 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${agreedToTerms
-              ? "bg-primary-green border-primary-green shadow-circle-check"
-              : "border-border-muted group-hover:border-primary-green"
-              }`}
-          >
-            {agreedToTerms && (
-              <div className="h-2 w-2 rounded-full bg-white transition-all scale-100" />
-            )}
-          </div>
-          <span className="text-sm text-gray-500 leading-tight">
-            I have read and agree to Collabden&apos;s{" "}
-            <Link
-              href="#"
-              className="underline font-semibold decoration-primary-green/30 hover:decoration-primary-green transition-colors text-primary-green"
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            >
-              terms of use
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="#"
-              className="underline font-semibold decoration-primary-green/30 hover:decoration-primary-green transition-colors text-primary-green"
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            >
-              privacy policy
-            </Link>
-          </span>
-        </div>
+        <Checkbox
+          checked={watchedAgreedToTerms}
+          onChange={(checked) => setValue("agreedToTerms", checked, { shouldValidate: true })}
+          disabled={authLoading}
+          error={errors.agreedToTerms?.message}
+          label={
+            <>
+              I have read and agree to Collabden&apos;s{" "}
+              <Link
+                href="#"
+                className="underline font-semibold decoration-primary-green/30 hover:decoration-primary-green transition-colors text-primary-green"
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                terms of use
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="#"
+                className="underline font-semibold decoration-primary-green/30 hover:decoration-primary-green transition-colors text-primary-green"
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                privacy policy
+              </Link>
+            </>
+          }
+        />
 
         {/* Sign Up Button */}
         <button
           type="submit"
-          disabled={!isFormValid || authLoading}
+          disabled={!isValid || authLoading}
           className={`w-full py-4 text-white font-bold rounded-full transition-all cursor-pointer disabled:cursor-not-allowed flex justify-center items-center gap-2
-            ${isFormValid && !authLoading
+            ${isValid && !authLoading
               ? "bg-primary-green shadow-btn-primary hover:shadow-btn-hover hover:-translate-y-1 hover:brightness-90 active:scale-[0.98]"
               : "bg-primary-green/60 shadow-none"
             }`}
@@ -200,7 +185,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href={ROUTES.AUTH.LOGIN}
-              className="text-bold hover:underline text-primary-green"
+              className="font-bold hover:underline text-primary-green"
             >
               Log In
             </Link>

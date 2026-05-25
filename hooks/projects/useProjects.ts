@@ -48,11 +48,19 @@ export const useProjects = () => {
     onError: (error) => handleApiError(error),
   });
 
+  // Fetch project metadata/stats
+  const useProjectMetadata = (id: string) => useQuery({
+    queryKey: ['projects', id, 'metadata'],
+    queryFn: () => projectService.getMetadata(id),
+    enabled: !!id,
+  });
+
   return {
     useAllProjects,
     useProjectDetail,
     useCreateProject,
     useUpdateProject,
     useDeleteProject,
+    useProjectMetadata,
   };
 };

@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     INVITE: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/invite`,
     REMOVE_COLLABORATOR: (projectId: string, collaboratorId: string) => 
       `${API_BASE_URL}/api/v1/projects/${projectId}/collaborators/${collaboratorId}`,
+    METADATA: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/metadata`,
   },
   AGREEMENTS: {
     UPLOAD: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements`,
@@ -39,6 +40,12 @@ export const API_ENDPOINTS = {
     STATUS: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}/status`,
     SIGN: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}/sign`,
     ESIGN: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}/esign`,
+  },
+  CONNECTIONS: {
+    SEND_REQUEST: `${API_BASE_URL}/api/v1/user/connections/request`,
+    RESPOND_REQUEST: (id: string) => `${API_BASE_URL}/api/v1/user/connections/request/${id}`,
+    LIST: `${API_BASE_URL}/api/v1/user/connections`,
+    LIST_PENDING: `${API_BASE_URL}/api/v1/user/connections/pending`,
   },
 };
 

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import authService, { LoginPayload, SignupPayload } from '@/services/auth.service';
+import authService, { LoginPayload, SignupPayload, VerifyPayload } from '@/services/auth.service';
 import { ROUTES } from '@/constants/routes';
 import { useLogin } from '@/hooks/auth/useLogin';
 import { useSignup } from '@/hooks/auth/useSignup';
@@ -12,6 +12,8 @@ import { getErrorMessage } from '@/lib/error-handler';
 interface User {
   id: string;
   email: string;
+  hasCompletedOnboarding?: boolean;
+  onboardingCompleted?: boolean;
 }
 
 interface AuthContextType {
@@ -21,6 +23,7 @@ interface AuthContextType {
   error: string | null;
   login: (data: LoginPayload) => Promise<void>;
   signup: (data: SignupPayload) => Promise<void>;
+  verify: (data: VerifyPayload) => Promise<any>;
   logout: () => Promise<void>;
   clearError: () => void;
 }
@@ -62,13 +65,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const clearError = () => setManualError(null);
 
+  const verify = async (data: VerifyPayload) => {
+    try {
+      const response = await authService.verifyEmail(data);
+      const verifiedUser = response.user || response.data?.user || response.data;
+      setUser(verifiedUser);
+      setIsAuthenticated(true);
+      return response;
+    } catch (err) {
+      console.error('Email verification sync error:', err);
+      throw err;
+    }
+  };
+
   const login = async (data: LoginPayload) => {
     try {
       const response = await loginMutation.mutateAsync(data);
       if (response.success) {
-        setUser(response.user);
+        const loggedUser = response.user || response.data?.user || response.data;
+        setUser(loggedUser);
         setIsAuthenticated(true);
-        router.push(ROUTES.DASHBOARD.ROOT);
+
+        // Dynamic onboarding redirection
+        const isAlreadyOnboarded = loggedUser?.hasCompletedOnboarding === true || loggedUser?.onboardingCompleted === true;
+        if (!isAlreadyOnboarded) {
+          router.push(ROUTES.DASHBOARD.SETUP); // Redirect to onboarding /intro
+        } else {
+          router.push(ROUTES.DASHBOARD.ROOT);  // Redirect to dashboard
+        }
       }
     } catch {
       // Error is managed globally by AuthContext via mutations
@@ -112,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       error,
       login,
       signup,
+      verify,
       logout,
       clearError
     }}>
