@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 export default function RootLoading() {
   return (
@@ -13,10 +14,13 @@ export default function RootLoading() {
       <div className="relative z-10 max-w-sm w-full mx-4 bg-[#141718]/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center text-center gap-6">
         {/* Pulsing Logo Container */}
         <div className="relative w-20 h-20 flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 animate-pulse">
-          <img 
+          <Image 
             src="/Green-logo.png" 
             alt="CollabDen Logo" 
-            className="w-12 h-12 object-contain"
+            width={48}
+            height={48}
+            className="object-contain"
+            priority
           />
         </div>
 

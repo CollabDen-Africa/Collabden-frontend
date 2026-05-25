@@ -3,15 +3,18 @@ import FragmentationSection from "@/components/features/homepage/FragmentationSe
 import OffersSection from "@/components/features/homepage/OffersSection";
 import HowItWorks from "@/components/features/homepage/HowItWorks";
 import CollaborationSection from "@/components/features/homepage/CollaborationSection";
+import React from "react";
+import MarketingPageWrapper from "@/components/layout/MarketingPageWrapper";
 
 export default function Home() {
   return (
-    <div className="bg-white/30">
+    <MarketingPageWrapper bgClass="bg-white/30">
       <Hero />
       <FragmentationSection />
       <OffersSection />
       <HowItWorks />
       <CollaborationSection />
-    </div>
+    </MarketingPageWrapper>
   );
 }
+

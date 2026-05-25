@@ -1,9 +1,11 @@
 import React from 'react';
+import MarketingPageWrapper from '@/components/layout/MarketingPageWrapper';
 import Link from 'next/link';
 import { BsArrowUpRightCircleFill } from "react-icons/bs";
 import AboutHero from '@/components/features/about/AboutHero';
 import AboutSection from '@/components/features/about/AboutSection';
 import Button from '@/components/ui/Button';
+
 
 export default function AboutPage() {
     const problemParagraphs = [
@@ -28,7 +30,7 @@ export default function AboutPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-black/50 overflow-x-hidden pb-12">
+        <MarketingPageWrapper bgClass="bg-black/50" className="overflow-x-hidden">
             <AboutHero />
 
             <div className="flex flex-col">
@@ -66,6 +68,6 @@ export default function AboutPage() {
                     </Link>
                 </AboutSection>
             </div>
-        </div>
+        </MarketingPageWrapper>
     );
 }
