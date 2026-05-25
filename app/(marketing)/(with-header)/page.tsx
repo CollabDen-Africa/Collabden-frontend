@@ -6,12 +6,12 @@ import CollaborationSection from "@/components/features/homepage/CollaborationSe
 
 export default function Home() {
   return (
-    <>
+    <div className="bg-white/30">
       <Hero />
       <FragmentationSection />
       <OffersSection />
       <HowItWorks />
       <CollaborationSection />
-    </>
+    </div>
   );
 }

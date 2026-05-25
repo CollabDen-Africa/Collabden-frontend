@@ -1,7 +1,8 @@
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import BackgroundPattern from "../_components/background/BackgroundPattern";
+import BackgroundPattern from "@/app/(marketing)/_components/background/BackgroundPattern";
+
 
 export default function MarketingLayout({
   children,
@@ -9,9 +10,9 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-white/30">
-      <Navbar />
+    <Ba className="relative min-h-screen">
       <BackgroundPattern />
+      <Navbar />
       <main>{children}</main>
       <Footer />
     </div>

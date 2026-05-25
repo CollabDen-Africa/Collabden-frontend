@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import QueryProvider from "@/components/providers/QueryProvider";
 import NextTopLoader from "nextjs-toploader";
-import GlobalLoaderProvider from "@/components/providers/GlobalLoaderProvider";
+
 
 
 const raleway = Raleway({
@@ -33,22 +33,20 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            <GlobalLoaderProvider>
-              <NextTopLoader
-                color="#73BF44"
-                initialPosition={0.08}
-                crawlSpeed={200}
-                height={3}
-                crawl={true}
-                showSpinner={false}
-                easing="ease"
-                speed={200}
-                shadow="0 0 10px #73BF44, 0 0 5px #73BF44"
-              />
-              <div className="content-wrapper">
-                {children}
-              </div>
-            </GlobalLoaderProvider>
+            <NextTopLoader
+              color="#73BF44"
+              initialPosition={0.08}
+              crawlSpeed={200}
+              height={3}
+              crawl={true}
+              showSpinner={false}
+              easing="ease"
+              speed={200}
+              shadow="0 0 10px #73BF44, 0 0 5px #73BF44"
+            />
+            <div className="content-wrapper">
+              {children}
+            </div>
           </AuthProvider>
         </QueryProvider>
       </body>
