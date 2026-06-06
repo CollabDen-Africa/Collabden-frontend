@@ -12,6 +12,8 @@ import { getErrorMessage } from '@/lib/error-handler';
 interface User {
   id: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   hasCompletedOnboarding?: boolean;
   onboardingCompleted?: boolean;
 }

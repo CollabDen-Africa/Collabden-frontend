@@ -25,6 +25,8 @@ export default function SignupPage() {
     resolver: zodResolver(signUpSchema),
     mode: "onChange",
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       agreedToTerms: false,
@@ -49,7 +51,12 @@ export default function SignupPage() {
   const onSubmit = async (data: SignUpInput) => {
     clearError();
     try {
-      await signup({ email: data.email, password: data.password });
+      await signup({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      });
     } catch {
       // Error is managed globally by AuthContext
     }
@@ -84,6 +91,28 @@ export default function SignupPage() {
       )}
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        {/* Name Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            type="text"
+            label="First Name"
+            error={errors.firstName?.message}
+            variant="light"
+            disabled={authLoading}
+            placeholder="User"
+            {...register("firstName")}
+          />
+          <Input
+            type="text"
+            label="Last Name"
+            error={errors.lastName?.message}
+            variant="light"
+            disabled={authLoading}
+            placeholder="Name"
+            {...register("lastName")}
+          />
+        </div>
+
         {/* Email Field */}
         <Input
           type="email"
