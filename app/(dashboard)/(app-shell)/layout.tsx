@@ -5,10 +5,12 @@ import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import { HiMenu } from "react-icons/hi";
 import { useTour } from "@/context/TourContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { currentStep, setStep, onSkip, isTourActive } = useTour();
+  const { user } = useAuth();
 
   // This automatically slides the mobile drawer open/closed based on the tour step
   useEffect(() => {
@@ -34,9 +36,8 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       )}
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:block relative shrink-0 pl-[18px] pt-[52px] pb-8 transition-all ${
-        isTourActive && [2, 3].includes(currentStep) ? "z-50" : "z-10"
-      }`}>
+      <div className={`hidden lg:block relative shrink-0 pl-[18px] pt-[52px] pb-8 transition-all ${isTourActive && [2, 3].includes(currentStep) ? "z-50" : "z-10"
+        }`}>
         <div className="sticky top-[52px] h-[788px] w-[209px]">
           <DashboardSidebar
             currentStep={currentStep}
@@ -53,9 +54,8 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
-      <div className={`fixed top-0 left-0 h-full w-[250px] z-70 p-[18px] transform transition-transform duration-300 ease-in-out lg:hidden ${
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-      }`}>
+      <div className={`fixed top-0 left-0 h-full w-[250px] z-70 p-[18px] transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}>
         <DashboardSidebar
           onClose={() => setIsMobileMenuOpen(false)}
           currentStep={currentStep}
@@ -87,6 +87,12 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           {/* HEADER WRAPPER */}
           <div className={`w-full transition-all duration-300 ${isTourActive && currentStep === 1 ? 'relative z-50' : ''}`}>
             <DashboardHeader
+              user={user ? {
+                firstName: user.firstName || "User",
+                lastName: user.lastName || "Name",
+                role: "Producer",
+                avatarUrl: "/mock-profiles/small.png"
+              } : undefined}
               currentStep={currentStep}
               setStep={setStep}
               onSkip={handleSkip}

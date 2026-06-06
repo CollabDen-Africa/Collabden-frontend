@@ -1,9 +1,10 @@
 import axiosInstance, { localApi } from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export interface SignupPayload {
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
 }
 
 export interface LoginPayload {

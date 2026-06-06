@@ -12,6 +12,7 @@ const TARGET_DATE = new Date('2026-09-09T00:00:00');
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
@@ -53,6 +54,11 @@ export default function WaitlistPage() {
     e.preventDefault();
     setErrorMessage("");
 
+    if (!name.trim()) {
+      setErrorMessage("Please enter your name.");
+      return;
+    }
+
     if (!validateEmail(email)) {
       setErrorMessage("Please enter a valid email address.");
       return;
@@ -64,7 +70,7 @@ export default function WaitlistPage() {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, name }),
       });
 
       const data = await res.json();
@@ -72,6 +78,7 @@ export default function WaitlistPage() {
       if (res.ok) {
         setStatus("success");
         setEmail("");
+        setName("");
         setSubmitted(true);
 
         // Automatically show form again after 5 seconds
