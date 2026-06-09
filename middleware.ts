@@ -9,6 +9,11 @@ import { ROUTES } from './constants/routes';
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // DEV BYPASS: If running locally, let every request pass through
+    if (process.env.NODE_ENV === 'development') {
+      return NextResponse.next();
+    }
+
   // Protected route prefixes
   const protectedRoutes = [
     ROUTES.DASHBOARD.ROOT,

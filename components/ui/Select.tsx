@@ -48,7 +48,7 @@ export default function Select({
     light: `bg-white text-text-main border-border-muted placeholder:text-text-muted focus:border-primary-green ${
       isOpen ? "border-primary-green" : "hover:border-primary-green"
     }`,
-    glass: `bg-white/10 text-white border-transparent hover:border-primary-green focus:border-primary-green focus:bg-white/15 ${
+    glass: `bg-white/20 text-white border-transparent hover:border-primary-green focus:border-primary-green focus:bg-white/15 ${
       isOpen ? "border-primary-green" : "border-white/20 hover:border-primary-green"
     }`,
   };
@@ -58,7 +58,7 @@ export default function Select({
 
   const dropdownBgVariants = {
     light: "bg-white border border-border-light text-text-main shadow-lg",
-    glass: "bg-white/20 backdrop-blur-2xl border border-white/30 text-white shadow-2xl",
+    glass: "bg-gray-500/90 backdrop-blur-md border border-white/30 text-black shadow-2xl",
   };
 
   const optionHoverVariants = {
@@ -112,7 +112,7 @@ export default function Select({
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           {/* Dropdown Container */}
           <div
-            className={`absolute top-[calc(100%+8px)] left-0 w-full rounded-[20px] p-2 z-50 max-h-[250px] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200 ${dropdownBgVariants[variant]}`}
+            className={`absolute top-[calc(100%+8px)] left-0 w-full rounded-[20px] p-2 z-50 max-h-[250px] overflow-y-auto custom-scrollbar animate-in fade-in duration-200 ${dropdownBgVariants[variant]}`}
           >
             <div className="flex flex-col gap-1">
               {normalizedOptions.map((opt) => {

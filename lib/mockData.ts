@@ -419,3 +419,20 @@ export const MOCK_BOARD: Column[] = [
     ]
   }
 ];
+
+export const MOCK_DASHBOARD_CONVERSATIONS = [
+  { id: "c1", name: "Maya Johnson", lastMessage: "Just uploaded the new beat", time: "now", unread: 0, avatar: "/mock-profiles/small.png", isOnline: true, isTyping: true, category: "test" },
+  { id: "c2", name: "Nkechi Obi", lastMessage: "You: Love the baseline", time: "now", unread: 0, avatar: "/mock-profiles/small2.png", isOnline: true, isTyping: false, category: "test-2" },
+  { id: "c3", name: "Kabiru Musa", lastMessage: "What do you think?", time: "12:51", unread: 2, avatar: "/mock-profiles/Tayo.png", isOnline: false, isTyping: false },
+  { id: "c4", name: "Brooklyn Simmons", lastMessage: "You: Let’s go over it again", time: "12:31", unread: 0, avatar: "/mock-profiles/Sam.png", isOnline: false, isTyping: false },
+  { id: "c5", name: "Dianne Russell", lastMessage: "You: This is great!", time: "12:11", unread: 0, avatar: "/mock-profiles/small3.png", isOnline: false, isTyping: false },
+  { id: "c6", name: "Robert Fox", lastMessage: "Recording it right away", time: "11:51", unread: 1, avatar: "/mock-profiles/David.png", isOnline: true, isTyping: false },
+  { id: "c7", name: "Leslie Alexander", lastMessage: "That will do", time: "11:41", unread: 0, avatar: "/mock-profiles/small.png", isOnline: false, isTyping: false },
+  { id: "c8", name: "Cody Fisher", lastMessage: "You: Exactly!", time: "11:01", unread: 0, avatar: "/mock-profiles/small2.png", isOnline: false, isTyping: false },
+];
+
+export const MOCK_DASHBOARD_MESSAGES = [
+  { id: 1, sender: "Maya Johnson", text: "Hey Emmanuel! I just listened to the new stems you sent over.", time: "10:30 AM", isMe: false, avatar: "/mock-profiles/small.png" },
+  { id: 2, sender: "You", text: "Awesome! What do you think of the transition at the 2-minute mark?", time: "10:35 AM", isMe: true, avatar: "/mock-profiles/user-emmanuel.png" },
+  { id: 3, sender: "Maya Johnson", text: "It's super smooth. I might add a tiny bit of reverb to the snare just to give it more depth, but structurally it's perfect.", time: "10:42 AM", isMe: false, avatar: "/mock-profiles/small.png" }
+];
