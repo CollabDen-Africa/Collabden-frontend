@@ -24,12 +24,15 @@ const SETTINGS_OPTIONS = [
   { id: "own", title: "Ownership", sub: "Transfer project", icon: <FiKey size={16} /> },
 ];
 
+import { Project } from "@/types/api.types";
+
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  project?: Project;
 }
 
-export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
+export default function SettingsPanel({ isOpen, onClose, project }: SettingsPanelProps) {
   // State to track which settings tab is currently open
   const [activeTab, setActiveTab] = useState<string | null>(null);
 
@@ -115,11 +118,11 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </button>
 
             {/* Render the selected component */}
-            {activeTab === "gen" && <GeneralSettingsTab />}
-            {activeTab === "mem" && <MembersSettingsTab />}
+            {activeTab === "gen" && <GeneralSettingsTab project={project} />}
+            {activeTab === "mem" && <MembersSettingsTab project={project} />}
             {activeTab === "not" && <NotificationsSettingsTab />}
-            {activeTab === "pri" && <PrivacySettingsTab />}
-            {activeTab === "own" && <OwnershipSettingsTab />}
+            {activeTab === "pri" && <PrivacySettingsTab project={project} />}
+            {activeTab === "own" && <OwnershipSettingsTab project={project} />}
           </div>
         </div>
       )}

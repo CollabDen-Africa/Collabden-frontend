@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   FiLock, 
   FiGlobe, 
@@ -8,13 +8,15 @@ import {
   FiLink, 
   FiEye 
 } from "react-icons/fi";
+import { Project } from "@/types/api.types";
+import { useProjects } from "@/hooks/projects/useProjects";
 
 // --- PRIVACY SETTINGS DATA ---
 const PRIVACY_SETTINGS = [
   { 
     id: "project_visibility", 
     title: "Project Visibility", 
-    description: "Anyone with the link can join the project", 
+    description: "Anyone with the link can join the project (PUBLIC vs PRIVATE)", 
     icon: FiGlobe, 
     defaultState: true 
   },
@@ -41,16 +43,60 @@ const PRIVACY_SETTINGS = [
   },
 ];
 
-export default function PrivacySettingsTab() {
-  // Initialize state based on the default values of our settings array
-  const [settings, setSettings] = useState<Record<string, boolean>>(
-    PRIVACY_SETTINGS.reduce((acc, curr) => ({ ...acc, [curr.id]: curr.defaultState }), {})
-  );
+interface PrivacySettingsTabProps {
+  project?: Project;
+}
+
+export default function PrivacySettingsTab({ project }: PrivacySettingsTabProps) {
+  const { useUpdateProject } = useProjects();
+  const updateMutation = useUpdateProject(project?.id || "");
+
+  // Initialize state based on project visibility
+  const [settings, setSettings] = useState<Record<string, boolean>>({
+    project_visibility: project?.visibility === "PUBLIC",
+    allow_applications: true,
+    shareable_links: true,
+    guest_viewing: true,
+  });
+
+  // Keep visibility synced when project loads/updates
+  useEffect(() => {
+    if (project) {
+      setSettings((prev) => ({
+        ...prev,
+        project_visibility: project.visibility === "PUBLIC",
+      }));
+    }
+  }, [project]);
 
   // Toggle handler
-  const toggleSetting = (id: string) => {
-    setSettings((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleSetting = async (id: string) => {
+    if (!project?.id) return;
+    const nextVal = !settings[id];
+    
+    // Optimistically update
+    setSettings((prev) => ({ ...prev, [id]: nextVal }));
+
+    if (id === "project_visibility") {
+      try {
+        await updateMutation.mutateAsync({
+          visibility: nextVal ? "PUBLIC" : "PRIVATE",
+        });
+      } catch (err) {
+        // Revert on error
+        setSettings((prev) => ({ ...prev, [id]: !nextVal }));
+        console.error("Failed to update project visibility:", err);
+      }
+    }
   };
+
+  if (!project) {
+    return (
+      <div className="w-full max-w-[931px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] lg:rounded-[50px] p-[32px] lg:p-[48px] shadow-2xl flex items-center justify-center">
+        <p className="text-white/60">No active project selected.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-[931px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] lg:rounded-[50px] p-[32px] lg:p-[48px] shadow-2xl animate-in fade-in slide-in-from-right-8 duration-500">
@@ -67,7 +113,7 @@ export default function PrivacySettingsTab() {
               Privacy & Visibility
             </h2>
             <p className="font-raleway font-medium text-[15px] lg:text-[18px] leading-[21px] text-white/60">
-              Control who can find, view and join Urban Beats Vol. 2.
+              Control who can find, view and join {project.name}.
             </p>
           </div>
         </div>
@@ -77,6 +123,7 @@ export default function PrivacySettingsTab() {
           {PRIVACY_SETTINGS.map((item) => {
             const Icon = item.icon;
             const isActive = settings[item.id];
+            const isPending = item.id === "project_visibility" && updateMutation.isPending;
 
             return (
               <div 
@@ -102,9 +149,10 @@ export default function PrivacySettingsTab() {
                 <button
                   type="button"
                   onClick={() => toggleSetting(item.id)}
+                  disabled={isPending}
                   className={`relative w-[45px] h-[27px] rounded-full p-[3px] transition-colors duration-300 shrink-0 ${
                     isActive ? "bg-primary-green" : "bg-white/20"
-                  }`}
+                  } ${isPending ? "opacity-55 cursor-not-allowed" : ""}`}
                   aria-pressed={isActive}
                 >
                   <div 

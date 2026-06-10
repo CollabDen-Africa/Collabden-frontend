@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import projectService from '@/services/project.service';
-import { CreateProjectPayload } from '@/types/api.types';
+import { CreateProjectPayload, InviteCollaboratorPayload } from '@/types/api.types';
 import { handleApiError } from '@/lib/error-handler';
 
 export const useProjects = () => {
@@ -55,6 +55,24 @@ export const useProjects = () => {
     enabled: !!id,
   });
 
+  // Invite collaborator
+  const useInviteCollaborator = (projectId: string) => useMutation({
+    mutationFn: (data: InviteCollaboratorPayload) => projectService.invite(projectId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+    },
+    onError: (error) => handleApiError(error),
+  });
+
+  // Remove collaborator
+  const useRemoveCollaborator = (projectId: string) => useMutation({
+    mutationFn: (collaboratorId: string) => projectService.removeCollaborator(projectId, collaboratorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+    },
+    onError: (error) => handleApiError(error),
+  });
+
   return {
     useAllProjects,
     useProjectDetail,
@@ -62,5 +80,7 @@ export const useProjects = () => {
     useUpdateProject,
     useDeleteProject,
     useProjectMetadata,
+    useInviteCollaborator,
+    useRemoveCollaborator,
   };
 };

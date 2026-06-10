@@ -13,6 +13,8 @@ import SettingsPanel from "@/components/features/workspace/settings-panel/Settin
 import { useProjects } from "@/hooks/projects/useProjects";
 import { handleApiError } from "@/lib/error-handler";
 
+import { WorkspaceProvider } from "@/context/WorkspaceContext";
+
 const TABS = [
   { name: "Overview", path: "/workspace" },
   { name: "Files", path: "/workspace/files" },
@@ -39,8 +41,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const { useAllProjects } = useProjects();
-  const { data: apiProjects, error } = useAllProjects();
+  const { useAllProjects, useProjectDetail } = useProjects();
+  const { data: apiProjects, error, isLoading } = useAllProjects();
 
   const sidebarProjects = useMemo(() => {
     if (!apiProjects?.length) return ["Urban Beats Vol.2", "Acoustic Sessions"]; // Fallback
@@ -53,12 +55,25 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
     }
   }, [sidebarProjects, activeProject]);
 
+  const selectedProject = useMemo(() => {
+    return apiProjects?.find(p => p.name === activeProject) || apiProjects?.[0] || null;
+  }, [apiProjects, activeProject]);
+
+  // Query for the full details (includes collaborators, etc.)
+  const { data: projectDetails } = useProjectDetail(selectedProject?.id || "");
+
   if (error) {
     handleApiError(error);
   }
 
   return (
-    <div className="relative z-10 w-full max-w-[1512px] mx-auto flex flex-col md:flex-row gap-6 p-4 sm:p-6 lg:p-8 text-white font-sans">
+    <WorkspaceProvider
+      projects={apiProjects || []}
+      activeProjectName={activeProject}
+      onSelectProject={setActiveProject}
+      isLoading={isLoading}
+    >
+      <div className="relative z-10 w-full max-w-[1512px] mx-auto flex flex-col md:flex-row gap-6 p-4 sm:p-6 lg:p-8 text-white font-sans">
       {/* Desktop Sidebar (Hidden on Mobile) */}
       <WorkspaceSidebar
         projects={sidebarProjects}
@@ -161,6 +176,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
           <SettingsPanel
             isOpen={isSettingsOpen}
             onClose={() => setIsSettingsOpen(false)}
+            project={projectDetails || selectedProject || undefined}
           />
         </div>
       </main>
@@ -216,5 +232,6 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
       </aside>
     </div>
+    </WorkspaceProvider>
   );
 }
