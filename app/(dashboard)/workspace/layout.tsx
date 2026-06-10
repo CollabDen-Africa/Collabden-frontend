@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Avatar from "@/components/ui/Avatar";
 import WorkspaceSidebar from "@/components/features/workspace/WorkspaceSidebar";
 import Link from "next/link";
@@ -49,11 +49,43 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
     return apiProjects.map(p => p.name);
   }, [apiProjects]);
 
-  useEffect(() => {
-    if (sidebarProjects.length > 0 && !activeProject) {
-      setActiveProject(sidebarProjects[0]);
+  const handleSelectProject = (name: string) => {
+    setActiveProject(name);
+    const proj = apiProjects?.find(p => p.name === name);
+    if (proj) {
+      localStorage.setItem("activeProjectId", proj.id);
     }
-  }, [sidebarProjects, activeProject]);
+  };
+
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && apiProjects && apiProjects.length > 0 && !initializedRef.current) {
+      initializedRef.current = true;
+      const params = new URLSearchParams(window.location.search);
+      const urlProjectId = params.get("projectId");
+      if (urlProjectId) {
+        const proj = apiProjects.find(p => p.id === urlProjectId);
+        if (proj) {
+          setActiveProject(proj.name);
+          localStorage.setItem("activeProjectId", proj.id);
+          return;
+        }
+      }
+      
+      const savedId = localStorage.getItem("activeProjectId");
+      if (savedId) {
+        const proj = apiProjects.find(p => p.id === savedId);
+        if (proj) {
+          setActiveProject(proj.name);
+          return;
+        }
+      }
+
+      setActiveProject(apiProjects[0].name);
+      localStorage.setItem("activeProjectId", apiProjects[0].id);
+    }
+  }, [apiProjects]);
 
   const selectedProject = useMemo(() => {
     return apiProjects?.find(p => p.name === activeProject) || apiProjects?.[0] || null;
@@ -70,7 +102,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
     <WorkspaceProvider
       projects={apiProjects || []}
       activeProjectName={activeProject}
-      onSelectProject={setActiveProject}
+      onSelectProject={handleSelectProject}
       isLoading={isLoading}
     >
       <div className="relative z-10 w-full max-w-[1512px] mx-auto flex flex-col md:flex-row gap-6 p-4 sm:p-6 lg:p-8 text-white font-sans">
@@ -78,7 +110,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
       <WorkspaceSidebar
         projects={sidebarProjects}
         activeProject={activeProject}
-        onSelectProject={setActiveProject}
+        onSelectProject={handleSelectProject}
       />
 
       {/* Workspace Flow */}
@@ -90,7 +122,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
           <div className="relative w-full">
             <select
               value={activeProject}
-              onChange={(e) => setActiveProject(e.target.value)}
+              onChange={(e) => handleSelectProject(e.target.value)}
               className="w-full appearance-none bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white font-sans font-semibold text-[16px] outline-none focus:border-primary-green"
             >
               {sidebarProjects.map((project) => (
@@ -181,8 +213,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
         </div>
       </main>
 
-      {/* Right Toolbar */}
-      <aside className="fixed bottom-0 left-0 w-full h-[80px] bg-[#121A1F]/95 backdrop-blur-md border-t border-white/10 flex flex-row items-center justify-around pb-safe z-[80]
+       {/* Right Toolbar */}
+      <aside className="fixed bottom-0 left-0 w-full h-[80px] bg-[#121A1F]/95 backdrop-blur-md border-t border-white/10 flex flex-row items-center justify-around pb-safe z-80
                         xl:relative xl:bottom-auto xl:left-auto xl:w-[60px] xl:h-auto xl:bg-transparent xl:border-none xl:flex-col xl:justify-start xl:gap-8 xl:pt-[220px] xl:shrink-0 xl:z-auto">
 
         {/* Updates Button */}

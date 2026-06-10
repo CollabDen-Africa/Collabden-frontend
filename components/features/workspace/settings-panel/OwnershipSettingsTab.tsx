@@ -90,7 +90,7 @@ export default function OwnershipSettingsTab({ project }: OwnershipSettingsTabPr
                     <Avatar name={ownerName} />
                   </div>
                   {/* Green Status Dot */}
-                  <div className="absolute bottom-0 right-0 w-[14px] h-[14px] bg-primary-green rounded-full border-[2px] border-white/20" />
+                  <div className="absolute bottom-0 right-0 w-[14px] h-[14px] bg-primary-green rounded-full border-2 border-white/20" />
                 </div>
                 
                 <div className="flex items-center gap-[10px]">
@@ -133,7 +133,7 @@ export default function OwnershipSettingsTab({ project }: OwnershipSettingsTabPr
         </div>
 
         {/* Transfer Warning Box */}
-        <div className="flex flex-col gap-[24px] w-full max-w-[605px] bg-[#FF0000]/[0.04] border border-[#FF0000]/60 rounded-[30px] p-[24px]">
+        <div className="flex flex-col gap-[24px] w-full max-w-[605px] bg-[#FF0000]/4 border border-[#FF0000]/60 rounded-[30px] p-[24px]">
           
           <div className="flex flex-col gap-[16px]">
             <h3 className="font-raleway font-semibold text-[20px] leading-[22px] text-white">
@@ -158,7 +158,7 @@ export default function OwnershipSettingsTab({ project }: OwnershipSettingsTabPr
         </div>
 
         {/* Danger Zone / Delete Project Box */}
-        <div className="flex flex-col gap-[24px] w-full max-w-[605px] bg-[#FF0000]/[0.04] border border-[#FF0000]/60 rounded-[30px] p-[24px]">
+        <div className="flex flex-col gap-[24px] w-full max-w-[605px] bg-[#FF0000]/4 border border-[#FF0000]/60 rounded-[30px] p-[24px]">
           
           <div className="flex flex-col gap-[16px]">
             <h3 className="font-raleway font-semibold text-[20px] leading-[22px] text-[#FC110A]">

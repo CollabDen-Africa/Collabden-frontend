@@ -43,7 +43,7 @@ export default function SettingsPanel({ isOpen, onClose, project }: SettingsPane
     <div className="lg:relative flex h-full items-start justify-end shrink-0">
       
       {/* Settings Navigation Sidebar */}
-      <aside className="fixed inset-y-0 right-0 z-[100] w-[85vw] sm:w-[322px] bg-[#162026] border-l border-white/10 p-[26px_17px] shadow-2xl animate-in slide-in-from-right-8 duration-300 flex flex-col shrink-0
+      <aside className="fixed inset-y-0 right-0 z-100 w-[85vw] sm:w-[322px] bg-[#162026] border-l border-white/10 p-[26px_17px] shadow-2xl animate-in slide-in-from-right-8 duration-300 flex flex-col shrink-0
                         lg:relative lg:inset-auto lg:z-auto lg:w-[322px] lg:h-[879px] lg:bg-white/10 lg:border-none lg:rounded-[30px] lg:shadow-none">
         
         <div className="flex justify-between items-center mb-8">
@@ -101,7 +101,7 @@ export default function SettingsPanel({ isOpen, onClose, project }: SettingsPane
 
       {/* Active Tab Content Overlay */}
       {activeTab && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8 bg-black/60 backdrop-blur-md lg:absolute lg:inset-auto lg:top-0 lg:right-[calc(100%+32px)] lg:w-[931px] lg:max-w-[calc(100vw-380px)] lg:bg-transparent lg:backdrop-blur-none lg:p-0 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-110 flex items-center justify-center p-4 sm:p-8 bg-black/60 backdrop-blur-md lg:absolute lg:inset-auto lg:top-0 lg:right-[calc(100%+32px)] lg:w-[931px] lg:max-w-[calc(100vw-380px)] lg:bg-transparent lg:backdrop-blur-none lg:p-0 animate-in fade-in duration-300">
           
           {/* Backdrop click to close the active tab on mobile */}
           <div className="absolute inset-0 lg:hidden" onClick={() => setActiveTab(null)} />

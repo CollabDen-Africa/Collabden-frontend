@@ -80,7 +80,7 @@ const AgreementCard = ({
             <div className="flex items-center gap-[8px]">
               <div className="flex -space-x-[12px]">
                 {agreement.collaborators.map((collab: any) => (
-                  <div key={collab.id} className="relative w-[28px] h-[28px] rounded-full border-2 border-primary-green overflow-hidden z-[1]">
+                  <div key={collab.id} className="relative w-[28px] h-[28px] rounded-full border-2 border-primary-green overflow-hidden z-1">
                     <Avatar name={collab.name} src={collab.image} className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -105,7 +105,7 @@ const AgreementCard = ({
         {/* Right: Collaborators, Sign Button, & Status Pill */}
         <div className="flex flex-wrap items-start gap-[16px] lg:gap-[32px]">
           <div className="flex items-center justify-start bg-accent-yellow/20 border border-accent-yellow px-[36px] py-[16px] rounded-full shrink-0 lg:mt-[-51px]">
-            <span className="font-inter font-medium text-[10px] lg:text-[11px] text-accent-yellow tracking-wider leading-none mt-[1px]">
+            <span className="font-inter font-medium text-[10px] lg:text-[11px] text-accent-yellow tracking-wider leading-none mt-px">
               Pending Signature
             </span>
           </div>
@@ -258,7 +258,7 @@ export default function AgreementsOverviewPage() {
 
   return (
     <div className="flex flex-col w-full h-full relative">
-      <div className="flex flex-col w-full px-[20px] lg:px-[0px] gap-[32px] pb-[40px]">
+      <div className="flex flex-col w-full px-[20px] lg:px-0 gap-[32px] pb-[40px]">
 
         {agreementsList.length === 0 ? (
           <EmptyState 
