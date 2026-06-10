@@ -180,4 +180,13 @@ export interface ProjectMetadata {
   };
 }
 
+// --- Waitlist Types ---
+
+export interface WaitlistEntry {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+
 

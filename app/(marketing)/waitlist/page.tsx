@@ -6,24 +6,40 @@ import { IoMailOutline, IoCheckmarkCircle } from 'react-icons/io5';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowLeftCircleFill } from "react-icons/bs";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { waitlistSchema, WaitlistInput } from '@/lib/validations/waitlist.schema';
+import { useWaitlist } from '@/hooks/waitlist/useWaitlist';
+import { getErrorMessage } from '@/lib/error-handler';
 
 // Set target date to 6 months from now (September 9, 2026)
 const TARGET_DATE = new Date('2026-09-09T00:00:00');
 
 export default function WaitlistPage() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [errorMessage, setErrorMessage] = useState("");
-
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
+  });
+
+  const { useJoinWaitlist } = useWaitlist();
+  const joinMutation = useJoinWaitlist();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<WaitlistInput>({
+    resolver: zodResolver(waitlistSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+    },
   });
 
   useEffect(() => {
@@ -46,55 +62,24 @@ export default function WaitlistPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: WaitlistInput) => {
     setErrorMessage("");
 
-    if (!name.trim()) {
-      setErrorMessage("Please enter your name.");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
-    }
-
-    setStatus("loading");
-
     try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name }),
-      });
+      await joinMutation.mutateAsync(data.email);
+      setSubmitted(true);
+      reset();
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatus("success");
-        setEmail("");
-        setName("");
-        setSubmitted(true);
-
-        // Automatically show form again after 5 seconds
-        setTimeout(() => {
-          setSubmitted(false);
-          setStatus("idle");
-        }, 5000);
-      } else {
-        setStatus("error");
-        setErrorMessage(data.error || "Something went wrong. Please try again.");
-      }
-    } catch {
-      setStatus("error");
-      setErrorMessage("Failed to connect to the server.");
+      // Automatically show form again after 5 seconds
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
+    } catch (error: any) {
+      setErrorMessage(getErrorMessage(error) || "Something went wrong. Please try again.");
     }
   };
+
+  const status = joinMutation.isPending ? "loading" : joinMutation.isError ? "error" : "idle";
 
   return (
     <main className="h-screen w-full flex flex-col items-center justify-between p-4 py-8 relative overflow-hidden bg-white/30">
@@ -174,7 +159,7 @@ export default function WaitlistPage() {
                 hidden: { opacity: 0, scale: 0.98 },
                 visible: { opacity: 1, scale: 1 },
               }}
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmit)}
               className="w-full max-w-lg relative mb-4"
             >
               <div className="flex items-center bg-black/30 border border-white/10 rounded-full p-1.5 md:p-2 pl-4 md:pl-6 focus-within:border-primary-green transition-all shadow-xl group">
@@ -184,18 +169,16 @@ export default function WaitlistPage() {
                 />
                 <input
                   type="email"
-                  required
                   disabled={status === "loading"}
                   placeholder="Enter your e-mail"
                   className="bg-transparent border-none outline-none text-white w-full py-2 md:py-3 text-sm md:text-base placeholder:text-white disabled:opacity-50"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  disabled={status === "loading"}
+                  disabled={!isValid || status === "loading"}
                   className="bg-primary-green text-white font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all shrink-0 ml-2 shadow-lg shadow-primary-green/20 text-sm md:text-base disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {status === "loading" ? (
@@ -212,13 +195,15 @@ export default function WaitlistPage() {
                   )}
                 </motion.button>
               </div>
-              {errorMessage && (
+              
+              {/* Zod/Submit Error Messages */}
+              {(errors.email || errorMessage) && (
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-red-400 text-sm mt-3 ml-4 text-left"
+                  className="text-red-400 text-sm mt-3 ml-4 text-left font-medium"
                 >
-                  {errorMessage}
+                  {errors.email?.message || errorMessage}
                 </motion.p>
               )}
             </motion.form>
