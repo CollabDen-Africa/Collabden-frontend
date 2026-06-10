@@ -91,11 +91,11 @@ export default function BaseDashboardLayout({ children }: { children: React.Reac
     <div className="flex min-h-screen w-full relative font-sans bg-background text-foreground overflow-x-hidden">
       {/* BACKGROUND GLOW */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute w-[868px] h-[868px] left-[278px] top-[-156px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
-        <div className="absolute w-[868px] h-[868px] left-[652px] top-[896px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
-        <div className="absolute w-[868px] h-[868px] left-[-434px] top-[1409px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
-        <div className="absolute w-[868px] h-[868px] left-[756px] top-[1843px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
-        <div className="absolute inset-0 bg-white/20" />
+        <div className="absolute w-[868px] h-[868px] left-[278px] top-[-156px] bg-primary-blue/70 rounded-full blur-[242.3px] opacity-90" />
+        <div className="absolute w-[868px] h-[868px] left-[652px] top-[896px] bg-primary-blue rounded-full blur-[242.3px] opacity-90" />
+        <div className="absolute w-[668px] h-[68px] left-[-434px] top-[609px] bg-primary-blue rounded-full blur-[242.3px] opacity-80" />
+        <div className="absolute w-[1968px] h-[1868px] left-[756px] top-[843px] bg-primary-blue/70 rounded-full blur-[242.3px] opacity-80" />
+        <div className="absolute inset-0 bg-accent-soft-blue/20" />
       </div>
       
       <TourContext.Provider value={{ currentStep: tourStep, setStep: setTourStep, onSkip: handleSkip, isTourActive }}>

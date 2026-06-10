@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import NotificationBell from "../ui/Notifications";
 import Avatar from "../ui/Avatar";
 import OnboardingTooltip from "../ui/Tooltip";
+import { usePathname } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import { HiChevronDown } from "react-icons/hi";
 
@@ -37,6 +38,8 @@ export default function DashboardHeader({
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const displayName = `${user.firstName} ${user.lastName}`;
+  const pathname = usePathname();
+  const isMainDashboard = pathname === "/dashboard";
 
   // Auto-open notification dropdown for Step 5
   useEffect(() => {
@@ -68,7 +71,8 @@ export default function DashboardHeader({
         {/* Top Row: Welcome & Profile */}
         <div className="w-full flex flex-col-reverse lg:flex-row justify-between items-start gap-[24px] lg:gap-[40px] 2xl:gap-[70px]">
 
-          {/* Greeting Area - Anchor for Step 1 */}
+          {/* Greeting Area - Anchor for Step 1 + Conditionally Rendered */}
+          {isMainDashboard ? (
           <div className="relative flex-1 flex flex-col gap-[6px] w-full xl:max-w-max">
             <h1 className="text-foreground text-[26px] lg:text-[32px] font-semibold font-sans leading-tight wrap-break-word">
               Welcome back, {user.firstName}!
@@ -91,6 +95,10 @@ export default function DashboardHeader({
               />
             )}
           </div>
+          ) : (
+                      // Empty placeholder
+                      <div className="flex-1 hidden lg:block" />
+                    )}
 
           <div className="w-full xl:w-[413px] flex shrink-0 justify-end">
             <div className="relative flex items-center gap-[20px] md:gap-[40px] lg:gap-[75px] mt-1">
@@ -134,19 +142,21 @@ export default function DashboardHeader({
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="w-full flex">
-          <div className="w-full xl:max-w-[711px]">
-            <div className="flex items-center gap-[10px] bg-black/20 w-full h-[52px] pl-[20px] lg:pl-[25px] pr-[20px] lg:pr-[30px] rounded-[50px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md">
-              <FiSearch className="text-foreground/30 shrink-0" size={18} strokeWidth={2.5} />
-              <input
-                type="text"
-                placeholder="Search projects, collaborators..."
-                className="bg-transparent border-none outline-none text-foreground text-[14px] placeholder:text-foreground/30 w-full font-medium font-sans min-w-0"
-              />
+        {/* Search Bar - Conditionally Rendered */}
+        {isMainDashboard && (
+          <div className="w-full flex">
+            <div className="w-full xl:max-w-[711px]">
+              <div className="flex items-center gap-[10px] bg-black/20 w-full h-[52px] pl-[20px] lg:pl-[25px] pr-[20px] lg:pr-[30px] rounded-[50px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] focus-within:border-primary-green backdrop-blur-md">
+                <FiSearch className="text-foreground/30 shrink-0" size={18} strokeWidth={2.5} />
+                <input
+                  type="text"
+                  placeholder="Search projects, collaborators..."
+                  className="bg-transparent border-none outline-none text-foreground text-[14px] placeholder:text-foreground/30 w-full font-medium font-sans min-w-0"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </header>

@@ -3,15 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiFolder, FiMic, FiSend } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar";
+import TypingIndicator, { TypingUser } from "@/components/ui/TypingIndicator"; 
 import { MOCK_MESSAGES } from "@/lib/mockData";
-
-// Typing User Definition
-interface TypingUser {
-  id: string;
-  name: string;
-  avatar: string;
-  isMe: boolean;
-}
 
 export default function MessagesPage() {
   const [inputText, setInputText] = useState("");
@@ -27,50 +20,50 @@ export default function MessagesPage() {
   }, [messages, typingUsers]);
 
   // Typing Indicator Logic: Shows when user types to simulate interaction
-    useEffect(() => {
-      const myId = "u-me";
-      if (inputText.length > 0) {
-        setTypingUsers((prev) => 
-          prev.some(u => u.id === myId) ? prev : [...prev, { id: myId, name: "You", avatar: "/mock-profiles/small2.png", isMe: true }]
-        );
-      } else {
-        setTypingUsers((prev) => prev.filter(u => u.id !== myId));
-      }
-    }, [inputText]);
+  useEffect(() => {
+    const myId = "u-me";
+    if (inputText.length > 0) {
+      setTypingUsers((prev) => 
+        prev.some(u => u.id === myId) ? prev : [...prev, { id: myId, name: "You", avatar: "/mock-profiles/small2.png", isMe: true }]
+      );
+    } else {
+      setTypingUsers((prev) => prev.filter(u => u.id !== myId));
+    }
+  }, [inputText]);
   
-    // Mock simulation logic for others typing
-    const simulateRecipientResponse = () => {
-      const alex: TypingUser = { id: "u2", name: "Alex Rivera", avatar: "/mock-profiles/small3.png", isMe: false };
-      const maya: TypingUser = { id: "u3", name: "Maya Johnson", avatar: "/mock-profiles/small.png", isMe: false };
-  
-      // Alex starts typing after 1 second
+  // Mock simulation logic for others typing
+  const simulateRecipientResponse = () => {
+    const alex: TypingUser = { id: "u2", name: "Alex Rivera", avatar: "/mock-profiles/small3.png", isMe: false };
+    const maya: TypingUser = { id: "u3", name: "Maya Johnson", avatar: "/mock-profiles/small.png", isMe: false };
+
+    // Alex starts typing after 1 second
+    setTimeout(() => {
+      setTypingUsers(prev => [...prev, alex]);
+      
+      // Maya joins in typing 1 second later
       setTimeout(() => {
-        setTypingUsers(prev => [...prev, alex]);
+        setTypingUsers(prev => [...prev, maya]);
         
-        // Maya joins in typing 1 second later
+        // Alex finishes and sends message
         setTimeout(() => {
-          setTypingUsers(prev => [...prev, maya]);
-          
-          // Alex finishes and sends message
+          setTypingUsers(prev => prev.filter(u => u.id !== "u2"));
+          setMessages(prev => [...prev, {
+            id: Date.now(),
+            sender: "Alex Rivera",
+            time: "3:05 PM",
+            text: "I'm checking the stems now!",
+            isMe: false,
+            avatar: "/mock-profiles/small3.png"
+          }]);
+
+          // Maya finishes typing shortly after
           setTimeout(() => {
-            setTypingUsers(prev => prev.filter(u => u.id !== "u2"));
-            setMessages(prev => [...prev, {
-              id: Date.now(),
-              sender: "Alex Rivera",
-              time: "3:05 PM",
-              text: "I'm checking the stems now!",
-              isMe: false,
-              avatar: "/mock-profiles/small3.png"
-            }]);
-  
-            // Maya finishes typing shortly after
-            setTimeout(() => {
-              setTypingUsers(prev => prev.filter(u => u.id !== "u3"));
-            }, 1500);
-          }, 2000);
-        }, 1000);
+            setTypingUsers(prev => prev.filter(u => u.id !== "u3"));
+          }, 1500);
+        }, 2000);
       }, 1000);
-    };
+    }, 1000);
+  };
 
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -131,28 +124,10 @@ export default function MessagesPage() {
             </div>
           ))}
 
-          {/* DYNAMIC TYPING INDICATORS */}
-                    <div className="flex flex-col gap-6 mt-2">
-                      {typingUsers.map((user) => (
-                        <div 
-                          key={user.id} 
-                          className={`flex items-end gap-3 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 ${user.isMe ? "flex-row-reverse" : "flex-row"}`}
-                        >
-                          <div className="w-[45px] h-[45px] rounded-full border border-primary-green overflow-hidden shrink-0 opacity-80">
-                            <Avatar name={user.name} src={user.avatar} className="w-full h-full" />
-                          </div>
-                          <div className={`flex flex-col gap-2 ${user.isMe ? "items-end" : "items-start"}`}>
-                            <div className={`px-5 py-4 flex items-center justify-center gap-[6px] h-[50px] min-w-[80px] ${user.isMe ? "bg-primary-blue rounded-msg-me" : "bg-white rounded-msg-them"}`}>
-                              <div className={`w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s] ${user.isMe ? "bg-white/60" : "bg-primary-blue/40"}`} />
-                              <div className={`w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s] ${user.isMe ? "bg-white/60" : "bg-primary-blue/40"}`} />
-                              <div className={`w-2 h-2 rounded-full animate-bounce ${user.isMe ? "bg-white/60" : "bg-primary-blue/40"}`} />
-                            </div>
-                            <span className="font-poppins font-light text-[11px] text-white/30 px-1 italic">{user.isMe ? "You are typing..." : `${user.name} is typing...`}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+          {/* DYNAMIC TYPING INDICATORS COMPONENT */}
+          <TypingIndicator typingUsers={typingUsers} />
+
+        </div>
         
         {/* Input Bar Area */}
         <div className="absolute bottom-6 left-0 w-full px-6 flex items-center gap-3 z-20">

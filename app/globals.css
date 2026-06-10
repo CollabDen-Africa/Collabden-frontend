@@ -7,6 +7,9 @@
   --primary-white: #FFFFFF;
   --primary-black: #000000;
 
+  /* Secondary colours */
+  --secondary-blue: #6495ED;
+
   /* Accent Colors */
   --accent-green-bright: #1EFD05;
   --accent-green-success: #34A853;
@@ -40,6 +43,7 @@
   --color-foreground: var(--foreground);
   --color-primary-blue: var(--primary-blue);
   --color-primary-green: var(--primary-green);
+  --color-secondary-blue: var(--secondary-blue);
   --color-card-bg: var(--card-bg);
   --color-card-bg-alt: var(--card-bg-alt);
   --color-text-main: var(--text-main);
@@ -97,12 +101,20 @@ body {
   color: var(--primary-green);
 }
 
+.text-secondary-blue {
+  color: var(--secondary-blue);
+}
+
 .text-accent-red {
   color: var(--accent-red);
 }
 
 .bg-primary-blue {
   background-color: var(--primary-blue);
+}
+
+.bg-secondary-blue {
+  color: var(--secondary-blue);
 }
 
 .bg-primary-green {

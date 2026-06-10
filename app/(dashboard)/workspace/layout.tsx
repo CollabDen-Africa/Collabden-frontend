@@ -9,7 +9,7 @@ import { HiOutlineChevronDown } from "react-icons/hi";
 import { FiBell, FiSettings, FiClock } from "react-icons/fi";
 import ActivityPanel from "@/components/features/workspace/ActivityPanel";
 import UpdatesPanel from "@/components/features/workspace/UpdatesPanel";
-import SettingsPanel from "@/components/features/workspace/SettingsPanel";
+import SettingsPanel from "@/components/features/workspace/settings-panel/SettingsPanel";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { handleApiError } from "@/lib/error-handler";
 

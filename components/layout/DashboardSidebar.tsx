@@ -35,11 +35,11 @@ export default function DashboardSidebar({
 
   const navItems = [
     { name: "Dashboard", icon: HiViewGrid, path: "/dashboard" },
-    { name: "Messages", icon: IoIosChatbubbles, path: "/dashboard/messages" },
+    { name: "Messages", icon: IoIosChatbubbles, path: "/messages" },
     { name: "Projects", icon: FaFolderOpen, path: "/projects" },
-    { name: "Marketplace", icon: FaStore, path: "/dashboard/marketplace" },
-    { name: "Agreements", icon: FaHandshake, path: "/dashboard/agreements" },
-    { name: "Payment", icon: FaCreditCard, path: "/dashboard/payment" },
+    { name: "Marketplace", icon: FaStore, path: "/marketplace" },
+    { name: "Agreements", icon: FaHandshake, path: "/agreements" },
+    { name: "Payment", icon: FaCreditCard, path: "/payment" },
   ];
 
   const router = useRouter();
