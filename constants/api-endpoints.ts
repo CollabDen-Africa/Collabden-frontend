@@ -47,6 +47,10 @@ export const API_ENDPOINTS = {
     LIST: `${API_BASE_URL}/api/v1/user/connections`,
     LIST_PENDING: `${API_BASE_URL}/api/v1/user/connections/pending`,
   },
+  WAITLIST: {
+    JOIN: `${API_BASE_URL}/api/v1/waitlist`,
+    DOWNLOAD: `${API_BASE_URL}/api/v1/waitlist/download`,
+  },
 };
 
 export interface API_RESPONSE<T = unknown> {
