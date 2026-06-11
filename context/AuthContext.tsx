@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import authService, { LoginPayload, SignupPayload, VerifyPayload } from '@/services/auth.service';
 import { ROUTES } from '@/constants/routes';
@@ -30,6 +30,7 @@ interface AuthContextType {
   verify: (data: VerifyPayload) => Promise<any>;
   logout: () => Promise<void>;
   clearError: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,6 +47,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loginMutation = useLogin();
   const signupMutation = useSignup();
   const logoutMutation = useLogout();
+
+  // Create refs to hold stable references to mutation reset functions
+  const loginResetRef = useRef(loginMutation.reset);
+  const signupResetRef = useRef(signupMutation.reset);
+
+  // Keep refs up-to-date
+  loginResetRef.current = loginMutation.reset;
+  signupResetRef.current = signupMutation.reset;
 
   // On mount, check if user is already authenticated
   useEffect(() => {
@@ -67,7 +76,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchProfile();
   }, []);
 
-  const clearError = () => setManualError(null);
+  const clearError = useCallback(() => {
+    setManualError(null);
+    loginResetRef.current();
+    signupResetRef.current();
+  }, []);
+
+  const refreshUser = async () => {
+    try {
+      const data = await authService.getProfile();
+      const updatedUser = data.user || data.data;
+      setUser(updatedUser);
+      setIsAuthenticated(true);
+    } catch {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  };
 
   const verify = async (data: VerifyPayload) => {
     try {
@@ -142,7 +167,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       signup,
       verify,
       logout,
-      clearError
+      clearError,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>

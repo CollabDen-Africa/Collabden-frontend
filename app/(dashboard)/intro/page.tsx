@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { HiArrowRight } from "react-icons/hi";
 import { ROUTES } from '@/constants/routes';
 import { useUpdateOnboarding } from '@/hooks/auth/useUpdateOnboarding';
+import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 const SLIDES = [
@@ -13,26 +15,27 @@ const SLIDES = [
     title: "Share Your Sound Without Losing Its Quality",
     description: "Upload and send your tracks in their original quality, so every detail sounds exactly the way you created it.",
     image: "/Mask I.png",
-    bgPosition: "bg-left",
+    objectPosition: "object-left",
   },
   {
     id: 2,
     title: "Create together without the usual risks",
     description: "Work with others seamlessly while keeping your contributions protected and your payments secure, all in one place.",
     image: "/Mask II.png",
-    bgPosition: "bg-left",
+    objectPosition: "object-left",
   },
   {
     id: 3,
     title: "Find the right collaborators",
     description: "Connect with creatives, join projects that match your vision, and earn from the work you do.",
     image: "/Mask III.png",
-    bgPosition: "bg-bottom",
+    objectPosition: "object-bottom",
   }
 ];
 
 export default function OnboardingIntroPage() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
   const updateOnboardingMutation = useUpdateOnboarding();
@@ -45,11 +48,17 @@ export default function OnboardingIntroPage() {
       // 2. Set local flag for UI tours/tooltips
       localStorage.setItem('collabden_onboarding_complete', 'true');
       
-      // 3. Navigate to dashboard
+      // 3. Refresh user state in AuthContext to update onboarding completion status
+      await refreshUser();
+      
+      // 4. Navigate to dashboard
       router.push(ROUTES.DASHBOARD.ROOT);
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
-      // Fallback to dashboard anyway to not block the user
+      // Try refreshing and navigating anyway to not block the user
+      try {
+        await refreshUser();
+      } catch {}
       router.push(ROUTES.DASHBOARD.ROOT);
     }
   };
@@ -214,11 +223,17 @@ export default function OnboardingIntroPage() {
             initial="enter"
             animate="center"
             exit="exit"
-            className={`absolute inset-0 w-full h-full bg-cover ${slide.bgPosition}`}
-            style={{ 
-              backgroundImage: `url('${slide.image}')`, 
-            }}
-          />
+            className="absolute inset-0 w-full h-full"
+          >
+            <Image
+              src={slide.image}
+              alt={slide.title}
+              fill
+              className={`object-cover ${slide.objectPosition}`}
+              priority={currentSlideIndex === 0}
+              sizes="(max-width: 1024px) 0px, 55vw"
+            />
+          </motion.div>
         </AnimatePresence>
       </div>
 

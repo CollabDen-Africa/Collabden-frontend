@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, SignUpInput } from "@/lib/validations/auth.schema";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
+import { useResendVerification } from "@/hooks/auth/useVerifyEmail";
 import { FcGoogle } from "react-icons/fc";
 import Input from "@/components/ui/Input";
 import PasswordInput from "@/components/ui/PasswordInput";
@@ -14,6 +16,9 @@ import Checkbox from "@/components/ui/Checkbox";
 
 export default function SignupPage() {
   const { signup, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const router = useRouter();
+  const resendMutation = useResendVerification();
+  const [resendMessage, setResendMessage] = useState("");
 
   const {
     register,
@@ -48,8 +53,24 @@ export default function SignupPage() {
     window.location.href = "/api/auth/google?mode=signup";
   };
 
+  const handleResendVerification = async () => {
+    const email = watch("email");
+    if (!email) return;
+    try {
+      setResendMessage("");
+      await resendMutation.mutateAsync(email);
+      setResendMessage("Verification code resent! Redirecting...");
+      setTimeout(() => {
+        router.push(`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(email)}`);
+      }, 1500);
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
   const onSubmit = async (data: SignUpInput) => {
     clearError();
+    setResendMessage("");
     try {
       await signup({
         email: data.email,
@@ -73,18 +94,34 @@ export default function SignupPage() {
         </p>
       </div>
 
+      {resendMessage && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          {resendMessage}
+        </div>
+      )}
+
       {authError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
           {authError}
           {isAlreadyExistsError && (
-            <div className="mt-2 text-red-600">
-              Already have an account?{" "}
-              <Link
-                href={ROUTES.AUTH.LOGIN}
-                className="text-primary-green font-bold underline hover:no-underline"
+            <div className="mt-3 flex flex-col gap-2">
+              <div className="text-red-600">
+                Already have an account?{" "}
+                <Link
+                  href={ROUTES.AUTH.LOGIN}
+                  className="text-primary-green font-bold underline hover:no-underline"
+                >
+                  Log in here
+                </Link>
+              </div>
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendMutation.isPending || !watch("email")}
+                className="text-primary-green font-bold underline hover:no-underline text-left disabled:opacity-50"
               >
-                Log in here
-              </Link>
+                {resendMutation.isPending ? "Resending..." : "Signed up but didn\u2019t verify? Resend Verification Code"}
+              </button>
             </div>
           )}
         </div>

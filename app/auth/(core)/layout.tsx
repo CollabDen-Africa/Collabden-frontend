@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { ROUTES } from "@/constants/routes";
 import { BsArrowUpRightCircleFill } from "react-icons/bs";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 export default function AuthLayout({
   children,
@@ -14,6 +16,11 @@ export default function AuthLayout({
 }) {
   const pathname = usePathname();
   const isSignup = pathname === ROUTES.AUTH.SIGNUP;
+  const { clearError } = useAuth();
+
+  useEffect(() => {
+    clearError();
+  }, [pathname, clearError]);
 
   const imagePanel = (
     <div className="hidden lg:flex lg:w-[55%] relative p-5">
