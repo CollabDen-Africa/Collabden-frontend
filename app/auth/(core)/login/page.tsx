@@ -1,22 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/validations/auth.schema";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
+import { useResendVerification } from "@/hooks/auth/useVerifyEmail";
 import { FcGoogle } from "react-icons/fc";
 import Input from "@/components/ui/Input";
 import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function LoginPage() {
   const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const router = useRouter();
+  const resendMutation = useResendVerification();
+  const [resendMessage, setResendMessage] = useState("");
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isValid },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -26,6 +32,8 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  const watchedEmail = watch("email");
 
   const isUnverifiedError = useMemo(() => {
     if (!authError) return false;
@@ -46,8 +54,23 @@ export default function LoginPage() {
     window.location.href = "/api/auth/google";
   };
 
+  const handleResendVerification = async () => {
+    if (!watchedEmail) return;
+    try {
+      setResendMessage("");
+      await resendMutation.mutateAsync(watchedEmail);
+      setResendMessage("Verification code resent! Redirecting...");
+      setTimeout(() => {
+        router.push(`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(watchedEmail)}`);
+      }, 1500);
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
   const onSubmit = async (data: LoginInput) => {
     clearError();
+    setResendMessage("");
     try {
       await login({ email: data.email, password: data.password });
     } catch {
@@ -66,17 +89,31 @@ export default function LoginPage() {
         </p>
       </div>
 
+      {resendMessage && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
+          {resendMessage}
+        </div>
+      )}
+
       {authError && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
           {authError}
           {isUnverifiedError && (
-            <div className="mt-2">
+            <div className="mt-3 flex flex-col gap-2">
               <Link
-                href={`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(errors.email?.message || "")}`}
+                href={`${ROUTES.AUTH.VERIFY_EMAIL}?email=${encodeURIComponent(watchedEmail)}`}
                 className="text-primary-green font-bold underline hover:no-underline"
               >
                 Click here to verify your account
               </Link>
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendMutation.isPending || !watchedEmail}
+                className="text-primary-green font-bold underline hover:no-underline text-left disabled:opacity-50"
+              >
+                {resendMutation.isPending ? "Resending..." : "Resend Verification Code"}
+              </button>
             </div>
           )}
           {isNotFoundError && (
