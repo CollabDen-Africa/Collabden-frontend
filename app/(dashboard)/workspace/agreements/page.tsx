@@ -9,6 +9,9 @@ import EmptyState from "@/components/ui/EmptyState";
 import SignAgreementOverlay from "@/components/features/agreements/SignAgreements";
 import ConfirmSignatureOverlay from "@/components/features/agreements/ConfirmSignature";
 import SuccessSignatureOverlay from "@/components/features/agreements/SuccessSignature";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { useAgreements } from "@/hooks/projects/useAgreements";
+import { useAuth } from "@/context/AuthContext";
 
 // --- MOCK DATA ---
 const MOCK_AGREEMENTS: any[] = [
@@ -77,7 +80,7 @@ const AgreementCard = ({
             <div className="flex items-center gap-[8px]">
               <div className="flex -space-x-[12px]">
                 {agreement.collaborators.map((collab: any) => (
-                  <div key={collab.id} className="relative w-[28px] h-[28px] rounded-full border-2 border-primary-green overflow-hidden z-[1]">
+                  <div key={collab.id} className="relative w-[28px] h-[28px] rounded-full border-2 border-primary-green overflow-hidden z-1">
                     <Avatar name={collab.name} src={collab.image} className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -102,7 +105,7 @@ const AgreementCard = ({
         {/* Right: Collaborators, Sign Button, & Status Pill */}
         <div className="flex flex-wrap items-start gap-[16px] lg:gap-[32px]">
           <div className="flex items-center justify-start bg-accent-yellow/20 border border-accent-yellow px-[36px] py-[16px] rounded-full shrink-0 lg:mt-[-51px]">
-            <span className="font-inter font-medium text-[10px] lg:text-[11px] text-accent-yellow tracking-wider leading-none mt-[1px]">
+            <span className="font-inter font-medium text-[10px] lg:text-[11px] text-accent-yellow tracking-wider leading-none mt-px">
               Pending Signature
             </span>
           </div>
@@ -182,26 +185,82 @@ const AgreementCard = ({
 
 // --- MAIN PAGE ---
 export default function AgreementsOverviewPage() {
-  
+  const { activeProject } = useWorkspace();
+  const { user } = useAuth();
+  const isUserVerified = user?.identityVerified || false;
+
+  const projectId = activeProject?.id || "";
+
+  const { useProjectAgreements, useEsignAgreement } = useAgreements(projectId);
+  const { data: apiAgreements = [], isLoading } = useProjectAgreements();
+
   // State to manage modal flow
   const [flowState, setFlowState] = useState<'idle' | 'signing' | 'confirming' | 'success'>('idle');
-  
- 
   const [selectedAgreement, setSelectedAgreement] = useState<any>(null);
 
-  // Toggle for unverified vs verified states
-  const isUserVerified = false; 
+  const esignMutation = useEsignAgreement(selectedAgreement?.id || "");
 
   const handleTriggerSign = (agreement: any) => {
     setSelectedAgreement(agreement);
     setFlowState('signing');
   };
 
+  const handleConfirmSign = async () => {
+    if (!selectedAgreement?.id) return;
+    try {
+      await esignMutation.mutateAsync(true);
+      setFlowState('success');
+    } catch (err) {
+      console.error("Failed to sign agreement:", err);
+    }
+  };
+
+  // Map backend agreements to match card fields
+  const agreementsList = apiAgreements.map((agreement) => {
+    const totalSignatories = activeProject?.collaborators?.length || 1;
+    const completedSignatories = agreement.signatures?.length || 0;
+
+    return {
+      id: agreement.id,
+      title: agreement.title || "Untitled Agreement",
+      project: activeProject?.name || "Unknown Project",
+      createdDate: new Date(agreement.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      collaboratorsCount: activeProject?.collaborators?.length || 0,
+      collaborators: activeProject?.collaborators?.map((c) => ({
+        id: c.userId,
+        name: c.user?.email.split("@")[0] || "User",
+        image: undefined,
+      })) || [],
+      signatories: {
+        completed: completedSignatories,
+        total: totalSignatories,
+      },
+      lastUpdated: `Updated ${new Date(agreement.updatedAt).toLocaleDateString()}`,
+      contentPreview: agreement.content 
+        ? [agreement.content] 
+        : ["No content preview available."],
+      isVerified: isUserVerified,
+      status: agreement.status,
+    };
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-[100px] w-full">
+        <div className="w-12 h-12 border-4 border-primary-green/35 border-t-primary-green rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full h-full relative">
-      <div className="flex flex-col w-full px-[20px] lg:px-[0px] gap-[32px] pb-[40px]">
+      <div className="flex flex-col w-full px-[20px] lg:px-0 gap-[32px] pb-[40px]">
 
-        {MOCK_AGREEMENTS.length === 0 ? (
+        {agreementsList.length === 0 ? (
           <EmptyState 
             icon={<FiFileText size={32} strokeWidth={1.5} />}
             title="No Agreements Found"
@@ -211,7 +270,7 @@ export default function AgreementsOverviewPage() {
           />
         ) : (
           <div className="flex flex-col gap-[40px] w-full">
-            {MOCK_AGREEMENTS.map((agreement) => (
+            {agreementsList.map((agreement) => (
               <AgreementCard 
                 key={agreement.id} 
                 agreement={agreement} 
@@ -275,7 +334,7 @@ export default function AgreementsOverviewPage() {
 
       </div>
 
-      {/* OVERLAY COMPONENTS                         */}
+      {/* OVERLAY COMPONENTS */}
       <SignAgreementOverlay 
         isOpen={flowState === 'signing'} 
         onClose={() => setFlowState('idle')} 
@@ -285,7 +344,7 @@ export default function AgreementsOverviewPage() {
       <ConfirmSignatureOverlay 
         isOpen={flowState === 'confirming'} 
         onClose={() => setFlowState('idle')} 
-        onConfirm={() => setFlowState('success')} 
+        onConfirm={handleConfirmSign} 
       />
       
       <SuccessSignatureOverlay 

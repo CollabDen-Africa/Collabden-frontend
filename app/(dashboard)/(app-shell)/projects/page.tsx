@@ -235,7 +235,7 @@ export default function ProjectsPage() {
                   </div>
 
                   <button
-                    onClick={() => router.push(`/projects/${project.id}`)}
+                    onClick={() => router.push(`/workspace?projectId=${project.id}`)}
                     className="flex items-center gap-2 text-primary-green hover:brightness-110 transition-colors"
                   >
                     <span className="font-sans font-semibold text-[13px] sm:text-[14px]">Open Project</span>

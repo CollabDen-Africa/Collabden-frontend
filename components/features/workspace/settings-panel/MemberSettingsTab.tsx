@@ -1,32 +1,85 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiUsers, FiSearch, FiMoreVertical } from "react-icons/fi";
+import { FiUsers, FiSearch, FiMoreVertical, FiPlusCircle, FiTrash2 } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar"; 
 import Select from "@/components/ui/Select";
+import { Project } from "@/types/api.types";
+import { useProjects } from "@/hooks/projects/useProjects";
+import { useConnections } from "@/hooks/connections/useConnections";
 
-// --- MOCK DATA ---
-const TEAM_MEMBERS = [
-  { id: "m1", name: 'David Chen', role: 'Mixing Engineer', email: 'davidchen24@gmail.com', access: 'Editor', isOwner: true },
-  { id: "m2", name: 'Tayo Oni', role: 'Producer', email: 'tayooni68@gmail.com', access: 'Editor', isOwner: false },
-  { id: "m3", name: 'Michael Awe', role: 'Vocalist', email: 'michaelawe22@gmail.com', access: 'Viewer', isOwner: false },
-  { id: "m4", name: 'Chika Ike', role: 'Bass Player', email: 'johnike244@gmail.com', access: 'Viewer', isOwner: false },
-];
+interface MembersSettingsTabProps {
+  project?: Project;
+}
 
-export default function MembersSettingsTab() {
+export default function MembersSettingsTab({ project }: MembersSettingsTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [members, setMembers] = useState(TEAM_MEMBERS);
+  const [selectedConnectionId, setSelectedConnectionId] = useState("");
 
-  // Filter members based on search
-  const filteredMembers = members.filter(member => 
-    member.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    member.role.toLowerCase().includes(searchQuery.toLowerCase())
+  const { useInviteCollaborator, useRemoveCollaborator } = useProjects();
+  const inviteMutation = useInviteCollaborator(project?.id || "");
+  const removeMutation = useRemoveCollaborator(project?.id || "");
+
+  const { useUserConnections } = useConnections();
+  const { data: connections = [], isLoading: isLoadingConnections } = useUserConnections();
+
+  // Active collaborators inside this project
+  const activeCollaborators = project?.collaborators || [];
+
+  // Filter connections to only show those NOT already in the project
+  const inviteCandidates = connections.filter(
+    (conn) => !activeCollaborators.some((collab) => collab.userId === conn.id && collab.isActive)
   );
 
-  const handleAccessChange = (id: string, newAccess: string) => {
-      setMembers(prev => prev.map(m => m.id === id ? { ...m, access: newAccess } : m));
-    };
+  // Map collaborators to displayable member object
+  const members = activeCollaborators.map((c) => ({
+    id: c.userId,
+    name: c.user?.email ? c.user.email.split("@")[0] : "Collaborator",
+    email: c.user?.email || "No email",
+    role: c.role === "OWNER" ? "Owner" : "Collaborator",
+    isOwner: c.role === "OWNER",
+    access: c.role === "OWNER" ? "Owner" : "Editor",
+  }));
+
+  // Filter members based on search query
+  const filteredMembers = members.filter(
+    (member) =>
+      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      member.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleInvite = async () => {
+    if (!selectedConnectionId || !project?.id) return;
+    try {
+      await inviteMutation.mutateAsync({ collaboratorId: selectedConnectionId });
+      setSelectedConnectionId("");
+    } catch (err) {
+      console.error("Failed to invite collaborator:", err);
+    }
+  };
+
+  const handleRemove = async (userId: string) => {
+    if (!project?.id) return;
+    if (confirm("Are you sure you want to remove this collaborator from the project?")) {
+      try {
+        await removeMutation.mutateAsync(userId);
+      } catch (err) {
+        console.error("Failed to remove collaborator:", err);
+      }
+    }
+  };
+
+  if (!project) {
+    return (
+      <div className="w-full max-w-[931px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] lg:rounded-[50px] p-[32px] lg:p-[48px] shadow-2xl flex items-center justify-center">
+        <p className="text-white/60">No active project selected.</p>
+      </div>
+    );
+  }
+
+  // Options for custom select
+  const connectionOptions = inviteCandidates.map((conn) => conn.email);
 
   return (
     <div className="w-full max-w-[931px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] lg:rounded-[50px] p-[32px] lg:p-[48px] shadow-2xl animate-in fade-in slide-in-from-right-8 duration-500">
@@ -45,6 +98,38 @@ export default function MembersSettingsTab() {
             <p className="font-raleway font-medium text-[15px] lg:text-[18px] leading-[21px] text-white/60">
               Manage who has access to this project and what they can do.
             </p>
+          </div>
+        </div>
+
+        {/* Invite Collaborator Section */}
+        <div className="flex flex-col gap-[16px] w-full bg-black/15 border border-white/5 p-6 rounded-[24px]">
+          <h3 className="font-raleway font-bold text-[16px] text-white">Invite Collaborator</h3>
+          <p className="font-raleway font-normal text-[13px] text-white/60 -mt-2">
+            Only users in your accepted connections can be invited.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-[16px] items-stretch sm:items-center mt-2">
+            <div className="flex-1 relative min-h-[44px]">
+              <Select
+                options={connectionOptions}
+                value={
+                  connections.find((c) => c.id === selectedConnectionId)?.email || ""
+                }
+                onChange={(val) => {
+                  const matched = connections.find((c) => c.email === val);
+                  if (matched) setSelectedConnectionId(matched.id);
+                }}
+                placeholder="Choose a connected colleague..."
+                variant="glass"
+              />
+            </div>
+            <button
+              onClick={handleInvite}
+              disabled={!selectedConnectionId || inviteMutation.isPending}
+              className="bg-primary-green hover:bg-accent-green-success disabled:opacity-50 disabled:cursor-not-allowed text-white font-sans font-semibold text-[14px] px-[24px] py-[12px] rounded-full transition-all duration-300 shadow-[0_4px_14px_rgba(115,191,68,0.3)] flex items-center justify-center gap-2"
+            >
+              <FiPlusCircle size={16} />
+              {inviteMutation.isPending ? "Inviting..." : "Invite"}
+            </button>
           </div>
         </div>
 
@@ -101,23 +186,25 @@ export default function MembersSettingsTab() {
                 {/* Right Side: Access Level & Options */}
                 <div className="flex items-center gap-[16px] lg:gap-[24px]">
                   
-                  {/* Select Dropdown (Native for simplicity, but you can swap to your custom Select) */}
+                  {/* Access Dropdown Indicator */}
                   <div className="hidden sm:block">
                     <Select 
-                                          options={["Viewer", "Editor", "Admin"]}
-                                          value={member.access}
-                                          onChange={(val) => handleAccessChange(member.id, val)}
-                                          variant="glass"
-                                          disabled={member.isOwner}
-                                        />
+                      options={["Viewer", "Editor", "Admin"]}
+                      value={member.access}
+                      onChange={() => {}} // Local access visual only
+                      variant="glass"
+                      disabled={true} // Only OWNER vs COLLABORATOR supported in DB
+                    />
                   </div>
 
-                  {/* Options Menu Button */}
+                  {/* Remove Button */}
                   <button 
-                    className="w-[36px] h-[36px] flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                    disabled={member.isOwner}
+                    onClick={() => handleRemove(member.id)}
+                    disabled={member.isOwner || removeMutation.isPending}
+                    className="w-[36px] h-[36px] flex items-center justify-center rounded-full hover:bg-red-500/20 text-white/45 hover:text-red-500 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Remove collaborator"
                   >
-                    <FiMoreVertical size={20} />
+                    <FiTrash2 size={18} />
                   </button>
 
                 </div>

@@ -16,6 +16,8 @@ interface User {
   lastName?: string;
   hasCompletedOnboarding?: boolean;
   onboardingCompleted?: boolean;
+  identityVerified?: boolean;
+  legalName?: string | null;
 }
 
 interface AuthContextType {
