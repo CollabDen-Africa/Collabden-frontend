@@ -23,6 +23,7 @@ export const ROUTES = {
     DETAIL: (id: string) => `/projects/${id}`,
     SUCCESS: "/projects/success",
   },
+  ADMIN: "/admin",
 };
 
 export const PUBLIC_ROUTES = [
