@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IoMailOutline, IoCheckmarkCircle, IoPersonOutline, IoCallOutline } from 'react-icons/io5';
+import { IoMailOutline, IoCheckmarkCircle } from 'react-icons/io5';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowLeftCircleFill } from "react-icons/bs";
@@ -84,7 +84,7 @@ export default function WaitlistPage() {
   const status = joinMutation.isPending ? "loading" : joinMutation.isError ? "error" : "idle";
 
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-between p-4 py-4 md:py-6 relative overflow-y-auto bg-white/30">
+    <main className="min-h-screen w-full flex flex-col items-center justify-between p-4 py-4 md:py-6 relative overflow-hidden bg-white/30">
       {/* Back to Home Link */}
       <div className="absolute top-8 left-8 z-20">
         <Link
@@ -330,7 +330,7 @@ export default function WaitlistPage() {
       </motion.div>
 
       {/* Dashboard Preview - Anchored to bottom with fixed height ratio */}
-      <div className="relative w-full max-w-6xl px-4 z-0 pointer-events-none mt-[-60]">
+      <div className="relative w-full max-w-6xl px-4 z-0 pointer-events-none mt-[-35px]">
         <motion.div
           initial={{ opacity: 0, y: 100, rotateX: 20 }}
           animate={{ opacity: 1, y: 0, rotateX: 8 }}
