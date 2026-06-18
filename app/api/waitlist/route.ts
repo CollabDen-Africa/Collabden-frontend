@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export async function POST(request: Request) {
   try {
-    const { email: rawEmail, name } = await request.json();
+    const { email: rawEmail, name, phoneNumber } = await request.json();
     const email = rawEmail?.trim();
 
     if (!email) {
@@ -15,28 +16,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
-    const sheetUrl = process.env.SHEET_BEST_URL;
-
-    if (!sheetUrl) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
-
-    const response = await fetch(sheetUrl, {
+    const response = await fetch(API_ENDPOINTS.WAITLIST.JOIN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify([{
-        timestamp: new Date().toISOString(),
-        email,
-        name: name || '',
-      }]),
+      body: JSON.stringify({ email, name, phoneNumber }),
     });
 
+    const data = await response.json().catch(() => null);
+
     if (!response.ok) {
-      throw new Error('Failed to save to sheet');
+      return NextResponse.json(
+        { error: data?.error || 'Failed to save to waitlist' },
+        { status: response.status }
+      );
     }
 
-    return NextResponse.json({ message: 'Success' }, { status: 200 });
-  } catch {
+    return NextResponse.json(data || { message: 'Success' }, { status: 200 });
+  } catch (error) {
+    console.error('Waitlist proxy error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

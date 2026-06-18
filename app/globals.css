@@ -7,6 +7,9 @@
   --primary-white: #FFFFFF;
   --primary-black: #000000;
 
+  /* Secondary colours */
+  --secondary-blue: #6495ED;
+
   /* Accent Colors */
   --accent-green-bright: #1EFD05;
   --accent-green-success: #34A853;
@@ -22,9 +25,13 @@
   --accent-yellow: #FBBC04;
   --accent-gray: #7D7D7F;
 
-  /* Card / Surface Colors */
+  /* Surface / Border Colors */
   --card-bg: #505050;
   --card-bg-alt: #444444;
+  --text-main: #101618;
+  --text-muted: #AEB2B4;
+  --border-muted: #AEB2B4;
+  --border-light: #C0C3C4;
 
   /* Legacy fallbacks */
   --background: #000000;
@@ -36,8 +43,32 @@
   --color-foreground: var(--foreground);
   --color-primary-blue: var(--primary-blue);
   --color-primary-green: var(--primary-green);
+  --color-secondary-blue: var(--secondary-blue);
   --color-card-bg: var(--card-bg);
   --color-card-bg-alt: var(--card-bg-alt);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-border-muted: var(--border-muted);
+  --color-border-light: var(--border-light);
+  
+   --color-accent-green-bright: var(--accent-green-bright);
+    --color-accent-green-success: var(--accent-green-success);
+    --color-accent-red: var(--accent-red);
+    --color-accent-red-alt: var(--accent-red-alt);
+    --color-accent-red-google: var(--accent-red-google);
+    --color-accent-red-youtube: var(--accent-red-youtube);
+    --color-accent-pink: var(--accent-pink);
+    --color-accent-soft-red: var(--accent-soft-red);
+    --color-accent-soft-pink: var(--accent-soft-pink);
+    --color-accent-soft-blue: var(--accent-soft-blue);
+    --color-accent-soft-green: var(--accent-soft-green);
+    --color-accent-yellow: var(--accent-yellow);
+    --color-accent-gray: var(--accent-gray);
+
+  --shadow-btn-primary: 0 10px 25px rgba(115, 191, 68, 0.25);
+  --shadow-btn-hover: 0 15px 35px rgba(115, 191, 68, 0.35);
+  --shadow-circle-check: 0 0 8px rgba(115, 191, 68, 0.4);
+
   --font-sans: var(--font-raleway);
   --font-mono: var(--font-geist-mono);
 }
@@ -70,12 +101,20 @@ body {
   color: var(--primary-green);
 }
 
+.text-secondary-blue {
+  color: var(--secondary-blue);
+}
+
 .text-accent-red {
   color: var(--accent-red);
 }
 
 .bg-primary-blue {
   background-color: var(--primary-blue);
+}
+
+.bg-secondary-blue {
+  color: var(--secondary-blue);
 }
 
 .bg-primary-green {
@@ -123,20 +162,42 @@ body {
 }
 
 /* Custom Scrollbar */
+.custom-scrollbar {
+  /* Firefox support */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-green) rgba(255, 255, 255, 0.05);
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--primary-green);
   border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0); 
+  background-clip: padding-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #1efd05;
 }
+
+/* Optional: Apply to textareas specifically if they override inherited styles */
+textarea.custom-scrollbar {
+  scrollbar-width: thin;
+}
+
+/* Message Bubbles */
+.rounded-msg-me {
+  border-radius: 16.8px 16.8px 0px 16.8px;
+}
+
+.rounded-msg-them {
+  border-radius: 16.8px 16.8px 16.8px 0px;
+}
+
