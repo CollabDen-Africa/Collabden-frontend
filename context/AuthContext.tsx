@@ -18,6 +18,7 @@ interface User {
   onboardingCompleted?: boolean;
   identityVerified?: boolean;
   legalName?: string | null;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -62,8 +63,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         setIsInitializing(true);
         const data = await authService.getProfile();
-        setUser(data.user || data.data);
+        const profileUser = data.user || data.data;
+        setUser(profileUser);
         setIsAuthenticated(true);
+        if (profileUser?.isAdmin) {
+          localStorage.setItem("collabden_admin_logged_in", "true");
+        }
       } catch {
         // Not authenticated
         setUser(null);
@@ -117,7 +122,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Dynamic onboarding redirection
         const isAlreadyOnboarded = loggedUser?.hasCompletedOnboarding === true || loggedUser?.onboardingCompleted === true;
-        if (!isAlreadyOnboarded) {
+        if (loggedUser?.isAdmin) {
+          localStorage.setItem("collabden_admin_logged_in", "true");
+          router.push("/admin/dashboard");
+        } else if (!isAlreadyOnboarded) {
           router.push(ROUTES.DASHBOARD.SETUP); // Redirect to onboarding /intro
         } else {
           router.push(ROUTES.DASHBOARD.ROOT);  // Redirect to dashboard

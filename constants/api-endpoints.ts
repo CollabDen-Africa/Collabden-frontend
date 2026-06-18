@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
     LIST_PENDING: `${API_BASE_URL}/api/v1/user/connections/pending`,
   },
   WAITLIST: {
+    LIST: `${API_BASE_URL}/api/v1/waitlist`,
     JOIN: `${API_BASE_URL}/api/v1/waitlist`,
     DOWNLOAD: `${API_BASE_URL}/api/v1/waitlist/download`,
   },

@@ -68,7 +68,11 @@ export default function WaitlistPage() {
     setErrorMessage("");
 
     try {
-      await joinMutation.mutateAsync(data.email);
+      await joinMutation.mutateAsync({
+        email: data.email,
+        name: data.name,
+        phoneNumber: data.phone,
+      });
       setSubmitted(true);
       reset();
 

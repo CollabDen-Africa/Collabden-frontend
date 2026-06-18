@@ -2,20 +2,21 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminPage() {
   const router = useRouter();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const isLoggedIn = localStorage.getItem("collabden_admin_logged_in") === "true";
-      if (isLoggedIn) {
+    if (!isLoading) {
+      if (user?.isAdmin) {
         router.replace("/admin/dashboard");
       } else {
-        router.replace("/admin/login");
+        router.replace("/auth/login");
       }
     }
-  }, [router]);
+  }, [user, isLoading, router]);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[#0d0f10]">
