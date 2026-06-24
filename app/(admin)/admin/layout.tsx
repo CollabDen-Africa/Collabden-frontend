@@ -23,14 +23,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Client-side auth guard using user.isAdmin property
   useEffect(() => {
+    if (pathname === "/admin") return;
+
     if (!isAuthLoading) {
       if (!user || !user.isAdmin) {
-        router.replace("/auth/login");
+        router.replace("/admin");
       } else {
         setIsCheckingAuth(false);
       }
     }
-  }, [user, isAuthLoading, router]);
+  }, [user, isAuthLoading, router, pathname]);
+
+  // The login page (/admin) handles its own auth — skip the sidebar shell entirely
+  if (pathname === "/admin") {
+    return <>{children}</>;
+  }
 
   const handleLogout = async () => {
     await logout();
@@ -177,11 +184,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="flex items-center gap-3">
             <Avatar 
-              name="Stella" 
+              name={user?.firstName || "Admin"} 
               className="w-9 h-9 border border-primary-green shadow-md text-sm"
             />
             <div className="hidden sm:flex flex-col items-start leading-none">
-              <span className="text-white font-bold text-sm">Stella</span>
+              <span className="text-white font-bold text-sm">{user?.firstName || "Admin"}</span>
               <span className="text-white/40 text-[11px] mt-0.5">Administrator</span>
             </div>
           </div>
