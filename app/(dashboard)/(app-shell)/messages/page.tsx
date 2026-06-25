@@ -11,7 +11,7 @@ export default function DashboardMessagesPage() {
   const isChatOpen = selectedChatId !== null;
 
   return (
-    <div className="w-full h-full flex flex-col items-center pt-1.75 mt-2.5 lg:mt-23.75 font-sans pb-1 relative flex-1">
+    <div className="w-full h-full flex flex-col items-center pt-1.75 mt-2.5 font-sans pb-1 relative flex-1">
       
       {/* Title */}
       <h1 className="font-medium text-[36px] lg:text-[48px] leading-10 lg:leading-14 text-white mb-3.75 z-10 text-center lg:text-left w-full max-w-305.75">

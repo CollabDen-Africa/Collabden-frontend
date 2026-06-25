@@ -4,6 +4,7 @@ import React from "react";
 import { SETTINGS_SIDEBAR_LINKS } from "@/lib/mockData";
 import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
+import Image from 'next/image';
 
 export default function SettingsSidebar() {
   return (
@@ -12,10 +13,14 @@ export default function SettingsSidebar() {
       {/* Header / Logo Area */}
       <div className="flex items-center gap-3.75 px-6.75 mb-10">
         <div className="w-9 h-9 bg-primary-green rounded-[9.5px] flex items-center justify-center shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white"/>
-            <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <span>
+            <Image
+              src="/collabden-logo-small.png"
+              alt="logo"
+              width={25}
+              height={25}
+            />
+          </span>
         </div>
         <div className="flex flex-col">
           <span className="font-raleway font-bold text-[20px] text-white leading-5.75">CollabDen</span>
