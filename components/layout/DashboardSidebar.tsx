@@ -119,14 +119,14 @@ export default function DashboardSidebar({
         </div>
 
         {/* New Project & Logout Button Area */}
-        <div className="px-[18px] pb-[20px] w-full flex flex-col gap-4">
+        <div className="px-3 pb-5 w-full flex flex-col gap-4">
           <div className="relative w-full">
             <Button
               variant="primary"
               icon={HiPlus}
               iconPosition="left"
               onClick={() => router.push("/projects/new-project")}
-              className="shrink-0 h-[48px] px-6"
+              className="shrink-0 h-[48px] px-5"
             >
               <span className="font-sans font-semibold text-[16px] whitespace-nowrap">New Project</span>
             </Button>
@@ -149,7 +149,7 @@ export default function DashboardSidebar({
           <button
             onClick={logout}
             disabled={isAuthLoading}
-            className="flex items-center gap-[10px] pl-[25px] pr-[20px] h-[52px] w-full text-foreground/60 hover:text-red-400 hover:bg-white/5 transition-colors group"
+            className="flex items-center gap-[10px] pl-[25px] pr-[20px] h-[52px] w-full text-foreground/60 hover:text-red-400 hover:bg-white/5 transition-colors group rounded-3xl"
           >
             <HiOutlineLogout size={20} className="group-hover:text-red-400 shrink-0 transition-colors" />
             <span className="text-[16px] font-medium transition-colors">
