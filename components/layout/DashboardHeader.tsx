@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import NotificationBell from "../ui/Notifications";
-import Avatar from "../ui/Avatar";
 import OnboardingTooltip from "../ui/Tooltip";
 import { usePathname } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
-import { HiChevronDown } from "react-icons/hi";
+import ProfileMenu from "../ui/ProfileMenu";
+
 
 
 // User data structure
@@ -37,7 +37,6 @@ export default function DashboardHeader({
 }) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const displayName = `${user.firstName} ${user.lastName}`;
   const pathname = usePathname();
   const isMainDashboard = pathname === "/dashboard";
 
@@ -64,16 +63,16 @@ export default function DashboardHeader({
   }, [currentStep]);
 
   return (
-    <header className="w-full pt-[20px] lg:pt-[58px] pb-[20px] lg:pb-[40px] shrink-0">
+    <header className="w-full pt-5 lg:pt-14.5 pb-5 lg:pb-10 shrink-0">
 
-      <div className="w-full max-w-[1200px] mx-auto flex flex-col gap-[24px] lg:gap-[34px]">
+      <div className="w-full max-w-300 mx-auto flex flex-col gap-6 lg:gap-8.5">
 
         {/* Top Row: Welcome & Profile */}
-        <div className="w-full flex flex-col-reverse lg:flex-row justify-between items-start gap-[24px] lg:gap-[40px] 2xl:gap-[70px]">
+        <div className="w-full flex flex-col-reverse lg:flex-row justify-between items-start gap-6 lg:gap-10 2xl:gap-17.5">
 
           {/* Greeting Area - Anchor for Step 1 + Conditionally Rendered */}
           {isMainDashboard ? (
-          <div className="relative flex-1 flex flex-col gap-[6px] w-full xl:max-w-max">
+          <div className="relative flex-1 flex flex-col gap-1.5 w-full xl:max-w-max">
             <h1 className="text-foreground text-[26px] lg:text-[32px] font-semibold font-sans leading-tight wrap-break-word">
               Welcome back, {user.firstName}!
             </h1>
@@ -118,24 +117,10 @@ export default function DashboardHeader({
 
               </div>
 
-              <div className="flex items-center gap-[12px] lg:gap-[16px] cursor-pointer hover:opacity-80 transition-opacity">
-                <Avatar
-                  name={displayName}
-                  src={user.avatarUrl}
-                  className="w-[45px] h-[45px] lg:w-[52px] lg:h-[52px] border-2 border-primary-green shadow-[0_4px_10px_rgba(115,191,68,0.2)] text-[18px]"
-                />
+              <div className="flex items-center gap-3 lg:gap-4 cursor-pointer">
 
-                <div className="flex items-center gap-[8px] lg:gap-[16px]">
-                  <div className="flex flex-col items-end gap-[4px] lg:gap-[8px]">
-                    <span className="text-foreground font-bold text-[14px] lg:text-[16px] leading-none whitespace-nowrap">
-                      {displayName}
-                    </span>
-                    <span className="text-foreground/60 font-medium text-[12px] lg:text-[14px] leading-none whitespace-nowrap capitalize">
-                      {user.role}
-                    </span>
-                  </div>
-                  <HiChevronDown className="text-foreground shrink-0" size={20} />
-                </div>
+                <ProfileMenu user={user} />
+                
               </div>
 
             </div>
@@ -145,8 +130,8 @@ export default function DashboardHeader({
         {/* Search Bar - Conditionally Rendered */}
         {isMainDashboard && (
           <div className="w-full flex">
-            <div className="w-full xl:max-w-[711px]">
-              <div className="flex items-center gap-[10px] bg-black/20 w-full h-[52px] pl-[20px] lg:pl-[25px] pr-[20px] lg:pr-[30px] rounded-[50px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] focus-within:border-primary-green backdrop-blur-md">
+            <div className="w-full xl:max-w-177.75">
+              <div className="flex items-center gap-2.5 bg-black/20 w-full h-13 pl-5 lg:pl-6.25 pr-5 lg:pr-7.5 rounded-[50px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] focus-within:border-primary-green backdrop-blur-md">
                 <FiSearch className="text-foreground/30 shrink-0" size={18} strokeWidth={2.5} />
                 <input
                   type="text"

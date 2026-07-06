@@ -457,10 +457,10 @@ export const PRIMARY_ROLES = ["Record Producer", "Sound Designer", "Music Produc
 export const SPECIALIZATIONS = ["Sampling", "Live Recording", "Audio Editing", "Podcast Production", "Mixing & Mastering"];
 
 export const PORTFOLIO_ITEMS = [
-  { id: 1, title: "Urban Beats Vol. 2", subtitle: "Producer · Mar 2024", status: "Completed", isCompleted: true, img: "/mock-projects/1.jpg" },
-  { id: 2, title: "Harmony App Redesign", subtitle: "Song Writer · Jan 2024", status: "Completed", isCompleted: true, img: "/mock-projects/2.jpg" },
-  { id: 3, title: "AfroTech Dashboard", subtitle: "Producer · Nov 2023", status: "Completed", isCompleted: true, img: "/mock-projects/3.jpg" },
-  { id: 4, title: "CreatorOS Platform", subtitle: "Creative Director · Sep 2023", status: "In Progress", isCompleted: false, img: "/mock-projects/4.jpg" },
+  { id: 1, title: "Urban Beats Vol. 2", role: "Producer · Mar 2024", status: "Completed", isCompleted: true, image: "/mock-profiles/UrbanBeatsVol.2.png" },
+  { id: 2, title: "Harmony App Redesign", role: "Song Writer · Jan 2024", status: "Completed", isCompleted: true, image: "/mock-profiles/HarmonyAppRedesign.png" },
+  { id: 3, title: "AfroTech Dashboard", role: "Producer · Nov 2023", status: "Completed", isCompleted: true, image: "/mock-profiles/AfroTechDashboard.png" },
+  { id: 4, title: "CreatorOS Platform", role: "Creative Director · Sep 2023", status: "In Progress", isCompleted: false, image: "/mock-profiles/CreatorOSPlatform.png" },
 ];
 
 export const ACHIEVEMENTS = [

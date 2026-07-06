@@ -6,7 +6,12 @@ import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import Image from 'next/image';
 
-export default function SettingsSidebar() {
+interface SettingsSidebarProps {
+  activeTab: string;
+  onTabChange: (tabId: string) => void;
+}
+
+export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
   return (
     <div className="w-full flex flex-col shrink-0 bg-black/20 rounded-[30px] overflow-hidden backdrop-blur-md border border-white/5 py-16">
       
@@ -32,9 +37,11 @@ export default function SettingsSidebar() {
       <div className="flex flex-col w-full">
         {SETTINGS_SIDEBAR_LINKS.map((link) => {
           const Icon = link.icon;
+          const isCurrentlyActive = activeTab === link.id;
           return (
             <button 
               key={link.id}
+              onClick={() => onTabChange(link.id)}
               className={`relative flex items-center w-full h-13 px-6.75 gap-3.75 transition-colors ${
                 link.isActive 
                   ? "bg-linear-to-r from-primary-green/20 to-transparent" 
@@ -42,17 +49,17 @@ export default function SettingsSidebar() {
               }`}
             >
               {/* Active Left Border Indicator */}
-              {link.isActive && (
+              {isCurrentlyActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-12 bg-primary-green rounded-r-[50px]" />
               )}
               
               <Icon 
                 size={20} 
-                className={link.isActive ? "text-primary-green" : "text-white/70"} 
+                className={isCurrentlyActive ? "text-primary-green" : "text-white/70"} 
               />
               <span 
                 className={`font-raleway font-medium text-[16px] leading-4.75 ${
-                  link.isActive ? "text-primary-green" : "text-white/90"
+                  isCurrentlyActive ? "text-primary-green" : "text-white/90"
                 }`}
               >
                 {link.label}
