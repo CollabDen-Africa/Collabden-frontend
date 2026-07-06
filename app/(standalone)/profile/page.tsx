@@ -12,20 +12,26 @@ import TestimonialsSection from "@/components/features/profile/TestimonialsSecti
 
 export default function ProfileOverview() {
   return (
-    <div className="w-full flex flex-col gap-[32px] pt-4 animate-in fade-in duration-300">
+    <div className="w-full flex flex-col gap-8 pt-4 animate-in fade-in duration-300 mt-5">
       
       {/* Top Action Header */}
       <div className="flex items-center justify-between w-full">
         <Link 
           href="/dashboard"
-          className="flex items-center gap-[8px] text-white/70 hover:text-white transition-colors font-raleway bg-white/5 hover:bg-white/10 px-[12px] py-[12px] rounded-full border border-white/5"
+          className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-raleway bg-white/5 hover:bg-white/10 px-3 py-3 rounded-full border border-white/5"
         >
           <IoIosArrowBack size={24} />
         </Link>
 
+        <div>
+          <h1 className="font-semibold text-[38px] leading-5.75">
+            Profile Overview
+          </h1>
+        </div>
+
         <Link 
-          href="profile/profile-settings" 
-          className="flex items-center gap-[8px] text-white/70 hover:text-white transition-colors font-raleway bg-white/5 hover:bg-white/10 px-3 py-3 rounded-full border border-white/10"
+          href="/profile-settings" 
+          className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-raleway bg-white/5 hover:bg-white/10 px-3 py-3 rounded-full border border-white/10"
         >
           <FiSettings size={24} />
         </Link>
@@ -33,21 +39,21 @@ export default function ProfileOverview() {
 
       <ProfileCompletion />
 
-      {/* 3-Column Fluid Layout (Fixes the cut-off issue) */}
-      <div className="flex flex-col xl:flex-row gap-[24px] 2xl:gap-[32px] w-full items-stretch">
+      {/* 3-Column Layout */}
+      <div className="flex flex-col xl:flex-row gap-6 2xl:gap-8 w-full items-stretch">
         
-        {/* Left Column - Takes up ~28% of the space */}
-        <div className="flex-1 w-full min-w-[300px]">
+        {/* Left Column */}
+        <div className="flex-1 w-full min-w-75">
           <ProfileLeftColumn />
         </div>
         
-        {/* Middle Column - Slightly wider, takes up ~36% of the space */}
+        {/* Middle Column */}
         <div className="flex-[1.2] w-full min-w-[320px]">
           <ProfileMiddleColumn />
         </div>
         
-        {/* Right Column - Takes up ~31% of the space */}
-        <div className="flex-1 w-full min-w-[300px]">
+        {/* Right Column */}
+        <div className="flex-1 w-full min-w-75">
           <ProfileRightColumn />
         </div>
 

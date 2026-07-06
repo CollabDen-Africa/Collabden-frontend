@@ -2,7 +2,7 @@ import React from 'react';
 import { IconType } from 'react-icons';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'white';
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'white' | 'red';
     size?: 'sm' | 'md' | 'lg';
     icon?: IconType;
     iconPosition?: 'left' | 'right';
@@ -24,7 +24,8 @@ const Button: React.FC<ButtonProps> = ({
         secondary: 'bg-primary-blue text-white hover:brightness-110 focus:ring-primary-blue shadow-lg',
         outline: 'border-2 border-primary-green text-primary-green hover:bg-primary-green hover:text-white focus:ring-primary-green',
         ghost: 'text-white hover:bg-white/10 focus:ring-white',
-        white: 'bg-white text-primary-green hover:bg-gray-100 focus:ring-white shadow-lg',
+      white: 'bg-white text-primary-green hover:bg-gray-100 focus:ring-white shadow-lg',
+        red: 'bg-accent-red text-white hover:bg-accent-red-alt/80 focus:ring-accent-red shadow-lg',
     };
 
     const sizes = {
