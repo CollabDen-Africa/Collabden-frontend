@@ -196,5 +196,125 @@ export interface JoinWaitlistPayload {
   phoneNumber?: string;
 }
 
+// --- Messaging Types ---
+
+export type MessageRequestStatus = "PENDING" | "ACCEPTED" | "DECLINED";
+
+export interface MessageRequest {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  message: string;
+  status: MessageRequestStatus;
+  createdAt: string;
+  updatedAt: string;
+  sender?: { id: string; email: string; displayName?: string; avatarUrl?: string };
+  receiver?: { id: string; email: string; displayName?: string; avatarUrl?: string };
+}
+
+export interface DirectChat {
+  id: string;
+  otherParticipant: {
+    id: string;
+    email: string;
+    displayName: string;
+    avatarUrl?: string;
+  };
+  isArchived: boolean;
+  lastMessage: DirectMessage | null;
+  unreadCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DirectMessage {
+  id: string;
+  chatId: string;
+  senderId: string;
+  content: string | null;
+  voiceUrl: string | null;
+  voiceDuration: number | null;
+  isRead: boolean;
+  parentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  reactions?: MessageReaction[];
+}
+
+export interface MessageReaction {
+  id: string;
+  messageId: string;
+  userId: string;
+  emoji: string;
+}
+
+export interface SendMessagePayload {
+  content?: string;
+  parentId?: string;
+  voiceUrl?: string;
+  voiceDuration?: number;
+}
+
+// --- Payment Types ---
+
+export type TransactionType = "FUNDING" | "WITHDRAWAL" | "ESCROW_CREDIT" | "ESCROW_DEBIT";
+export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "REVERSED";
+
+export interface Wallet {
+  id: string;
+  balance: number;
+  currency: string;
+  updatedAt: string;
+}
+
+export interface Transaction {
+  id: string;
+  userId: string;
+  type: TransactionType;
+  status: TransactionStatus;
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  reference: string;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface BankAccount {
+  id: string;
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export interface WithdrawalRecord {
+  id: string;
+  txRef: string;
+  amount: number;
+  currency: string;
+  status: string;
+  type: string;
+  createdAt: string;
+}
+
+export interface InitializeFundingPayload {
+  amount: number;
+  paymentMethod: "card" | "banktransfer" | "ussd";
+}
+
+export interface AddBankAccountPayload {
+  bankCode: string;
+  accountNumber: string;
+}
+
+export interface RequestWithdrawalPayload {
+  bankAccountId: string;
+  amount: number;
+}
+
+
 
 
