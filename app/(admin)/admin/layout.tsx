@@ -12,33 +12,35 @@ import {
 import { IoMailOutline } from "react-icons/io5";
 
 import Avatar from "@/components/ui/Avatar";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { user, isLoading: isAuthLoading, logout } = useAuth();
 
-  const isLoginPage = pathname === "/admin/login";
-
-  // Client-side simple auth guard
+  // Client-side auth guard using user.isAdmin property
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const isLoggedIn = localStorage.getItem("collabden_admin_logged_in") === "true";
-      
-      if (!isLoggedIn && !isLoginPage) {
-        router.replace("/admin/login");
-      } else if (isLoggedIn && isLoginPage) {
-        router.replace("/admin/dashboard");
+    if (pathname === "/admin") return;
+
+    if (!isAuthLoading) {
+      if (!user || !user.isAdmin) {
+        router.replace("/admin");
       } else {
         setIsCheckingAuth(false);
       }
     }
-  }, [pathname, isLoginPage, router]);
+  }, [user, isAuthLoading, router, pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("collabden_admin_logged_in");
-    router.replace("/admin/login");
+  // The login page (/admin) handles its own auth — skip the sidebar shell entirely
+  if (pathname === "/admin") {
+    return <>{children}</>;
+  }
+
+  const handleLogout = async () => {
+    await logout();
     setIsMobileMenuOpen(false);
   };
 
@@ -52,11 +54,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
     );
-  }
-
-  // Login page layout (no sidebar or header)
-  if (isLoginPage) {
-    return <>{children}</>;
   }
 
   const navItems = [
@@ -187,11 +184,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="flex items-center gap-3">
             <Avatar 
-              name="Stella" 
+              name={user?.firstName || "Admin"} 
               className="w-9 h-9 border border-primary-green shadow-md text-sm"
             />
             <div className="hidden sm:flex flex-col items-start leading-none">
-              <span className="text-white font-bold text-sm">Stella</span>
+              <span className="text-white font-bold text-sm">{user?.firstName || "Admin"}</span>
               <span className="text-white/40 text-[11px] mt-0.5">Administrator</span>
             </div>
           </div>

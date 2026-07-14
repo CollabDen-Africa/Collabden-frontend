@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export async function POST(request: Request) {
   try {
-    const { email: rawEmail } = await request.json();
+    const { email: rawEmail, name, phoneNumber } = await request.json();
     const email = rawEmail?.trim();
 
     if (!email) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const response = await fetch(API_ENDPOINTS.WAITLIST.JOIN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, name, phoneNumber }),
     });
 
     const data = await response.json().catch(() => null);
