@@ -244,7 +244,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   |--------|-------------|
   | `200`  | Success — returns completeness percentage and missing fields |
 
-### 17. Browse/Search Collaborators
+### 17. Browse/Search Collaborators (Legacy Profile Browse)
 - **Endpoint:** `GET /api/v1/user/profile/browse`
 - **Auth Required:** No
 - **Query Parameters (optional):**
@@ -318,13 +318,169 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 
 ---
 
+## 🔒 User Security & 2FA Endpoints
+
+### 23. Generate 2FA Secret
+- **Endpoint:** `POST /api/v1/user/security/2fa/setup`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns QR code image URL and secret key |
+
+### 24. Verify 2FA and Enable
+- **Endpoint:** `POST /api/v1/user/security/2fa/verify`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Request Body (required):**
+  ```json
+  {
+    "token": "string"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | 2FA successfully enabled |
+  | `400`  | Invalid 2FA token |
+
+### 25. Logout From All Devices
+- **Endpoint:** `POST /api/v1/user/security/logout-all`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Successfully terminated all other active sessions |
+
+### 26. Deactivate User Account
+- **Endpoint:** `POST /api/v1/user/security/deactivate`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Account deactivated successfully |
+
+### 27. Delete User Account
+- **Endpoint:** `DELETE /api/v1/user/security/delete`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Account marked for permanent deletion |
+
+### 28. Request Data Export
+- **Endpoint:** `POST /api/v1/user/security/data-export`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Export request queued |
+
+### 29. Check Data Export Status
+- **Endpoint:** `GET /api/v1/user/security/data-export/{id}`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `id` (string) - Export request ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns export status (e.g. pending, completed, fileUrl) |
+
+### 30. Create Support Ticket
+- **Endpoint:** `POST /api/v1/user/security/support-request`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Request Body (required):**
+  ```json
+  {
+    "subject": "string",
+    "message": "string"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `201`  | Support ticket created successfully |
+
+---
+
+## 🆔 Persona Identity Webhook
+
+### 31. Persona Webhook Handler
+- **Endpoint:** `POST /api/v1/user/persona/webhook`
+- **Auth Required:** No (Verifies cryptographic header `persona-signature`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Webhook processed successfully |
+
+---
+
+## 🧑‍🤝‍🧑 Marketplace Collaborator Search Endpoints
+
+### 32. List/Filter Collaborators (Marketplace)
+- **Endpoint:** `GET /api/v1/user/collaborators`
+- **Auth Required:** No
+- **Query Parameters (optional):**
+  | Param | Type | Description |
+  |-------|------|-------------|
+  | `name` | string | Search name (first, last, legal, display) |
+  | `skills` | string | Comma-separated skills |
+  | `genres` | string | Comma-separated genres |
+  | `role` | string | Search specific role in experience |
+  | `openToCollaborate` | string | Filter availability (`true`, `false`, `all`) |
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns list of collaborator profiles |
+
+### 33. Get Unique Skills Present on Profiles
+- **Endpoint:** `GET /api/v1/user/collaborators/skills`
+- **Auth Required:** No
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns list of all unique skills in the platform |
+
+### 34. Get Unique Genres Present on Profiles
+- **Endpoint:** `GET /api/v1/user/collaborators/genres`
+- **Auth Required:** No
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns list of all unique genres in the platform |
+
+### 35. Update Collaborator Availability Status
+- **Endpoint:** `PATCH /api/v1/user/collaborators/availability`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Request Body (required):**
+  ```json
+  {
+    "openToCollaborate": boolean
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Availability updated successfully |
+
+### 36. Get Detailed Collaborator Profile By ID
+- **Endpoint:** `GET /api/v1/user/collaborators/{userId}`
+- **Auth Required:** No
+- **Path Parameters:**
+  - `userId` (string) - ID of the target user
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Detailed profile including portfolio, history, and endorsements |
+
+---
+
 ## 🤝 Connections Endpoints
 
 > [!NOTE]
 > There is a pluralization discrepancy in the backend Swagger/JSDoc configuration which annotates paths using `/api/v1/users/connections/...`.
 > However, the actual endpoint mounted on the Express server is singular: `/api/v1/user/connections/...`. The client must call the singular path.
 
-### 23. Send Connection Request
+### 37. Send Connection Request
 - **Endpoint:** `POST /api/v1/user/connections/request`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Request Body (required):**
@@ -338,7 +494,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   |--------|-------------|
   | `201`  | Connection request sent successfully |
 
-### 24. Respond to Connection Request
+### 38. Respond to Connection Request
 - **Endpoint:** `PUT /api/v1/user/connections/request/{id}`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -354,7 +510,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   |--------|-------------|
   | `200`  | Response saved successfully |
 
-### 25. List Accepted Connections
+### 39. List Accepted Connections
 - **Endpoint:** `GET /api/v1/user/connections`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Responses:**
@@ -362,7 +518,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   |--------|-------------|
   | `200`  | Returns array of collaborator user objects |
 
-### 26. List Pending Connection Requests
+### 40. List Pending Connection Requests
 - **Endpoint:** `GET /api/v1/user/connections/pending`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Responses:**
@@ -374,7 +530,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 
 ## 📊 Dashboard Endpoints
 
-### 27. Fetch Dashboard Data
+### 41. Fetch Dashboard Data
 - **Endpoint:** `GET /api/v1/dashboard`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Description:** Aggregates active projects and recent notifications for the authenticated user.
@@ -386,7 +542,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 
 ---
 
-## 🔔 Notification Endpoints
+## 🔔 Notification & Settings Endpoints
 
 ### Notification Schema
 ```json
@@ -403,26 +559,23 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 }
 ```
 
-### 28. Get All Notifications
+### 42. Get All Notifications
 - **Endpoint:** `GET /api/v1/notifications`
 - **Auth Required:** Yes (`Bearer <token>`)
-- **Description:** Returns all notifications for the currently logged-in user, ordered by most recent first.
 - **Responses:**
   | Status | Description |
   |--------|-------------|
   | `200`  | Array of notification objects |
-  | `401`  | Unauthorized |
 
-### 29. Mark All Notifications as Read
+### 43. Mark All Notifications as Read
 - **Endpoint:** `PATCH /api/v1/notifications/read-all`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Responses:**
   | Status | Description |
   |--------|-------------|
   | `200`  | `{ "message": "All notifications marked as read" }` |
-  | `401`  | Unauthorized |
 
-### 30. Mark Single Notification as Read
+### 44. Mark Single Notification as Read
 - **Endpoint:** `PATCH /api/v1/notifications/{id}/read`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -431,32 +584,55 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | `{ "message": "Notification marked as read", "notification": { ... } }` |
-  | `401`  | Unauthorized |
+
+### 45. Get Notification Settings
+- **Endpoint:** `GET /api/v1/notification-settings`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns `NotificationSetting` preferences object |
+
+### 46. Update Notification Settings
+- **Endpoint:** `PATCH /api/v1/notification-settings`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Request Body:**
+  ```json
+  {
+    "inApp": boolean,
+    "email": boolean,
+    "sms": boolean,
+    "frequency": "IMMEDIATE" | "DAILY" | "WEEKLY"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Settings updated successfully |
 
 ---
 
 ## 📁 Project Endpoints
 
-### 31. Create Project
+### 47. Create Project
 - **Endpoint:** `POST /api/v1/projects`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Request Body (required):**
   ```json
   {
-    "name": "string",         // required
-    "description": "string",  // optional
-    "genre": "string",        // required
-    "startDate": "ISO 8601",  // required
-    "visibility": "PUBLIC" | "PRIVATE" // optional (defaults to PUBLIC)
+    "name": "string",
+    "description": "string",
+    "genre": "string",
+    "startDate": "ISO 8601",
+    "visibility": "PUBLIC" | "PRIVATE"
   }
   ```
 - **Responses:**
   | Status | Description |
   |--------|-------------|
   | `201`  | Project created successfully |
-  | `400`  | Missing required fields |
 
-### 32. List All User Projects
+### 48. List All User Projects
 - **Endpoint:** `GET /api/v1/projects`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Query Parameters (optional):**
@@ -475,7 +651,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   |--------|-------------|
   | `200`  | Returns `{ projects: [...], meta: { total, page, limit, totalPages } }` |
 
-### 33. Get Project Details
+### 49. Get Project Details
 - **Endpoint:** `GET /api/v1/projects/{id}`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -484,31 +660,19 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Success — returns project detail workspace object |
-  | `404`  | Project not found |
 
-### 34. Update Project
+### 50. Update Project
 - **Endpoint:** `PUT /api/v1/projects/{id}`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
   - `id` (string) - The project ID
-- **Request Body:**
-  ```json
-  {
-    "name": "string",
-    "description": "string",
-    "genre": "string",
-    "startDate": "ISO 8601",
-    "visibility": "PUBLIC" | "PRIVATE"
-  }
-  ```
+- **Request Body:** Custom fields to update
 - **Responses:**
   | Status | Description |
   |--------|-------------|
   | `200`  | Project updated successfully |
-  | `403`  | Forbidden (Only the owner can update project settings) |
-  | `404`  | Project not found |
 
-### 35. Delete Project
+### 51. Delete Project
 - **Endpoint:** `DELETE /api/v1/projects/{id}`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -517,9 +681,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Project deleted successfully |
-  | `403`  | Forbidden (Only the owner can delete the project) |
 
-### 36. Invite Collaborator
+### 52. Invite Collaborator
 - **Endpoint:** `POST /api/v1/projects/{id}/invite`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -534,9 +697,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Collaborator invited successfully |
-  | `404`  | Project or User not found |
 
-### 37. Remove Collaborator
+### 53. Remove Collaborator
 - **Endpoint:** `DELETE /api/v1/projects/{id}/collaborators/{collaboratorId}`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -546,9 +708,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Collaborator removed successfully |
-  | `403`  | Permission denied |
 
-### 38. Get Project Metadata and Stats
+### 54. Get Project Metadata and Stats
 - **Endpoint:** `GET /api/v1/projects/{id}/metadata`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Path Parameters:**
@@ -556,7 +717,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 - **Responses:**
   | Status | Description |
   |--------|-------------|
-  | `200`  | Success — returns project stats (tasks, files, messages, agreements, collaborators counts) |
+  | `200`  | Success — returns project stats counts |
 
 ---
 
@@ -585,7 +746,7 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 }
 ```
 
-### 39. Upload Draft Agreement
+### 55. Upload Draft Agreement
 - **Endpoint:** `POST /api/v1/projects/{projectId}/agreements`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Request Body (Multipart Form):**
@@ -594,10 +755,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `201`  | Draft agreement uploaded successfully |
-  | `400`  | No file uploaded |
-  | `403`  | Plan limit reached or access denied |
 
-### 40. Get All Agreements for Project
+### 56. Get All Agreements for Project
 - **Endpoint:** `GET /api/v1/projects/{projectId}/agreements`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Responses:**
@@ -605,12 +764,9 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   |--------|-------------|
   | `200`  | Returns an array of agreements for the project |
 
-### 41. Edit/Replace Draft Agreement
+### 57. Edit/Replace Draft Agreement
 - **Endpoint:** `PUT /api/v1/projects/{projectId}/agreements/{id}`
 - **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `projectId` (string) - The project ID
-  - `id` (string) - The agreement ID
 - **Request Body (Multipart Form):**
   - `file`: PDF file (optional)
   - `title`: string (optional)
@@ -619,10 +775,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Agreement updated successfully |
-  | `400`  | Cannot edit a signed agreement |
-  | `403`  | Only project owner can edit |
 
-### 42. Update Agreement Status Manually
+### 58. Update Agreement Status Manually
 - **Endpoint:** `PATCH /api/v1/projects/{projectId}/agreements/{id}/status`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Request Body:**
@@ -635,9 +789,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Status updated successfully |
-  | `400`  | Invalid status transition |
 
-### 43. Upload Signed Copy Manually
+### 59. Upload Signed Copy Manually
 - **Endpoint:** `POST /api/v1/projects/{projectId}/agreements/{id}/sign`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Request Body (Multipart Form):**
@@ -646,9 +799,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Signed agreement uploaded and locked |
-  | `400`  | Agreement already signed |
 
-### 44. Electronically Sign Agreement
+### 60. Electronically Sign Agreement
 - **Endpoint:** `POST /api/v1/projects/{projectId}/agreements/{id}/esign`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Request Body:**
@@ -661,287 +813,362 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `200`  | Agreement e-signed successfully |
-  | `400`  | Missing checkbox intent |
 
 ---
 
-## 💬 Messaging Endpoints
+## 🔒 Escrow Payment Endpoints
 
-### 45. Send Message Request
-- **Endpoint:** `POST /api/v1/messaging/requests`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Request Body (required):**
-  ```json
-  {
-    "receiverId": "string",
-    "message": "string"
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `201`  | Message request sent successfully |
-  | `400`  | Bad request (already connected/requested) |
+### Escrow Schema
+```json
+{
+  "id": "string",
+  "projectId": "string",
+  "agreementId": "string",
+  "totalAmount": number,
+  "fundedAmount": number,
+  "releasedAmount": number,
+  "status": "PENDING_FUNDING" | "FUNDED" | "LOCKED" | "COMPLETED",
+  "reviewPeriodDays": number,
+  "createdAt": "ISO 8601"
+}
+```
 
-### 46. Respond to Message Request
-- **Endpoint:** `PATCH /api/v1/messaging/requests/{id}`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (string) - The message request ID
-- **Request Body (required):**
-  ```json
-  {
-    "status": "ACCEPTED" | "DECLINED"
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Response saved successfully. Returns created `chatId` if accepted |
+### Escrow Milestone Schema
+```json
+{
+  "id": "string",
+  "title": "string",
+  "amount": number,
+  "status": "PENDING" | "IN_PROGRESS" | "SUBMITTED" | "AWAITING_REVIEW" | "APPROVED" | "PAYMENT_RELEASED" | "DISPUTED",
+  "dueDate": "ISO 8601 | null",
+  "submittedAt": "ISO 8601 | null",
+  "reviewDeadline": "ISO 8601 | null",
+  "evidence": {
+    "files": ["string"],
+    "links": ["string"],
+    "documents": ["string"],
+    "comment": "string"
+  },
+  "isAutoReleased": boolean,
+  "collaborators": [
+    {
+      "userId": "string",
+      "paymentReference": "string | null",
+      "releasedAt": "ISO 8601 | null"
+    }
+  ]
+}
+```
 
-### 47. List Message Requests
-- **Endpoint:** `GET /api/v1/messaging/requests`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Query Parameters (optional):**
-  | Param | Type | Default | Description |
-  |-------|------|---------|-------------|
-  | `direction` | string | `received` | Direction of requests (`sent` or `received`) |
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns array of message request objects |
-
-### 48. List Direct Chats
-- **Endpoint:** `GET /api/v1/messaging/chats`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns array of chat session objects with last message and unread count |
-
-### 49. Fetch Direct Chat Messages
-- **Endpoint:** `GET /api/v1/messaging/chats/{chatId}/messages`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `chatId` (string) - The chat ID
-- **Query Parameters (optional):**
-  | Param | Type | Default | Description |
-  |-------|------|---------|-------------|
-  | `limit` | integer | `50` | Number of messages to retrieve |
-  | `beforeId` | string | null | Message ID cursor for backwards pagination |
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns array of messages sorted chronologically |
-
-### 50. Send Direct Message / Voice Note
-- **Endpoint:** `POST /api/v1/messaging/chats/{chatId}/messages`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `chatId` (string) - The chat ID
-- **Request Body (optional fields):**
-  ```json
-  {
-    "content": "string",       // text content of message
-    "parentId": "string",      // parent message ID for replies
-    "voiceUrl": "string",      // URL to uploaded voice file
-    "voiceDuration": integer   // duration in seconds
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `201`  | Message sent successfully |
-
-### 51. Mark Chat Messages as Read
-- **Endpoint:** `PATCH /api/v1/messaging/chats/{chatId}/read`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `chatId` (string) - The chat ID
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Chat marked as read successfully |
-
-### 52. Toggle Emoji Reaction on Message
-- **Endpoint:** `POST /api/v1/messaging/messages/{messageId}/reactions`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `messageId` (string) - The message ID
-- **Request Body (required):**
-  ```json
-  {
-    "emoji": "string"
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Reaction toggled (`status`: `ADDED` or `REMOVED`) |
-
-### 53. Archive Direct Chat
-- **Endpoint:** `PATCH /api/v1/messaging/chats/{chatId}/archive`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `chatId` (string) - The chat ID
-- **Request Body (required):**
-  ```json
-  {
-    "isArchived": boolean
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Chat archived or unarchived successfully |
-
-### 54. Delete Direct Chat History
-- **Endpoint:** `DELETE /api/v1/messaging/chats/{chatId}`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `chatId` (string) - The chat ID
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Chat history deleted successfully (soft delete) |
-
----
-
-## 💳 Payments & Wallet Endpoints
-
-### 55. Flutterwave Webhook Callback
-- **Endpoint:** `POST /api/v1/payments/webhook/flutterwave`
-- **Auth Required:** No (Verifies signature header `verif-hash`)
-- **Description:** Receives payment events from Flutterwave.
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Webhook processed |
-
-### 56. Fetch Wallet Balance
-- **Endpoint:** `GET /api/v1/payments/wallet`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns wallet details (balance, currency NGN) |
-
-### 57. Fetch Transaction History
-- **Endpoint:** `GET /api/v1/payments/transactions`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Query Parameters (optional):**
-  | Param | Type | Description |
-  |-------|------|-------------|
-  | `type` | string | Filter by transaction type (`FUNDING`, `WITHDRAWAL`, `ESCROW_CREDIT`, `ESCROW_DEBIT`) |
-  | `status` | string | Filter by status (`PENDING`, `COMPLETED`, `FAILED`, `REVERSED`) |
-  | `page` | integer | Page number |
-  | `limit` | integer | Page size limit |
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns list of transactions and pagination metadata |
-
-### 58. Initialize Wallet Funding
-- **Endpoint:** `POST /api/v1/payments/fund/initialize`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Request Body (required):**
-  ```json
-  {
-    "amount": number,           // minimum 100 NGN
-    "paymentMethod": "string"   // "card" | "banktransfer" | "ussd"
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Payment link generated (`paymentLink`, `txRef`) |
-
-### 59. Verify Wallet Funding
-- **Endpoint:** `GET /api/v1/payments/fund/verify`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Query Parameters (required):**
-  | Param | Type | Description |
-  |-------|------|-------------|
-  | `transaction_id` | string | Flutterwave transaction ID from redirect callback |
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns verification details and wallet balance |
-
-### 60. Get Supported Banks for Withdrawal
-- **Endpoint:** `GET /api/v1/payments/banks`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns array of banks with names and codes |
-
-### 61. Add Bank Account for Withdrawals
-- **Endpoint:** `POST /api/v1/payments/bank-accounts`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Request Body (required):**
-  ```json
-  {
-    "bankCode": "string",
-    "accountNumber": "string"
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `201`  | Bank account registered and verified successfully |
-
-### 62. List Registered Bank Accounts
-- **Endpoint:** `GET /api/v1/payments/bank-accounts`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Returns array of bank account details |
-
-### 63. Remove Registered Bank Account
-- **Endpoint:** `DELETE /api/v1/payments/bank-accounts/{id}`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Path Parameters:**
-  - `id` (string) - Bank account ID
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Bank account soft-deleted |
-
-### 64. Request Payout Withdrawal
-- **Endpoint:** `POST /api/v1/payments/withdraw`
-- **Auth Required:** Yes (`Bearer <token>`)
-- **Request Body (required):**
-  ```json
-  {
-    "bankAccountId": "string",
-    "amount": number // minimum 1000 NGN
-  }
-  ```
-- **Responses:**
-  | Status | Description |
-  |--------|-------------|
-  | `200`  | Withdrawal request submitted successfully |
-
-### 65. Fetch Withdrawal Payout History
-- **Endpoint:** `GET /api/v1/payments/withdrawals`
+### 61. Get Personal Escrow Payments Received
+- **Endpoint:** `GET /api/v1/projects/escrow/my-payments`
 - **Auth Required:** Yes (`Bearer <token>`)
 - **Query Parameters (optional):**
   | Param | Type | Default | Description |
   |-------|------|---------|-------------|
   | `page` | integer | `1` | Page number |
-  | `limit` | integer | `20` | Page size limit |
+  | `limit` | integer | `20` | Page limit size |
 - **Responses:**
   | Status | Description |
   |--------|-------------|
-  | `200`  | Returns array of payout transactions |
+  | `200`  | Returns array of transaction objects |
+
+### 62. Configure Escrow Terms
+- **Endpoint:** `POST /api/v1/projects/{projectId}/escrow`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+- **Request Body (required):**
+  ```json
+  {
+    "totalAmount": number,
+    "agreementId": "string",
+    "reviewPeriodDays": number,
+    "milestones": [
+      {
+        "title": "string",
+        "amount": number,
+        "collaboratorIds": ["string"]
+      }
+    ]
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `201`  | Escrow configured successfully |
+
+### 63. Get Project Escrow Details
+- **Endpoint:** `GET /api/v1/projects/{projectId}/escrow`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns escrow allocations and milestones configurations |
+
+### 64. Get Escrow Status Dashboard
+- **Endpoint:** `GET /api/v1/projects/{projectId}/escrow/status`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns summary of funds locked, milestones progress, allocations |
+
+### 65. Review and Approve/Reject Escrow Proposal
+- **Endpoint:** `PATCH /api/v1/projects/{projectId}/escrow/approve`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+- **Request Body (required):**
+  ```json
+  {
+    "status": "APPROVED" | "CHANGES_REQUESTED" | "REJECTED",
+    "comment": "string"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Proposal review recorded |
+
+### 66. Fund Escrow Proposal
+- **Endpoint:** `POST /api/v1/projects/{projectId}/escrow/fund`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Escrow funded and status set to FUNDED |
+
+### 67. Get Project Escrow Payout History
+- **Endpoint:** `GET /api/v1/projects/{projectId}/escrow/payments`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns list of released payouts for the project |
+
+### 68. Get Milestone Details
+- **Endpoint:** `GET /api/v1/projects/{projectId}/escrow/milestones/{milestoneId}`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+  - `milestoneId` (string) - Milestone ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns milestone details |
+
+### 69. Submit Milestone Evidence
+- **Endpoint:** `POST /api/v1/projects/{projectId}/escrow/milestones/{milestoneId}/submit`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+  - `milestoneId` (string) - Milestone ID
+- **Request Body (required):**
+  ```json
+  {
+    "evidence": {
+      "files": ["string"],
+      "links": ["string"],
+      "documents": ["string"],
+      "comment": "string"
+    }
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Milestone set to AWAITING_REVIEW status |
+
+### 70. Approve Milestone and Release Funds
+- **Endpoint:** `PATCH /api/v1/projects/{projectId}/escrow/milestones/{milestoneId}/approve`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+  - `milestoneId` (string) - Milestone ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Milestone approved and payments released to all assigned collaborators |
+
+### 71. Raise Dispute on Milestone
+- **Endpoint:** `POST /api/v1/projects/{projectId}/escrow/milestones/{milestoneId}/dispute`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `projectId` (string) - Project ID
+  - `milestoneId` (string) - Milestone ID
+- **Request Body (required):**
+  ```json
+  {
+    "reason": "string" // minimum 10 characters
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Dispute raised and milestone locked |
+
+### 72. Resolve Dispute (Admin Only)
+- **Endpoint:** `PATCH /api/v1/projects/escrow/disputes/{milestoneId}/resolve`
+- **Auth Required:** Yes (`Bearer <token>` + Admin)
+- **Path Parameters:**
+  - `milestoneId` (string) - Milestone ID
+- **Request Body (required):**
+  ```json
+  {
+    "resolution": "APPROVE_RELEASE" | "REJECT",
+    "adminComment": "string"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Dispute resolved successfully |
+
+---
+
+## 💳 Subscriptions & Plans Endpoints
+
+### 73. Get Available Plans
+- **Endpoint:** `GET /api/v1/subscriptions/plans`
+- **Auth Required:** No
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns available subscription plans |
+
+### 74. Get Current User Subscription
+- **Endpoint:** `GET /api/v1/subscriptions/me`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns active subscription details |
+
+### 75. Subscribe or Upgrade Plan
+- **Endpoint:** `POST /api/v1/subscriptions/subscribe`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Request Body (required):**
+  ```json
+  {
+    "tier": "ADVANCE" | "PRO" | "ELITE",
+    "billingCycle": "MONTHLY" | "ANNUAL"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Plan subscription successfully initialized/updated |
+
+### 76. Cancel Subscription Auto-Renewal
+- **Endpoint:** `POST /api/v1/subscriptions/cancel`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Auto-renewal cancelled |
+
+### 77. Reactivate Pending Cancellation
+- **Endpoint:** `POST /api/v1/subscriptions/reactivate`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Subscription reactivated successfully |
+
+### 78. Get Billing/Invoice History
+- **Endpoint:** `GET /api/v1/subscriptions/billing/history`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Query Parameters (optional):**
+  | Param | Type | Default | Description |
+  |-------|------|---------|-------------|
+  | `page` | integer | `1` | Page number |
+  | `limit` | integer | `20` | Items per page |
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns paginated list of invoices |
+
+### 79. Get Invoice Details By ID
+- **Endpoint:** `GET /api/v1/subscriptions/billing/invoices/{id}`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `id` (string) - Invoice ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns invoice details |
+
+### 80. Get Invoice PDF Details
+- **Endpoint:** `GET /api/v1/subscriptions/billing/invoices/{id}/pdf`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `id` (string) - Invoice ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns formatted PDF invoice download stream/data |
+
+### 81. Save Payment Method
+- **Endpoint:** `POST /api/v1/subscriptions/payment-methods`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Request Body (required):**
+  ```json
+  {
+    "token": "string",
+    "last4": "string",
+    "brand": "string",
+    "expMonth": integer,
+    "expYear": integer,
+    "type": "CARD" | "BANK_TRANSFER"
+  }
+  ```
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `201`  | Payment method saved successfully |
+
+### 82. List Saved Payment Methods
+- **Endpoint:** `GET /api/v1/subscriptions/payment-methods`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Returns array of saved cards/accounts |
+
+### 83. Set Default Payment Method
+- **Endpoint:** `PATCH /api/v1/subscriptions/payment-methods/{id}/default`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `id` (string) - Payment method ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Set as default payment method |
+
+### 84. Remove Saved Payment Method
+- **Endpoint:** `DELETE /api/v1/subscriptions/payment-methods/{id}`
+- **Auth Required:** Yes (`Bearer <token>`)
+- **Path Parameters:**
+  - `id` (string) - Payment method ID
+- **Responses:**
+  | Status | Description |
+  |--------|-------------|
+  | `200`  | Payment method removed successfully |
 
 ---
 
 ## 📝 Waitlist Endpoints
 
-### 66. Join Waitlist
+### 85. Join Waitlist
 - **Endpoint:** `POST /api/v1/waitlist`
 - **Auth Required:** No
 - **Request Body (required):**
@@ -956,9 +1183,8 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
   | Status | Description |
   |--------|-------------|
   | `201`  | Successfully joined the waitlist |
-  | `400`  | Already registered or bad request |
 
-### 67. Download Waitlist (Admin Only)
+### 86. Download Waitlist (Admin Only)
 - **Endpoint:** `GET /api/v1/waitlist/download`
 - **Auth Required:** Yes (`Bearer <token>` + Admin)
 - **Responses:**
@@ -995,48 +1221,67 @@ Auth: `Authorization: Bearer <JWT>` (Handled via HTTP-only cookies in frontend p
 | 20 | `GET` | `/api/v1/user/profile/portfolio/{userId}` | No | Profile |
 | 21 | `PUT` | `/api/v1/user/profile/portfolio/{projectId}` | Yes | Profile |
 | 22 | `POST` | `/api/v1/user/profile/portfolio/{projectId}/endorsements` | Yes | Profile |
-| 23 | `POST` | `/api/v1/user/connections/request` | Yes | Connections |
-| 24 | `PUT` | `/api/v1/user/connections/request/{id}` | Yes | Connections |
-| 25 | `GET` | `/api/v1/user/connections` | Yes | Connections |
-| 26 | `GET` | `/api/v1/user/connections/pending` | Yes | Connections |
-| 27 | `GET` | `/api/v1/dashboard` | Yes | Dashboard |
-| 28 | `GET` | `/api/v1/notifications` | Yes | Notifications |
-| 29 | `PATCH` | `/api/v1/notifications/read-all` | Yes | Notifications |
-| 30 | `PATCH` | `/api/v1/notifications/{id}/read` | Yes | Notifications |
-| 31 | `POST` | `/api/v1/projects` | Yes | Projects |
-| 32 | `GET` | `/api/v1/projects` | Yes | Projects |
-| 33 | `GET` | `/api/v1/projects/{id}` | Yes | Projects |
-| 34 | `PUT` | `/api/v1/projects/{id}` | Yes | Projects |
-| 35 | `DELETE` | `/api/v1/projects/{id}` | Yes | Projects |
-| 36 | `POST` | `/api/v1/projects/{id}/invite` | Yes | Projects |
-| 37 | `DELETE` | `/api/v1/projects/{id}/collaborators/{collaboratorId}` | Yes | Projects |
-| 38 | `GET` | `/api/v1/projects/{id}/metadata` | Yes | Projects |
-| 39 | `POST` | `/api/v1/projects/{projectId}/agreements` | Yes | Agreements |
-| 40 | `GET` | `/api/v1/projects/{projectId}/agreements` | Yes | Agreements |
-| 41 | `PUT` | `/api/v1/projects/{projectId}/agreements/{id}` | Yes | Agreements |
-| 42 | `PATCH` | `/api/v1/projects/{projectId}/agreements/{id}/status` | Yes | Agreements |
-| 43 | `POST` | `/api/v1/projects/{projectId}/agreements/{id}/sign` | Yes | Agreements |
-| 44 | `POST` | `/api/v1/projects/{projectId}/agreements/{id}/esign` | Yes | Agreements |
-| 45 | `POST` | `/api/v1/messaging/requests` | Yes | Messaging |
-| 46 | `PATCH` | `/api/v1/messaging/requests/{id}` | Yes | Messaging |
-| 47 | `GET` | `/api/v1/messaging/requests` | Yes | Messaging |
-| 48 | `GET` | `/api/v1/messaging/chats` | Yes | Messaging |
-| 49 | `GET` | `/api/v1/messaging/chats/{chatId}/messages` | Yes | Messaging |
-| 50 | `POST` | `/api/v1/messaging/chats/{chatId}/messages` | Yes | Messaging |
-| 51 | `PATCH` | `/api/v1/messaging/chats/{chatId}/read` | Yes | Messaging |
-| 52 | `POST` | `/api/v1/messaging/messages/{messageId}/reactions` | Yes | Messaging |
-| 53 | `PATCH` | `/api/v1/messaging/chats/{chatId}/archive` | Yes | Messaging |
-| 54 | `DELETE` | `/api/v1/messaging/chats/{chatId}` | Yes | Messaging |
-| 55 | `POST` | `/api/v1/payments/webhook/flutterwave` | No | Payments |
-| 56 | `GET` | `/api/v1/payments/wallet` | Yes | Payments |
-| 57 | `GET` | `/api/v1/payments/transactions` | Yes | Payments |
-| 58 | `POST` | `/api/v1/payments/fund/initialize` | Yes | Payments |
-| 59 | `GET` | `/api/v1/payments/fund/verify` | Yes | Payments |
-| 60 | `GET` | `/api/v1/payments/banks` | Yes | Payments |
-| 61 | `POST` | `/api/v1/payments/bank-accounts` | Yes | Payments |
-| 62 | `GET` | `/api/v1/payments/bank-accounts` | Yes | Payments |
-| 63 | `DELETE` | `/api/v1/payments/bank-accounts/{id}` | Yes | Payments |
-| 64 | `POST` | `/api/v1/payments/withdraw` | Yes | Payments |
-| 65 | `GET` | `/api/v1/payments/withdrawals` | Yes | Payments |
-| 66 | `POST` | `/api/v1/waitlist` | No | Waitlist |
-| 67 | `GET` | `/api/v1/waitlist/download` | Yes | Waitlist |
+| 23 | `POST` | `/api/v1/user/security/2fa/setup` | Yes | Security |
+| 24 | `POST` | `/api/v1/user/security/2fa/verify` | Yes | Security |
+| 25 | `POST` | `/api/v1/user/security/logout-all` | Yes | Security |
+| 26 | `POST` | `/api/v1/user/security/deactivate` | Yes | Security |
+| 27 | `DELETE` | `/api/v1/user/security/delete` | Yes | Security |
+| 28 | `POST` | `/api/v1/user/security/data-export` | Yes | Security |
+| 29 | `GET` | `/api/v1/user/security/data-export/{id}` | Yes | Security |
+| 30 | `POST` | `/api/v1/user/security/support-request` | Yes | Security |
+| 31 | `POST` | `/api/v1/user/persona/webhook` | No | Persona |
+| 32 | `GET` | `/api/v1/user/collaborators` | No | Collaborators |
+| 33 | `GET` | `/api/v1/user/collaborators/skills` | No | Collaborators |
+| 34 | `GET` | `/api/v1/user/collaborators/genres` | No | Collaborators |
+| 35 | `PATCH` | `/api/v1/user/collaborators/availability` | Yes | Collaborators |
+| 36 | `GET` | `/api/v1/user/collaborators/{userId}` | No | Collaborators |
+| 37 | `POST` | `/api/v1/user/connections/request` | Yes | Connections |
+| 38 | `PUT` | `/api/v1/user/connections/request/{id}` | Yes | Connections |
+| 39 | `GET` | `/api/v1/user/connections` | Yes | Connections |
+| 40 | `GET` | `/api/v1/user/connections/pending` | Yes | Connections |
+| 41 | `GET` | `/api/v1/dashboard` | Yes | Dashboard |
+| 42 | `GET` | `/api/v1/notifications` | Yes | Notifications |
+| 43 | `PATCH` | `/api/v1/notifications/read-all` | Yes | Notifications |
+| 44 | `PATCH` | `/api/v1/notifications/{id}/read` | Yes | Notifications |
+| 45 | `GET` | `/api/v1/notification-settings` | Yes | Notifications |
+| 46 | `PATCH` | `/api/v1/notification-settings` | Yes | Notifications |
+| 47 | `POST` | `/api/v1/projects` | Yes | Projects |
+| 48 | `GET` | `/api/v1/projects` | Yes | Projects |
+| 49 | `GET` | `/api/v1/projects/{id}` | Yes | Projects |
+| 50 | `PUT` | `/api/v1/projects/{id}` | Yes | Projects |
+| 51 | `DELETE` | `/api/v1/projects/{id}` | Yes | Projects |
+| 52 | `POST` | `/api/v1/projects/{id}/invite` | Yes | Projects |
+| 53 | `DELETE` | `/api/v1/projects/{id}/collaborators/{collaboratorId}` | Yes | Projects |
+| 54 | `GET` | `/api/v1/projects/{id}/metadata` | Yes | Projects |
+| 55 | `POST` | `/api/v1/projects/{projectId}/agreements` | Yes | Agreements |
+| 56 | `GET` | `/api/v1/projects/{projectId}/agreements` | Yes | Agreements |
+| 57 | `PUT` | `/api/v1/projects/{projectId}/agreements/{id}` | Yes | Agreements |
+| 58 | `PATCH` | `/api/v1/projects/{projectId}/agreements/{id}/status` | Yes | Agreements |
+| 59 | `POST` | `/api/v1/projects/{projectId}/agreements/{id}/sign` | Yes | Agreements |
+| 60 | `POST` | `/api/v1/projects/{projectId}/agreements/{id}/esign` | Yes | Agreements |
+| 61 | `GET` | `/api/v1/projects/escrow/my-payments` | Yes | Escrow |
+| 62 | `POST` | `/api/v1/projects/{projectId}/escrow` | Yes | Escrow |
+| 63 | `GET` | `/api/v1/projects/{projectId}/escrow` | Yes | Escrow |
+| 64 | `GET` | `/api/v1/projects/{projectId}/escrow/status` | Yes | Escrow |
+| 65 | `PATCH` | `/api/v1/projects/{projectId}/escrow/approve` | Yes | Escrow |
+| 66 | `POST` | `/api/v1/projects/{projectId}/escrow/fund` | Yes | Escrow |
+| 67 | `GET` | `/api/v1/projects/{projectId}/escrow/payments` | Yes | Escrow |
+| 68 | `GET` | `/api/v1/projects/{projectId}/escrow/milestones/{milestoneId}` | Yes | Escrow |
+| 69 | `POST` | `/api/v1/projects/{projectId}/escrow/milestones/{milestoneId}/submit` | Yes | Escrow |
+| 70 | `PATCH` | `/api/v1/projects/{projectId}/escrow/milestones/{milestoneId}/approve` | Yes | Escrow |
+| 71 | `POST` | `/api/v1/projects/{projectId}/escrow/milestones/{milestoneId}/dispute` | Yes | Escrow |
+| 72 | `PATCH` | `/api/v1/projects/escrow/disputes/{milestoneId}/resolve` | Yes | Escrow |
+| 73 | `GET` | `/api/v1/subscriptions/plans` | No | Subscriptions |
+| 74 | `GET` | `/api/v1/subscriptions/me` | Yes | Subscriptions |
+| 75 | `POST` | `/api/v1/subscriptions/subscribe` | Yes | Subscriptions |
+| 76 | `POST` | `/api/v1/subscriptions/cancel` | Yes | Subscriptions |
+| 77 | `POST` | `/api/v1/subscriptions/reactivate` | Yes | Subscriptions |
+| 78 | `GET` | `/api/v1/subscriptions/billing/history` | Yes | Subscriptions |
+| 79 | `GET` | `/api/v1/subscriptions/billing/invoices/{id}` | Yes | Subscriptions |
+| 80 | `GET` | `/api/v1/subscriptions/billing/invoices/{id}/pdf` | Yes | Subscriptions |
+| 81 | `POST` | `/api/v1/subscriptions/payment-methods` | Yes | Subscriptions |
+| 82 | `GET` | `/api/v1/subscriptions/payment-methods` | Yes | Subscriptions |
+| 83 | `PATCH` | `/api/v1/subscriptions/payment-methods/{id}/default` | Yes | Subscriptions |
+| 84 | `DELETE` | `/api/v1/subscriptions/payment-methods/{id}` | Yes | Subscriptions |
+| 85 | `POST` | `/api/v1/waitlist` | No | Waitlist |
+| 86 | `GET` | `/api/v1/waitlist/download` | Yes | Waitlist |
