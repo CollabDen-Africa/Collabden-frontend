@@ -119,7 +119,7 @@ export default function CreateProjectPage() {
               <textarea
                 placeholder="Describe your project..."
                 {...register("description")}
-                className="w-full h-[178px] bg-white/10 border border-white/20 hover:border-primary-green focus:border-primary-green rounded-[24px] p-6 font-sans font-medium text-[16px] text-white placeholder-white/50 resize-none outline-none transition-all duration-300"
+                className="w-full h-44.5 bg-white/10 border border-white/20 hover:border-primary-green focus:border-primary-green rounded-3x1 p-6 font-sans font-medium text-[16px] text-white placeholder-white/50 resize-none outline-none transition-all duration-300"
               />
               {errors.description && (
                 <p className="text-xs text-red-400 font-medium pl-4 mt-0.5">

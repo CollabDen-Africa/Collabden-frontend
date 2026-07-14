@@ -1,5 +1,20 @@
 //Temporary data until integration
 
+import { 
+  FiGlobe, FiLinkedin, FiInstagram, FiTwitter, FiYoutube, 
+  FiUsers, FiCheckCircle, FiAward, FiUser, 
+    FiEye, 
+    FiLink, 
+    FiCreditCard, 
+    FiBell, 
+    FiShield, 
+    FiLock, 
+    FiActivity, 
+    FiHelpCircle 
+} from "react-icons/fi";
+import { FaDribbble } from "react-icons/fa";
+
+
 // --- USER PROFILE ---
 export const MOCK_USER = {
   firstName: "Emmanuel",
@@ -435,4 +450,69 @@ export const MOCK_DASHBOARD_MESSAGES = [
   { id: 1, sender: "Maya Johnson", text: "Hey Emmanuel! I just listened to the new stems you sent over.", time: "10:30 AM", isMe: false, avatar: "/mock-profiles/small.png" },
   { id: 2, sender: "You", text: "Awesome! What do you think of the transition at the 2-minute mark?", time: "10:35 AM", isMe: true, avatar: "/mock-profiles/user-emmanuel.png" },
   { id: 3, sender: "Maya Johnson", text: "It's super smooth. I might add a tiny bit of reverb to the snare just to give it more depth, but structurally it's perfect.", time: "10:42 AM", isMe: false, avatar: "/mock-profiles/small.png" }
+];
+
+//Mock data for profile page
+export const PRIMARY_ROLES = ["Record Producer", "Sound Designer", "Music Producer", "Composer", "Songwriter"];
+export const SPECIALIZATIONS = ["Sampling", "Live Recording", "Audio Editing", "Podcast Production", "Mixing & Mastering"];
+
+export const PORTFOLIO_ITEMS = [
+  { id: 1, title: "Urban Beats Vol. 2", role: "Producer · Mar 2024", status: "Completed", isCompleted: true, image: "/mock-profiles/UrbanBeatsVol.2.png" },
+  { id: 2, title: "Harmony App Redesign", role: "Song Writer · Jan 2024", status: "Completed", isCompleted: true, image: "/mock-profiles/HarmonyAppRedesign.png" },
+  { id: 3, title: "AfroTech Dashboard", role: "Producer · Nov 2023", status: "Completed", isCompleted: true, image: "/mock-profiles/AfroTechDashboard.png" },
+  { id: 4, title: "CreatorOS Platform", role: "Creative Director · Sep 2023", status: "In Progress", isCompleted: false, image: "/mock-profiles/CreatorOSPlatform.png" },
+];
+
+export const ACHIEVEMENTS = [
+  { id: 1, value: "48", label: "Projects Completed", icon: FiCheckCircle },
+  { id: 2, value: "23", label: "Collaborators", icon: FiUsers },
+  { id: 3, value: "23", label: "Endorsements", icon: FiAward },
+];
+
+export const INSIGHTS = [
+  { id: 1, label: "Profile Views", value: "2.4k", change: "+18%" },
+  { id: 2, label: "Portfolio Engagement", value: "87%", change: "+3%" },
+  { id: 3, label: "Project Invitations", value: "12", change: "+5" },
+  { id: 4, label: "Connection Requests", value: "34", change: "+8" },
+  { id: 5, label: "Profile Saves", value: "12", change: "+5" },
+  { id: 6, label: "Direct Messages", value: "8", change: "+2" },
+];
+
+export const SOCIAL_LINKS = [
+  { id: 1, platform: "Portfolio", handle: "oyinda.design", icon: FiGlobe },
+  { id: 2, platform: "LinkedIn", handle: "/in/oyinda", icon: FiLinkedin },
+  { id: 3, platform: "Instagram", handle: "@oyinda.creates", icon: FiInstagram },
+  { id: 4, platform: "X (Twitter)", handle: "@oyindadesigns", icon: FiTwitter },
+  { id: 5, platform: "Dribbble", handle: "oyinda", icon: FaDribbble },
+  { id: 6, platform: "YouTube", handle: "@oyindacraft", icon: FiYoutube },
+];
+
+export const TESTIMONIALS = [
+  { id: 1, text: "Oyinda is one of the most thoughtful product designers I've ever collaborated with. Her attention to detail is unmatched.", name: "Chinedu Okafor", role: "Project Owner · Urban Beats Vol. 2 · Feb 2024", initials: "CO" },
+  { id: 2, text: "Working with Oyinda was a transformative experience for our brand. She elevated our entire platform's aesthetic.", name: "Amara Nwosu", role: "Startup Founder · Harmony App · Jan 2024", initials: "AN" },
+  { id: 3, text: "Oyinda brings a rare combination of creativity and strategic thinking. She consistently delivers excellence.", name: "David Mensah", role: "Creative Director · AfroTech Dashboard · Dec 2023", initials: "DM" },
+];
+
+//Profile Settings
+export const SETTINGS_SIDEBAR_LINKS = [
+  { id: "profile", label: "My Profile", icon: FiUser, isActive: true },
+  { id: "visibility", label: "Profile Visibility", icon: FiEye, isActive: false },
+  { id: "linked-accounts", label: "Linked Accounts", icon: FiLink, isActive: false },
+  { id: "subscriptions", label: "Subscriptions", icon: FiCreditCard, isActive: false },
+  { id: "notifications", label: "Notifications", icon: FiBell, isActive: false },
+  { id: "security", label: "Security", icon: FiShield, isActive: false },
+  { id: "privacy", label: "Privacy & Controls", icon: FiLock, isActive: false },
+  { id: "activity", label: "Activity", icon: FiActivity, isActive: false },
+  { id: "support", label: "Support & Help", icon: FiHelpCircle, isActive: false },
+];
+
+export const PROFILE_FORM_FIELDS = [
+  { id: "email", label: "Email Address", value: "oyinda@collabden.io" },
+  { id: "phone", label: "Phone Number", value: "+234 801 234 5678" },
+  { id: "legalName", label: "Legal Name", value: "Oyinda Babalola" },
+  { id: "stageName", label: "Stage Name", value: "Oyinda" },
+  { id: "username", label: "Username", value: "@oyinda" },
+  { id: "bio", label: "Bio", value: "Product Designer & Analyst based in Lagos. Building intuitive digital workspaces." },
+  { id: "language", label: "Language", value: "English (US)" },
+  { id: "timezone", label: "Time Zone", value: "Africa/Lagos (WAT, UTC+1)" },
 ];
