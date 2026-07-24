@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from '@/constants/api-endpoints';
 import axios from 'axios';
 import { cookies } from 'next/headers';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
     const cookieStore = await cookies();
@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
     const cookieStore = await cookies();

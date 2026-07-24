@@ -22,7 +22,6 @@ export default function AdminLoginPage() {
     isAuthenticated,
     error: authError,
     clearError,
-    logout,
   } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);

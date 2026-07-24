@@ -10,7 +10,7 @@ export default function PaymentsOverviewPage() {
   
   const { data: wallet } = useWallet();
   const { data: txData } = useTransactions(undefined, undefined, 1, 50);
-  const transactions = txData?.transactions || [];
+  const transactions = useMemo(() => txData?.transactions || [], [txData?.transactions]);
 
   // Dynamically compute balances based on transaction history
   const calculatedMetrics = useMemo(() => {

@@ -7,7 +7,6 @@ import { useSubscription } from "@/hooks/subscription/useSubscription";
 
 export default function ProfileSettingsSubscriptions() {
   const {
-    usePlans,
     useMySubscription,
     useSubscribe,
     useCancelSubscription,

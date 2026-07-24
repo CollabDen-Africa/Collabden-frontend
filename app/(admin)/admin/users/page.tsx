@@ -59,7 +59,7 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const { data, isLoading, isError } = useUsers({
+  const { data, isLoading } = useUsers({
     page,
     limit,
     search: searchTerm || undefined,

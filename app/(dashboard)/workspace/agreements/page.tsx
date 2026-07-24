@@ -13,33 +13,6 @@ import { useWorkspace } from "@/context/WorkspaceContext";
 import { useAgreements } from "@/hooks/projects/useAgreements";
 import { useAuth } from "@/context/AuthContext";
 
-// --- MOCK DATA ---
-const MOCK_AGREEMENTS: any[] = [
-  {
-    id: "agr_1",
-    title: "Freelance Design Agreement",
-    project: "Urban Beats Vol. 2",
-    createdDate: "May 4, 2026",
-    collaboratorsCount: 3,
-    collaborators: [
-      { id: 1, name: "David Chen", image: "/mock-profiles/David.png" },
-      { id: 2, name: "Tayo Oni", image: "/mock-profiles/Tayo.png" },
-      { id: 3, name: "Michael Awe", image: "/mock-profiles/Matt.png" },
-    ],
-    signatories: {
-      completed: 1,
-      total: 3,
-    },
-    lastUpdated: "Updated 2 hours ago",
-    contentPreview: [
-      'This Agreement is entered into as of May 4, 2026, between the parties identified below for the project "Urban Beats Vol. 2".',
-      "The Designer agrees to provide creative services as outlined in the project scope, including brand identity design, visual assets, and delivery of final files in agreed-upon formats.",
-      "[Document continues with full terms and conditions...]"
-    ],
-    isVerified: true
-  }
-];
-
 
 const AgreementCard = ({ 
   agreement, 
