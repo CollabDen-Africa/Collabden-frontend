@@ -1,0 +1,61 @@
+import { NextResponse } from 'next/server';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import axios from 'axios';
+import { cookies } from 'next/headers';
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const { id } = await params;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth-token')?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: 'No authentication token found' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const queryString = searchParams.toString();
+
+    const response = await axios.get(`${API_ENDPOINTS.ADMIN_AUTH.USER_NOTES(id)}${queryString ? `?${queryString}` : ''}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return NextResponse.json(response.data);
+  } catch (error: any) {
+    console.error(`Admin User Notes Fetch Proxy Error (ID: ${id}):`, error.response?.data || error.message);
+    return NextResponse.json(
+      { error: error.response?.data?.error || 'Failed to fetch user notes' },
+      { status: error.response?.status || 500 }
+    );
+  }
+}
+
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const { id } = await params;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth-token')?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: 'No authentication token found' }, { status: 401 });
+    }
+
+    const body = await request.json();
+
+    const response = await axios.post(API_ENDPOINTS.ADMIN_AUTH.USER_NOTES(id), body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return NextResponse.json(response.data);
+  } catch (error: any) {
+    console.error(`Admin User Notes POST Proxy Error (ID: ${id}):`, error.response?.data || error.message);
+    return NextResponse.json(
+      { error: error.response?.data?.error || 'Failed to create user note' },
+      { status: error.response?.status || 500 }
+    );
+  }
+}

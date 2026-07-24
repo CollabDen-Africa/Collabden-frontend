@@ -10,29 +10,41 @@ export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // DEV BYPASS: If running locally, let every request pass through
-    if (process.env.NODE_ENV === 'development') {
-      return NextResponse.next();
-    }
+  if (process.env.NODE_ENV === "development") {
+    return NextResponse.next();
+  }
 
   // Protected route prefixes
   const protectedRoutes = [
     ROUTES.DASHBOARD.ROOT,
     ROUTES.PROJECTS.LIST,
-    '/projects', // Catch-all for projects subroutes
-    '/workspace', // Protected workspace
-    '/intro',     // Protected onboarding intro
+    "/projects", // Catch-all for projects subroutes
+    "/workspace", // Protected workspace
+    "/intro", // Protected onboarding intro
   ];
 
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
   if (isProtectedRoute) {
     // Check for session token cookie
-    const token = request.cookies.get('auth-token');
+    const token = request.cookies.get("auth-token");
 
     if (!token) {
       const loginUrl = new URL(ROUTES.AUTH.LOGIN, request.url);
       // Preserve the intended destination in redirect
-      loginUrl.searchParams.set('callbackUrl', pathname);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // Admin routes protection (exclude /admin which is the login page)
+  if (pathname.startsWith("/admin") && pathname !== "/admin") {
+    const token = request.cookies.get("auth-token");
+    if (!token) {
+      const loginUrl = new URL(ROUTES.ADMIN.LOGIN, request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
   }

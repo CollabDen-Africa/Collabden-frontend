@@ -22,6 +22,15 @@ export interface ResetPasswordPayload {
   token: string;
 }
 
+export interface AdminVerify2FAPayload {
+  adminId: string;
+  code: string;
+}
+
+export interface AdminResend2FAPayload {
+  adminId: string;
+}
+
 const authService = {
   /**
    * Register a new user via local API route
@@ -37,6 +46,30 @@ const authService = {
    */
   login: async (data: LoginPayload) => {
     const response = await localApi.post('/api/auth/login', data);
+    return response.data;
+  },
+
+  /**
+   * Login an admin via local API route
+   */
+  adminLogin: async (data: LoginPayload) => {
+    const response = await localApi.post('/api/admin/auth/login', data);
+    return response.data;
+  },
+
+  /**
+   * Verify admin 2FA code
+   */
+  adminVerify2FA: async (data: AdminVerify2FAPayload) => {
+    const response = await localApi.post('/api/admin/auth/verify-2fa', data);
+    return response.data;
+  },
+
+  /**
+   * Resend admin 2FA code
+   */
+  adminResend2FA: async (data: AdminResend2FAPayload) => {
+    const response = await localApi.post('/api/admin/auth/resend-2fa', data);
     return response.data;
   },
 

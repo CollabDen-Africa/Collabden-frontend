@@ -15,7 +15,15 @@ import { getErrorMessage } from "@/lib/error-handler";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading, login, isAuthenticated, error: authError, clearError, logout } = useAuth();
+  const {
+    user,
+    isLoading: isAuthLoading,
+    adminLogin,
+    isAuthenticated,
+    error: authError,
+    clearError,
+    logout,
+  } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
@@ -44,9 +52,18 @@ export default function AdminLoginPage() {
     clearError();
 
     try {
-      await login(data);
+      const response = await adminLogin(data);
+      console.log("Login Response:", response);
+      if (response && response?.requires2FA) {
+        router.push(
+          `/admin/verify?adminId=${response?.adminId}&email=${response?.email}`
+        );
+        return;
+      }
     } catch (error: unknown) {
-      setLoginError(getErrorMessage(error) || "Invalid credentials. Please try again.");
+      setLoginError(
+        getErrorMessage(error) || "Invalid credentials. Please try again."
+      );
       setIsSubmitting(false);
     }
   };
@@ -64,9 +81,8 @@ export default function AdminLoginPage() {
     if (!isAuthLoading && isAuthenticated && user && !user.isAdmin) {
       setLoginError("Access denied. This portal is restricted to administrators only.");
       setIsSubmitting(false);
-      logout();
     }
-  }, [isAuthLoading, isAuthenticated, user, logout]);
+  }, [isAuthLoading, isAuthenticated, user]);
 
   // While AuthContext is initializing, show the loading spinner
   if (isAuthLoading) {
