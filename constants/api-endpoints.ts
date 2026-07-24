@@ -18,6 +18,8 @@ export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/api/v1/admin/auth/login`,
     VERIFY_2FA: `${API_BASE_URL}/api/v1/admin/auth/verify-2fa`,
     RESEND_2FA: `${API_BASE_URL}/api/v1/admin/auth/resend-2fa`,
+    FORGOT_PASSWORD: `${API_BASE_URL}/api/v1/admin/auth/forgot-password`,
+    RESET_PASSWORD: `${API_BASE_URL}/api/v1/admin/auth/reset-password`,
     ME: `${API_BASE_URL}/api/v1/admin/auth/me`,
     ALL_USERS: `${API_BASE_URL}/api/v1/admin/users/all-users`,
     USER_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}`,
