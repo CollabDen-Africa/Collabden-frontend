@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { AdminDashboardView } from "@/components/features/admin/dashboard/AdminDashboardView";
+import { DashboardView } from "@/components/features/admin/dashboard/DashboardView";
 
 export default function AdminDashboardPage() {
-  return <AdminDashboardView />;
+  return <DashboardView />;
 }

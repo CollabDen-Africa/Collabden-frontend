@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { UsersParams } from '@/services/adminUsers.service';
+import { UsersParams } from '@/services/admin/users.service';
 
 export const useUsers = (params: UsersParams) => {
   return useQuery({

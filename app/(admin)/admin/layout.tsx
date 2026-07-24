@@ -7,7 +7,14 @@ import {
   HiViewGrid, 
   HiOutlineLogout, 
   HiMenu, 
-  HiX 
+  HiX,
+  HiOutlineFolder,
+  HiOutlineShoppingBag,
+  HiOutlineDocumentText,
+  HiOutlineCreditCard,
+  HiOutlineShieldCheck,
+  HiOutlineTicket,
+  HiOutlineCog
 } from "react-icons/hi";
 import { LuUsers } from "react-icons/lu";
 import { IoMailOutline } from "react-icons/io5";
@@ -76,6 +83,13 @@ export default function AdminLayout({
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: HiViewGrid },
     { name: "Users", href: "/admin/users", icon: LuUsers },
+    { name: "Projects", href: "/admin/projects", icon: HiOutlineFolder },
+    { name: "Marketplace", href: "/admin/marketplace", icon: HiOutlineShoppingBag },
+    { name: "Agreements", href: "/admin/agreements", icon: HiOutlineDocumentText },
+    { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
+    { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
+    { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
+    { name: "Settings", href: "/admin/settings", icon: HiOutlineCog },
     { name: "Waitlist", href: "/admin/waitlist", icon: IoMailOutline },
   ];
 
@@ -83,41 +97,49 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen w-full font-sans bg-[#0d0f10] text-white overflow-hidden">
       {/* SIDEBAR (Desktop: static, fixed size, no scroll) */}
-      <aside className="hidden lg:flex flex-col w-62.5 shrink-0 border-r border-white/10 p-6 bg-black/35 backdrop-blur-md justify-between h-screen sticky top-0 z-25">
-        <div className="flex flex-col gap-8">
+      <aside className="hidden lg:flex flex-col w-62.5 shrink-0 border-r border-white/10 p-5 bg-black/35 backdrop-blur-md justify-between h-screen sticky top-0 z-25">
+        <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-1">
           {/* Logo Area */}
-          <div className="flex items-center gap-2 px-2">
-            <div className="w-9 h-9 bg-primary-green rounded-[9px] flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-xl leading-none">
+          <div className="flex items-center gap-2.5 px-2 pt-1">
+            <div className="w-9 h-9 bg-primary-green rounded-[9px] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(115,191,68,0.2)]">
+              <span className="text-[#0d0f10] font-bold text-xl leading-none">
                 C
               </span>
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-white font-bold text-lg leading-tight">
+              <span className="text-white font-bold text-base leading-tight tracking-tight">
                 CollabDen
               </span>
-              <span className="text-primary-green font-semibold text-[11px] leading-tight uppercase tracking-wider">
-                Admin
+              <span className="text-primary-green font-semibold text-[10px] leading-tight uppercase tracking-widest">
+                Admin Portal
               </span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col gap-2">
+          <nav className="flex flex-col gap-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-all ${
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all group ${
                     isActive
-                      ? "bg-primary-green/20 text-primary-green border-l-4 border-primary-green pl-3"
+                      ? "bg-primary-green/15 text-primary-green border-l-4 border-primary-green font-semibold"
                       : "text-white/60 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <item.icon size={18} />
-                  <span>{item.name}</span>
+                  <div className="flex items-center gap-3">
+                    <item.icon size={17} className={isActive ? "text-primary-green" : "text-white/40 group-hover:text-white"} />
+                    <span>{item.name}</span>
+                  </div>
+
+                  {item.badge && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold leading-none ${item.badgeColor}`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}

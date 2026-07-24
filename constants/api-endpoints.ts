@@ -31,6 +31,14 @@ export const API_ENDPOINTS = {
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
   },
+  ADMIN_DASHBOARD: {
+    ROOT: `${API_BASE_URL}/api/v1/dashboard/admin`,
+    USER_STATS: `${API_BASE_URL}/api/v1/dashboard/admin/stats/users`,
+    PROJECT_STATS: `${API_BASE_URL}/api/v1/dashboard/admin/stats/projects`,
+    PENDING_STATS: `${API_BASE_URL}/api/v1/dashboard/admin/stats/pending`,
+    PENDING_ACTIONS: `${API_BASE_URL}/api/v1/dashboard/admin/pending-actions`,
+    ACTIVITIES: `${API_BASE_URL}/api/v1/dashboard/admin/activities`,
+  },
   NOTIFICATIONS: {
     LIST: `${API_BASE_URL}/api/v1/notifications`,
     READ_ALL: `${API_BASE_URL}/api/v1/notifications/read-all`,
