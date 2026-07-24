@@ -6,9 +6,10 @@ import axios from 'axios';
  * where HTTP-only cookies are not yet involved or are handled manually.
  */
 export const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://collabden-backend.onrender.com',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  //|| 'https://collabden-backend.onrender.com',
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 

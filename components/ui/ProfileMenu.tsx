@@ -6,13 +6,6 @@ import { FiChevronDown, FiUser, FiSettings, FiLogOut } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar";
 import { useAuth } from "@/context/AuthContext";
 
-interface UserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  avatarUrl?: string;
-}
 
 export default function ProfileMenu({ user }) {
   const [isOpen, setIsOpen] = useState(false);

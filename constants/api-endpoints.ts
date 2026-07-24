@@ -14,6 +14,18 @@ export const API_ENDPOINTS = {
     GOOGLE_CALLBACK: `${API_BASE_URL}/api/v1/user/auth/google/callback`,
     ONBOARDING: `${API_BASE_URL}/api/v1/user/onboarding`,
   },
+  ADMIN_AUTH: {
+    LOGIN: `${API_BASE_URL}/api/v1/admin/auth/login`,
+    VERIFY_2FA: `${API_BASE_URL}/api/v1/admin/auth/verify-2fa`,
+    RESEND_2FA: `${API_BASE_URL}/api/v1/admin/auth/resend-2fa`,
+    ME: `${API_BASE_URL}/api/v1/admin/auth/me`,
+    ALL_USERS: `${API_BASE_URL}/api/v1/admin/users/all-users`,
+    USER_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}`,
+    USER_ACTIVITY: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/activity`,
+    USER_REPORTS: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/reports`,
+    USER_AUDIT_HISTORY: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/audit-history`,
+    USER_NOTES: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/notes`,
+  },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
   },
