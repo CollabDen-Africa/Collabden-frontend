@@ -18,6 +18,8 @@ export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/api/v1/admin/auth/login`,
     VERIFY_2FA: `${API_BASE_URL}/api/v1/admin/auth/verify-2fa`,
     RESEND_2FA: `${API_BASE_URL}/api/v1/admin/auth/resend-2fa`,
+    FORGOT_PASSWORD: `${API_BASE_URL}/api/v1/admin/auth/forgot-password`,
+    RESET_PASSWORD: `${API_BASE_URL}/api/v1/admin/auth/reset-password`,
     ME: `${API_BASE_URL}/api/v1/admin/auth/me`,
     ALL_USERS: `${API_BASE_URL}/api/v1/admin/users/all-users`,
     USER_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}`,
@@ -28,6 +30,14 @@ export const API_ENDPOINTS = {
   },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
+  },
+  ADMIN_DASHBOARD: {
+    ROOT: `${API_BASE_URL}/api/v1/dashboard/admin`,
+    USER_STATS: `${API_BASE_URL}/api/v1/dashboard/admin/stats/users`,
+    PROJECT_STATS: `${API_BASE_URL}/api/v1/dashboard/admin/stats/projects`,
+    PENDING_STATS: `${API_BASE_URL}/api/v1/dashboard/admin/stats/pending`,
+    PENDING_ACTIONS: `${API_BASE_URL}/api/v1/dashboard/admin/pending-actions`,
+    ACTIVITIES: `${API_BASE_URL}/api/v1/dashboard/admin/activities`,
   },
   NOTIFICATIONS: {
     LIST: `${API_BASE_URL}/api/v1/notifications`,

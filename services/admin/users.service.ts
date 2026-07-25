@@ -10,7 +10,7 @@ export interface UsersParams {
   tier?: string;
 }
 
-const getUsers = async (params: UsersParams) => {
+export const getUsers = async (params: UsersParams) => {
   const response = await axios.get(API_ENDPOINTS.ADMIN_AUTH.ALL_USERS, {
     params,
     withCredentials: true,
@@ -18,8 +18,8 @@ const getUsers = async (params: UsersParams) => {
   return response.data;
 };
 
-const adminUsersService = {
+export const usersService = {
   getUsers,
 };
 
-export default adminUsersService;
+export default usersService;

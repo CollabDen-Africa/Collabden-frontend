@@ -74,6 +74,22 @@ const authService = {
   },
 
   /**
+   * Admin forgot password request
+   */
+  adminForgotPassword: async (email: string) => {
+    const response = await localApi.post('/api/admin/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  /**
+   * Admin reset password
+   */
+  adminResetPassword: async (data: { resetToken: string; newPassword: string }) => {
+    const response = await localApi.post('/api/admin/auth/reset-password', data);
+    return response.data;
+  },
+
+  /**
    * Logout a user via local API route
    */
   logout: async () => {

@@ -39,8 +39,18 @@ export default function middleware(request: NextRequest) {
     }
   }
 
-  // Admin routes protection (exclude /admin which is the login page)
-  if (pathname.startsWith("/admin") && pathname !== "/admin") {
+  // Admin routes protection (exclude public admin auth pages)
+  const publicAdminRoutes = [
+    "/admin",
+    "/admin/verify",
+    "/admin/forgot-password",
+    "/admin/reset-link-sent",
+    "/admin/account-locked",
+    "/admin/reset-password",
+  ];
+  const isPublicAdminRoute = publicAdminRoutes.includes(pathname);
+
+  if (pathname.startsWith("/admin") && !isPublicAdminRoute) {
     const token = request.cookies.get("auth-token");
     if (!token) {
       const loginUrl = new URL(ROUTES.ADMIN.LOGIN, request.url);
