@@ -2,11 +2,10 @@
 import React, { useEffect, useRef } from "react";
 import { FiCheck, FiArrowLeft } from "react-icons/fi";
 import Button from "@/components/ui/Button";
-import { PaymentFlowStep } from "./PaymentsPage";
 
 interface PaymentFlowLayoutProps {
   children: React.ReactNode;
-  currentStep: PaymentFlowStep;
+  currentStep: string;
   onBack?: () => void;
 }
 

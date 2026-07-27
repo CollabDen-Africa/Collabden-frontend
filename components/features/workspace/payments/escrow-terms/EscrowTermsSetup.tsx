@@ -79,7 +79,7 @@ export default function EscrowTermsSetup({
           <div className="flex-1 bg-black/15 border border-white/5 rounded-[30px] p-6 flex flex-col backdrop-blur-md">
             <div className="flex flex-col gap-0.5 mb-6">
               <h3 className="font-raleway font-bold text-[16px] text-white">Escrow Configuration</h3>
-              <p className="font-raleway font-normal text-[12px] text-text-muted">Set the financial parameters for this project's escrow account.</p>
+              <p className="font-raleway font-normal text-[12px] text-text-muted">Set the financial parameters for this project&apos;s escrow account.</p>
             </div>
 
             {/* Form Grid */}

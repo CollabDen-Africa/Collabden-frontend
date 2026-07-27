@@ -189,7 +189,7 @@ export default function EscrowFundingSetup({
                 </h4>
               </div>
               <p className="font-raleway font-normal text-[14px] text-accent-soft-blue/75 leading-[1.6]">
-                Funds are protected until each milestone's release conditions are met and approved by all required collaborators.
+                Funds are protected until each milestone&apos;s release conditions are met and approved by all required collaborators.
               </p>
             </div>
 
