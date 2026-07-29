@@ -27,6 +27,10 @@ export const API_ENDPOINTS = {
     USER_REPORTS: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/reports`,
     USER_AUDIT_HISTORY: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/audit-history`,
     USER_NOTES: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/notes`,
+    ROLES: `${API_BASE_URL}/api/v1/admin/permissions`,
+    ADMIN_ACCOUNTS: `${API_BASE_URL}/api/v1/admin/users`,
+    ADMIN_ACCOUNT_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/users/${id}`,
+    ADMIN_ACCESS_LOGS: `${API_BASE_URL}/api/v1/admin/users/all-users`,
   },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
