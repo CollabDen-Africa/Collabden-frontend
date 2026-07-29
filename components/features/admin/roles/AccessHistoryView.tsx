@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { 
   HiOutlineSearch, 
   HiOutlineClock, 
@@ -122,7 +121,7 @@ export const AccessHistoryView: React.FC = () => {
             <HiOutlineSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" size={18} />
             <input
               type="text"
-              placeholder="Search by name or IP..."
+              placeholder="Search by name or device..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary-green/50 transition-all"
@@ -158,7 +157,6 @@ export const AccessHistoryView: React.FC = () => {
               { label: "Role", key: "roleName" },
               { label: "Timestamp", key: "timestamp" },
               { label: "Device", key: "device" },
-              { label: "IP Address", key: "ipAddress" },
               { label: "Status", key: "status" },
             ]}
           />
@@ -211,13 +209,6 @@ export const AccessHistoryView: React.FC = () => {
                 <HiOutlineDesktopComputer size={15} className="text-white/40 shrink-0" />
                 <span>{log.device}</span>
               </div>
-            ),
-          },
-          {
-            key: "ipAddress",
-            label: "IP ADDRESS",
-            render: (log: AccessHistoryLog) => (
-              <span className="text-sm font-mono text-white/80">{log.ipAddress}</span>
             ),
           },
           {

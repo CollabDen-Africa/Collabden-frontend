@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { HiOutlineArrowLeft, HiOutlineShieldCheck, HiOutlineInformationCircle, HiOutlineUsers } from "react-icons/hi";
+import { HiOutlineArrowLeft, HiOutlineInformationCircle } from "react-icons/hi";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { 
   adminRolesService, 
@@ -129,7 +129,7 @@ export const EditRoleMatrixView: React.FC<EditRoleMatrixViewProps> = ({ roleId }
         {/* Left Matrix Table Column (2/3 width) */}
         <div className="lg:col-span-2 flex flex-col gap-6 bg-white/5 border border-white/10 rounded-2xl p-5 md:p-6 shadow-sm">
           <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left border-collapse min-w-[500px]">
+            <table className="w-full text-left border-collapse min-w-125">
               <thead>
                 <tr className="border-b border-white/10 text-[11px] font-bold uppercase tracking-wider text-white/40">
                   <th className="py-3 px-4">MODULE</th>
@@ -140,7 +140,7 @@ export const EditRoleMatrixView: React.FC<EditRoleMatrixViewProps> = ({ roleId }
               </thead>
               <tbody className="divide-y divide-white/5">
                 {matrix.map((row) => (
-                  <tr key={row.moduleName} className="hover:bg-white/[0.02] transition-colors">
+                  <tr key={row.moduleName} className="hover:bg-white/5 transition-colors">
                     <td className="py-4 px-4 text-sm font-semibold text-white/90">
                       {row.moduleName}
                     </td>
