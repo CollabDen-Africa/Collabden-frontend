@@ -28,6 +28,16 @@ export const API_ENDPOINTS = {
     USER_AUDIT_HISTORY: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/audit-history`,
     USER_NOTES: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}/notes`,
   },
+  ADMIN_PROJECTS: {
+    ALL_PROJECTS: `${API_BASE_URL}/api/v1/admin/projects/all-projects`,
+    PROJECT_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/projects/all-projects/${id}`,
+    PROJECT_ACTIVITY: (id: string) => `${API_BASE_URL}/api/v1/admin/projects/all-projects/${id}/activity`,
+    REPORTS: `${API_BASE_URL}/api/v1/admin/projects/reports`,
+    UPDATE_REPORT_STATUS: (projectId: string, reportId: string) => `${API_BASE_URL}/api/v1/admin/projects/all-projects/${projectId}/reports/${reportId}/status`,
+    PROJECT_NOTES: (id: string) => `${API_BASE_URL}/api/v1/admin/projects/all-projects/${id}/notes`,
+    PROJECT_AUDIT_HISTORY: (id: string) => `${API_BASE_URL}/api/v1/admin/projects/all-projects/${id}/audit`,
+    MODERATE_PROJECT: (id: string) => `${API_BASE_URL}/api/v1/admin/projects/all-projects/${id}/moderate`,
+  },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
   },
