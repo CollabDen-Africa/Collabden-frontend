@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { 
   FiMessageCircle, 
   FiAlertOctagon, 
   FiBookOpen, 
   FiArrowRight,
- FiStar 
+  FiStar,
+  FiLoader
 } from "react-icons/fi";
 import { LuLightbulb } from "react-icons/lu";
+import Button from "@/components/ui/Button";
+import { useSecurity } from "@/hooks/security/useSecurity";
 
 const SUPPORT_CARDS = [
   { 
@@ -54,6 +57,32 @@ const SUPPORT_CARDS = [
 ];
 
 export default function ProfileSettingsSupport() {
+  const { useCreateSupportTicket } = useSecurity();
+  const createTicketMutation = useCreateSupportTicket();
+
+  const [showForm, setShowForm] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+
+  const handleSubmitTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subject.trim() || !message.trim()) return;
+
+    try {
+      await createTicketMutation.mutateAsync({ subject, message });
+      setStatus("Ticket submitted successfully! Our support team will get back to you shortly.");
+      setSubject("");
+      setMessage("");
+      setTimeout(() => {
+        setShowForm(false);
+        setStatus(null);
+      }, 3000);
+    } catch {
+      setStatus("Failed to submit ticket. Please try again.");
+    }
+  };
+
   return (
     <div className="flex flex-col w-full flex-1 gap-8.75 animate-in fade-in duration-300 pb-10">
       
@@ -99,6 +128,11 @@ export default function ProfileSettingsSupport() {
 
               {/* Action Link */}
               <button 
+                onClick={() => {
+                  if (card.id === 'contact' || card.id === 'report') {
+                    setShowForm(true);
+                  }
+                }}
                 className="flex items-center gap-1.5 mt-[17.6px] w-fit group-hover:opacity-80 transition-opacity"
                 style={{ color: card.color }}
               >
@@ -111,6 +145,61 @@ export default function ProfileSettingsSupport() {
           );
         })}
       </div>
+
+      {/* Ticket Form */}
+      {showForm && (
+        <form onSubmit={handleSubmitTicket} className="w-full bg-white/15 border border-white/10 rounded-[35px] p-8 flex flex-col gap-4 animate-in slide-in-from-bottom-6 duration-300">
+          <h2 className="font-raleway font-semibold text-[22px] text-white">Submit a Support Ticket</h2>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] text-white/70">Subject</label>
+            <input
+              type="text"
+              required
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="How can we help?"
+              className="w-full h-[45px] rounded-xl bg-black/20 border border-white/10 px-4 text-white outline-none focus:border-primary-green placeholder:text-white/20"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] text-white/70">Message</label>
+            <textarea
+              required
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Describe your issue in detail..."
+              className="w-full rounded-xl bg-black/20 border border-white/10 p-4 text-white outline-none focus:border-primary-green placeholder:text-white/20 resize-none"
+            />
+          </div>
+
+          {status && (
+            <span className={`text-[14px] ${status.includes("successfully") ? "text-primary-green" : "text-red-400"}`}>
+              {status}
+            </span>
+          )}
+
+          <div className="flex gap-3 mt-2">
+            <Button
+              type="submit"
+              disabled={createTicketMutation.isPending}
+              className="bg-primary-green text-white px-6"
+            >
+              {createTicketMutation.isPending ? <FiLoader className="animate-spin m-auto" /> : "Submit Ticket"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowForm(false);
+                setStatus(null);
+              }}
+              className="text-white border-white/10"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
 
       {/* System Status Footer Card */}
       <div className="w-full bg-primary-green/5 border-[1.6px] border-primary-green/15 rounded-[35px] px-7.25 py-5.75 flex flex-row items-center justify-between backdrop-blur-md mt-2.5">

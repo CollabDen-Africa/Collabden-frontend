@@ -45,3 +45,4 @@ next-env.d.ts
 #documentation
 rules
 .amazonq
+arch.md
