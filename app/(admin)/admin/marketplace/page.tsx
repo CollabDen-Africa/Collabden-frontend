@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import { FeatureInProgressView } from "@/components/features/admin/shared/FeatureInProgressView";
+import { AdminMarketplaceView } from "@/components/features/admin/marketplace/AdminMarketplaceView";
 
-export default function MarketplaceAdminPage() {
-  return (
-    <FeatureInProgressView
-      title="Marketplace Administration"
-      description="The Marketplace listings and store management module is currently under construction."
-    />
-  );
+export default function AdminMarketplacePage() {
+  return <AdminMarketplaceView />;
 }
