@@ -6,9 +6,9 @@ import { Tabs } from "@/components/ui/Tabs";
 import { AgreementHeaderBanner } from "./AgreementHeaderBanner";
 import { AgreementInfoTab, AgreementInfoData } from "./AgreementInfoTab";
 import { AgreementActivityTab, ActivityEventItem } from "./AgreementActivityTab";
+import { AgreementAuditLogTab } from "./AgreementAuditLogTab";
 import { MarketplaceCollabReportsTab } from "@/components/features/admin/marketplace/MarketplaceCollabReportsTab";
-import { MarketplaceCollabNotesAuditTab } from "@/components/features/admin/marketplace/MarketplaceCollabNotesAuditTab";
-import { useAgreementDetailQuery, useAgreementActivityQuery, useAdminAgreements } from "@/hooks/admin/useAdminAgreements";
+import { useAgreementDetailQuery, useAgreementActivityQuery } from "@/hooks/admin/useAdminAgreements";
 
 interface AgreementDetailProps {
   id: string;
@@ -55,9 +55,8 @@ const MOCK_ACTIVITY_EVENTS: ActivityEventItem[] = [
 export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
   const [activeTab, setActiveTab] = useState("Agreement Details");
 
-  const { data: remoteDetail, isLoading, isError } = useAgreementDetailQuery(id);
+  const { data: remoteDetail, isLoading } = useAgreementDetailQuery(id);
   const { data: remoteActivity } = useAgreementActivityQuery(id);
-  const { createNote } = useAdminAgreements();
 
   if (isLoading) return <div className="p-8 text-white/40 text-center">Loading agreement details...</div>;
 
@@ -89,10 +88,6 @@ export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
   const reports = remoteDetail?.reports || [];
   const auditLogs = remoteDetail?.auditLogs || [];
 
-  const handleAddNote = async (noteText: string) => {
-    await createNote({ note: noteText, agreementId: id });
-  };
-
   return (
     <div className="w-full flex flex-col gap-6 pb-12 text-white animate-in fade-in duration-300">
       {/* Breadcrumb Trail */}
@@ -121,7 +116,7 @@ export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
 
         {/* Detail Sub-Tabs Bar */}
         <Tabs
-          tabs={["Agreement Details", "Activity History", `Reports (${reports.length})`, "Notes & Audit"]}
+          tabs={["Agreement Details", "Activity History", `Reports (${reports.length})`, "Audit Log"]}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
@@ -133,8 +128,12 @@ export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
 
         {activeTab.startsWith("Reports") && <MarketplaceCollabReportsTab reports={reports} />}
 
-        {activeTab === "Notes & Audit" && (
-          <MarketplaceCollabNotesAuditTab logs={auditLogs} onAddNote={handleAddNote} />
+        {activeTab === "Audit Log" && (
+          <AgreementAuditLogTab
+            logs={auditLogs}
+            agreementTitle={infoData.projectName}
+            agreementId={infoData.agreementId}
+          />
         )}
       </div>
     </div>
