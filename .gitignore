@@ -42,7 +42,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#documentation
+# documentation & agents
 rules
 .amazonq
 arch.md
+.agents/
+AGENTS.md
+final prompt.md

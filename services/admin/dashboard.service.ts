@@ -1,4 +1,5 @@
-import { localApi } from "@/lib/axios";
+import axiosInstance from "@/lib/axios";
+import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export interface DashboardOverviewData {
   totalUsers?: number;
@@ -35,7 +36,7 @@ export interface ActivityItem {
 export const dashboardService = {
   getOverview: async (): Promise<DashboardOverviewData> => {
     try {
-      const response = await localApi.get("/api/proxy/dashboard/admin");
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_DASHBOARD.ROOT);
       return response.data?.data || response.data || {};
     } catch {
       return {};
@@ -44,7 +45,7 @@ export const dashboardService = {
 
   getPendingActions: async (): Promise<PendingActionsData> => {
     try {
-      const response = await localApi.get("/api/proxy/dashboard/admin/pending-actions");
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_DASHBOARD.PENDING_ACTIONS);
       return response.data?.data || response.data || {};
     } catch {
       return {};
@@ -53,7 +54,7 @@ export const dashboardService = {
 
   getRecentActivities: async (limit = 10): Promise<ActivityItem[]> => {
     try {
-      const response = await localApi.get("/api/proxy/dashboard/admin/activities", {
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_DASHBOARD.ACTIVITIES, {
         params: { limit },
       });
       return response.data?.data || (Array.isArray(response.data) ? response.data : []);

@@ -1,4 +1,5 @@
-import axiosInstance, { localApi } from "@/lib/axios";
+import axiosInstance from "@/lib/axios";
+import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export interface SignupPayload {
   email: string;
@@ -33,27 +34,26 @@ export interface AdminResend2FAPayload {
 
 const authService = {
   /**
-   * Register a new user via local API route
-   * @param data { email, password }
+   * Register a new user
    */
   signup: async (data: SignupPayload) => {
-    const response = await localApi.post('/api/auth/signup', data);
+    const response = await axiosInstance.post(API_ENDPOINTS.AUTH.SIGNUP, data);
     return response.data;
   },
 
   /**
-   * Login a user via local API route
+   * Login a user
    */
   login: async (data: LoginPayload) => {
-    const response = await localApi.post('/api/auth/login', data);
+    const response = await axiosInstance.post(API_ENDPOINTS.AUTH.LOGIN, data);
     return response.data;
   },
 
   /**
-   * Login an admin via local API route
+   * Login an admin
    */
   adminLogin: async (data: LoginPayload) => {
-    const response = await localApi.post('/api/admin/auth/login', data);
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.LOGIN, data);
     return response.data;
   },
 
@@ -61,7 +61,7 @@ const authService = {
    * Verify admin 2FA code
    */
   adminVerify2FA: async (data: AdminVerify2FAPayload) => {
-    const response = await localApi.post('/api/admin/auth/verify-2fa', data);
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.VERIFY_2FA, data);
     return response.data;
   },
 
@@ -69,7 +69,7 @@ const authService = {
    * Resend admin 2FA code
    */
   adminResend2FA: async (data: AdminResend2FAPayload) => {
-    const response = await localApi.post('/api/admin/auth/resend-2fa', data);
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.RESEND_2FA, data);
     return response.data;
   },
 
@@ -77,7 +77,7 @@ const authService = {
    * Admin forgot password request
    */
   adminForgotPassword: async (email: string) => {
-    const response = await localApi.post('/api/admin/auth/forgot-password', { email });
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.FORGOT_PASSWORD, { email });
     return response.data;
   },
 
@@ -85,23 +85,27 @@ const authService = {
    * Admin reset password
    */
   adminResetPassword: async (data: { resetToken: string; newPassword: string }) => {
-    const response = await localApi.post('/api/admin/auth/reset-password', data);
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.RESET_PASSWORD, data);
     return response.data;
   },
 
   /**
-   * Logout a user via local API route
+   * Logout user / admin
    */
   logout: async () => {
-    const response = await localApi.post('/api/auth/logout');
-    return response.data;
+    try {
+      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.ME.replace('/me', '/logout'));
+      return response.data;
+    } catch {
+      return { success: true };
+    }
   },
 
   /**
-   * Get current user profile via local proxy
+   * Get current user profile
    */
   getProfile: async () => {
-    const response = await localApi.get('/api/auth/profile');
+    const response = await axiosInstance.get(API_ENDPOINTS.AUTH.PROFILE);
     return response.data;
   },
 
@@ -112,8 +116,8 @@ const authService = {
     if (!data.email) {
       throw new Error("Email is required for verification.");
     }
-    const response = await localApi.post(
-      '/api/auth/verify',
+    const response = await axiosInstance.post(
+      API_ENDPOINTS.AUTH.VERIFY,
       {
         email: data.email.trim(),
         verificationToken: data.verificationToken,
@@ -129,8 +133,8 @@ const authService = {
     if (!email) {
       throw new Error("Email is required to resend verification code.");
     }
-    const response = await localApi.post(
-      '/api/auth/resend-verify',
+    const response = await axiosInstance.post(
+      API_ENDPOINTS.AUTH.RESEND_VERIFY,
       { email: email.trim() }
     );
     return response.data;
@@ -140,8 +144,8 @@ const authService = {
    * Request password reset link
    */
   forgotPassword: async (email: string) => {
-    const response = await localApi.post(
-      '/api/auth/forgot-password',
+    const response = await axiosInstance.post(
+      API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
       { email }
     );
     return response.data;
@@ -151,8 +155,8 @@ const authService = {
    * Reset password with token
    */
   resetPassword: async (data: ResetPasswordPayload) => {
-    const response = await localApi.post(
-      '/api/auth/reset-password',
+    const response = await axiosInstance.post(
+      API_ENDPOINTS.AUTH.RESET_PASSWORD,
       data
     );
     return response.data;
@@ -162,7 +166,7 @@ const authService = {
    * Update user onboarding status
    */
   updateOnboarding: async (data: { hasCompletedOnboarding: boolean }) => {
-    const response = await localApi.patch('/api/proxy/user/onboarding', {
+    const response = await axiosInstance.patch(API_ENDPOINTS.AUTH.ONBOARDING, {
       completed: data.hasCompletedOnboarding
     });
     return response.data;

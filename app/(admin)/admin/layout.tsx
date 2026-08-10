@@ -89,9 +89,18 @@ export default function AdminLayout({
     { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
     { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
     { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
+    { name: "Admin Roles", href: "/admin/roles", icon: HiOutlineShieldCheck },
     { name: "Settings", href: "/admin/settings", icon: HiOutlineCog },
     { name: "Waitlist", href: "/admin/waitlist", icon: IoMailOutline },
   ];
+
+  const getHeaderTitle = (path: string) => {
+    if (path === "/admin/dashboard") return "Admin Console";
+    if (path === "/admin/roles") return "Admin Roles & Permissions";
+    if (path === "/admin/users") return "User Management";
+    if (path === "/admin/waitlist") return "Waitlist Manager";
+    return "Admin Portal";
+  };
 
   // Shell Layout with persistent static sidebar and scrollable right content
   return (
@@ -231,9 +240,7 @@ export default function AdminLayout({
               <HiMenu size={20} />
             </button>
             <h2 className="text-lg font-bold font-sans capitalize tracking-wide text-white/90">
-              {pathname === "/admin/dashboard"
-                ? "Admin Console"
-                : "Waitlist Manager"}
+              {getHeaderTitle(pathname)}
             </h2>
           </div>
 

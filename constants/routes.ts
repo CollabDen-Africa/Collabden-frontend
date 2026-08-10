@@ -28,6 +28,10 @@ export const ROUTES = {
     LOGIN: "/admin",
     DASHBOARD: "/admin/dashboard",
     WAITLIST: "/admin/waitlist",
+    ROLES: "/admin/roles",
+    ROLES_ACCOUNTS: "/admin/roles/accounts",
+    ROLES_ACCESS_HISTORY: "/admin/roles/access-history",
+    ROLE_EDIT: (id: string) => `/admin/roles/${id}/edit`,
   },
 };
 
