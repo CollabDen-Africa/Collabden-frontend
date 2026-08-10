@@ -1,28 +1,21 @@
 import axios from 'axios';
 
 /**
- * axiosInstance: Dedicated to direct backend communication.
- * Primarily used in Server Components or for initial data fetching 
- * where HTTP-only cookies are not yet involved or are handled manually.
+ * Unified axiosInstance: Direct backend communication with HTTP-only cookies.
+ * Configured with `withCredentials: true` to ensure HTTP-only session cookies
+ * are automatically sent with all requests to NEXT_PUBLIC_API_BASE_URL.
  */
 export const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  //|| 'https://collabden-backend.onrender.com',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://collabden-backend.onrender.com',
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 /**
- * localApi: Dedicated to calling the frontend's local API routes (/api/*).
- * This is the standard for Client Components to ensure that the browser 
- * automatically attaches HTTP-only session cookies to requests.
+ * @deprecated Deprecated in favor of direct API calls using `axiosInstance` with `withCredentials: true`.
  */
-export const localApi = axios.create({
-  baseURL: '', // Relative to the current domain
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export const localApi = axiosInstance;
 
 export default axiosInstance;

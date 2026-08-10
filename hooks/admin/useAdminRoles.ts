@@ -13,21 +13,21 @@ export const useAdminRoles = () => {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const loadRoles = async () => {
-      setIsLoading(true);
-      try {
-        const fetched = await adminRolesService.getRoles();
-        if (fetched && fetched.length > 0) {
-          setRoles(fetched);
-        }
-      } catch (error) {
-        console.error("Failed to load admin roles", error);
-      } finally {
-        setIsLoading(false);
+  const loadRoles = async () => {
+    setIsLoading(true);
+    try {
+      const fetched = await adminRolesService.getRoles();
+      if (fetched && fetched.length > 0) {
+        setRoles(fetched);
       }
-    };
+    } catch (error) {
+      console.error("Failed to load admin roles", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadRoles();
   }, []);
 
@@ -66,6 +66,24 @@ export const useAdminRoles = () => {
     return created;
   };
 
+  const handleUpdateRole = async (roleKey: string, payload: Partial<CreateRolePayload>) => {
+    const updated = await adminRolesService.updateRole(roleKey, payload);
+    await loadRoles();
+    return updated;
+  };
+
+  const handleAddPermissions = async (roleKey: string, permissions: string[]) => {
+    const updated = await adminRolesService.addRolePermissions(roleKey, permissions);
+    await loadRoles();
+    return updated;
+  };
+
+  const handleRemovePermissions = async (roleKey: string, permissions: string[]) => {
+    const updated = await adminRolesService.removeRolePermissions(roleKey, permissions);
+    await loadRoles();
+    return updated;
+  };
+
   const handleToggleRoleStatus = (roleId: string) => {
     setRoles((prev) =>
       prev.map((role) => {
@@ -82,7 +100,12 @@ export const useAdminRoles = () => {
     );
   };
 
-  const handleDeleteRole = (roleId: string) => {
+  const handleDeleteRole = async (roleId: string) => {
+    try {
+      await adminRolesService.deleteRole(roleId);
+    } catch {
+      // Fallback local update
+    }
     setRoles((prev) => prev.filter((r) => r.id !== roleId));
   };
 
@@ -96,7 +119,11 @@ export const useAdminRoles = () => {
     statusFilter,
     setStatusFilter,
     handleCreateRole,
+    handleUpdateRole,
+    handleAddPermissions,
+    handleRemovePermissions,
     handleToggleRoleStatus,
     handleDeleteRole,
+    refreshRoles: loadRoles,
   };
 };

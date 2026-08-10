@@ -1,4 +1,4 @@
-import { localApi } from "@/lib/axios";
+import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export interface AdminRoleItem {
@@ -182,61 +182,6 @@ export const INITIAL_ADMIN_ACCOUNTS: AdminAccountItem[] = [
     status: "Active",
     dateAdded: "Feb 12, 2024",
     initials: "AE"
-  },
-  {
-    id: "admin-3",
-    firstName: "Tunde",
-    lastName: "Bello",
-    email: "tunde@collabden.com",
-    roleName: "Finance Admin",
-    roleKey: "FINANCE_ADMIN",
-    status: "Active",
-    dateAdded: "Mar 3, 2024",
-    initials: "TB"
-  },
-  {
-    id: "admin-4",
-    firstName: "Zara",
-    lastName: "Musa",
-    email: "zara@collabden.com",
-    roleName: "Verification Admin",
-    roleKey: "VERIFICATION_ADMIN",
-    status: "Active",
-    dateAdded: "Mar 20, 2024",
-    initials: "ZM"
-  },
-  {
-    id: "admin-5",
-    firstName: "Emeka",
-    lastName: "Nwosu",
-    email: "emeka@collabden.com",
-    roleName: "Marketplace Moderator",
-    roleKey: "MARKETPLACE_MODERATOR",
-    status: "Inactive",
-    dateAdded: "Apr 7, 2024",
-    initials: "EN"
-  },
-  {
-    id: "admin-6",
-    firstName: "Fatima",
-    lastName: "Al-Said",
-    email: "fatima@collabden.com",
-    roleName: "Support Admin",
-    roleKey: "SUPPORT_ADMIN",
-    status: "Active",
-    dateAdded: "May 1, 2024",
-    initials: "FA"
-  },
-  {
-    id: "admin-7",
-    firstName: "Kola",
-    lastName: "Adewale",
-    email: "kola@collabden.com",
-    roleName: "Finance Admin",
-    roleKey: "FINANCE_ADMIN",
-    status: "Active",
-    dateAdded: "May 19, 2024",
-    initials: "KA"
   }
 ];
 
@@ -251,92 +196,13 @@ export const INITIAL_ACCESS_LOGS: AccessHistoryLog[] = [
     device: "macOS · Chrome",
     ipAddress: "197.211.45.32",
     status: "Success"
-  },
-  {
-    id: "log-2",
-    adminName: "Amaka Eze",
-    initials: "AE",
-    roleName: "Support Admin",
-    roleKey: "SUPPORT_ADMIN",
-    timestamp: "Today, 08:52 AM",
-    device: "Windows · Edge",
-    ipAddress: "105.112.78.11",
-    status: "Success"
-  },
-  {
-    id: "log-3",
-    adminName: "Tunde Bello",
-    initials: "TB",
-    roleName: "Finance Admin",
-    roleKey: "FINANCE_ADMIN",
-    timestamp: "Today, 08:31 AM",
-    device: "macOS · Safari",
-    ipAddress: "197.255.101.5",
-    status: "Success"
-  },
-  {
-    id: "log-4",
-    adminName: "Unknown",
-    initials: "?",
-    roleName: "—",
-    roleKey: "UNKNOWN",
-    timestamp: "Yesterday, 11:47 PM",
-    device: "Linux · Firefox",
-    ipAddress: "45.153.204.19",
-    status: "Failed",
-    isSuspicious: true
-  },
-  {
-    id: "log-5",
-    adminName: "Zara Musa",
-    initials: "ZM",
-    roleName: "Verification Admin",
-    roleKey: "VERIFICATION_ADMIN",
-    timestamp: "Yesterday, 06:20 PM",
-    device: "iOS · Safari",
-    ipAddress: "197.211.89.44",
-    status: "Success"
-  },
-  {
-    id: "log-6",
-    adminName: "Fatima Al-Said",
-    initials: "FA",
-    roleName: "Support Admin",
-    roleKey: "SUPPORT_ADMIN",
-    timestamp: "Yesterday, 03:15 PM",
-    device: "Android · Chrome",
-    ipAddress: "105.100.34.77",
-    status: "Success"
-  },
-  {
-    id: "log-7",
-    adminName: "Kola Adewale",
-    initials: "KA",
-    roleName: "Finance Admin",
-    roleKey: "FINANCE_ADMIN",
-    timestamp: "Jul 13, 2025, 10:08 AM",
-    device: "Windows · Chrome",
-    ipAddress: "197.210.55.88",
-    status: "Success"
-  },
-  {
-    id: "log-8",
-    adminName: "Unknown",
-    initials: "?",
-    roleName: "—",
-    roleKey: "UNKNOWN",
-    timestamp: "Jul 13, 2025, 03:22 AM",
-    device: "Unknown Device",
-    ipAddress: "83.22.144.201",
-    status: "Locked",
-    isSuspicious: true
   }
 ];
 
 class AdminRolesService {
   async getRoles(): Promise<AdminRoleItem[]> {
     try {
-      const response = await localApi.get(API_ENDPOINTS.ADMIN_AUTH.ROLES);
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ROLES);
       if (response.data?.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
@@ -346,7 +212,60 @@ class AdminRolesService {
     return INITIAL_ROLES_DATA;
   }
 
+  async getAvailableRoles(): Promise<any> {
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.AVAILABLE_ROLES);
+    return response.data?.data || response.data;
+  }
+
+  async getRolesHistory(): Promise<any> {
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ROLES_HISTORY);
+    return response.data?.data || response.data;
+  }
+
+  async getRoleDetail(role: string): Promise<any> {
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ROLE_DETAIL(role));
+    return response.data?.data || response.data;
+  }
+
+  async updateRole(role: string, payload: Partial<CreateRolePayload>): Promise<any> {
+    const response = await axiosInstance.put(API_ENDPOINTS.ADMIN_AUTH.UPDATE_ROLE(role), payload);
+    return response.data?.data || response.data;
+  }
+
+  async addRolePermissions(role: string, permissions: string[]): Promise<any> {
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.ADD_ROLE_PERMISSIONS(role), { permissions });
+    return response.data?.data || response.data;
+  }
+
+  async removeRolePermissions(role: string, permissions: string[]): Promise<any> {
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.REMOVE_ROLE_PERMISSIONS(role), { permissions });
+    return response.data?.data || response.data;
+  }
+
+  async addRoleModules(role: string, modules: string[]): Promise<any> {
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.ADD_ROLE_MODULES(role), { modules });
+    return response.data?.data || response.data;
+  }
+
+  async removeRoleModules(role: string, modules: string[]): Promise<any> {
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.REMOVE_ROLE_MODULES(role), { modules });
+    return response.data?.data || response.data;
+  }
+
+  async deleteRole(role: string): Promise<any> {
+    const response = await axiosInstance.delete(API_ENDPOINTS.ADMIN_AUTH.DELETE_ROLE(role));
+    return response.data?.data || response.data;
+  }
+
   async createRole(payload: CreateRolePayload): Promise<AdminRoleItem> {
+    try {
+      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.ROLES, payload);
+      if (response.data?.data) {
+        return response.data.data;
+      }
+    } catch (error) {
+      console.warn("Could not create role via API, using local mock", error);
+    }
     const newRole: AdminRoleItem = {
       id: `role-${Date.now()}`,
       name: payload.name,
@@ -365,7 +284,7 @@ class AdminRolesService {
 
   async getAdminAccounts(): Promise<AdminAccountItem[]> {
     try {
-      const response = await localApi.get(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCOUNTS);
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCOUNTS);
       if (response.data?.data && Array.isArray(response.data.data)) {
         return response.data.data.map((u: any) => ({
           id: u.id,
@@ -385,7 +304,25 @@ class AdminRolesService {
     return INITIAL_ADMIN_ACCOUNTS;
   }
 
+  async updateAdminRole(id: string, roleKey: string): Promise<any> {
+    const response = await axiosInstance.put(API_ENDPOINTS.ADMIN_AUTH.UPDATE_ADMIN_ROLE(id), { role: roleKey });
+    return response.data?.data || response.data;
+  }
+
+  async deactivateAdmin(id: string): Promise<any> {
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.DEACTIVATE_ADMIN(id));
+    return response.data?.data || response.data;
+  }
+
   async inviteAdmin(payload: InviteAdminPayload): Promise<AdminAccountItem> {
+    try {
+      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCOUNTS, payload);
+      if (response.data?.data) {
+        return response.data.data;
+      }
+    } catch (error) {
+      console.warn("Could not invite admin via API, using fallback data", error);
+    }
     const newAccount: AdminAccountItem = {
       id: `admin-${Date.now()}`,
       firstName: payload.firstName,
@@ -402,7 +339,7 @@ class AdminRolesService {
 
   async getAccessHistoryLogs(): Promise<AccessHistoryLog[]> {
     try {
-      const response = await localApi.get(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCESS_LOGS);
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCESS_LOGS);
       if (response.data?.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
