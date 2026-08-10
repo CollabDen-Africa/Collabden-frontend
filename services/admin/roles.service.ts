@@ -202,7 +202,7 @@ export const INITIAL_ACCESS_LOGS: AccessHistoryLog[] = [
 class AdminRolesService {
   async getRoles(): Promise<AdminRoleItem[]> {
     try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ROLES);
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_PERMISSIONS.ROLES);
       if (response.data?.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
@@ -213,53 +213,53 @@ class AdminRolesService {
   }
 
   async getAvailableRoles(): Promise<any> {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.AVAILABLE_ROLES);
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_PERMISSIONS.AVAILABLE_ROLES);
     return response.data?.data || response.data;
   }
 
   async getRolesHistory(): Promise<any> {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ROLES_HISTORY);
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_PERMISSIONS.ROLES_HISTORY);
     return response.data?.data || response.data;
   }
 
   async getRoleDetail(role: string): Promise<any> {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ROLE_DETAIL(role));
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_PERMISSIONS.ROLE_DETAIL(role));
     return response.data?.data || response.data;
   }
 
   async updateRole(role: string, payload: Partial<CreateRolePayload>): Promise<any> {
-    const response = await axiosInstance.put(API_ENDPOINTS.ADMIN_AUTH.UPDATE_ROLE(role), payload);
+    const response = await axiosInstance.put(API_ENDPOINTS.ADMIN_PERMISSIONS.UPDATE_ROLE(role), payload);
     return response.data?.data || response.data;
   }
 
   async addRolePermissions(role: string, permissions: string[]): Promise<any> {
-    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.ADD_ROLE_PERMISSIONS(role), { permissions });
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_PERMISSIONS.ADD_ROLE_PERMISSIONS(role), { permissions });
     return response.data?.data || response.data;
   }
 
   async removeRolePermissions(role: string, permissions: string[]): Promise<any> {
-    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.REMOVE_ROLE_PERMISSIONS(role), { permissions });
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_PERMISSIONS.REMOVE_ROLE_PERMISSIONS(role), { permissions });
     return response.data?.data || response.data;
   }
 
   async addRoleModules(role: string, modules: string[]): Promise<any> {
-    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.ADD_ROLE_MODULES(role), { modules });
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_PERMISSIONS.ADD_ROLE_MODULES(role), { modules });
     return response.data?.data || response.data;
   }
 
   async removeRoleModules(role: string, modules: string[]): Promise<any> {
-    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.REMOVE_ROLE_MODULES(role), { modules });
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_PERMISSIONS.REMOVE_ROLE_MODULES(role), { modules });
     return response.data?.data || response.data;
   }
 
   async deleteRole(role: string): Promise<any> {
-    const response = await axiosInstance.delete(API_ENDPOINTS.ADMIN_AUTH.DELETE_ROLE(role));
+    const response = await axiosInstance.delete(API_ENDPOINTS.ADMIN_PERMISSIONS.DELETE_ROLE(role));
     return response.data?.data || response.data;
   }
 
   async createRole(payload: CreateRolePayload): Promise<AdminRoleItem> {
     try {
-      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.ROLES, payload);
+      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_PERMISSIONS.ROLES, payload);
       if (response.data?.data) {
         return response.data.data;
       }
@@ -284,7 +284,7 @@ class AdminRolesService {
 
   async getAdminAccounts(): Promise<AdminAccountItem[]> {
     try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCOUNTS);
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_ACCOUNTS.LIST);
       if (response.data?.data && Array.isArray(response.data.data)) {
         return response.data.data.map((u: any) => ({
           id: u.id,
@@ -305,18 +305,18 @@ class AdminRolesService {
   }
 
   async updateAdminRole(id: string, roleKey: string): Promise<any> {
-    const response = await axiosInstance.put(API_ENDPOINTS.ADMIN_AUTH.UPDATE_ADMIN_ROLE(id), { role: roleKey });
+    const response = await axiosInstance.put(API_ENDPOINTS.ADMIN_ACCOUNTS.UPDATE_ROLE(id), { role: roleKey });
     return response.data?.data || response.data;
   }
 
   async deactivateAdmin(id: string): Promise<any> {
-    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_AUTH.DEACTIVATE_ADMIN(id));
+    const response = await axiosInstance.patch(API_ENDPOINTS.ADMIN_ACCOUNTS.DEACTIVATE(id));
     return response.data?.data || response.data;
   }
 
   async inviteAdmin(payload: InviteAdminPayload): Promise<AdminAccountItem> {
     try {
-      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCOUNTS, payload);
+      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_ACCOUNTS.LIST, payload);
       if (response.data?.data) {
         return response.data.data;
       }
@@ -339,7 +339,7 @@ class AdminRolesService {
 
   async getAccessHistoryLogs(): Promise<AccessHistoryLog[]> {
     try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ADMIN_ACCESS_LOGS);
+      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_ACCOUNTS.ACCESS_LOGS);
       if (response.data?.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }

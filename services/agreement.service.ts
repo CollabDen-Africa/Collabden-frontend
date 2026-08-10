@@ -7,7 +7,7 @@ const agreementService = {
    * List all agreements for the authenticated user across all projects.
    */
   getUserAgreements: async (): Promise<LegalAgreement[]> => {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AUTH.ALL_USERS + "/agreements");
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_USERS.ALL_USERS + "/agreements");
     const raw = response.data;
     if (raw?.data && Array.isArray(raw.data)) return raw.data;
     if (Array.isArray(raw)) return raw;
