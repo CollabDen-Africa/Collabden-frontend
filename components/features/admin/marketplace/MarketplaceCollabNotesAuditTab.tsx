@@ -58,7 +58,7 @@ export const MarketplaceCollabNotesAuditTab: React.FC<MarketplaceCollabNotesAudi
         </form>
 
         {/* Notes Timeline List */}
-        <div className="flex flex-col gap-3 mt-2 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+        <div className="flex flex-col gap-3 mt-2 max-h-75 overflow-y-auto custom-scrollbar pr-1">
           {logs
             .filter((l) => l.note)
             .map((item) => (
@@ -82,7 +82,7 @@ export const MarketplaceCollabNotesAuditTab: React.FC<MarketplaceCollabNotesAudi
           Moderation & Action Audit History
         </h3>
 
-        <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
+        <div className="flex flex-col gap-4 max-h-100 overflow-y-auto custom-scrollbar pr-1">
           {logs.map((item) => (
             <div
               key={item.id}

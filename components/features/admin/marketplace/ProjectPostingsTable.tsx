@@ -69,7 +69,7 @@ export const ProjectPostingsTable: React.FC<ProjectPostingsTableProps> = ({ data
       key: "roles",
       label: "REQUIRED ROLES",
       render: (row: ProjectPostingRow) => (
-        <div className="flex flex-wrap items-center gap-1.5 max-w-[200px]">
+        <div className="flex flex-wrap items-center gap-1.5 max-w-50">
           {row.requiredRoles.map((role, idx) => (
             <span
               key={idx}
@@ -85,7 +85,7 @@ export const ProjectPostingsTable: React.FC<ProjectPostingsTableProps> = ({ data
       key: "genres",
       label: "GENRES",
       render: (row: ProjectPostingRow) => (
-        <div className="flex flex-wrap items-center gap-1.5 max-w-[180px]">
+        <div className="flex flex-wrap items-center gap-1.5 max-w-45">
           {row.genres.map((genre, idx) => (
             <span
               key={idx}

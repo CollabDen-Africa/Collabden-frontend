@@ -70,7 +70,7 @@ export const CollaboratorsTable: React.FC<CollaboratorsTableProps> = ({ data, is
       key: "roles",
       label: "ROLES",
       render: (row: CollaboratorProfileRow) => (
-        <div className="flex flex-wrap items-center gap-1.5 max-w-[200px]">
+        <div className="flex flex-wrap items-center gap-1.5 max-w-50">
           {row.roles.map((role, idx) => (
             <span
               key={idx}
@@ -86,7 +86,7 @@ export const CollaboratorsTable: React.FC<CollaboratorsTableProps> = ({ data, is
       key: "genres",
       label: "GENRES",
       render: (row: CollaboratorProfileRow) => (
-        <div className="flex flex-wrap items-center gap-1.5 max-w-[180px]">
+        <div className="flex flex-wrap items-center gap-1.5 max-w-45">
           {row.genres.map((genre, idx) => (
             <span
               key={idx}

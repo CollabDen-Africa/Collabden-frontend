@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { HiStar, HiOutlinePlus, HiOutlineBan } from "react-icons/hi";
 
 export interface CollabHeaderData {

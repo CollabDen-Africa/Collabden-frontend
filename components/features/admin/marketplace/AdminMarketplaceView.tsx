@@ -154,7 +154,6 @@ export const AdminMarketplaceView: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Collaborator Profiles");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const limit = 10;
 
   const { overview, isLoadingOverview } = useAdminMarketplace();
 
