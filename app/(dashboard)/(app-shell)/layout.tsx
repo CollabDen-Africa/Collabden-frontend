@@ -65,9 +65,9 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       </div>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col relative min-h-screen px-[18px] lg:px-0 lg:pl-[34px] lg:pr-[34px] xl:pr-[60px] w-full">
+      <main className="flex-1 flex flex-col relative min-h-screen px-4.5 lg:pl-8.5 lg:pr-8.5 xl:pr-[60px] w-full">
 
-        <div className="lg:hidden flex items-center justify-between pt-[20px] pb-[10px] w-full max-w-[1200px] mx-auto">
+        <div className="lg:hidden flex items-center justify-between pt-[20px] pb-[10px] w-full max-w-300 mx-auto">
           <div className="flex items-center gap-[6px]">
             <div className="w-[36px] h-[36px] bg-primary-green rounded-[9.47px] flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-xl leading-none">C</span>
@@ -82,7 +82,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           </button>
         </div>
 
-        <div className="w-full max-w-[1200px] mx-auto pb-[100px]">
+        <div className="w-full lg:max-w-230 xl:max-w-300 mx-auto pb-[100px]">
 
           {/* HEADER WRAPPER */}
           <div className={`w-full transition-all duration-300 ${isTourActive && currentStep === 1 ? 'relative z-50' : ''}`}>

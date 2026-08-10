@@ -496,7 +496,6 @@ export const TESTIMONIALS = [
 //Profile Settings
 export const SETTINGS_SIDEBAR_LINKS = [
   { id: "profile", label: "My Profile", icon: FiUser, isActive: true },
-  { id: "visibility", label: "Profile Visibility", icon: FiEye, isActive: false },
   { id: "linked-accounts", label: "Linked Accounts", icon: FiLink, isActive: false },
   { id: "subscriptions", label: "Subscriptions", icon: FiCreditCard, isActive: false },
   { id: "notifications", label: "Notifications", icon: FiBell, isActive: false },
