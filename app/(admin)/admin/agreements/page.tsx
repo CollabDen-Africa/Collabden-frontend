@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import { FeatureInProgressView } from "@/components/features/admin/shared/FeatureInProgressView";
+import { AdminAgreementsView } from "@/components/features/admin/agreements/AdminAgreementsView";
 
-export default function AgreementsAdminPage() {
-  return (
-    <FeatureInProgressView
-      title="Agreements & Legal Contracts"
-      description="The Agreements oversight and contract template module is currently under construction."
-    />
-  );
+export default function AdminAgreementsPage() {
+  return <AdminAgreementsView />;
 }

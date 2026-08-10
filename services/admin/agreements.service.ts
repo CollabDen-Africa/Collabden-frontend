@@ -7,6 +7,11 @@ export class AdminAgreementsService {
     return response.data?.data || response.data;
   }
 
+  async getAgreements(params?: { page?: number; limit?: number; search?: string; status?: string }): Promise<any> {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.ADMIN_AGREEMENTS.ROOT}/all`, { params });
+    return response.data?.data || response.data;
+  }
+
   async getReports(): Promise<any> {
     const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_AGREEMENTS.REPORTS);
     return response.data?.data || response.data;

@@ -1,12 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAgreementsService } from "@/services/admin/agreements.service";
 
-export const useAdminAgreements = () => {
+export const useAdminAgreements = (params?: { page?: number; limit?: number; search?: string; status?: string }) => {
   const queryClient = useQueryClient();
 
   const overviewQuery = useQuery({
     queryKey: ["admin", "agreements", "overview"],
     queryFn: () => adminAgreementsService.getAgreementsOverview(),
+  });
+
+  const agreementsQuery = useQuery({
+    queryKey: ["admin", "agreements", "list", params?.page, params?.search, params?.status],
+    queryFn: () => adminAgreementsService.getAgreements(params),
   });
 
   const reportsQuery = useQuery({
@@ -23,7 +28,7 @@ export const useAdminAgreements = () => {
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminAgreementsService.updateReportStatus(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "agreements", "reports"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "agreements"] });
     },
   });
 
@@ -38,11 +43,31 @@ export const useAdminAgreements = () => {
   return {
     overview: overviewQuery.data,
     isLoadingOverview: overviewQuery.isLoading,
-    reports: reportsQuery.data,
+    agreements: agreementsQuery.data?.items || agreementsQuery.data || [],
+    agreementsTotal: agreementsQuery.data?.total || 0,
+    isLoadingAgreements: agreementsQuery.isLoading,
+    reports: reportsQuery.data?.items || reportsQuery.data || [],
+    reportsTotal: reportsQuery.data?.total || (Array.isArray(reportsQuery.data) ? reportsQuery.data.length : 0),
     isLoadingReports: reportsQuery.isLoading,
     auditHistory: auditQuery.data,
     isLoadingAudit: auditQuery.isLoading,
     updateReportStatus: updateReportStatusMutation.mutateAsync,
     createNote: createNoteMutation.mutateAsync,
   };
+};
+
+export const useAgreementDetailQuery = (id: string) => {
+  return useQuery({
+    queryKey: ["admin", "agreements", "detail", id],
+    queryFn: () => adminAgreementsService.getAgreementDetail(id),
+    enabled: Boolean(id),
+  });
+};
+
+export const useAgreementActivityQuery = (id: string) => {
+  return useQuery({
+    queryKey: ["admin", "agreements", "activity", id],
+    queryFn: () => adminAgreementsService.getAgreementActivity(id),
+    enabled: Boolean(id),
+  });
 };

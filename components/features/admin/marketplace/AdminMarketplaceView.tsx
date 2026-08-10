@@ -10,166 +10,51 @@ import { Pagination } from "@/components/ui/Pagination";
 import { CollaboratorsTable, CollaboratorProfileRow } from "./CollaboratorsTable";
 import { ProjectPostingsTable, ProjectPostingRow } from "./ProjectPostingsTable";
 
-const MOCK_COLLABORATORS: CollaboratorProfileRow[] = [
-  {
-    id: "mkt-0412",
-    name: "Chisom Eze",
-    email: "chisom@gmail.com",
-    profileId: "MKT-0412",
-    roles: ["Songwriter", "Vocalist"],
-    genres: ["R&B", "Pop"],
-    location: "Enugu, NG",
-    rating: 4.9,
-    collabs: 38,
-    status: "Reported",
-  },
-  {
-    id: "mkt-0521",
-    name: "Tola Adebayo",
-    email: "tola@gmail.com",
-    profileId: "MKT-0521",
-    roles: ["Sound Engineer"],
-    genres: ["Afrobeats"],
-    location: "Lagos, NG",
-    rating: 4.8,
-    collabs: 14,
-    status: "Active",
-  },
-  {
-    id: "mkt-0319",
-    name: "Omotola Eke",
-    email: "omotola@gmail.com",
-    profileId: "MKT-0319",
-    roles: ["Songwriter", "Vocalist"],
-    genres: ["R&B", "Pop"],
-    location: "Enugu, NG",
-    rating: 4.9,
-    collabs: 42,
-    status: "Reported",
-  },
-  {
-    id: "mkt-0814",
-    name: "Marcus Lee",
-    email: "marcus@gmail.com",
-    profileId: "MKT-0814",
-    roles: ["Producer"],
-    genres: ["Lo-Fi", "Hip-Hop"],
-    location: "London, UK",
-    rating: 5.0,
-    collabs: 7,
-    status: "Restricted",
-  },
-  {
-    id: "mkt-0127",
-    name: "Ngozi Okafor",
-    email: "ngozi@gmail.com",
-    profileId: "MKT-0127",
-    roles: ["Vocalist", "Songwriter"],
-    genres: ["Gospel", "Afrobeats"],
-    location: "Lagos, NG",
-    rating: 4.7,
-    collabs: 19,
-    status: "Active",
-  },
-  {
-    id: "mkt-0612",
-    name: "Dennis Nwosu",
-    email: "dennis@gmail.com",
-    profileId: "MKT-0612",
-    roles: ["Mix Engineer"],
-    genres: ["Afrobeats"],
-    location: "Port Harcourt",
-    rating: 4.1,
-    collabs: 3,
-    status: "Removed",
-  },
-  {
-    id: "mkt-0718",
-    name: "Yemi Ogedengbe",
-    email: "yemi@gmail.com",
-    profileId: "MKT-0718",
-    roles: ["Producer", "Composer"],
-    genres: ["Afrobeats", "Pop"],
-    location: "Lagos, NG",
-    rating: 4.8,
-    collabs: 26,
-    status: "Active",
-  },
-];
-
-const MOCK_PROJECT_POSTINGS: ProjectPostingRow[] = [
-  {
-    id: "post-101",
-    title: "Vocalist Needed for Afro-Pop Single",
-    postId: "POST-101",
-    ownerName: "Chisom Eze",
-    requiredRoles: ["Vocalist"],
-    genres: ["Afrobeats", "Pop"],
-    applications: 8,
-    status: "Active",
-  },
-  {
-    id: "post-102",
-    title: "Looking for Mix Engineer - Hip-Hop Track",
-    postId: "POST-102",
-    ownerName: "Tola Adebayo",
-    requiredRoles: ["Mix Engineer"],
-    genres: ["Hip-Hop"],
-    applications: 11,
-    status: "Active",
-  },
-  {
-    id: "post-103",
-    title: "Beat Producer Needed - R&B Album",
-    postId: "POST-103",
-    ownerName: "Omotola Eke",
-    requiredRoles: ["Producer"],
-    genres: ["R&B"],
-    applications: 3,
-    status: "Reported",
-  },
-  {
-    id: "post-104",
-    title: "Songwriter Collab for Acoustic EP",
-    postId: "POST-104",
-    ownerName: "Marcus Lee",
-    requiredRoles: ["Songwriter"],
-    genres: ["Acoustic", "Pop"],
-    applications: 14,
-    status: "Active",
-  },
-  {
-    id: "post-105",
-    title: "Lo-Fi Beats Collaboration",
-    postId: "POST-105",
-    ownerName: "Dennis Nwosu",
-    requiredRoles: ["Producer"],
-    genres: ["Lo-Fi"],
-    applications: 6,
-    status: "Restricted",
-  },
-];
-
 export const AdminMarketplaceView: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Collaborator Profiles");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const { overview, isLoadingOverview } = useAdminMarketplace();
+  const {
+    overview,
+    isLoadingOverview,
+    collaborators,
+    collaboratorsTotal,
+    isLoadingCollaborators,
+    postings,
+    postingsTotal,
+    isLoadingPostings,
+  } = useAdminMarketplace({ page, limit, search: searchTerm || undefined });
 
-  const filteredCollaborators = MOCK_COLLABORATORS.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.profileId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Map API response data cleanly
+  const collaboratorRows: CollaboratorProfileRow[] = Array.isArray(collaborators)
+    ? collaborators.map((c: any) => ({
+        id: c.id || c._id,
+        name: c.displayName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.name || "Collaborator",
+        email: c.email || "user@collabden.com",
+        profileId: c.profileId || `MKT-${c.id?.slice(-4) || '0000'}`,
+        roles: Array.isArray(c.roles) ? c.roles : [c.role || "Collaborator"],
+        genres: Array.isArray(c.genres) ? c.genres : ["Afrobeats"],
+        location: c.location || "Lagos, NG",
+        rating: c.rating || 4.8,
+        collabs: c.collabsCount || c.totalCollaborations || 0,
+        status: c.status === "REPORTED" ? "Reported" : c.status === "RESTRICTED" ? "Restricted" : c.status === "REMOVED" ? "Removed" : "Active",
+      }))
+    : [];
 
-  const filteredPostings = MOCK_PROJECT_POSTINGS.filter(
-    (p) =>
-      p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.postId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const postingRows: ProjectPostingRow[] = Array.isArray(postings)
+    ? postings.map((p: any) => ({
+        id: p.id || p._id,
+        title: p.title || "Untitled Project",
+        postId: p.postId || `POST-${p.id?.slice(-3) || '000'}`,
+        ownerName: p.ownerName || p.user?.displayName || "Project Owner",
+        requiredRoles: Array.isArray(p.requiredRoles) ? p.requiredRoles : ["Producer"],
+        genres: Array.isArray(p.genres) ? p.genres : ["Pop"],
+        applications: p.applicationsCount || p.applications?.length || 0,
+        status: p.status === "REPORTED" ? "Reported" : p.status === "RESTRICTED" ? "Restricted" : p.status === "CLOSED" ? "Closed" : "Active",
+      }))
+    : [];
 
   return (
     <div className="w-full flex flex-col gap-8 pb-12 animate-in fade-in duration-300">
@@ -184,7 +69,7 @@ export const AdminMarketplaceView: React.FC = () => {
           </p>
         </div>
         <ExportCSVButton
-          data={activeTab === "Collaborator Profiles" ? filteredCollaborators : filteredPostings}
+          data={activeTab === "Collaborator Profiles" ? collaboratorRows : postingRows}
           filename={`marketplace-${activeTab.toLowerCase().replace(/\s+/g, "-")}.csv`}
           headers={
             activeTab === "Collaborator Profiles"
@@ -212,32 +97,32 @@ export const AdminMarketplaceView: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard
           label="Total Profiles"
-          value={overview?.totalProfiles?.toLocaleString() || "13,240"}
+          value={overview?.totalProfiles?.toLocaleString() || overview?.profilesCount?.toLocaleString() || "0"}
           color="bg-primary-green"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Active Postings"
-          value={overview?.activePostings?.toLocaleString() || "18,601"}
+          value={overview?.activePostings?.toLocaleString() || overview?.activeCount?.toLocaleString() || "0"}
           color="bg-primary-green"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Project Listings"
-          value={overview?.projectListings?.toLocaleString() || "3,822"}
+          value={overview?.projectListings?.toLocaleString() || overview?.listingsCount?.toLocaleString() || "0"}
           color="bg-primary-blue"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Reported Items"
-          value={overview?.reportedItems?.toLocaleString() || "64"}
+          value={overview?.reportedItems?.toLocaleString() || overview?.reportedCount?.toLocaleString() || "0"}
           color="bg-accent-red"
           isRedAlert
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Pending Review"
-          value={overview?.pendingReview?.toLocaleString() || "283"}
+          value={overview?.pendingReview?.toLocaleString() || overview?.pendingCount?.toLocaleString() || "0"}
           color="bg-accent-yellow"
           isLoading={isLoadingOverview}
         />
@@ -276,26 +161,23 @@ export const AdminMarketplaceView: React.FC = () => {
           <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors shrink-0">
             <HiOutlineFilter size={16} />
             Filters
-            <span className="bg-primary-green text-text-main text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">
-              3
-            </span>
           </button>
         </div>
 
-        {/* Data Table */}
+        {/* Real-time Data Table */}
         {activeTab === "Collaborator Profiles" ? (
-          <CollaboratorsTable data={filteredCollaborators} />
+          <CollaboratorsTable data={collaboratorRows} isLoading={isLoadingCollaborators} />
         ) : (
-          <ProjectPostingsTable data={filteredPostings} />
+          <ProjectPostingsTable data={postingRows} isLoading={isLoadingPostings} />
         )}
 
         {/* Pagination */}
         <Pagination
           currentPage={page}
-          totalPages={10}
+          totalPages={Math.ceil((activeTab === "Collaborator Profiles" ? collaboratorsTotal : postingsTotal) / limit) || 1}
           onPageChange={setPage}
-          currentItemsCount={activeTab === "Collaborator Profiles" ? filteredCollaborators.length : filteredPostings.length}
-          totalItems={activeTab === "Collaborator Profiles" ? 13240 : 3822}
+          currentItemsCount={activeTab === "Collaborator Profiles" ? collaboratorRows.length : postingRows.length}
+          totalItems={activeTab === "Collaborator Profiles" ? collaboratorsTotal : postingsTotal}
           itemName={activeTab === "Collaborator Profiles" ? "profiles" : "postings"}
         />
       </div>
