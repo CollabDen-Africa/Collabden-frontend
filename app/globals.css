@@ -24,6 +24,7 @@
   --accent-soft-green: #D9FBC4;
   --accent-yellow: #FBBC04;
   --accent-gray: #7D7D7F;
+  --accent-blue: #3B7BF5;
 
   /* Surface / Border Colors */
   --card-bg: #505050;
@@ -64,6 +65,7 @@
     --color-accent-soft-green: var(--accent-soft-green);
     --color-accent-yellow: var(--accent-yellow);
     --color-accent-gray: var(--accent-gray);
+    --color-accent-blue: var(--accent-blue);
 
   --shadow-btn-primary: 0 10px 25px rgba(115, 191, 68, 0.25);
   --shadow-btn-hover: 0 15px 35px rgba(115, 191, 68, 0.35);
@@ -114,7 +116,7 @@ body {
 }
 
 .bg-secondary-blue {
-  color: var(--secondary-blue);
+  background-color: var(--secondary-blue);
 }
 
 .bg-primary-green {
@@ -132,6 +134,7 @@ body {
 .bg-gradient-blue-dark {
   background: var(--gradient-blue-dark);
 }
+
 
 /* Button styles using brand colors */
 .btn-primary {
@@ -181,6 +184,7 @@ body {
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0); 
   background-clip: padding-box;
+  transition: background-color 0.3s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
