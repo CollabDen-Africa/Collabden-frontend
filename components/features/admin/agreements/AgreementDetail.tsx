@@ -14,79 +14,48 @@ interface AgreementDetailProps {
   id: string;
 }
 
-const MOCK_AGREEMENT_DATA: AgreementInfoData = {
-  agreementId: "AGR-4018",
-  projectName: "Afro Fusion Album",
-  projectId: "proj-101",
-  status: "Disputed",
-  dateCreated: "May 10, 2024",
-  dateSigned: "May 18, 2024",
-  agreementType: "Track-Only Collaboration Agreement",
-  format: "PDF Document",
-  displayFile: "Afro_Fusion_Agreement.pdf",
-  fileSize: "2.4 MB",
-  ownerId: "user-1",
-  ownerName: "Chisom Eze",
-  ownerRole: "Project Owner",
-  signatories: [
-    { id: "s1", name: "Chisom Eze", role: "Project Owner", status: "Signed", signedDate: "May 16, 2024" },
-    { id: "s2", name: "Amaka Eze", role: "Collaborator", status: "Signed", signedDate: "May 18, 2024" },
-    { id: "s3", name: "Marcus Lee", role: "Collaborator", status: "Pending" },
-  ],
-  dispute: {
-    filedBy: "Marcus Lee",
-    date: "Jun 20, 2024",
-    reason: "Royalty split differs from verbal agreement during production negotiation.",
-  },
-  tamperProofHash: "sha256-8f92a10b4c7319e5",
-};
-
-const MOCK_ACTIVITY_EVENTS: ActivityEventItem[] = [
-  { id: "e1", eventType: "Uploads", badgeLabel: "Agreement Uploaded", badgeColor: "green", description: "Initial draft uploaded by project owner", actorName: "Chisom Eze", timestamp: "May 10, 2024 - 10:14 AM" },
-  { id: "e2", eventType: "Edits", badgeLabel: "Agreement Edited", badgeColor: "blue", description: "Royalty split updated from 70/30 to 60/40", actorName: "Chisom Eze", timestamp: "May 14, 2024 - 03:15 PM" },
-  { id: "e3", eventType: "Edits", badgeLabel: "Agreement Edited", badgeColor: "blue", description: "Delivery deadline set to May 30, 2024", actorName: "Chisom Eze", timestamp: "May 15, 2024 - 11:02 AM" },
-  { id: "e4", eventType: "Signatures", badgeLabel: "Signed by Project Owner", badgeColor: "green", description: "Chisom Eze signed the agreement digitally", actorName: "Chisom Eze", timestamp: "May 16, 2024 - 09:20 AM" },
-  { id: "e5", eventType: "Signatures", badgeLabel: "Signed by Collaborator", badgeColor: "green", description: "Amaka Eze signed the agreement digitally", actorName: "Amaka Eze", timestamp: "May 18, 2024 - 02:45 PM" },
-  { id: "e6", eventType: "State Changes", badgeLabel: "State Changed – Pending", badgeColor: "yellow", description: "Awaiting final signature from Marcus Lee", actorName: "System", timestamp: "May 19, 2024 - 10:00 AM" },
-  { id: "e7", eventType: "State Changes", badgeLabel: "Dispute Filed", badgeColor: "red", description: "Marcus Lee filed a dispute regarding royalty splits with project owner", actorName: "Marcus Lee", timestamp: "Jun 20, 2024 - 05:12 PM" },
-  { id: "e8", eventType: "State Changes", badgeLabel: "State Changed – Disputed", badgeColor: "red", description: "Agreement flagged for administrative review", actorName: "System", timestamp: "Jun 20, 2024 - 05:12 PM" },
-];
-
 export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
   const [activeTab, setActiveTab] = useState("Agreement Details");
 
-  const { data: remoteDetail, isLoading } = useAgreementDetailQuery(id);
-  const { data: remoteActivity } = useAgreementActivityQuery(id);
+  const { data: remoteDetail, isLoading: isLoadingDetail, isError: isErrorDetail } = useAgreementDetailQuery(id);
+  const { data: remoteActivity, isLoading: isLoadingActivity } = useAgreementActivityQuery(id);
 
-  if (isLoading) return <div className="p-8 text-white/40 text-center">Loading agreement details...</div>;
+  if (isLoadingDetail) return <div className="p-12 text-white/40 text-center text-sm">Loading agreement details...</div>;
+  if (isErrorDetail || !remoteDetail) return <div className="p-12 text-accent-red text-center text-sm">Error loading agreement details from API.</div>;
 
-  const infoData: AgreementInfoData = remoteDetail
-    ? {
-        agreementId: remoteDetail.agreementId || `AGR-${id.slice(-4)}`,
-        projectName: remoteDetail.projectName || remoteDetail.project?.title || "Project Agreement",
-        projectId: remoteDetail.projectId || remoteDetail.project?.id || "proj-1",
-        status: remoteDetail.status || "Signed",
-        dateCreated: remoteDetail.createdAt ? new Date(remoteDetail.createdAt).toLocaleDateString() : "May 10, 2024",
-        dateSigned: remoteDetail.signedAt ? new Date(remoteDetail.signedAt).toLocaleDateString() : "May 18, 2024",
-        agreementType: remoteDetail.agreementType || "Track-Only Collaboration Agreement",
-        format: "PDF Document",
-        displayFile: remoteDetail.displayFile || "Agreement_Copy.pdf",
-        fileSize: remoteDetail.fileSize || "2.4 MB",
-        ownerId: remoteDetail.ownerId || remoteDetail.owner?.id || "user-1",
-        ownerName: remoteDetail.ownerName || remoteDetail.owner?.displayName || "Project Owner",
-        ownerRole: remoteDetail.ownerRole || "Project Owner",
-        signatories: Array.isArray(remoteDetail.signatories) ? remoteDetail.signatories : MOCK_AGREEMENT_DATA.signatories,
-        dispute: remoteDetail.dispute || MOCK_AGREEMENT_DATA.dispute,
-        tamperProofHash: remoteDetail.tamperProofHash || "sha256-verified",
-      }
-    : MOCK_AGREEMENT_DATA;
+  const infoData: AgreementInfoData = {
+    agreementId: remoteDetail.agreementId || `AGR-${id.slice(-4)}`,
+    projectName: remoteDetail.projectName || remoteDetail.project?.title || "Project Agreement",
+    projectId: remoteDetail.projectId || remoteDetail.project?.id || "proj-1",
+    status: remoteDetail.status || "Signed",
+    dateCreated: remoteDetail.createdAt ? new Date(remoteDetail.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A",
+    dateSigned: remoteDetail.signedAt ? new Date(remoteDetail.signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A",
+    agreementType: remoteDetail.agreementType || "Track-Only Collaboration Agreement",
+    format: remoteDetail.format || "PDF Document",
+    displayFile: remoteDetail.displayFile || "Agreement_Copy.pdf",
+    fileSize: remoteDetail.fileSize || "2.4 MB",
+    ownerId: remoteDetail.ownerId || remoteDetail.owner?.id || "user-1",
+    ownerName: remoteDetail.ownerName || remoteDetail.owner?.displayName || "Project Owner",
+    ownerRole: remoteDetail.ownerRole || "Project Owner",
+    signatories: Array.isArray(remoteDetail.signatories) ? remoteDetail.signatories : [],
+    dispute: remoteDetail.dispute,
+    tamperProofHash: remoteDetail.tamperProofHash || "sha256-verified",
+  };
 
-  const activityEvents: ActivityEventItem[] = Array.isArray(remoteActivity) && remoteActivity.length > 0
-    ? remoteActivity
-    : MOCK_ACTIVITY_EVENTS;
+  const activityEvents: ActivityEventItem[] = Array.isArray(remoteActivity)
+    ? remoteActivity.map((e: any, idx: number) => ({
+        id: e.id || `act-${idx}`,
+        eventType: e.eventType || "State Changes",
+        badgeLabel: e.badgeLabel || e.action || "Activity Event",
+        badgeColor: e.badgeColor || (e.eventType === "Signatures" ? "green" : e.eventType === "Edits" ? "blue" : e.eventType === "Uploads" ? "green" : "yellow"),
+        description: e.description || e.note || "Event logged",
+        actorName: e.actorName || e.user?.displayName || "System",
+        timestamp: e.timestamp || (e.createdAt ? new Date(e.createdAt).toLocaleString() : "Recently"),
+      }))
+    : [];
 
-  const reports = remoteDetail?.reports || [];
-  const auditLogs = remoteDetail?.auditLogs || [];
+  const reports = Array.isArray(remoteDetail?.reports) ? remoteDetail.reports : [];
+  const auditLogs = Array.isArray(remoteDetail?.auditLogs) ? remoteDetail.auditLogs : [];
 
   return (
     <div className="w-full flex flex-col gap-6 pb-12 text-white animate-in fade-in duration-300">
@@ -124,7 +93,13 @@ export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
         {/* Tab Panel Content */}
         {activeTab === "Agreement Details" && <AgreementInfoTab data={infoData} />}
 
-        {activeTab === "Activity History" && <AgreementActivityTab events={activityEvents} />}
+        {activeTab === "Activity History" && (
+          isLoadingActivity ? (
+            <div className="p-12 text-center text-white/40 text-sm">Loading activity history...</div>
+          ) : (
+            <AgreementActivityTab events={activityEvents} />
+          )
+        )}
 
         {activeTab.startsWith("Reports") && <MarketplaceCollabReportsTab reports={reports} />}
 

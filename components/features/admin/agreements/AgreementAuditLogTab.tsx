@@ -16,88 +16,22 @@ export interface AuditLogRow {
   dateTime: string;
 }
 
-const MOCK_AUDIT_ROWS: AuditLogRow[] = [
-  {
-    id: "aud-1",
-    indexNumber: 1,
-    actionPerformed: "Accessed agreement record",
-    administratorName: "Super Admin",
-    role: "Super Admin",
-    reason: "Routine monitoring",
-    dateTime: "Jul 1, 2025 - 10:02 AM",
-  },
-  {
-    id: "aud-2",
-    indexNumber: 2,
-    actionPerformed: "Accessed signed document copy",
-    isSensitive: true,
-    administratorName: "Super Admin",
-    role: "Super Admin",
-    reason: "Dispute investigation initiated by Marcus Lee",
-    dateTime: "Jun 20, 2025 - 11:17 AM",
-  },
-  {
-    id: "aud-3",
-    indexNumber: 3,
-    actionPerformed: "Added internal investigation note",
-    administratorName: "Support Admin",
-    role: "Support Admin",
-    reason: "Documenting dispute details before escalation",
-    dateTime: "Jun 20, 2025 - 10:45 AM",
-  },
-  {
-    id: "aud-4",
-    indexNumber: 4,
-    actionPerformed: "Updated report status – Under Review",
-    administratorName: "Support Admin",
-    role: "Support Admin",
-    reason: "Dispute review in progress",
-    dateTime: "Jun 20, 2025 - 10:01 AM",
-  },
-  {
-    id: "aud-5",
-    indexNumber: 5,
-    actionPerformed: "Verified signatory identity",
-    isSensitive: true,
-    administratorName: "Verification Admin",
-    role: "Verification Admin",
-    reason: "Confirm identities of Chisom Eze and Marcus Lee",
-    dateTime: "Jun 20, 2025 - 04:33 PM",
-  },
-  {
-    id: "aud-6",
-    indexNumber: 6,
-    actionPerformed: "Reviewed agreement activity history",
-    administratorName: "Super Admin",
-    role: "Super Admin",
-    reason: "Timeline review for dispute resolution",
-    dateTime: "Jun 20, 2025 - 02:50 PM",
-  },
-  {
-    id: "aud-7",
-    indexNumber: 7,
-    actionPerformed: "Accessed agreement record",
-    administratorName: "Finance Admin",
-    role: "Finance Admin",
-    reason: "Payment dispute cross-reference",
-    dateTime: "Jun 20, 2025 - 01:12 PM",
-  },
-];
-
 interface AgreementAuditLogTabProps {
   logs?: AuditLogRow[];
   agreementTitle?: string;
   agreementId?: string;
+  isLoading?: boolean;
 }
 
 export const AgreementAuditLogTab: React.FC<AgreementAuditLogTabProps> = ({
-  logs,
-  agreementTitle = "Jazz Fusion Album",
-  agreementId = "AGR-4018",
+  logs = [],
+  agreementTitle = "Agreement Project",
+  agreementId = "AGR-0000",
+  isLoading = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const rows: AuditLogRow[] = Array.isArray(logs) && logs.length > 0 ? logs : MOCK_AUDIT_ROWS;
+  const rows: AuditLogRow[] = Array.isArray(logs) ? logs : [];
 
   const filteredRows = rows.filter((r) => {
     if (!searchTerm) return true;
@@ -228,7 +162,7 @@ export const AgreementAuditLogTab: React.FC<AgreementAuditLogTabProps> = ({
 
       {/* Audit Log Table */}
       <div className="bg-card-bg-alt/30 border border-white/5 rounded-2xl p-4 flex flex-col gap-4">
-        <Table columns={columns} data={filteredRows} emptyState={<div className="py-8 text-center text-white/40">No audit records found.</div>} />
+        <Table columns={columns} data={filteredRows} isLoading={isLoading} emptyState={<div className="py-8 text-center text-white/40">No audit records logged for this agreement.</div>} />
 
         {/* Footer Retention Notice */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5 text-xs text-text-muted">

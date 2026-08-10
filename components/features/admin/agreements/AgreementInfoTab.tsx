@@ -53,7 +53,7 @@ export const AgreementInfoTab: React.FC<AgreementInfoTabProps> = ({ data }) => {
               Agreement Under Dispute
             </h4>
             <p className="text-xs text-white/80 leading-relaxed font-sans">
-              A dispute was filed on <strong>{data.dispute.date}</strong> by <strong>{data.dispute.filedBy}</strong>. Reason: <em>"{data.dispute.reason}"</em>. Review the activity history and user communications surrounding this agreement.
+              A dispute was filed on <strong>{data.dispute.date}</strong> by <strong>{data.dispute.filedBy}</strong>. Reason: <em>&ldquo;{data.dispute.reason}&rdquo;</em>. Review the activity history and user communications surrounding this agreement.
             </p>
           </div>
         </div>

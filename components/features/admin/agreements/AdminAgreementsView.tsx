@@ -8,54 +8,6 @@ import { StatCard } from "@/components/features/admin/shared/StatCard";
 import { Pagination } from "@/components/ui/Pagination";
 import { AgreementsTable, AgreementRow } from "./AgreementsTable";
 
-const MOCK_AGREEMENTS: AgreementRow[] = [
-  {
-    id: "agr-4018",
-    agreementId: "AGR-4018",
-    projectName: "Afro Fusion Album Vol. 2",
-    ownerName: "Chisom Eze",
-    collaborators: [{ id: "c1", name: "Amaka Eze" }, { id: "c2", name: "Marcus Lee" }],
-    status: "Disputed",
-    dateSigned: "Jun 1, 2024",
-  },
-  {
-    id: "agr-5102",
-    agreementId: "AGR-5102",
-    projectName: "Summer Vibes EP",
-    ownerName: "Tola Adebayo",
-    collaborators: [{ id: "c3", name: "Omotola Eke" }],
-    status: "Pending Signatures",
-    dateSigned: "Jun 15, 2024",
-  },
-  {
-    id: "agr-2101",
-    agreementId: "AGR-2101",
-    projectName: "Acoustic Session EP",
-    ownerName: "Marcus Lee",
-    collaborators: [{ id: "c4", name: "Chisom Eze" }, { id: "c5", name: "Afeez Owo" }],
-    status: "Signed",
-    dateSigned: "May 18, 2024",
-  },
-  {
-    id: "agr-3092",
-    agreementId: "AGR-3092",
-    projectName: "Lo-Fi Beat Collection",
-    ownerName: "Dennis Nwosu",
-    collaborators: [{ id: "c6", name: "Femi Dedigbo" }],
-    status: "Draft",
-    dateSigned: "Jul 2, 2024",
-  },
-  {
-    id: "agr-1804",
-    agreementId: "AGR-1804",
-    projectName: "Gospel Choir Single Collection",
-    ownerName: "Ngozi Okafor",
-    collaborators: [{ id: "c7", name: "Yemi Ogedengbe" }, { id: "c8", name: "Amaka Eze" }],
-    status: "Signed",
-    dateSigned: "Apr 20, 2024",
-  },
-];
-
 export const AdminAgreementsView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
@@ -64,17 +16,17 @@ export const AdminAgreementsView: React.FC = () => {
   const { overview, isLoadingOverview, agreements, agreementsTotal, isLoadingAgreements } =
     useAdminAgreements({ page, limit, search: searchTerm || undefined });
 
-  const rows: AgreementRow[] = Array.isArray(agreements) && agreements.length > 0
+  const rows: AgreementRow[] = Array.isArray(agreements)
     ? agreements.map((a: any) => ({
         id: a.id || a._id,
         agreementId: a.agreementId || `AGR-${a.id?.slice(-4) || '0000'}`,
         projectName: a.projectName || a.project?.title || "Untitled Agreement",
         ownerName: a.ownerName || a.owner?.displayName || "Project Owner",
-        collaborators: Array.isArray(a.collaborators) ? a.collaborators : [{ id: "c1", name: "Collaborator" }],
+        collaborators: Array.isArray(a.collaborators) ? a.collaborators : [],
         status: a.status === "DISPUTED" ? "Disputed" : a.status === "PENDING" ? "Pending Signatures" : a.status === "DRAFT" ? "Draft" : "Signed",
-        dateSigned: a.signedAt ? new Date(a.signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "May 18, 2024",
+        dateSigned: a.signedAt ? new Date(a.signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A",
       }))
-    : MOCK_AGREEMENTS;
+    : [];
 
   return (
     <div className="w-full flex flex-col gap-8 pb-12 animate-in fade-in duration-300">
@@ -105,32 +57,32 @@ export const AdminAgreementsView: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard
           label="Total Agreements"
-          value={overview?.totalAgreements?.toLocaleString() || overview?.totalCount?.toLocaleString() || "9,342"}
+          value={overview?.totalAgreements?.toLocaleString() || overview?.totalCount?.toLocaleString() || "0"}
           color="bg-primary-green"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Active"
-          value={overview?.activeAgreements?.toLocaleString() || overview?.activeCount?.toLocaleString() || "7,210"}
+          value={overview?.activeAgreements?.toLocaleString() || overview?.activeCount?.toLocaleString() || "0"}
           color="bg-primary-green"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Pending Signatures"
-          value={overview?.pendingSignatures?.toLocaleString() || overview?.pendingCount?.toLocaleString() || "1,612"}
+          value={overview?.pendingSignatures?.toLocaleString() || overview?.pendingCount?.toLocaleString() || "0"}
           color="bg-primary-blue"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Disputed"
-          value={overview?.disputedAgreements?.toLocaleString() || overview?.disputedCount?.toLocaleString() || "87"}
+          value={overview?.disputedAgreements?.toLocaleString() || overview?.disputedCount?.toLocaleString() || "0"}
           color="bg-accent-red"
           isRedAlert
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Draft / Pending"
-          value={overview?.draftAgreements?.toLocaleString() || overview?.draftCount?.toLocaleString() || "434"}
+          value={overview?.draftAgreements?.toLocaleString() || overview?.draftCount?.toLocaleString() || "0"}
           color="bg-accent-yellow"
           isLoading={isLoadingOverview}
         />
@@ -159,16 +111,16 @@ export const AdminAgreementsView: React.FC = () => {
           </button>
         </div>
 
-        {/* Data Table */}
+        {/* Real-time Data Table */}
         <AgreementsTable data={rows} isLoading={isLoadingAgreements} />
 
         {/* Pagination */}
         <Pagination
           currentPage={page}
-          totalPages={Math.ceil((agreementsTotal || rows.length) / limit) || 1}
+          totalPages={Math.ceil(agreementsTotal / limit) || 1}
           onPageChange={setPage}
           currentItemsCount={rows.length}
-          totalItems={agreementsTotal || rows.length}
+          totalItems={agreementsTotal}
           itemName="agreements"
         />
       </div>
