@@ -7,8 +7,23 @@ export class AdminMarketplaceService {
     return response.data?.data || response.data;
   }
 
-  async getReports(): Promise<any> {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_MARKETPLACE.REPORTS);
+  async getCollaborators(params?: { page?: number; limit?: number; search?: string }): Promise<any> {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.ADMIN_MARKETPLACE.ROOT}/collaborators`, { params });
+    return response.data?.data || response.data;
+  }
+
+  async getProjectPostings(params?: { page?: number; limit?: number; search?: string }): Promise<any> {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.ADMIN_MARKETPLACE.ROOT}/projects`, { params });
+    return response.data?.data || response.data;
+  }
+
+  async getPostingDetail(id: string): Promise<any> {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.ADMIN_MARKETPLACE.ROOT}/projects/${id}`);
+    return response.data?.data || response.data;
+  }
+
+  async getReports(params?: { category?: string; status?: string; search?: string }): Promise<any> {
+    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_MARKETPLACE.REPORTS, { params });
     return response.data?.data || response.data;
   }
 

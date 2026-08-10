@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiOutlineSearch, HiOutlineFilter } from "react-icons/hi";
+import { HiOutlineSearch } from "react-icons/hi";
 import { Tabs } from "@/components/ui/Tabs";
 import { Pagination } from "@/components/ui/Pagination";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -9,88 +9,43 @@ import { MarketplaceReportCard, MarketplaceReportCardItem } from "./MarketplaceR
 import { MarketplaceModerationModal, ModerationTarget } from "./MarketplaceModerationModal";
 import { useAdminMarketplace } from "@/hooks/admin/useAdminMarketplace";
 
-const MOCK_REPORTED_ITEMS: MarketplaceReportCardItem[] = [
-  {
-    id: "rep-1",
-    targetId: "mkt-0412",
-    targetName: "Chisom Eze",
-    targetType: "profile",
-    profileIdOrPostId: "MKT-0412",
-    categoryOrRole: "Collaborator Profile • Songwriter / Vocalist",
-    status: "Under Review",
-    reason: "Fake profile — exaggerated work history/location description",
-    reporterName: "Marcus Lee",
-    reportedDate: "Jun 8, 2024",
-  },
-  {
-    id: "rep-2",
-    targetId: "post-103",
-    targetName: "Beat Producer Needed – Hip-Hop Project",
-    targetType: "posting",
-    profileIdOrPostId: "POST-103",
-    categoryOrRole: "Project Posting • Hip-Hop Beat Production",
-    status: "Pending",
-    reason: "Misleading posting — payment terms misrepresentation",
-    reporterName: "Tola Adebayo",
-    reportedDate: "Jul 5, 2024",
-  },
-  {
-    id: "rep-3",
-    targetId: "mkt-0814",
-    targetName: "Marcus Lee",
-    targetType: "profile",
-    profileIdOrPostId: "MKT-0814",
-    categoryOrRole: "Collaborator Profile • Producer",
-    status: "Pending",
-    reason: "Impersonation — using unauthorized photo and credentials",
-    reporterName: "Omotola Eke",
-    reportedDate: "Jul 2, 2024",
-  },
-  {
-    id: "rep-4",
-    targetId: "post-052",
-    targetName: "Lo-Fi Beat Collection Collaborator",
-    targetType: "posting",
-    profileIdOrPostId: "POST-052",
-    categoryOrRole: "Project Posting • Lo-Fi Beats",
-    status: "Resolved",
-    reason: "Spam posting — duplicate project listing / promotional spam",
-    reporterName: "Ngozi Okafor",
-    reportedDate: "Jun 28, 2024",
-  },
-];
-
 export const MarketplaceReportsView: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState("All Content");
   const [activeStatus, setActiveStatus] = useState("All Statuses");
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
+  const limit = 10;
   const [selectedTarget, setSelectedTarget] = useState<ModerationTarget | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { moderateCollaborator, moderateProject } = useAdminMarketplace();
-
-  const filteredItems = MOCK_REPORTED_ITEMS.filter((item) => {
-    // Category filter
-    if (activeCategory === "Profiles" && item.targetType !== "profile") return false;
-    if (activeCategory === "Postings" && item.targetType !== "posting") return false;
-
-    // Status filter
-    if (activeStatus !== "All Statuses" && item.status !== activeStatus) return false;
-
-    // Search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      return (
-        item.targetName.toLowerCase().includes(term) ||
-        item.profileIdOrPostId.toLowerCase().includes(term) ||
-        item.reason.toLowerCase().includes(term) ||
-        item.reporterName.toLowerCase().includes(term)
-      );
-    }
-
-    return true;
+  const {
+    reports,
+    reportsTotal,
+    isLoadingReports,
+    moderateCollaborator,
+    moderateProject,
+  } = useAdminMarketplace({
+    page,
+    limit,
+    category: activeCategory !== "All Content" ? activeCategory.toLowerCase() : undefined,
+    status: activeStatus !== "All Statuses" ? activeStatus.toLowerCase().replace(/\s+/g, "_") : undefined,
+    search: searchTerm || undefined,
   });
+
+  const reportItems: MarketplaceReportCardItem[] = Array.isArray(reports)
+    ? reports.map((r: any) => ({
+        id: r.id || r._id,
+        targetId: r.targetId || r.contentId || r.id,
+        targetName: r.targetName || r.title || r.user?.displayName || "Reported Item",
+        targetType: r.targetType === "posting" || r.contentType === "posting" ? "posting" : "profile",
+        profileIdOrPostId: r.profileId || r.postId || `REF-${r.id?.slice(-4) || '0000'}`,
+        categoryOrRole: r.categoryOrRole || `${r.targetType === "posting" ? "Project Posting" : "Collaborator Profile"}`,
+        status: r.status === "RESOLVED" ? "Resolved" : r.status === "UNDER_REVIEW" ? "Under Review" : "Pending",
+        reason: r.reason || r.description || "Violation of marketplace guidelines",
+        reporterName: r.reporterName || r.reporter?.displayName || "Platform User",
+        reportedDate: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recently",
+      }))
+    : [];
 
   const handleModerateOpen = (item: MarketplaceReportCardItem) => {
     setSelectedTarget({
@@ -187,12 +142,16 @@ export const MarketplaceReportsView: React.FC = () => {
 
         {/* Reported Content Cards Stack */}
         <div className="flex flex-col gap-4 mt-2">
-          {filteredItems.length === 0 ? (
+          {isLoadingReports ? (
+            <div className="py-12 text-center text-white/40 text-sm">
+              Loading marketplace reports...
+            </div>
+          ) : reportItems.length === 0 ? (
             <div className="py-12 text-center text-white/40 text-sm">
               No reported content matches your criteria.
             </div>
           ) : (
-            filteredItems.map((item) => (
+            reportItems.map((item) => (
               <MarketplaceReportCard
                 key={item.id}
                 item={item}
@@ -206,10 +165,10 @@ export const MarketplaceReportsView: React.FC = () => {
         {/* Pagination */}
         <Pagination
           currentPage={page}
-          totalPages={5}
+          totalPages={Math.ceil(reportsTotal / limit) || 1}
           onPageChange={setPage}
-          currentItemsCount={filteredItems.length}
-          totalItems={64}
+          currentItemsCount={reportItems.length}
+          totalItems={reportsTotal}
           itemName="reports"
         />
       </div>

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminMarketplaceService } from "@/services/admin/marketplace.service";
 
-export const useAdminMarketplace = () => {
+export const useAdminMarketplace = (params?: { page?: number; limit?: number; search?: string; category?: string; status?: string }) => {
   const queryClient = useQueryClient();
 
   const overviewQuery = useQuery({
@@ -9,9 +9,19 @@ export const useAdminMarketplace = () => {
     queryFn: () => adminMarketplaceService.getMarketplaceOverview(),
   });
 
+  const collaboratorsQuery = useQuery({
+    queryKey: ["admin", "marketplace", "collaborators", params?.page, params?.search],
+    queryFn: () => adminMarketplaceService.getCollaborators(params),
+  });
+
+  const postingsQuery = useQuery({
+    queryKey: ["admin", "marketplace", "postings", params?.page, params?.search],
+    queryFn: () => adminMarketplaceService.getProjectPostings(params),
+  });
+
   const reportsQuery = useQuery({
-    queryKey: ["admin", "marketplace", "reports"],
-    queryFn: () => adminMarketplaceService.getReports(),
+    queryKey: ["admin", "marketplace", "reports", params?.category, params?.status, params?.search],
+    queryFn: () => adminMarketplaceService.getReports(params),
   });
 
   const auditQuery = useQuery({
@@ -23,7 +33,7 @@ export const useAdminMarketplace = () => {
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       adminMarketplaceService.updateReportStatus(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "marketplace", "reports"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "marketplace"] });
     },
   });
 
@@ -54,7 +64,14 @@ export const useAdminMarketplace = () => {
   return {
     overview: overviewQuery.data,
     isLoadingOverview: overviewQuery.isLoading,
-    reports: reportsQuery.data,
+    collaborators: collaboratorsQuery.data?.items || collaboratorsQuery.data || [],
+    collaboratorsTotal: collaboratorsQuery.data?.total || 0,
+    isLoadingCollaborators: collaboratorsQuery.isLoading,
+    postings: postingsQuery.data?.items || postingsQuery.data || [],
+    postingsTotal: postingsQuery.data?.total || 0,
+    isLoadingPostings: postingsQuery.isLoading,
+    reports: reportsQuery.data?.items || reportsQuery.data || [],
+    reportsTotal: reportsQuery.data?.total || 0,
     isLoadingReports: reportsQuery.isLoading,
     auditHistory: auditQuery.data,
     isLoadingAudit: auditQuery.isLoading,
@@ -63,4 +80,20 @@ export const useAdminMarketplace = () => {
     moderateCollaborator: moderateCollaboratorMutation.mutateAsync,
     moderateProject: moderateProjectMutation.mutateAsync,
   };
+};
+
+export const useMarketplaceCollaboratorDetail = (id: string) => {
+  return useQuery({
+    queryKey: ["admin", "marketplace", "collaborator", id],
+    queryFn: () => adminMarketplaceService.getCollaboratorDetail(id),
+    enabled: Boolean(id),
+  });
+};
+
+export const useMarketplacePostingDetailQuery = (id: string) => {
+  return useQuery({
+    queryKey: ["admin", "marketplace", "posting", id],
+    queryFn: () => adminMarketplaceService.getPostingDetail(id),
+    enabled: Boolean(id),
+  });
 };
