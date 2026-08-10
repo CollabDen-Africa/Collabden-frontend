@@ -6,7 +6,7 @@ interface UserOverviewProps {
   verifiedOn: string;
 }
 
-const InfoCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
+export const InfoCard = ({ title, children }: { title: string, children: React.ReactNode }) => (
   <div className="bg-[#121415] border border-white/5 rounded-2xl p-6 flex flex-col gap-5">
     <h3 className="text-[11px] font-bold text-white/40 uppercase tracking-widest">{title}</h3>
     <div className="flex flex-col gap-4">
@@ -15,7 +15,7 @@ const InfoCard = ({ title, children }: { title: string, children: React.ReactNod
   </div>
 );
 
-const InfoRow = ({ label, value, valueClassName = "text-white font-medium" }: { label: string, value: React.ReactNode, valueClassName?: string }) => (
+export const InfoRow = ({ label, value, valueClassName = "text-white font-medium" }: { label: string, value: React.ReactNode, valueClassName?: string }) => (
   <div className="flex justify-between items-center text-sm">
     <span className="text-white/40">{label}</span>
     <span className={valueClassName}>{value}</span>
