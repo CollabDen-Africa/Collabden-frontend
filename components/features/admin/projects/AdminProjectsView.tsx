@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { Table } from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineFolderOpen } from "react-icons/hi";
 
 const StatusBadge = ({ status, isDeleted }: { status: string, isDeleted?: boolean }) => {
   if (isDeleted) {
@@ -210,7 +212,17 @@ export const AdminProjectsView: React.FC = () => {
         data={data?.projects || []}
         isLoading={isLoading}
         loadingState={<div className="py-8 text-center text-white/40">Loading projects...</div>}
-        emptyState={<div className="py-8 text-center text-white/40">No projects found</div>}
+        emptyState={
+          <div className="py-6 px-4">
+            <EmptyState
+              icon={<HiOutlineFolderOpen size={36} />}
+              title="No Projects Found"
+              description="No projects match your current search criteria or filter options."
+              actionLabel="Clear Search"
+              onAction={() => { setSearchTerm(""); setPage(1); }}
+            />
+          </div>
+        }
         onRowClick={(project) => router.push(`/admin/projects/${project.id}`)}
       />
 

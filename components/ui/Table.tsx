@@ -1,4 +1,6 @@
 import React, { ReactNode } from "react";
+import { HiOutlineInbox } from "react-icons/hi";
+import EmptyState from "./EmptyState";
 
 export interface Column<T = any> {
   key: string;
@@ -20,8 +22,21 @@ export const Table = <T extends Record<string, any>>({
   columns,
   data,
   isLoading = false,
-  loadingState = <div className="py-8 text-center text-white/40">Loading...</div>,
-  emptyState = <div className="py-8 text-center text-white/40">No data found</div>,
+  loadingState = (
+    <div className="py-12 flex flex-col items-center justify-center gap-2 text-white/40 text-sm">
+      <div className="w-6 h-6 border-2 border-primary-green border-t-transparent rounded-full animate-spin" />
+      <span>Loading data...</span>
+    </div>
+  ),
+  emptyState = (
+    <div className="py-8 px-4">
+      <EmptyState
+        icon={<HiOutlineInbox size={36} />}
+        title="No Records Found"
+        description="There are no items matching your current filters or search criteria."
+      />
+    </div>
+  ),
   onRowClick,
   showHeader = true,
 }: TableProps<T>) => {

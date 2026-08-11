@@ -12,6 +12,8 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Table } from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineLockClosed } from "react-icons/hi";
 import { AdminRolesSubNav } from "./AdminRolesSubNav";
 import { useAccessHistory } from "@/hooks/admin/useAccessHistory";
 import { AccessHistoryLog } from "@/services/admin/roles.service";
@@ -224,7 +226,17 @@ export const AccessHistoryView: React.FC = () => {
         data={logs}
         isLoading={isLoading}
         loadingState={<div className="py-8 text-center text-white/40">Loading access history...</div>}
-        emptyState={<div className="py-8 text-center text-white/40">No access history events found.</div>}
+        emptyState={
+          <div className="py-6 px-4">
+            <EmptyState
+              icon={<HiOutlineLockClosed size={36} />}
+              title="No Access History Events"
+              description="No access or authentication events match your search query or criteria."
+              actionLabel="Clear Search"
+              onAction={() => setSearchQuery("")}
+            />
+          </div>
+        }
       />
 
       {/* Pagination Footer */}

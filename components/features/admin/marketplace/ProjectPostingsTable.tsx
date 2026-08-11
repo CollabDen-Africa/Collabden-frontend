@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Table, Column } from "@/components/ui/Table";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineMusicNote } from "react-icons/hi";
 
 export interface ProjectPostingRow {
   id: string;
@@ -116,7 +118,15 @@ export const ProjectPostingsTable: React.FC<ProjectPostingsTableProps> = ({ data
       columns={columns}
       data={data}
       isLoading={isLoading}
-      emptyState={<div className="py-8 text-center text-white/40">No project postings found.</div>}
+      emptyState={
+        <div className="py-6 px-4">
+          <EmptyState
+            icon={<HiOutlineMusicNote size={36} />}
+            title="No Project Listings"
+            description="There are no active or reported project listings found."
+          />
+        </div>
+      }
     />
   );
 };

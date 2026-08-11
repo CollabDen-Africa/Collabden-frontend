@@ -14,6 +14,8 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Table } from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineUserAdd } from "react-icons/hi";
 import { AdminRolesSubNav } from "./AdminRolesSubNav";
 import { InviteAdminModal } from "./InviteAdminModal";
 import { useAdminAccounts } from "@/hooks/admin/useAdminAccounts";
@@ -251,7 +253,17 @@ export const AdminAccountsView: React.FC = () => {
         data={accounts}
         isLoading={isLoading}
         loadingState={<div className="py-8 text-center text-white/40">Loading administrators...</div>}
-        emptyState={<div className="py-8 text-center text-white/40">No administrator accounts found.</div>}
+        emptyState={
+          <div className="py-6 px-4">
+            <EmptyState
+              icon={<HiOutlineUserAdd size={36} />}
+              title="No Admin Accounts Found"
+              description="No administrator accounts match your search query or filter criteria."
+              actionLabel="Clear Search"
+              onAction={() => setSearchQuery("")}
+            />
+          </div>
+        }
       />
 
       {/* Pagination */}

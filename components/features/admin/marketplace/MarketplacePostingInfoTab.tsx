@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Table, Column } from "@/components/ui/Table";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineUserGroup } from "react-icons/hi";
 import Link from "next/link";
 
 export interface ApplicantActivityItem {
@@ -156,7 +158,19 @@ export const MarketplacePostingInfoTab: React.FC<MarketplacePostingInfoTabProps>
         <h3 className="text-sm font-bold uppercase tracking-wider text-text-muted border-b border-white/5 pb-3">
           Application Activity ({data.applicants.length})
         </h3>
-        <Table columns={columns} data={data.applicants} emptyState={<div className="py-8 text-center text-white/40">No applications received yet.</div>} />
+        <Table
+          columns={columns}
+          data={data.applicants}
+          emptyState={
+            <div className="py-6 px-4">
+              <EmptyState
+                icon={<HiOutlineUserGroup size={36} />}
+                title="No Applications Received"
+                description="No applicant responses or applications have been submitted for this posting yet."
+              />
+            </div>
+          }
+        />
       </div>
     </div>
   );

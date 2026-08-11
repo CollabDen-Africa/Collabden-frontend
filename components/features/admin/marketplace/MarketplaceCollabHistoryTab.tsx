@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Table, Column } from "@/components/ui/Table";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineClock } from "react-icons/hi";
 
 export interface CollabHistoryItem {
   id: string;
@@ -70,7 +72,20 @@ export const MarketplaceCollabHistoryTab: React.FC<MarketplaceCollabHistoryTabPr
       <h3 className="text-sm font-bold uppercase tracking-wider text-text-muted">
         Collaboration History
       </h3>
-      <Table columns={columns} data={items} isLoading={isLoading} emptyState={<div className="py-8 text-center text-white/40">No collaboration history found.</div>} />
+      <Table
+        columns={columns}
+        data={items}
+        isLoading={isLoading}
+        emptyState={
+          <div className="py-6 px-4">
+            <EmptyState
+              icon={<HiOutlineClock size={36} />}
+              title="No Collaboration History"
+              description="No past projects or collaboration records found for this profile."
+            />
+          </div>
+        }
+      />
     </div>
   );
 };

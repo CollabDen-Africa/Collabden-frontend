@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Table, Column } from "@/components/ui/Table";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineUserGroup } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 
 export interface CollaboratorProfileRow {
@@ -134,7 +136,15 @@ export const CollaboratorsTable: React.FC<CollaboratorsTableProps> = ({ data, is
       data={data}
       isLoading={isLoading}
       onRowClick={(row) => router.push(`/admin/marketplace/${row.id}`)}
-      emptyState={<div className="py-8 text-center text-white/40">No collaborator profiles found.</div>}
+      emptyState={
+        <div className="py-6 px-4">
+          <EmptyState
+            icon={<HiOutlineUserGroup size={36} />}
+            title="No Collaborator Profiles"
+            description="No collaborator profiles match your current search criteria."
+          />
+        </div>
+      }
     />
   );
 };

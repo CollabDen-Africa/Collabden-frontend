@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiOutlineSearch } from "react-icons/hi";
+import { HiOutlineSearch, HiOutlineExclamationCircle } from "react-icons/hi";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Pagination } from "@/components/ui/Pagination";
+import EmptyState from "@/components/ui/EmptyState";
 import { AgreementReportCard, AgreementReportCardItem } from "./AgreementReportCard";
 import { useAdminAgreements } from "@/hooks/admin/useAdminAgreements";
 
@@ -113,13 +114,21 @@ export const AgreementsReportsView: React.FC = () => {
         {/* List of Report Cards */}
         <div className="flex flex-col gap-4 mt-1">
           {isLoadingReports ? (
-            <div className="py-12 text-center text-white/40 text-sm">
-              Loading agreement reports...
+            <div className="py-12 flex flex-col items-center justify-center gap-2 text-white/40 text-sm">
+              <div className="w-6 h-6 border-2 border-primary-green border-t-transparent rounded-full animate-spin" />
+              <span>Loading agreement reports...</span>
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="py-12 text-center text-white/40 text-sm">
-              No reported agreement issues match your search criteria.
-            </div>
+            <EmptyState
+              icon={<HiOutlineExclamationCircle size={36} />}
+              title="No Agreement Disputes Found"
+              description="No reported agreement issues match your filter criteria or search parameters."
+              actionLabel="Clear Filters"
+              onAction={() => {
+                setSearchTerm("");
+                setActiveStatus("All");
+              }}
+            />
           ) : (
             filteredItems.map((item) => (
               <AgreementReportCard key={item.id} item={item} onAddNote={handleAddNote} />
