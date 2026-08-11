@@ -41,12 +41,12 @@ export const Table = <T extends Record<string, any>>({
   showHeader = true,
 }: TableProps<T>) => {
   return (
-    <div className="w-full bg-white/[0.02] border border-white/5 rounded-[20px] overflow-hidden flex flex-col">
+    <div className="w-full bg-white/2 border border-white/5 rounded-[20px] overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-full">
           {showHeader && (
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.01]">
+              <tr className="border-b border-white/5 bg-white/1">
                 {columns.map((col) => (
                   <th
                     key={col.key}
@@ -72,7 +72,7 @@ export const Table = <T extends Record<string, any>>({
                 <tr
                   key={item.id || idx}
                   onClick={() => onRowClick && onRowClick(item)}
-                  className={`hover:bg-white/[0.02] transition-colors group ${
+                  className={`hover:bg-white/2 transition-colors group ${
                     onRowClick ? "cursor-pointer" : ""
                   }`}
                 >
