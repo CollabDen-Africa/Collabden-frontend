@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Table, Column } from "@/components/ui/Table";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineShieldCheck } from "react-icons/hi";
 
 export interface CollabReportItem {
   id: string;
@@ -97,7 +99,20 @@ export const MarketplaceCollabReportsTab: React.FC<MarketplaceCollabReportsTabPr
           Reports Filed ({reports.length})
         </h3>
       </div>
-      <Table columns={columns} data={reports} isLoading={isLoading} emptyState={<div className="py-8 text-center text-white/40">No reports filed for this collaborator.</div>} />
+      <Table
+        columns={columns}
+        data={reports}
+        isLoading={isLoading}
+        emptyState={
+          <div className="py-6 px-4">
+            <EmptyState
+              icon={<HiOutlineShieldCheck size={36} />}
+              title="No Reports Filed"
+              description="No user reports or violations have been filed against this collaborator profile."
+            />
+          </div>
+        }
+      />
     </div>
   );
 };

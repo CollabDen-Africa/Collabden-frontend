@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { HiOutlineShieldCheck, HiOutlineLockClosed, HiOutlineSearch } from "react-icons/hi";
 import { Table, Column } from "@/components/ui/Table";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
+import EmptyState from "@/components/ui/EmptyState";
 
 export interface AuditLogRow {
   id: string;
@@ -162,7 +163,20 @@ export const AgreementAuditLogTab: React.FC<AgreementAuditLogTabProps> = ({
 
       {/* Audit Log Table */}
       <div className="bg-card-bg-alt/30 border border-white/5 rounded-2xl p-4 flex flex-col gap-4">
-        <Table columns={columns} data={filteredRows} isLoading={isLoading} emptyState={<div className="py-8 text-center text-white/40">No audit records logged for this agreement.</div>} />
+        <Table
+          columns={columns}
+          data={filteredRows}
+          isLoading={isLoading}
+          emptyState={
+            <div className="py-6 px-4">
+              <EmptyState
+                icon={<HiOutlineLockClosed size={36} />}
+                title="No Audit Entries Recorded"
+                description="No administrative access or actions have been logged for this agreement."
+              />
+            </div>
+          }
+        />
 
         {/* Footer Retention Notice */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5 text-xs text-text-muted">

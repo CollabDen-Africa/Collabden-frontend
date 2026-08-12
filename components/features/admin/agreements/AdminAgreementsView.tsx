@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiOutlineSearch, HiOutlineFilter } from "react-icons/hi";
+import { HiOutlineSearch, HiOutlineFilter, HiOutlineExclamationCircle } from "react-icons/hi";
+import { useRouter } from "next/navigation";
 import { useAdminAgreements } from "@/hooks/admin/useAdminAgreements";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
 import { StatCard } from "@/components/features/admin/shared/StatCard";
@@ -9,6 +10,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { AgreementsTable, AgreementRow } from "./AgreementsTable";
 
 export const AdminAgreementsView: React.FC = () => {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -40,17 +42,26 @@ export const AdminAgreementsView: React.FC = () => {
             Review and manage all agreements across the platform.
           </p>
         </div>
-        <ExportCSVButton
-          data={rows}
-          filename="legal-agreements.csv"
-          headers={[
-            { label: "Agreement ID", key: "agreementId" },
-            { label: "Project", key: "projectName" },
-            { label: "Owner", key: "ownerName" },
-            { label: "Status", key: "status" },
-            { label: "Date Signed", key: "dateSigned" },
-          ]}
-        />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/admin/agreements/reports")}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold transition-colors cursor-pointer"
+          >
+            <HiOutlineExclamationCircle size={16} />
+            Reported Issues
+          </button>
+          <ExportCSVButton
+            data={rows}
+            filename="legal-agreements.csv"
+            headers={[
+              { label: "Agreement ID", key: "agreementId" },
+              { label: "Project", key: "projectName" },
+              { label: "Owner", key: "ownerName" },
+              { label: "Status", key: "status" },
+              { label: "Date Signed", key: "dateSigned" },
+            ]}
+          />
+        </div>
       </div>
 
       {/* 5 KPI Stat Metric Cards */}
@@ -105,7 +116,7 @@ export const AdminAgreementsView: React.FC = () => {
               className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-text-muted focus:outline-none focus:border-primary-green transition-colors"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors shrink-0">
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors shrink-0 cursor-pointer">
             <HiOutlineFilter size={16} />
             Filters
           </button>

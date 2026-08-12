@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiOutlineUpload, HiOutlinePencilAlt, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineRefresh } from "react-icons/hi";
+import { HiOutlineUpload, HiOutlinePencilAlt, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineRefresh, HiOutlineClock } from "react-icons/hi";
+import EmptyState from "@/components/ui/EmptyState";
 
 export interface ActivityEventItem {
   id: string;
@@ -90,9 +91,13 @@ export const AgreementActivityTab: React.FC<AgreementActivityTabProps> = ({ even
       {/* Timeline Event List */}
       <div className="flex flex-col gap-4">
         {filteredEvents.length === 0 ? (
-          <div className="py-12 text-center text-white/40 text-sm">
-            No activity events recorded for this category.
-          </div>
+          <EmptyState
+            icon={<HiOutlineClock size={36} />}
+            title="No Activity Events Recorded"
+            description="No timeline events or state changes match the selected category."
+            actionLabel="Reset Category"
+            onAction={() => setActiveFilter("All Events")}
+          />
         ) : (
           filteredEvents.map((item) => (
             <div

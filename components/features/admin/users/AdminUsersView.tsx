@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { Table } from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineUserGroup } from "react-icons/hi";
 
 const StatusBadge = ({ status }: { status: string }) => {
   const colors: Record<string, string> = {
@@ -223,7 +225,17 @@ export const AdminUsersView: React.FC = () => {
         data={data?.users || []}
         isLoading={isLoading}
         loadingState={<div className="py-8 text-center text-white/40">Loading users...</div>}
-        emptyState={<div className="py-8 text-center text-white/40">No users found</div>}
+        emptyState={
+          <div className="py-6 px-4">
+            <EmptyState
+              icon={<HiOutlineUserGroup size={36} />}
+              title="No Users Found"
+              description="No registered user accounts match your current search or filter criteria."
+              actionLabel="Clear Search"
+              onAction={() => { setSearchTerm(""); setPage(1); }}
+            />
+          </div>
+        }
         onRowClick={(user) => router.push(`/admin/users/${user.id}`)}
       />
 

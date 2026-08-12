@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { HiOutlineSearch, HiPlus } from "react-icons/hi";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import EmptyState from "@/components/ui/EmptyState";
 import { AdminRolesSubNav } from "./AdminRolesSubNav";
 import { RoleCard } from "./RoleCard";
 import { CreateRoleModal } from "./CreateRoleModal";
@@ -160,10 +161,16 @@ export const AdminRolesView: React.FC = () => {
             />
           ))
         ) : (
-          <div className="py-16 rounded-2xl bg-white/5 border border-white/10 text-center text-white/40 flex flex-col items-center gap-2">
-            <span className="text-base font-semibold text-white/70">No matching roles found</span>
-            <span className="text-xs">Try adjusting your search query or status filter.</span>
-          </div>
+          <EmptyState
+            icon={<HiOutlineSearch size={36} />}
+            title="No Matching Roles Found"
+            description="No admin roles match your current search query or applied status filter."
+            actionLabel="Reset Filters"
+            onAction={() => {
+              setSearchQuery("");
+              setStatusFilter("ALL");
+            }}
+          />
         )}
       </div>
 

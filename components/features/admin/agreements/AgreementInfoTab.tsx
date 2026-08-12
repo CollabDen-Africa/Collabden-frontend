@@ -39,9 +39,10 @@ export interface AgreementInfoData {
 
 interface AgreementInfoTabProps {
   data: AgreementInfoData;
+  onViewSignedCopy?: () => void;
 }
 
-export const AgreementInfoTab: React.FC<AgreementInfoTabProps> = ({ data }) => {
+export const AgreementInfoTab: React.FC<AgreementInfoTabProps> = ({ data, onViewSignedCopy }) => {
   return (
     <div className="p-6 md:p-8 flex flex-col gap-8 animate-in fade-in duration-300">
       {/* Red Alert Callout Box if Under Dispute */}
@@ -197,7 +198,10 @@ export const AgreementInfoTab: React.FC<AgreementInfoTabProps> = ({ data }) => {
               </span>
             </div>
 
-            <button className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-green/15 text-primary-green hover:bg-primary-green/25 text-xs font-bold border border-primary-green/30 transition-all cursor-pointer w-full mt-2">
+            <button
+              onClick={onViewSignedCopy}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-green/15 text-primary-green hover:bg-primary-green/25 text-xs font-bold border border-primary-green/30 transition-all cursor-pointer w-full mt-2"
+            >
               View Signed Copy
             </button>
           </div>

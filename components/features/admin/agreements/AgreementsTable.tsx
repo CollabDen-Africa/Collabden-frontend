@@ -2,6 +2,8 @@
 
 import React from "react";
 import { Table, Column } from "@/components/ui/Table";
+import EmptyState from "@/components/ui/EmptyState";
+import { HiOutlineDocumentText } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 
 export interface CollaboratorItem {
@@ -117,7 +119,15 @@ export const AgreementsTable: React.FC<AgreementsTableProps> = ({ data, isLoadin
       data={data}
       isLoading={isLoading}
       onRowClick={(row) => router.push(`/admin/agreements/${row.id}`)}
-      emptyState={<div className="py-8 text-center text-white/40">No legal agreements found.</div>}
+      emptyState={
+        <div className="py-6 px-4">
+          <EmptyState
+            icon={<HiOutlineDocumentText size={36} />}
+            title="No Legal Agreements"
+            description="No legal agreements have been generated or match your criteria."
+          />
+        </div>
+      }
     />
   );
 };

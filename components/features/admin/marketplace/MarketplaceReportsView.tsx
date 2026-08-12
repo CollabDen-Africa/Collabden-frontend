@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiOutlineSearch } from "react-icons/hi";
+import { HiOutlineSearch, HiOutlineShieldExclamation } from "react-icons/hi";
 import { Tabs } from "@/components/ui/Tabs";
 import { Pagination } from "@/components/ui/Pagination";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import EmptyState from "@/components/ui/EmptyState";
 import { MarketplaceReportCard, MarketplaceReportCardItem } from "./MarketplaceReportCard";
 import { MarketplaceModerationModal, ModerationTarget } from "./MarketplaceModerationModal";
 import { useAdminMarketplace } from "@/hooks/admin/useAdminMarketplace";
@@ -143,13 +144,22 @@ export const MarketplaceReportsView: React.FC = () => {
         {/* Reported Content Cards Stack */}
         <div className="flex flex-col gap-4 mt-2">
           {isLoadingReports ? (
-            <div className="py-12 text-center text-white/40 text-sm">
-              Loading marketplace reports...
+            <div className="py-12 flex flex-col items-center justify-center gap-2 text-white/40 text-sm">
+              <div className="w-6 h-6 border-2 border-primary-green border-t-transparent rounded-full animate-spin" />
+              <span>Loading marketplace reports...</span>
             </div>
           ) : reportItems.length === 0 ? (
-            <div className="py-12 text-center text-white/40 text-sm">
-              No reported content matches your criteria.
-            </div>
+            <EmptyState
+              icon={<HiOutlineShieldExclamation size={36} />}
+              title="No Reported Content Found"
+              description="No user reports match your selected category or status criteria."
+              actionLabel="Clear Filters"
+              onAction={() => {
+                setSearchTerm("");
+                setActiveCategory("All Content");
+                setActiveStatus("All Statuses");
+              }}
+            />
           ) : (
             reportItems.map((item) => (
               <MarketplaceReportCard
