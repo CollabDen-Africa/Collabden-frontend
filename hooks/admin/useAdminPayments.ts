@@ -141,7 +141,7 @@ export const useAdminPayments = (params?: UseAdminPaymentsParams) => {
   }, [fetchStats, fetchTransactions, fetchDisputes, fetchWithdrawals, fetchSubscriptions, fetchAuditLogs]);
 
   const triggerManualPayout = async (payload: { userId: string; amount: number; reason: string }) => {
-    const success = await apiProcessManualPayout(payload);
+    const success = await apiProcessManualPayout();
     if (success) {
       fetchTransactions();
       fetchStats();
