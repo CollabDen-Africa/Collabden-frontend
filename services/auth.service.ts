@@ -50,18 +50,22 @@ const authService = {
   },
 
   /**
-   * Login an admin
+   * Login an admin — must go through Next.js proxy to set the HTTP-only auth-token cookie.
    */
   adminLogin: async (data: LoginPayload) => {
-    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.LOGIN, data);
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.PROXY_LOGIN, data, {
+      baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
+    });
     return response.data;
   },
 
   /**
-   * Verify admin 2FA code
+   * Verify admin 2FA — must go through Next.js proxy to set the HTTP-only auth-token cookie.
    */
   adminVerify2FA: async (data: AdminVerify2FAPayload) => {
-    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.VERIFY_2FA, data);
+    const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.PROXY_VERIFY_2FA, data, {
+      baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
+    });
     return response.data;
   },
 

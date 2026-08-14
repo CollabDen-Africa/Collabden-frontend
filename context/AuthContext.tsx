@@ -170,18 +170,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const adminLogin = async (data: LoginPayload) => {
     try {
       const response = await adminLoginMutation.mutateAsync(data);
-      if (response.success) {
-        if (response.requires2FA) {
-          return response;
-        }
-        const loggedUser =
-          response.user || response.data?.user || response.data;
-        setUser(loggedUser);
+      // Proxy normalizes to: { success, requires2FA, adminId, email } or { success, user }
+      if (response.requires2FA) {
+        return response;
+      }
+      if (response.user) {
+        setUser({ ...response.user, isAdmin: true });
         setIsAuthenticated(true);
         localStorage.setItem("collabden_admin_logged_in", "true");
         router.push("/admin/dashboard");
-        return response;
       }
+      return response;
     } catch (err) {
       throw err;
     }
@@ -190,15 +189,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const adminVerify2FA = async (data: AdminVerify2FAPayload) => {
     try {
       const response = await adminVerify2FAMutation.mutateAsync(data);
-      if (response.success) {
-        const loggedUser =
-          response.user || response.data?.user || response.data;
-        setUser(loggedUser);
+      // Proxy normalizes to: { success: true, user: adminUser }
+      if (response.user) {
+        setUser({ ...response.user, isAdmin: true });
         setIsAuthenticated(true);
         localStorage.setItem("collabden_admin_logged_in", "true");
         router.push("/admin/dashboard");
-        return response;
       }
+      return response;
     } catch (err) {
       throw err;
     }
