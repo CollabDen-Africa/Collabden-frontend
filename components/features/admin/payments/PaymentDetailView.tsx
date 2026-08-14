@@ -8,7 +8,6 @@ import {
   HiCheckCircle,
   HiOutlineClock,
   HiOutlineShieldCheck,
-  HiOutlineArrowRight,
   HiOutlineExclamationCircle,
   HiOutlineRefresh,
 } from "react-icons/hi";

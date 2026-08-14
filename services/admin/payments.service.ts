@@ -425,7 +425,7 @@ export const getPaymentDisputes = async (params?: {
     const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_DISPUTES.LIST, { params });
     const data = res.data as DisputesResponse;
     return {
-      disputes: (data.disputes || []).map((d, i) => ({
+      disputes: (data.disputes || []).map((d) => ({
         id: d.id,
         disputeId: `DSP-${d.id.slice(-6).toUpperCase()}`,
         transactionId: d.transactionId || "N/A",
@@ -673,7 +673,7 @@ export const getPaymentReports = async (params?: {
 
 // ─── Manual Payout (placeholder — no backend endpoint yet) ──────────────────
 
-export const processManualPayout = async (payload: {
+export const processManualPayout = async (_payload: {
   userId: string;
   amount: number;
   reason: string;

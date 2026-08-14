@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Table, Column } from "@/components/ui/Table";
 import { ExportCSVButton } from "@/components/ui/ExportCSVButton";
 import EmptyState from "@/components/ui/EmptyState";
-import { HiOutlineDocumentReport, HiOutlineLockClosed, HiOutlineDownload } from "react-icons/hi";
+import { HiOutlineLockClosed } from "react-icons/hi";
 import { useAdminPayments } from "@/hooks/admin/useAdminPayments";
 import { PaymentAuditEntry } from "@/services/admin/payments.service";
 

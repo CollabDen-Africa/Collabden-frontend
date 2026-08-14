@@ -12,7 +12,7 @@ import { WithdrawalRequestItem, ActiveSubscriptionItem } from "@/services/admin/
 
 export const WithdrawalsSubscriptionsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Withdrawal Requests");
-  const { withdrawals, subscriptions, totalWithdrawals, totalSubscriptions, isLoadingWithdrawals } = useAdminPayments({
+  const { withdrawals, subscriptions, isLoadingWithdrawals } = useAdminPayments({
     loadStats: false,
     loadTransactions: false,
     loadWithdrawals: true,
