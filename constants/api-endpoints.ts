@@ -90,6 +90,36 @@ export const API_ENDPOINTS = {
     DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/agreements/${id}`,
     ACTIVITY: (id: string) => `${API_BASE_URL}/api/v1/admin/agreements/${id}/activity`,
   },
+  ADMIN_TRANSACTIONS: {
+    LIST: `${API_BASE_URL}/api/v1/admin/transactions`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/transactions/${id}`,
+  },
+  ADMIN_ESCROW: {
+    LIST: `${API_BASE_URL}/api/v1/admin/escrow`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/escrow/${id}`,
+  },
+  ADMIN_DISPUTES: {
+    LIST: `${API_BASE_URL}/api/v1/admin/disputes`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}`,
+    ASSIGN: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/assign`,
+    UPDATE_STATUS: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/status`,
+    NOTES: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/notes`,
+    MESSAGES: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/messages`,
+    EVIDENCE_REQUESTS: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/evidence-requests`,
+    REQUEST_EVIDENCE: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/request-evidence`,
+    DECISION: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/decision`,
+    AUDIT_LOGS: (id: string) => `${API_BASE_URL}/api/v1/admin/disputes/${id}/audit-logs`,
+  },
+  ADMIN_FINANCE: {
+    WITHDRAWALS: `${API_BASE_URL}/api/v1/admin/finance/withdrawals`,
+    WITHDRAWAL_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/finance/withdrawals/${id}`,
+    SUBSCRIPTION_PAYMENTS: `${API_BASE_URL}/api/v1/admin/finance/subscription-payments`,
+    SUBSCRIPTION_PAYMENT_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/finance/subscription-payments/${id}`,
+  },
+  ADMIN_PAYMENTS: {
+    REPORTS: `${API_BASE_URL}/api/v1/admin/payments/reports`,
+    AUDIT: `${API_BASE_URL}/api/v1/admin/payments/audit`,
+  },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
   },
