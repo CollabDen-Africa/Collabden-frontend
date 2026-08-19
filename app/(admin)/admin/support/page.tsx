@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import { FeatureInProgressView } from "@/components/features/admin/shared/FeatureInProgressView";
+import { AdminSupportView } from "@/components/features/admin/support/AdminSupportView";
 
-export default function SupportAdminPage() {
-  return (
-    <FeatureInProgressView
-      title="Support Tickets & Helpdesk"
-      description="The Admin Support Desk and Ticket management module is currently under construction."
-    />
-  );
+export default function AdminSupportPage() {
+  return <AdminSupportView />;
 }

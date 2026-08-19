@@ -123,6 +123,15 @@ export const API_ENDPOINTS = {
     REPORTS: `${API_BASE_URL}/api/v1/admin/payments/reports`,
     AUDIT: `${API_BASE_URL}/api/v1/admin/payments/audit`,
   },
+  ADMIN_SUPPORT: {
+    LIST: `${API_BASE_URL}/api/v1/admin/support`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/support/${id}`,
+    ASSIGN: (id: string) => `${API_BASE_URL}/api/v1/admin/support/${id}/assign`,
+    UPDATE_STATUS: (id: string) => `${API_BASE_URL}/api/v1/admin/support/${id}/status`,
+    MESSAGES: (id: string) => `${API_BASE_URL}/api/v1/admin/support/${id}/messages`,
+    REPORTS: `${API_BASE_URL}/api/v1/admin/support/reports`,
+    AUDIT: `${API_BASE_URL}/api/v1/admin/support/audit`,
+  },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,
   },
