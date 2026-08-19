@@ -95,7 +95,7 @@ export const AdminSupportView: React.FC = () => {
       key: "subject",
       label: "SUBJECT",
       render: (row) => (
-        <span className="text-xs text-white/80 line-clamp-1 max-w-[240px]">{row.subject}</span>
+        <span className="text-xs text-white/80 line-clamp-1 max-w-60">{row.subject}</span>
       ),
     },
     {

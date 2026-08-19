@@ -64,7 +64,7 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Message Thread */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-4 max-h-[500px]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-4 max-h-125">
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-sm text-text-muted">No messages yet. Start the conversation below.</p>
@@ -139,7 +139,7 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
       </div>
 
       {/* Reply Input */}
-      <div className="px-4 py-3 border-t border-white/5 bg-white/[0.02]">
+      <div className="px-4 py-3 border-t border-white/5 bg-white/2">
         <div className="flex items-end gap-2">
           <button className="shrink-0 p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
             <HiOutlinePaperClip size={16} />

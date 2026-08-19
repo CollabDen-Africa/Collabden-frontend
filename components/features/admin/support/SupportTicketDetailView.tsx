@@ -103,7 +103,7 @@ export const SupportTicketDetailView: React.FC<SupportTicketDetailViewProps> = (
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab Content */}
-      <div className="min-h-[400px]">
+      <div className="min-h-100">
         {activeTab === "Ticket Details" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Left Column — User Info + Ticket Metadata */}

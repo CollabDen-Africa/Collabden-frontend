@@ -158,7 +158,7 @@ export const SupportReportsView: React.FC = () => {
           <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">
             Tickets by Category
           </h3>
-          <div className="h-[250px] w-full">
+          <div className="h-62.5 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 layout="vertical"
