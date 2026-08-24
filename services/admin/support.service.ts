@@ -3,15 +3,23 @@ import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 // ─── TypeScript Interfaces ──────────────────────────────────────────────────
 
-export type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
-export type TicketPriority = "Critical" | "High" | "Medium" | "Low";
+export type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed" | "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+export type TicketPriority = "Critical" | "High" | "Medium" | "Low" | "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 export type TicketCategory =
   | "Payment Issue"
   | "Escrow Dispute"
   | "Account Access"
   | "Verification"
   | "Platform Bug"
-  | "General Inquiry";
+  | "General Inquiry"
+  | "ACCOUNT"
+  | "BILLING"
+  | "TECHNICAL"
+  | "PROJECT"
+  | "COLLABORATION"
+  | "VERIFICATION"
+  | "DISPUTE"
+  | "OTHER";
 
 export interface SupportTicketItem {
   id: string;
@@ -21,9 +29,9 @@ export interface SupportTicketItem {
   userEmail: string;
   userAvatar?: string;
   subject: string;
-  category: TicketCategory;
-  priority: TicketPriority;
-  status: TicketStatus;
+  category: string;
+  priority: string;
+  status: string;
   assignedTo?: string;
   assignedAdmin?: string;
   createdAt: string;
@@ -93,253 +101,68 @@ export interface SupportReportData {
   auditLogs: SupportAuditEntry[];
 }
 
-// ─── Mock / Initial Data ────────────────────────────────────────────────────
-
-export const INITIAL_SUPPORT_TICKETS: SupportTicketItem[] = [
-  {
-    id: "st-001",
-    ticketId: "TKT-001",
-    userId: "usr-101",
-    userName: "Amara Chan",
-    userEmail: "amara@example.com",
-    subject: "Escrow funds not released after milestone completion",
-    category: "Escrow Dispute",
-    priority: "Critical",
-    status: "Open",
-    assignedTo: "admin-001",
-    assignedAdmin: "Support Admin",
-    createdAt: "2025-08-12T09:30:00Z",
-    updatedAt: "2025-08-12T10:15:00Z",
-    deadline: "2025-08-14T09:30:00Z",
-    accountType: "Individual Freelancer",
-    userRole: "Collaborator",
-  },
-  {
-    id: "st-002",
-    ticketId: "TKT-002",
-    userId: "usr-102",
-    userName: "Marcus Lee",
-    userEmail: "marcus@example.com",
-    subject: "System failure: no response after login attempts",
-    category: "Platform Bug",
-    priority: "High",
-    status: "In Progress",
-    assignedTo: "admin-002",
-    assignedAdmin: "Dev Support",
-    createdAt: "2025-08-11T14:20:00Z",
-    updatedAt: "2025-08-12T08:45:00Z",
-    deadline: "2025-08-13T14:20:00Z",
-    accountType: "Business",
-    userRole: "Project Owner",
-  },
-  {
-    id: "st-003",
-    ticketId: "TKT-003",
-    userId: "usr-103",
-    userName: "Ngozi Obi",
-    userEmail: "ngozi@example.com",
-    subject: "Unable to update stage status on a project",
-    category: "Platform Bug",
-    priority: "Medium",
-    status: "In Progress",
-    assignedTo: "admin-001",
-    assignedAdmin: "Support Admin",
-    createdAt: "2025-08-10T11:00:00Z",
-    updatedAt: "2025-08-11T16:30:00Z",
-    accountType: "Individual Freelancer",
-    userRole: "Collaborator",
-  },
-  {
-    id: "st-004",
-    ticketId: "TKT-004",
-    userId: "usr-104",
-    userName: "Tola Adepemi",
-    userEmail: "tola@example.com",
-    subject: "Urgent: agreement not visible to all parties",
-    category: "Account Access",
-    priority: "High",
-    status: "Open",
-    createdAt: "2025-08-09T16:45:00Z",
-    updatedAt: "2025-08-09T16:45:00Z",
-    deadline: "2025-08-11T16:45:00Z",
-    accountType: "Business",
-    userRole: "Project Owner",
-  },
-  {
-    id: "st-005",
-    ticketId: "TKT-005",
-    userId: "usr-105",
-    userName: "Chisom Eze",
-    userEmail: "chisom@example.com",
-    subject: "Profile photo/identity file not uploading",
-    category: "Verification",
-    priority: "Low",
-    status: "Resolved",
-    assignedTo: "admin-003",
-    assignedAdmin: "Verification Team",
-    createdAt: "2025-08-08T09:15:00Z",
-    updatedAt: "2025-08-09T11:00:00Z",
-    accountType: "Individual Freelancer",
-    userRole: "Collaborator",
-  },
-  {
-    id: "st-006",
-    ticketId: "TKT-006",
-    userId: "usr-106",
-    userName: "Yomi Oladipo",
-    userEmail: "yomi@example.com",
-    subject: "Smartphone storage after cancellation",
-    category: "Payment Issue",
-    priority: "Medium",
-    status: "Resolved",
-    assignedTo: "admin-002",
-    assignedAdmin: "Finance Team",
-    createdAt: "2025-08-07T13:30:00Z",
-    updatedAt: "2025-08-08T15:00:00Z",
-    accountType: "Business",
-    userRole: "Project Owner",
-  },
-  {
-    id: "st-007",
-    ticketId: "TKT-007",
-    userId: "usr-107",
-    userName: "Emeka Kossou",
-    userEmail: "emeka@example.com",
-    subject: "Cannot receive milestone notifications",
-    category: "General Inquiry",
-    priority: "Low",
-    status: "Closed",
-    assignedTo: "admin-001",
-    assignedAdmin: "Support Admin",
-    createdAt: "2025-08-06T10:00:00Z",
-    updatedAt: "2025-08-07T14:30:00Z",
-    accountType: "Individual Freelancer",
-    userRole: "Collaborator",
-  },
-];
-
-export const INITIAL_SUPPORT_MESSAGES: Record<string, SupportMessage[]> = {
-  "st-001": [
-    {
-      id: "msg-001",
-      ticketId: "st-001",
-      senderId: "usr-101",
-      senderName: "Amara Chan",
-      senderRole: "user",
-      content:
-        "I completed the 'Composition & Editing' milestone on Urban Beats Vol. 3 (PR-0346) on June 4th, and the project owner approved it on June 6th. However, the escrow payment of N650,000 has not been released to my wallet. The payment of Milestone 1 has been released to the collaborators, but the funds are still showing as 'Settled'. Please investigate urgently as it's been 6 weeks already.",
-      createdAt: "2025-08-12T09:30:00Z",
-    },
-    {
-      id: "msg-002",
-      ticketId: "st-001",
-      senderId: "admin-001",
-      senderName: "Support Admin",
-      senderRole: "admin",
-      content:
-        "Hi Amara, thanks for reaching out. I've checked the transaction and escrow ledger for PR-0346. I can confirm that Milestone 2 was approved by the project owner (James Obi) on June 6th. The expected payout should have been triggered automatically within 48 hours. I'm escalating this to the Finance team for a manual review.",
-      createdAt: "2025-08-12T10:15:00Z",
-    },
-    {
-      id: "msg-003",
-      ticketId: "st-001",
-      senderId: "usr-101",
-      senderName: "Amara Chan",
-      senderRole: "user",
-      content:
-        "Thank you for the quick response. Please let me know as soon as the escalation yields results. I have bills to pay and this delay is really affecting me.",
-      createdAt: "2025-08-12T11:00:00Z",
-    },
-    {
-      id: "msg-004",
-      ticketId: "st-001",
-      senderId: "admin-001",
-      senderName: "Support Admin",
-      senderRole: "admin",
-      content:
-        "Absolutely, Amara. I've flagged this as urgent with the Finance division. You should receive an update within 24 hours. In the meantime, I'll add a manual note to the escrow record.",
-      isInternalNote: false,
-      createdAt: "2025-08-12T11:30:00Z",
-    },
-    {
-      id: "msg-005",
-      ticketId: "st-001",
-      senderId: "admin-001",
-      senderName: "Support Admin",
-      senderRole: "admin",
-      content:
-        "INTERNAL NOTE: Escalated to Finance team. Escrow ID: ESC-PR0346-M2. The automated payout webhook may have failed. Check Flutterwave logs for tx_ref matching this escrow.",
-      isInternalNote: true,
-      createdAt: "2025-08-12T11:35:00Z",
-    },
-  ],
+// Helper to normalize status to UI title case
+export const formatTicketStatus = (status: string): TicketStatus => {
+  switch (status?.toUpperCase()) {
+    case "OPEN":
+      return "Open";
+    case "IN_PROGRESS":
+      return "In Progress";
+    case "RESOLVED":
+      return "Resolved";
+    case "CLOSED":
+      return "Closed";
+    default:
+      return (status as TicketStatus) || "Open";
+  }
 };
 
-export const INITIAL_SUPPORT_AUDIT_LOGS: SupportAuditEntry[] = [
-  {
-    id: "audit-001",
-    ticketId: "TKT-001",
-    action: "Ticket Created",
-    adminName: "System",
-    userName: "Amara Chan",
-    details: "Ticket submitted via platform support form",
-    timestamp: "2025-08-12T09:30:00Z",
-  },
-  {
-    id: "audit-002",
-    ticketId: "TKT-001",
-    action: "Assigned",
-    adminName: "Support Admin",
-    userName: "Amara Chan",
-    details: "Auto-assigned based on category routing rules",
-    timestamp: "2025-08-12T09:31:00Z",
-  },
-  {
-    id: "audit-003",
-    ticketId: "TKT-002",
-    action: "Status Updated",
-    adminName: "Dev Support",
-    userName: "Marcus Lee",
-    details: "Status changed from Open → In Progress",
-    timestamp: "2025-08-11T15:00:00Z",
-  },
-  {
-    id: "audit-004",
-    ticketId: "TKT-005",
-    action: "Resolved",
-    adminName: "Verification Team",
-    userName: "Chisom Eze",
-    details: "File upload issue resolved — CDN cache cleared",
-    timestamp: "2025-08-09T11:00:00Z",
-  },
-  {
-    id: "audit-005",
-    ticketId: "TKT-003",
-    action: "Note Added",
-    adminName: "Support Admin",
-    userName: "Ngozi Obi",
-    details: "Internal note: Investigated project stage API response",
-    timestamp: "2025-08-11T16:30:00Z",
-  },
-  {
-    id: "audit-006",
-    ticketId: "TKT-006",
-    action: "Payment Reversed",
-    adminName: "Finance Team",
-    userName: "Yomi Oladipo",
-    details: "Subscription refund processed — N12,500 returned to wallet",
-    timestamp: "2025-08-08T15:00:00Z",
-  },
-  {
-    id: "audit-007",
-    ticketId: "TKT-004",
-    action: "Escalated",
-    adminName: "Support Admin",
-    userName: "Tola Adepemi",
-    details: "Escalated to legal — agreement visibility issue affecting parties",
-    timestamp: "2025-08-10T09:00:00Z",
-  },
-];
+// Helper to normalize status to Backend uppercase
+export const toBackendStatus = (status: string): string => {
+  switch (status) {
+    case "Open":
+      return "OPEN";
+    case "In Progress":
+      return "IN_PROGRESS";
+    case "Resolved":
+      return "RESOLVED";
+    case "Closed":
+      return "CLOSED";
+    default:
+      return status.toUpperCase();
+  }
+};
+
+// Normalize backend ticket item to frontend UI shape
+const transformTicketItem = (item: any): SupportTicketItem => {
+  const userName =
+    item.userName ||
+    (item.user
+      ? `${item.user.firstName || ""} ${item.user.lastName || ""}`.trim() ||
+        item.user.displayName ||
+        item.user.email
+      : "Unknown User");
+
+  return {
+    id: item.id,
+    ticketId: item.ticketNumber || item.ticketId || item.id,
+    userId: item.userId || item.user?.id || "",
+    userName,
+    userEmail: item.userEmail || item.user?.email || "N/A",
+    userAvatar: item.userAvatar || item.user?.avatarUrl || "",
+    subject: item.subject || item.title || "Support Request",
+    category: item.category || "General Inquiry",
+    priority: item.priority || "Medium",
+    status: formatTicketStatus(item.status || "OPEN"),
+    assignedTo: item.assignedAdminId || item.assignedTo || item.assignedAdmin?.id || "",
+    assignedAdmin: item.assignedAdminName || item.assignedAdmin?.email || item.assignedAdmin || "Unassigned",
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || item.createdAt || new Date().toISOString(),
+    deadline: item.deadline,
+    accountType: item.accountType || item.user?.accountStatus || "Standard",
+    userRole: item.userRole || item.user?.role || "User",
+  };
+};
 
 // ─── Service Methods ────────────────────────────────────────────────────────
 
@@ -351,45 +174,82 @@ export const adminSupportService = {
     status?: string;
     priority?: string;
     category?: string;
-  }): Promise<{ tickets: SupportTicketItem[]; total: number }> => {
+  }): Promise<{ tickets: SupportTicketItem[]; total: number; summary?: any }> => {
     try {
-      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.LIST, { params });
-      return res.data;
-    } catch {
-      return { tickets: INITIAL_SUPPORT_TICKETS, total: INITIAL_SUPPORT_TICKETS.length };
+      const apiParams: Record<string, any> = { ...params };
+      if (apiParams.status && apiParams.status !== "ALL" && apiParams.status !== "All") {
+        apiParams.status = toBackendStatus(apiParams.status);
+      } else {
+        delete apiParams.status;
+      }
+      if (apiParams.category === "ALL" || apiParams.category === "All") {
+        delete apiParams.category;
+      }
+
+      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.LIST, { params: apiParams });
+      const body = res.data;
+      const rawData = body?.data || body;
+      const ticketsArray = rawData?.tickets || (Array.isArray(rawData) ? rawData : []);
+      const formatted = ticketsArray.map(transformTicketItem);
+
+      return {
+        tickets: formatted,
+        total: rawData?.total || formatted.length,
+        summary: rawData?.summary,
+      };
+    } catch (err) {
+      console.error("Error fetching live support tickets:", err);
+      return { tickets: [], total: 0 };
     }
   },
 
   getTicketDetail: async (id: string): Promise<SupportTicketDetail | null> => {
     try {
       const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.DETAIL(id));
-      return res.data;
-    } catch {
-      const ticket = INITIAL_SUPPORT_TICKETS.find((t) => t.id === id);
-      if (!ticket) return null;
+      const body = res.data;
+      const item = body?.data || body;
+      if (!item) return null;
+
+      const base = transformTicketItem(item);
       return {
-        ...ticket,
-        message: "User submitted this ticket via the platform support form.",
-        attachments: [
-          { id: "att-001", fileName: "escrow_screenshot.png", fileType: "image/png", fileUrl: "#", uploadedAt: ticket.createdAt },
-          { id: "att-002", fileName: "milestone_completion.pdf", fileType: "application/pdf", fileUrl: "#", uploadedAt: ticket.createdAt },
-        ],
-        relatedActivity: [
-          { id: "ra-001", type: "Escrow", label: "Escrow Deposit", status: "Active", date: "Jul 12, 2025" },
-          { id: "ra-002", type: "Payment", label: "Payment Record", status: "Pending", date: "Jul 12, 2025" },
-          { id: "ra-003", type: "Project", label: "Project Activity", status: "Active", date: "Aug 11, 2025" },
-          { id: "ra-004", type: "Agreement", label: "Legal Agreement", status: "Active", date: "Mar 15, 2025" },
-        ],
+        ...base,
+        message: item.description || item.message || "No initial description provided.",
+        attachments: (item.attachments || []).map((a: any) => ({
+          id: a.id || `att-${Date.now()}`,
+          fileName: a.fileName || a.name || "attachment",
+          fileType: a.fileType || a.mimeType || "application/octet-stream",
+          fileUrl: a.fileUrl || a.url || "#",
+          uploadedAt: a.uploadedAt || a.createdAt || base.createdAt,
+        })),
+        relatedActivity: item.relatedActivity || [],
       };
+    } catch (err) {
+      console.error(`Error fetching ticket detail for ${id}:`, err);
+      return null;
     }
   },
 
   getTicketMessages: async (id: string): Promise<SupportMessage[]> => {
     try {
       const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.MESSAGES(id));
-      return res.data;
-    } catch {
-      return INITIAL_SUPPORT_MESSAGES[id] || [];
+      const body = res.data;
+      const rawMsgs = body?.data?.messages || body?.data || (Array.isArray(body) ? body : []);
+      
+      return rawMsgs.map((m: any) => ({
+        id: m.id,
+        ticketId: m.ticketId || id,
+        senderId: m.senderId || m.adminId || m.userId || "",
+        senderName: m.senderName || m.sender?.displayName || (m.isAdmin ? "Support Admin" : "User"),
+        senderRole: m.senderRole || (m.isAdmin || m.isInternal ? "admin" : "user"),
+        senderAvatar: m.senderAvatar || m.sender?.avatarUrl || "",
+        content: m.message || m.content || "",
+        attachments: m.attachments || [],
+        isInternalNote: m.isInternal || m.isInternalNote || false,
+        createdAt: m.createdAt || new Date().toISOString(),
+      }));
+    } catch (err) {
+      console.error(`Error fetching ticket messages for ${id}:`, err);
+      return [];
     }
   },
 
@@ -398,19 +258,27 @@ export const adminSupportService = {
     payload: { content: string; isInternalNote?: boolean }
   ): Promise<SupportMessage | null> => {
     try {
-      const res = await axiosInstance.post(API_ENDPOINTS.ADMIN_SUPPORT.MESSAGES(id), payload);
-      return res.data;
-    } catch {
-      return {
-        id: `msg-${Date.now()}`,
-        ticketId: id,
-        senderId: "admin-001",
-        senderName: "Support Admin",
-        senderRole: "admin",
-        content: payload.content,
-        isInternalNote: payload.isInternalNote,
-        createdAt: new Date().toISOString(),
+      const backendPayload = {
+        message: payload.content,
+        isInternal: Boolean(payload.isInternalNote),
       };
+      const res = await axiosInstance.post(API_ENDPOINTS.ADMIN_SUPPORT.MESSAGES(id), backendPayload);
+      const body = res.data;
+      const m = body?.data || body;
+
+      return {
+        id: m.id || `msg-${Date.now()}`,
+        ticketId: id,
+        senderId: m.senderId || "admin",
+        senderName: m.senderName || "Support Admin",
+        senderRole: "admin",
+        content: m.message || payload.content,
+        isInternalNote: m.isInternal || payload.isInternalNote,
+        createdAt: m.createdAt || new Date().toISOString(),
+      };
+    } catch (err) {
+      console.error(`Error sending message for ticket ${id}:`, err);
+      throw err;
     }
   },
 
@@ -419,47 +287,53 @@ export const adminSupportService = {
     payload: { adminId: string; adminName: string }
   ): Promise<boolean> => {
     try {
-      await axiosInstance.put(API_ENDPOINTS.ADMIN_SUPPORT.ASSIGN(id), payload);
+      await axiosInstance.patch(API_ENDPOINTS.ADMIN_SUPPORT.ASSIGN(id), {
+        assignedAdminId: payload.adminId,
+      });
       return true;
-    } catch {
-      return true;
+    } catch (err) {
+      console.error(`Error assigning ticket ${id}:`, err);
+      throw err;
     }
   },
 
   updateTicketStatus: async (id: string, status: TicketStatus): Promise<boolean> => {
     try {
-      await axiosInstance.put(API_ENDPOINTS.ADMIN_SUPPORT.UPDATE_STATUS(id), { status });
+      const backendStatus = toBackendStatus(status);
+      await axiosInstance.patch(API_ENDPOINTS.ADMIN_SUPPORT.UPDATE_STATUS(id), {
+        status: backendStatus,
+      });
       return true;
-    } catch {
-      return true;
+    } catch (err) {
+      console.error(`Error updating ticket status for ${id}:`, err);
+      throw err;
     }
   },
 
-  getReports: async (_params?: {
-    dateRange?: string;
-  }): Promise<SupportReportData> => {
+  getReports: async (params?: { dateRange?: string; groupBy?: string }): Promise<SupportReportData> => {
     try {
-      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.REPORTS, { params: _params });
-      return res.data;
-    } catch {
+      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.REPORTS, { params });
+      const body = res.data;
+      const data = body?.data || body;
+
       return {
         stats: {
-          totalTickets: 1814,
-          openTickets: 47,
-          inProgressTickets: 65,
-          resolvedTickets: 1604,
-          avgResponseTime: "4.2h",
-          slaBreaches: 8,
+          totalTickets: data?.summary?.totalCount || 0,
+          openTickets: data?.summary?.openCount || 0,
+          inProgressTickets: data?.summary?.inProgressCount || 0,
+          resolvedTickets: data?.summary?.resolvedCount || 0,
+          avgResponseTime: data?.avgResponseTime || "N/A",
+          slaBreaches: data?.slaBreaches || 0,
         },
-        categoryBreakdown: [
-          { category: "Payment Issue", count: 520, color: "var(--primary-green)" },
-          { category: "Escrow Dispute", count: 380, color: "var(--primary-blue)" },
-          { category: "Account Access", count: 310, color: "var(--secondary-blue)" },
-          { category: "Verification", count: 245, color: "var(--accent-yellow)" },
-          { category: "Platform Bug", count: 210, color: "var(--accent-red)" },
-          { category: "General Inquiry", count: 149, color: "var(--accent-pink)" },
-        ],
-        auditLogs: INITIAL_SUPPORT_AUDIT_LOGS,
+        categoryBreakdown: data?.categoryBreakdown || [],
+        auditLogs: data?.auditLogs || [],
+      };
+    } catch (err) {
+      console.error("Error fetching support reports:", err);
+      return {
+        stats: { totalTickets: 0, openTickets: 0, inProgressTickets: 0, resolvedTickets: 0, avgResponseTime: "0h", slaBreaches: 0 },
+        categoryBreakdown: [],
+        auditLogs: [],
       };
     }
   },
@@ -471,9 +345,27 @@ export const adminSupportService = {
   }): Promise<{ auditLogs: SupportAuditEntry[]; total: number }> => {
     try {
       const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.AUDIT, { params });
-      return res.data;
-    } catch {
-      return { auditLogs: INITIAL_SUPPORT_AUDIT_LOGS, total: INITIAL_SUPPORT_AUDIT_LOGS.length };
+      const body = res.data;
+      const data = body?.data || body;
+      const logs = data?.auditLogs || data?.logs || (Array.isArray(data) ? data : []);
+
+      return {
+        auditLogs: logs.map((l: any) => ({
+          id: l.id,
+          ticketId: l.ticketId || l.ticket?.ticketNumber || "N/A",
+          action: l.action || l.event || "LOGGED",
+          adminName: l.adminName || l.admin?.email || "Admin",
+          userName: l.userName || l.user?.email || "User",
+          details: typeof l.details === "string" ? l.details : JSON.stringify(l.details || {}),
+          timestamp: l.createdAt || l.timestamp || new Date().toISOString(),
+        })),
+        total: data?.total || logs.length,
+      };
+    } catch (err) {
+      console.error("Error fetching support audit logs:", err);
+      return { auditLogs: [], total: 0 };
     }
   },
 };
+
+export default adminSupportService;
