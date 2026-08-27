@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { HiOutlinePaperClip } from "react-icons/hi";
+import { HiOutlinePaperClip, HiOutlineLockClosed } from "react-icons/hi";
 import { IoSend } from "react-icons/io5";
 import { SupportMessage } from "@/services/admin/support.service";
 
@@ -17,6 +17,7 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
   onSendMessage,
 }) => {
   const [replyText, setReplyText] = useState("");
+  const [isInternalNote, setIsInternalNote] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -29,9 +30,14 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
   const handleSend = async () => {
     if (!replyText.trim() || isSending) return;
     setIsSending(true);
-    await onSendMessage(replyText.trim(), false);
-    setReplyText("");
-    setIsSending(false);
+    try {
+      await onSendMessage(replyText.trim(), isInternalNote);
+      setReplyText("");
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    } flex: {
+      setIsSending(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -56,15 +62,15 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
     return (
       <div className="p-12 text-center">
         <div className="w-8 h-8 border-2 border-primary-green border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-xs text-text-muted mt-3">Loading conversation...</p>
+        <p className="text-xs text-text-muted mt-3">Loading conversation history...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-card-bg-alt/20 rounded-2xl border border-white/5 overflow-hidden">
       {/* Message Thread */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-4 max-h-125">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4 max-h-125">
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-sm text-text-muted">No messages yet. Start the conversation below.</p>
@@ -77,14 +83,14 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
             if (isNote) {
               return (
                 <div key={msg.id} className="flex justify-center">
-                  <div className="max-w-[80%] px-4 py-3 rounded-xl bg-accent-yellow/10 border border-accent-yellow/20">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-bold text-accent-yellow uppercase tracking-wider">
-                        Internal Note
+                  <div className="max-w-[85%] px-4 py-3 rounded-xl bg-accent-yellow/10 border border-accent-yellow/20 shadow-sm">
+                    <div className="flex items-center justify-between gap-3 mb-1">
+                      <span className="text-[10px] font-bold text-accent-yellow uppercase tracking-wider flex items-center gap-1">
+                        <HiOutlineLockClosed size={12} /> Internal Note
                       </span>
                       <span className="text-[10px] text-accent-yellow/60">{formatTime(msg.createdAt)}</span>
                     </div>
-                    <p className="text-xs text-accent-yellow/90 leading-relaxed">{msg.content}</p>
+                    <p className="text-xs text-accent-yellow/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 </div>
               );
@@ -97,10 +103,10 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-primary-green/20 flex items-center justify-center shrink-0">
                       <span className="text-[10px] font-bold text-primary-green">
-                        {msg.senderName.charAt(0)}
+                        {msg.senderName ? msg.senderName.charAt(0) : "U"}
                       </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-white">{msg.senderName}</span>
+                    <span className="text-[11px] font-semibold text-white">{msg.senderName || "User"}</span>
                     {isAdmin && (
                       <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary-green/10 text-primary-green border border-primary-green/20">
                         Support Admin
@@ -110,10 +116,10 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
 
                   {/* Message Bubble */}
                   <div
-                    className={`px-4 py-3 text-xs leading-relaxed ${
+                    className={`px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap ${
                       isAdmin
-                        ? "bg-primary-green/10 border border-primary-green/20 text-white/90 rounded-msg-me"
-                        : "bg-white/5 border border-white/10 text-white/80 rounded-msg-them"
+                        ? "bg-primary-green/10 border border-primary-green/20 text-white/90 rounded-2xl rounded-tr-none"
+                        : "bg-white/5 border border-white/10 text-white/80 rounded-2xl rounded-tl-none"
                     }`}
                   >
                     {msg.content}
@@ -128,36 +134,56 @@ export const SupportConversationTab: React.FC<SupportConversationTabProps> = ({
         )}
       </div>
 
-      {/* Reply Actions */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-white/5">
-        <button className="px-3 py-1.5 rounded-xl bg-accent-red/10 border border-accent-red/20 text-xs font-semibold text-accent-red hover:bg-accent-red/20 transition-colors cursor-pointer">
-          Reject Ticket
-        </button>
-        <button className="px-3 py-1.5 rounded-xl bg-primary-green/10 border border-primary-green/20 text-xs font-semibold text-primary-green hover:bg-primary-green/20 transition-colors cursor-pointer">
-          Escalate
-        </button>
+      {/* Reply Options Bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-t border-white/5 bg-white/5">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsInternalNote(false)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              !isInternalNote
+                ? "bg-primary-green text-text-main"
+                : "bg-white/5 text-text-muted hover:text-white"
+            }`}
+          >
+            Public Reply
+          </button>
+          <button
+            onClick={() => setIsInternalNote(true)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+              isInternalNote
+                ? "bg-accent-yellow text-text-main"
+                : "bg-white/5 text-text-muted hover:text-white"
+            }`}
+          >
+            <HiOutlineLockClosed size={13} /> Internal Note
+          </button>
+        </div>
       </div>
 
       {/* Reply Input */}
-      <div className="px-4 py-3 border-t border-white/5 bg-white/2">
+      <div className="p-4 border-t border-white/5 bg-white/5">
         <div className="flex items-end gap-2">
-          <button className="shrink-0 p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+          <button className="shrink-0 p-2.5 rounded-xl bg-white/5 border border-white/10 text-text-muted/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
             <HiOutlinePaperClip size={16} />
           </button>
           <textarea
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a reply..."
-            rows={1}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-primary-green/40 resize-none transition-colors"
+            placeholder={isInternalNote ? "Type an internal admin note..." : "Type a response to user..."}
+            rows={2}
+            className={`flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder:text-text-muted/40 focus:outline-none transition-colors resize-none ${
+              isInternalNote ? "focus:border-accent-yellow" : "focus:border-primary-green"
+            }`}
           />
           <button
             onClick={handleSend}
             disabled={!replyText.trim() || isSending}
-            className="shrink-0 p-2.5 rounded-xl bg-primary-green text-text-main hover:brightness-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 ${
+              isInternalNote ? "bg-accent-yellow text-text-main" : "bg-primary-green text-text-main"
+            }`}
           >
-            <IoSend size={16} />
+            {isSending ? "Sending..." : "Send"} <IoSend size={14} />
           </button>
         </div>
       </div>

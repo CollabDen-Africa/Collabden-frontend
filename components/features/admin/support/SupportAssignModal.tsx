@@ -39,7 +39,7 @@ export const SupportAssignModal: React.FC<SupportAssignModalProps> = ({
   onUpdateStatus,
 }) => {
   const [selectedAdmin, setSelectedAdmin] = useState(ticket.assignedTo || "");
-  const [selectedStatus, setSelectedStatus] = useState<TicketStatus>(ticket.status);
+  const [selectedStatus, setSelectedStatus] = useState<TicketStatus>(ticket.status as TicketStatus);
   const [selectedCategory] = useState(ticket.category);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);

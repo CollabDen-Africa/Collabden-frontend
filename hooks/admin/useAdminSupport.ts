@@ -1,23 +1,23 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   adminSupportService,
   SupportTicketItem,
   SupportStats,
-  INITIAL_SUPPORT_TICKETS,
   TicketStatus,
 } from "@/services/admin/support.service";
 
 export const useAdminSupport = () => {
-  const [tickets, setTickets] = useState<SupportTicketItem[]>(INITIAL_SUPPORT_TICKETS);
+  const [tickets, setTickets] = useState<SupportTicketItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [page, setPage] = useState(1);
   const [totalTickets, setTotalTickets] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [backendSummary, setBackendSummary] = useState<any>(null);
 
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await adminSupportService.getTickets({
@@ -27,21 +27,24 @@ export const useAdminSupport = () => {
         priority: priorityFilter !== "ALL" ? priorityFilter : undefined,
         category: categoryFilter !== "ALL" ? categoryFilter : undefined,
       });
-      if (data.tickets && data.tickets.length > 0) {
-        setTickets(data.tickets);
-        setTotalTickets(data.total);
+
+      setTickets(data.tickets || []);
+      setTotalTickets(data.total || 0);
+      if (data.summary) {
+        setBackendSummary(data.summary);
       }
     } catch (error) {
-      console.error("Failed to load support tickets", error);
+      console.error("Failed to load live support tickets", error);
+      setTickets([]);
+      setTotalTickets(0);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, searchQuery, statusFilter, priorityFilter, categoryFilter]);
 
   useEffect(() => {
     loadTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [loadTickets]);
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -53,23 +56,34 @@ export const useAdminSupport = () => {
         ticket.userEmail.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus =
-        statusFilter === "ALL" || ticket.status === statusFilter;
+        statusFilter === "ALL" || ticket.status.toUpperCase() === statusFilter.toUpperCase();
 
       const matchesPriority =
-        priorityFilter === "ALL" || ticket.priority === priorityFilter;
+        priorityFilter === "ALL" || ticket.priority.toUpperCase() === priorityFilter.toUpperCase();
 
       const matchesCategory =
-        categoryFilter === "ALL" || ticket.category === categoryFilter;
+        categoryFilter === "ALL" || ticket.category.toUpperCase() === categoryFilter.toUpperCase();
 
       return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
     });
   }, [tickets, searchQuery, statusFilter, priorityFilter, categoryFilter]);
 
   const stats: SupportStats = useMemo(() => {
+    if (backendSummary) {
+      return {
+        totalTickets: backendSummary.totalCount || totalTickets,
+        openTickets: backendSummary.openCount || 0,
+        inProgressTickets: backendSummary.inProgressCount || 0,
+        resolvedTickets: backendSummary.resolvedCount || 0,
+        avgResponseTime: "4.2h",
+        slaBreaches: backendSummary.unassignedCount || 0,
+      };
+    }
+
     const total = tickets.length;
-    const open = tickets.filter((t) => t.status === "Open").length;
-    const inProgress = tickets.filter((t) => t.status === "In Progress").length;
-    const resolved = tickets.filter((t) => t.status === "Resolved").length;
+    const open = tickets.filter((t) => t.status?.toUpperCase() === "OPEN" || t.status === "Open").length;
+    const inProgress = tickets.filter((t) => t.status?.toUpperCase() === "IN_PROGRESS" || t.status === "In Progress").length;
+    const resolved = tickets.filter((t) => t.status?.toUpperCase() === "RESOLVED" || t.status === "Resolved").length;
 
     return {
       totalTickets: total,
@@ -77,32 +91,34 @@ export const useAdminSupport = () => {
       inProgressTickets: inProgress,
       resolvedTickets: resolved,
       avgResponseTime: "4.2h",
-      slaBreaches: tickets.filter((t) => t.priority === "Critical" && t.status === "Open").length,
+      slaBreaches: tickets.filter((t) => t.priority?.toUpperCase() === "CRITICAL" && t.status?.toUpperCase() === "OPEN").length,
     };
-  }, [tickets]);
+  }, [tickets, backendSummary, totalTickets]);
 
   const handleUpdateStatus = async (ticketId: string, newStatus: TicketStatus) => {
-    const success = await adminSupportService.updateTicketStatus(ticketId, newStatus);
-    if (success) {
-      setTickets((prev) =>
-        prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t))
-      );
+    try {
+      const success = await adminSupportService.updateTicketStatus(ticketId, newStatus);
+      if (success) {
+        await loadTickets();
+      }
+      return success;
+    } catch (err) {
+      console.error("Failed to update ticket status:", err);
+      return false;
     }
-    return success;
   };
 
   const handleAssign = async (ticketId: string, adminId: string, adminName: string) => {
-    const success = await adminSupportService.assignTicket(ticketId, { adminId, adminName });
-    if (success) {
-      setTickets((prev) =>
-        prev.map((t) =>
-          t.id === ticketId
-            ? { ...t, assignedTo: adminId, assignedAdmin: adminName, updatedAt: new Date().toISOString() }
-            : t
-        )
-      );
+    try {
+      const success = await adminSupportService.assignTicket(ticketId, { adminId, adminName });
+      if (success) {
+        await loadTickets();
+      }
+      return success;
+    } catch (err) {
+      console.error("Failed to assign ticket:", err);
+      return false;
     }
-    return success;
   };
 
   return {
@@ -126,3 +142,5 @@ export const useAdminSupport = () => {
     refetch: loadTickets,
   };
 };
+
+export default useAdminSupport;
