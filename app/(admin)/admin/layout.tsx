@@ -101,19 +101,19 @@ export default function AdminLayout({
 
   const getHeaderTitle = (path: string) => {
     if (path === "/admin/dashboard") return "Admin Console";
-    if (path === "/admin/roles") return "Admin Roles & Permissions";
-    if (path === "/admin/users") return "User Management";
-    if (path === "/admin/waitlist") return "Waitlist Manager";
-    if (path === "/admin/disputes") return "Dispute Resolution";
-    if (path === "/admin/moderation") return "Content Moderation";
-    if (path === "/admin/verify") return "Identity Verification";
-    if (path === "/admin/support") return "Support Tickets";
-    if (path === "/admin/subscriptions") return "Subscription Management";
-    if (path === "/admin/payments") return "Payment Management";
-    if (path === "/admin/agreements") return "Agreement Management";
-    if (path === "/admin/projects") return "Project Management";
-    if (path === "/admin/marketplace") return "Marketplace Management";
-    if (path === "/admin/settings") return "Settings";
+    if (path.startsWith("/admin/roles")) return "Admin Roles & Permissions";
+    if (path.startsWith("/admin/users")) return "User Management";
+    if (path.startsWith("/admin/waitlist")) return "Waitlist Manager";
+    if (path.startsWith("/admin/disputes")) return "Dispute Resolution";
+    if (path.startsWith("/admin/moderation")) return "Content Moderation";
+    if (path.startsWith("/admin/verify")) return "Identity Verification";
+    if (path.startsWith("/admin/support")) return "Support Tickets";
+    if (path.startsWith("/admin/subscriptions")) return "Subscription Management";
+    if (path.startsWith("/admin/payments")) return "Payment Management";
+    if (path.startsWith("/admin/agreements")) return "Agreement Management";
+    if (path.startsWith("/admin/projects")) return "Project Management";
+    if (path.startsWith("/admin/marketplace")) return "Marketplace Management";
+    if (path.startsWith("/admin/settings")) return "Settings";
     return "Admin Portal";
   };
 
