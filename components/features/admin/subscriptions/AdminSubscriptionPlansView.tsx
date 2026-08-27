@@ -108,7 +108,7 @@ export const AdminSubscriptionPlansView: React.FC = () => {
                 </div>
 
                 <div>
-                  <div className="text-2xl font-bold text-white font-sans font-mono">
+                  <div className="text-2xl font-bold text-white font-mono">
                     ₦{p.priceMonthly.toLocaleString()}
                     <span className="text-xs text-[#AEB2B4] font-normal"> / month</span>
                   </div>
