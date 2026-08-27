@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  HiViewGrid, 
-  HiOutlineLogout, 
-  HiMenu, 
+import {
+  HiViewGrid,
+  HiOutlineLogout,
+  HiMenu,
   HiX,
   HiOutlineFolder,
   HiOutlineShoppingBag,
@@ -91,7 +91,7 @@ export default function AdminLayout({
     { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
     { name: "Disputes", href: "/admin/disputes", icon: HiOutlineFlag, badge: "12", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
     { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
-    { name: "Verification", href: "/admin/verification-management", icon: HiUserAdd, badge: "24", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
+    { name: "Verification", href: "/admin/verify", icon: HiOutlineShieldCheck, badge: "5", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Subscriptions", href: "/admin/subscriptions", icon: HiOutlineCreditCard, badge: "8", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Admin Roles", href: "/admin/roles", icon: HiOutlineShieldCheck },
@@ -105,6 +105,15 @@ export default function AdminLayout({
     if (path === "/admin/users") return "User Management";
     if (path === "/admin/waitlist") return "Waitlist Manager";
     if (path === "/admin/disputes") return "Dispute Resolution";
+    if (path === "/admin/moderation") return "Content Moderation";
+    if (path === "/admin/verify") return "Identity Verification";
+    if (path === "/admin/support") return "Support Tickets";
+    if (path === "/admin/subscriptions") return "Subscription Management";
+    if (path === "/admin/payments") return "Payment Management";
+    if (path === "/admin/agreements") return "Agreement Management";
+    if (path === "/admin/projects") return "Project Management";
+    if (path === "/admin/marketplace") return "Marketplace Management";
+    if (path === "/admin/settings") return "Settings";
     return "Admin Portal";
   };
 
@@ -139,11 +148,10 @@ export default function AdminLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all group ${
-                    isActive
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all group ${isActive
                       ? "bg-primary-green/15 text-primary-green border-l-4 border-primary-green font-semibold"
                       : "text-white/60 hover:text-white hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <item.icon size={17} className={isActive ? "text-primary-green" : "text-white/40 group-hover:text-white"} />
@@ -179,9 +187,8 @@ export default function AdminLayout({
         />
       )}
       <div
-        className={`fixed top-0 left-0 h-full w-62.5 z-50 p-6 bg-[#0d0f10] border-r border-white/10 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:hidden ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full w-62.5 z-50 p-6 bg-[#0d0f10] border-r border-white/10 flex flex-col justify-between transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex flex-col gap-8">
           <div className="flex items-center justify-between">
@@ -211,11 +218,10 @@ export default function AdminLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-all ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-all ${isActive
                       ? "bg-primary-green/20 text-primary-green"
                       : "text-white/60 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <item.icon size={18} />
                   <span>{item.name}</span>

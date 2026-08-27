@@ -148,10 +148,12 @@ export const API_ENDPOINTS = {
   },
   ADMIN_VERIFICATION: {
     LIST: `${API_BASE_URL}/api/v1/admin/verification`,
+    STATS: `${API_BASE_URL}/api/v1/admin/verification/stats`,
     AUDIT: `${API_BASE_URL}/api/v1/admin/verification/audit`,
     USER_HISTORY: (userId: string) => `${API_BASE_URL}/api/v1/admin/verification/user/${userId}/history`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/verification/${id}`,
     DECISION: (id: string) => `${API_BASE_URL}/api/v1/admin/verification/${id}/decision`,
+    ASSIGN: (id: string) => `${API_BASE_URL}/api/v1/admin/verification/${id}/assign`,
   },
   DASHBOARD: {
     ROOT: `${API_BASE_URL}/api/v1/dashboard`,

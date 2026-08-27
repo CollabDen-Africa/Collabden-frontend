@@ -1,13 +1,89 @@
 import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
+export type DisputeType =
+  | "PAYMENT"
+  | "ESCROW_MILESTONE"
+  | "AGREEMENT"
+  | "PROJECT_COLLABORATION"
+  | "USER_CONDUCT";
+
+export type DisputeStatus =
+  | "OPEN"
+  | "UNDER_REVIEW"
+  | "AWAITING_RESPONSE"
+  | "RESOLVED"
+  | "CLOSED";
+
+export interface DisputeUser {
+  id: string;
+  name: string;
+  initials?: string;
+  avatarColor?: string;
+}
+
+export interface Dispute {
+  id: string;
+  disputeCode: string;
+  type: DisputeType;
+  status: DisputeStatus;
+  complainant: DisputeUser;
+  respondent: DisputeUser;
+  project?: string | null;
+  reference: string;
+  assignedAdmin?: string | null;
+  createdAt: string;
+}
+
+export interface RelatedRecord {
+  label: string;
+  reference: string;
+  color: string;
+}
+
+export interface Evidence {
+  id: string;
+  filename: string;
+  type: string;
+  submittedBy: string;
+}
+
+export interface InvestigationNote {
+  id: string;
+  adminName: string;
+  adminRole: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface DisputeAuditRecord {
+  id: string;
+  action: string;
+  actionType: string[];
+  description: string;
+  adminName: string;
+  adminRole: string;
+  createdAt: string;
+}
+
+export interface DisputeDetail extends Dispute {
+  amount?: string | null;
+  reason: string;
+  evidence: Evidence[];
+  notes: InvestigationNote[];
+  relatedRecords: RelatedRecord[];
+  auditHistory: DisputeAuditRecord[];
+}
+
 export interface DisputesParams {
   search?: string;
   status?: string;
   category?: string;
+  type?: string;
   dateStart?: string;
   dateEnd?: string;
   assignedAdminId?: string;
+  assignedAdmin?: string;
   page?: number;
   limit?: number;
 }
