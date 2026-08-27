@@ -65,10 +65,10 @@ export default function DashboardHeader({
   return (
     <header className="w-full pt-5 lg:pt-14.5 pb-5 lg:pb-10 shrink-0">
 
-      <div className="w-full max-w-300 mx-auto flex flex-col gap-6 lg:gap-8.5">
+      <div className="w-full lg:max-w-230 xl:max-w-300 mx-auto flex flex-col gap-6 lg:gap-8.5">
 
         {/* Top Row: Welcome & Profile */}
-        <div className="w-full flex flex-col-reverse lg:flex-row justify-between items-start gap-6 lg:gap-10 2xl:gap-17.5">
+        <div className="w-full flex flex-col-reverse xl:flex-row justify-between items-start gap-6 lg:gap-10 2xl:gap-17.5">
 
           {/* Greeting Area - Anchor for Step 1 + Conditionally Rendered */}
           {isMainDashboard ? (
@@ -99,8 +99,8 @@ export default function DashboardHeader({
                       <div className="flex-1 hidden lg:block" />
                     )}
 
-          <div className="w-full xl:w-[413px] flex shrink-0 justify-end">
-            <div className="relative flex items-center gap-[20px] md:gap-[40px] lg:gap-[75px] mt-1">
+          <div className="w-full xl:w-103.25 flex shrink-0 justify-end">
+            <div className="relative flex items-center gap-5 md:gap-10 lg:gap-18.75 mt-1">
 
               {/* Notification Bell Area - Anchor for Step 5 */}
               <div
@@ -117,7 +117,7 @@ export default function DashboardHeader({
 
               </div>
 
-              <div className="flex items-center gap-3 lg:gap-4 cursor-pointer">
+              <div className="flex items-center gap-3 lg:gap-4 cursor-pointer relative z-50">
 
                 <ProfileMenu user={user} />
                 

@@ -42,7 +42,7 @@ export default function Select({
   const selectedOption = normalizedOptions.find((opt) => opt.value === value);
 
   const baseButtonStyles =
-    "w-full h-[52px] rounded-full px-6 flex items-center justify-between outline-none transition-all duration-300 border text-left";
+    "w-full h-[52px] rounded-full px-6 flex items-center justify-between outline-none transition-all duration-300 border text-left gap-3 overflow-hidden";
 
   const buttonVariants = {
     light: `bg-white text-text-main border-border-muted placeholder:text-text-muted focus:border-primary-green ${
@@ -86,7 +86,7 @@ export default function Select({
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span
-          className={`font-medium text-[16px] ${
+          className={`font-medium text-[16px] truncate block flex-1 text-left ${
             selectedOption
               ? variant === "glass"
                 ? "text-white"
@@ -99,7 +99,7 @@ export default function Select({
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <HiOutlineChevronDown
-          className={`${variant === "glass" ? "text-white/50" : "text-text-muted"} transition-transform duration-300 ${
+          className={`shrink-0 ${variant === "glass" ? "text-white/50" : "text-text-muted"} transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
           size={20}
@@ -112,7 +112,7 @@ export default function Select({
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           {/* Dropdown Container */}
           <div
-            className={`absolute top-[calc(100%+8px)] left-0 w-full rounded-[20px] p-2 z-50 max-h-[250px] overflow-y-auto custom-scrollbar animate-in fade-in duration-200 ${dropdownBgVariants[variant]}`}
+            className={`absolute top-[calc(100%+8px)] left-0 w-full rounded-[20px] p-2 z-999 max-h-62.5 overflow-y-auto custom-scrollbar animate-in fade-in duration-200 ${dropdownBgVariants[variant]}`}
           >
             <div className="flex flex-col gap-1">
               {normalizedOptions.map((opt) => {
@@ -124,14 +124,14 @@ export default function Select({
                       onChange(opt.value);
                       setIsOpen(false);
                     }}
-                    className={`flex items-center justify-between h-[46px] px-4 rounded-full cursor-pointer transition-colors group ${
+                    className={`flex items-center justify-between gap-3 min-h-11.5 py-1.5 px-4 rounded-full cursor-pointer transition-colors group ${
                       isSelected
                         ? "bg-primary-green text-white"
                         : optionHoverVariants[variant]
                     }`}
                   >
-                    <span className="font-medium text-[16px]">{opt.label}</span>
-                    {isSelected && <HiCheck className="text-white" size={20} />}
+                    <span className="font-medium wrap-break-word leading-snug text-[11px] sm:text-[16px]">{opt.label}</span>
+                    {isSelected && <HiCheck className="text-white shrink-0" size={20} />}
                   </div>
                 );
               })}

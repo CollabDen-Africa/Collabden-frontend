@@ -14,7 +14,9 @@ import {
   HiOutlineCreditCard,
   HiOutlineShieldCheck,
   HiOutlineTicket,
-  HiOutlineCog
+  HiOutlineCog,
+  HiOutlineFlag,
+  HiUserAdd
 } from "react-icons/hi";
 import { LuUsers } from "react-icons/lu";
 import { IoMailOutline } from "react-icons/io5";
@@ -87,7 +89,9 @@ export default function AdminLayout({
     { name: "Marketplace", href: "/admin/marketplace", icon: HiOutlineShoppingBag },
     { name: "Agreements", href: "/admin/agreements", icon: HiOutlineDocumentText },
     { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
+    { name: "Disputes", href: "/admin/disputes", icon: HiOutlineFlag, badge: "12", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
     { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
+    { name: "Verification", href: "/admin/verification-management", icon: HiUserAdd, badge: "24", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Subscriptions", href: "/admin/subscriptions", icon: HiOutlineCreditCard, badge: "8", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Admin Roles", href: "/admin/roles", icon: HiOutlineShieldCheck },
@@ -100,6 +104,7 @@ export default function AdminLayout({
     if (path === "/admin/roles") return "Admin Roles & Permissions";
     if (path === "/admin/users") return "User Management";
     if (path === "/admin/waitlist") return "Waitlist Manager";
+    if (path === "/admin/disputes") return "Dispute Resolution";
     return "Admin Portal";
   };
 

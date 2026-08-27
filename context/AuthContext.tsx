@@ -86,6 +86,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchProfile = async () => {
       try {
         setIsInitializing(true);
+
+        //  --- DEV BYPASS START ---
+                if (
+                  process.env.NODE_ENV === 'development' && 
+                  process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true'
+                ) {
+                  const mockUser: User = {
+                    id: 'dev-user-123',
+                    email: 'dev@localhost.com',
+                    firstName: 'Local',
+                    lastName: 'Developer',
+                    hasCompletedOnboarding: true,
+                    onboardingCompleted: true,
+                    isAdmin: true, // Toggle this based on what view you are working on
+                  };
+                  
+                  setUser(mockUser);
+                  setIsAuthenticated(true);
+                  if (mockUser.isAdmin) {
+                     localStorage.setItem("collabden_admin_logged_in", "true");
+                  }
+                  console.warn("⚠️ AUTH BYPASS ACTIVE: Logging in with mock data.");
+                  setIsInitializing(false);
+                  return; // Exit early so the real API is not called
+                }
+                //  --- DEV BYPASS END ---
+                 
+                
         const data = await authService.getProfile();
         const profileUser = data.user || data.data;
         setUser(profileUser);
@@ -170,18 +198,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const adminLogin = async (data: LoginPayload) => {
     try {
       const response = await adminLoginMutation.mutateAsync(data);
-      if (response.success) {
-        if (response.requires2FA) {
-          return response;
-        }
-        const loggedUser =
-          response.user || response.data?.user || response.data;
-        setUser(loggedUser);
+      // Proxy normalizes to: { success, requires2FA, adminId, email } or { success, user }
+      if (response.requires2FA) {
+        return response;
+      }
+      if (response.user) {
+        setUser({ ...response.user, isAdmin: true });
         setIsAuthenticated(true);
         localStorage.setItem("collabden_admin_logged_in", "true");
         router.push("/admin/dashboard");
-        return response;
       }
+      return response;
     } catch (err) {
       throw err;
     }
@@ -190,15 +217,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const adminVerify2FA = async (data: AdminVerify2FAPayload) => {
     try {
       const response = await adminVerify2FAMutation.mutateAsync(data);
-      if (response.success) {
-        const loggedUser =
-          response.user || response.data?.user || response.data;
-        setUser(loggedUser);
+      // Proxy normalizes to: { success: true, user: adminUser }
+      if (response.user) {
+        setUser({ ...response.user, isAdmin: true });
         setIsAuthenticated(true);
         localStorage.setItem("collabden_admin_logged_in", "true");
         router.push("/admin/dashboard");
-        return response;
       }
+      return response;
     } catch (err) {
       throw err;
     }

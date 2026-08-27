@@ -20,6 +20,9 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: `${API_BASE_URL}/api/v1/admin/auth/forgot-password`,
     RESET_PASSWORD: `${API_BASE_URL}/api/v1/admin/auth/reset-password`,
     ME: `${API_BASE_URL}/api/v1/admin/auth/me`,
+    // Next.js proxy routes — these go through /app/api/admin/auth/* to set HTTP-only cookies
+    PROXY_LOGIN: `/api/admin/auth/login`,
+    PROXY_VERIFY_2FA: `/api/admin/auth/verify-2fa`,
     // Backward compatibility aliases
     ALL_USERS: `${API_BASE_URL}/api/v1/admin/users/all-users`,
     USER_DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/users/all-users/${id}`,
