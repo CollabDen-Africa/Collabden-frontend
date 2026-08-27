@@ -120,6 +120,16 @@ export const API_ENDPOINTS = {
     REPORTS: `${API_BASE_URL}/api/v1/admin/payments/reports`,
     AUDIT: `${API_BASE_URL}/api/v1/admin/payments/audit`,
   },
+  ADMIN_SUBSCRIPTIONS: {
+    LIST: `${API_BASE_URL}/api/v1/admin/finance/subscription-payments`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/v1/admin/finance/subscription-payments/${id}`,
+    PLANS: `${API_BASE_URL}/api/v1/subscriptions/plans`,
+    ISSUES: `${API_BASE_URL}/api/v1/admin/finance/subscription-payments/issues`,
+    REPORTS: `${API_BASE_URL}/api/v1/admin/payments/reports`,
+    AUDIT: `${API_BASE_URL}/api/v1/admin/payments/audit`,
+    RETRY_PAYMENT: (id: string) => `${API_BASE_URL}/api/v1/admin/finance/subscription-payments/${id}/retry`,
+    UPDATE_NOTE: (id: string) => `${API_BASE_URL}/api/v1/admin/finance/subscription-payments/${id}/notes`,
+  },
   ADMIN_SUPPORT: {
     LIST: `${API_BASE_URL}/api/v1/admin/support-tickets`,
     STATS: `${API_BASE_URL}/api/v1/admin/support-tickets/stats`,

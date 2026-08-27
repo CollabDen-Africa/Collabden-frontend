@@ -7,5 +7,6 @@ export * from "./agreements.service";
 export * from "./payments.service";
 export * from "./support.service";
 export * from "./verification.service";
-export { disputesService } from "./disputes.service";
+export * from "./disputes.service";
 export type { DisputesParams, DisputeDecisionPayload } from "./disputes.service";
+export * from "./subscriptions.service";

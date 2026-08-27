@@ -89,6 +89,7 @@ export default function AdminLayout({
     { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
     { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
     { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
+    { name: "Subscriptions", href: "/admin/subscriptions", icon: HiOutlineCreditCard, badge: "8", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Admin Roles", href: "/admin/roles", icon: HiOutlineShieldCheck },
     { name: "Settings", href: "/admin/settings", icon: HiOutlineCog },
     { name: "Waitlist", href: "/admin/waitlist", icon: IoMailOutline },
