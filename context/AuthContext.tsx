@@ -86,6 +86,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchProfile = async () => {
       try {
         setIsInitializing(true);
+
+        //  --- DEV BYPASS START ---
+                if (
+                  process.env.NODE_ENV === 'development' && 
+                  process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true'
+                ) {
+                  const mockUser: User = {
+                    id: 'dev-user-123',
+                    email: 'dev@localhost.com',
+                    firstName: 'Local',
+                    lastName: 'Developer',
+                    hasCompletedOnboarding: true,
+                    onboardingCompleted: true,
+                    isAdmin: true, // Toggle this based on what view you are working on
+                  };
+                  
+                  setUser(mockUser);
+                  setIsAuthenticated(true);
+                  if (mockUser.isAdmin) {
+                     localStorage.setItem("collabden_admin_logged_in", "true");
+                  }
+                  console.warn("⚠️ AUTH BYPASS ACTIVE: Logging in with mock data.");
+                  setIsInitializing(false);
+                  return; // Exit early so the real API is not called
+                }
+                //  --- DEV BYPASS END ---
+                 
+                
         const data = await authService.getProfile();
         const profileUser = data.user || data.data;
         setUser(profileUser);
