@@ -15,8 +15,7 @@ import {
   HiOutlineShieldCheck,
   HiOutlineTicket,
   HiOutlineCog,
-  HiOutlineFlag,
-  HiUserAdd
+  HiOutlineFlag
 } from "react-icons/hi";
 import { LuUsers } from "react-icons/lu";
 import { IoMailOutline } from "react-icons/io5";
@@ -149,8 +148,8 @@ export default function AdminLayout({
                   key={item.href}
                   href={item.href}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all group ${isActive
-                      ? "bg-primary-green/15 text-primary-green border-l-4 border-primary-green font-semibold"
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? "bg-primary-green/15 text-primary-green border-l-4 border-primary-green font-semibold"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <div className="flex items-center gap-3">
@@ -219,8 +218,8 @@ export default function AdminLayout({
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-all ${isActive
-                      ? "bg-primary-green/20 text-primary-green"
-                      : "text-white/60 hover:text-white"
+                    ? "bg-primary-green/20 text-primary-green"
+                    : "text-white/60 hover:text-white"
                     }`}
                 >
                   <item.icon size={18} />
