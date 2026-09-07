@@ -6,7 +6,73 @@ import AboutHero from '@/components/features/about/AboutHero';
 import AboutSection from '@/components/features/about/AboutSection';
 import AboutTeam from '@/components/features/about/AboutTeam';
 import Button from '@/components/ui/Button';
+import JsonLd from '@/components/seo/JsonLd';
+import type { Metadata } from 'next';
 
+export const metadata: Metadata = {
+    title: "About Us | CollabDen - Unifying Music Collaboration Across Africa",
+    description:
+        "Learn why we built CollabDen. Discover our mission to empower African music producers, vocalists, sound engineers, and songwriters with a unified workspace.",
+    alternates: {
+        canonical: "https://collabden.africa/about",
+    },
+    openGraph: {
+        title: "About Us | CollabDen - Unifying Music Collaboration Across Africa",
+        description:
+            "Learn why we built CollabDen. Discover our mission to empower African music producers, vocalists, sound engineers, and songwriters.",
+        url: "https://collabden.africa/about",
+        siteName: "CollabDen",
+        images: [
+            {
+                url: "/collabden-logo.png",
+                width: 1200,
+                height: 630,
+                alt: "About CollabDen",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "About Us | CollabDen - Unifying Music Collaboration Across Africa",
+        description:
+            "Learn why we built CollabDen. Discover our mission to empower African music creators.",
+        images: ["/collabden-logo.png"],
+    },
+};
+
+const aboutPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": "https://collabden.africa/about#aboutpage",
+    url: "https://collabden.africa/about",
+    name: "About Us | CollabDen",
+    isPartOf: {
+        "@id": "https://collabden.africa/#website",
+    },
+    about: {
+        "@id": "https://collabden.africa/#organization",
+    },
+    description:
+        "CollabDen is a centralized workspace designed specifically for African music creators, uniting communication, high-quality audio file sharing, project management, legal agreements, and secure payments.",
+    inLanguage: "en-US",
+    breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: "https://collabden.africa/",
+            },
+            {
+                "@type": "ListItem",
+                position: 2,
+                name: "About Us",
+                item: "https://collabden.africa/about",
+            },
+        ],
+    },
+};
 
 export default function AboutPage() {
     const problemParagraphs = [
@@ -32,6 +98,7 @@ export default function AboutPage() {
 
     return (
         <MarketingPageWrapper bgClass="bg-black/50" className="overflow-x-hidden">
+            <JsonLd data={aboutPageSchema} />
             <AboutHero />
 
             <div className="flex flex-col">

@@ -39,6 +39,7 @@ const Hero = () => {
                     muted
                     playsInline
                     preload="metadata"
+                    poster="/hero_video_poster.png"
                     className="h-full w-full object-cover opacity-80"
                 >
                     <source src="/Collabden-hero.mp4" type="video/mp4" />

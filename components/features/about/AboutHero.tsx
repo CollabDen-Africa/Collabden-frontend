@@ -58,12 +58,12 @@ const AboutHero = () => {
                 >
                     {/* Background Image */}
                     <Image 
-                                            src="/about-hero.png"
-                                            alt="CollabDen hero image"
-                                            fill
-                                            priority
-                                            className="object-cover object-center z-0"
-                                        />
+                        src="/about-hero.webp"
+                        alt="CollabDen hero image"
+                        fill
+                        priority
+                        className="object-cover object-center z-0"
+                    />
                     
                     {/* Light gradient for image */}
                     <div className="absolute inset-0 z-0 bg-linear-to-r from-[#02050A] via-blue-900/50 to-[#02050A] pointer-events-none" />

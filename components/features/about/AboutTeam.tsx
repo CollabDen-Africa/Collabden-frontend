@@ -20,7 +20,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Founder",
     description:
       "Dedicated to ensuring creators can work together seamlessly regardless of their location, specialties and level of expertise",
-    image: "/team-info/Emmanuel Odo.png",
+    image: "/team-info/Emmanuel Odo.webp",
   },
   {
     id: "2",
@@ -28,7 +28,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Product Manager",
     description:
       "Dedicated to ensuring creators can work together seamlessly regardless of their location, specialties and level of expertise",
-    image: "/team-info/Anointing Uche.jpg",
+    image: "/team-info/Anointing Uche.webp",
   },
   {
     id: "3",
@@ -36,7 +36,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Product Designer",
     description:
       "I love how CollabDen pushed me beyond my comfort zone and introduced me to an industry I knew little about. I joined to learn, grow and challenge myself by designing for a completely unfamiliar community.",
-    image: "/team-info/Oyinda Babalola.jpg",
+    image: "/team-info/Oyinda Babalola.webp",
     avatarBg: "bg-[#F97316]",
   },
   {
@@ -45,7 +45,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Front-end Developer",
     description:
       "I joined because I needed the experience but I'm loving it regardless.",
-    image: "/team-info/Mmesoma Nzeribe.jpg",
+    image: "/team-info/Mmesoma Nzeribe.webp",
   },
   {
     id: "5",
@@ -53,7 +53,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Back-end Developer",
     description:
       "Dedicated to ensuring creators can work together seamlessly regardless of their location, specialties and level of expertise",
-    image: "/team-info/Godswill Ochi.png",
+    image: "/team-info/Godswill Ochi.webp",
   },
   {
     id: "6",
@@ -61,7 +61,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Founder",
     description:
       "Dedicated to ensuring creators can work together seamlessly regardless of their location, specialties and level of expertise",
-    image: "/team-info/Emmanuel Odo.png",
+    image: "/team-info/Emmanuel Odo.webp",
   },
   {
     id: "7",
@@ -69,7 +69,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Product Manager",
     description:
       "Dedicated to ensuring creators can work together seamlessly regardless of their location, specialties and level of expertise",
-    image: "/team-info/Anointing Uche.jpg",
+    image: "/team-info/Anointing Uche.webp",
   },
   {
     id: "8",
@@ -77,7 +77,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Product Designer",
     description:
       "I love how CollabDen pushed me beyond my comfort zone and introduced me to an industry I knew little about. I joined to learn, grow and challenge myself by designing for a completely unfamiliar community.",
-    image: "/team-info/Oyinda Babalola.jpg",
+    image: "/team-info/Oyinda Babalola.webp",
     avatarBg: "bg-[#F97316]",
   },
   {
@@ -86,7 +86,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Front-end Developer",
     description:
       "I joined because I needed the experience but I'm loving it regardless.",
-    image: "/team-info/Mmesoma Nzeribe.jpg",
+    image: "/team-info/Mmesoma Nzeribe.webp",
   },
   {
     id: "10",
@@ -94,7 +94,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Back-end Developer",
     description:
       "Dedicated to ensuring creators can work together seamlessly regardless of their location, specialties and level of expertise",
-    image: "/team-info/Godswill Ochi.png",
+    image: "/team-info/Godswill Ochi.webp",
   },
 ];
 
