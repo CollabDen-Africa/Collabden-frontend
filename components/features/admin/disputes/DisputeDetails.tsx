@@ -79,7 +79,7 @@ export const DisputeDetails: React.FC<DisputeDetailsProps> = ({ id }) => {
               </span>
               
               {/* Status Badge */}
-              <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border border-white/5 bg-white/[0.02] ${DISPUTE_STATUS_COLORS[dispute.status]}`}>
+              <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border border-white/5 bg-white/2 ${DISPUTE_STATUS_COLORS[dispute.status]}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${DISPUTE_STATUS_DOT[dispute.status]}`} />
                 {DISPUTE_STATUS_LABELS[dispute.status]}
               </span>

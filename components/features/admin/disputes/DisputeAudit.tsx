@@ -69,7 +69,7 @@ export const DisputeAudit: React.FC<DisputeAuditProps> = ({ dispute }) => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-4 py-2 rounded-xl border border-white/5 bg-white/[0.02] text-white/40 text-xs font-medium flex items-center gap-2">
+          <div className="px-4 py-2 rounded-xl border border-white/5 bg-white/2 text-white/40 text-xs font-medium flex items-center gap-2">
             <HiOutlineLockClosed size={14} />
             Read-Only - Immutable
           </div>

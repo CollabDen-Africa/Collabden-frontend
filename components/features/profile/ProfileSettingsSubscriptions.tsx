@@ -201,7 +201,7 @@ export default function ProfileSettingsSubscriptions() {
                   placeholder="4242 4242 4242 4242"
                   value={cardNumber}
                   onChange={(e) => setCardNumber(e.target.value)}
-                  className="w-full h-[45px] rounded-xl bg-black/20 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
+                  className="w-full h-11.25 rounded-xl bg-black/20 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -212,7 +212,7 @@ export default function ProfileSettingsSubscriptions() {
                   placeholder="MM/YY"
                   value={cardExpiry}
                   onChange={(e) => setCardExpiry(e.target.value)}
-                  className="w-full h-[45px] rounded-xl bg-black/20 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
+                  className="w-full h-11.25 rounded-xl bg-black/20 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -220,7 +220,7 @@ export default function ProfileSettingsSubscriptions() {
                 <select
                   value={cardBrand}
                   onChange={(e) => setCardBrand(e.target.value)}
-                  className="w-full h-[45px] rounded-xl bg-black/30 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
+                  className="w-full h-11.25 rounded-xl bg-black/30 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
                 >
                   <option value="Visa">Visa</option>
                   <option value="Mastercard">Mastercard</option>
