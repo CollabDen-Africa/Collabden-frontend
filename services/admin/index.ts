@@ -10,3 +10,5 @@ export * from "./verification.service";
 export { disputesService } from "./disputes.service";
 export type { DisputesParams, DisputeDecisionPayload } from "./disputes.service";
 export * from "./subscriptions.service";
+export * from "./settings.service";
+

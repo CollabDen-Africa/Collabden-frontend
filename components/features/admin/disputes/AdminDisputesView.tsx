@@ -52,7 +52,7 @@ interface FilterSelectProps {
   value: string;
   onChange: (v: string) => void;
   options: { label: string; value: string }[];
-  placeholder: string;
+  placeholder?: string;
 }
 
 const FilterSelect = ({ id, value, onChange, options, placeholder }: FilterSelectProps) => (
@@ -61,6 +61,7 @@ const FilterSelect = ({ id, value, onChange, options, placeholder }: FilterSelec
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={placeholder}
       className="appearance-none bg-white/5 border border-white/10 rounded-xl pl-3.5 pr-8 py-2.5 text-sm text-white font-medium focus:outline-none focus:border-white/20 transition-all cursor-pointer hover:bg-white/8 min-w-[148px]"
     >
       {options.map((o) => (

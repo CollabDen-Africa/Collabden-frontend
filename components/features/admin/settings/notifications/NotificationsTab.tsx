@@ -1,86 +1,225 @@
-import React, { useState } from 'react';
-import { 
-  Bell, 
-  Mail, 
-} from 'lucide-react';
-import { SectionCard } from '@/components/ui/SectionCard';
-import Toggle from '@/components/ui/Toggle';
-import { SystemAnnouncement } from './SystemAnnouncement';
+import React, { useState, useEffect } from "react";
+import { FiBell, FiMail, FiSave } from "react-icons/fi";
+import { SectionCard } from "@/components/ui/SectionCard";
+import Toggle from "@/components/ui/Toggle";
+import Button from "@/components/ui/Button";
+import { SystemAnnouncement } from "./SystemAnnouncement";
+import { NotificationSettingsData } from "@/services/admin/settings.service";
 
-export default function NotificationsTab() {
+interface NotificationsTabProps {
+  settings?: NotificationSettingsData;
+  onSave?: (data: Partial<NotificationSettingsData>) => Promise<boolean>;
+  onPublishAnnouncement?: (data: {
+    title: string;
+    body: string;
+    type?: "info" | "warning" | "critical";
+  }) => Promise<boolean>;
+  isSaving?: boolean;
+}
+
+export default function NotificationsTab({
+  settings = {},
+  onSave,
+  onPublishAnnouncement,
+  isSaving = false,
+}: NotificationsTabProps) {
   const [emailToggles, setEmailToggles] = useState({
-    collabReq: true, payment: true, dispute: true, subscription: true, identity: true, weeklyDigest: false,
+    notifyOnNewRegistration: settings.notifyOnNewRegistration ?? true,
+    notifyOnProjectInvite: settings.notifyOnProjectInvite ?? true,
+    notifyOnPaymentReceived: settings.notifyOnPaymentReceived ?? true,
+    notifyOnAccountFlagged: settings.notifyOnAccountFlagged ?? true,
+    emailNotificationsEnabled: settings.emailNotificationsEnabled ?? true,
   });
 
   const [inAppToggles, setInAppToggles] = useState({
-    realtime: true, projectStatus: true, escrow: true, newListings: false, adminSystem: true, featureRelease: true,
+    notifyOnNewMessage: settings.notifyOnNewMessage ?? true,
+    notifyOnConnectionRequest: settings.notifyOnConnectionRequest ?? true,
+    notifyOnProjectUpdate: settings.notifyOnProjectUpdate ?? true,
+    notifyOnMilestoneCompleted: settings.notifyOnMilestoneCompleted ?? true,
+    inAppNotificationsEnabled: settings.inAppNotificationsEnabled ?? true,
+    systemAnnouncementsEnabled: settings.systemAnnouncementsEnabled ?? true,
   });
 
-  const handleEmailToggle = (key: keyof typeof emailToggles) => setEmailToggles(prev => ({ ...prev, [key]: !prev[key] }));
-  const handleInAppToggle = (key: keyof typeof inAppToggles) => setInAppToggles(prev => ({ ...prev, [key]: !prev[key] }));
+  useEffect(() => {
+    if (settings && Object.keys(settings).length > 0) {
+      setEmailToggles({
+        notifyOnNewRegistration: settings.notifyOnNewRegistration ?? true,
+        notifyOnProjectInvite: settings.notifyOnProjectInvite ?? true,
+        notifyOnPaymentReceived: settings.notifyOnPaymentReceived ?? true,
+        notifyOnAccountFlagged: settings.notifyOnAccountFlagged ?? true,
+        emailNotificationsEnabled: settings.emailNotificationsEnabled ?? true,
+      });
+      setInAppToggles({
+        notifyOnNewMessage: settings.notifyOnNewMessage ?? true,
+        notifyOnConnectionRequest: settings.notifyOnConnectionRequest ?? true,
+        notifyOnProjectUpdate: settings.notifyOnProjectUpdate ?? true,
+        notifyOnMilestoneCompleted: settings.notifyOnMilestoneCompleted ?? true,
+        inAppNotificationsEnabled: settings.inAppNotificationsEnabled ?? true,
+        systemAnnouncementsEnabled: settings.systemAnnouncementsEnabled ?? true,
+      });
+    }
+  }, [settings]);
 
-  const renderIcon = (IconComp: any, theme: 'blue' | 'purple' = 'blue') => {
+  const handleEmailToggle = (key: keyof typeof emailToggles) =>
+    setEmailToggles((prev) => ({ ...prev, [key]: !prev[key] }));
+  const handleInAppToggle = (key: keyof typeof inAppToggles) =>
+    setInAppToggles((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleSave = async () => {
+    if (!onSave) return;
+    await onSave({
+      ...emailToggles,
+      ...inAppToggles,
+    });
+  };
+
+  const renderIcon = (IconComp: any, theme: "blue" | "purple" = "blue") => {
     const themes = {
       blue: "text-secondary-blue bg-secondary-blue/10 border-secondary-blue/20",
-      purple: "text-[#A78BFA] bg-[#A78BFA]/10 border-[#A78BFA]/20",
+      purple:
+        "text-secondary-blue bg-secondary-blue/10 border-secondary-blue/20",
     };
     return (
-      <div className={`flex justify-center items-center w-9 h-9 border rounded-xl ${themes[theme].split(' ').slice(1).join(' ')}`}>
-        <IconComp className={`w-4.25 h-4.25 ${themes[theme].split(' ')[0]}`} />
+      <div
+        className={`flex justify-center items-center w-9 h-9 border rounded-xl ${themes[
+          theme
+        ]
+          .split(" ")
+          .slice(1)
+          .join(" ")}`}
+      >
+        <IconComp className={`w-4 h-4 ${themes[theme].split(" ")[0]}`} />
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col gap-4.5 w-full">
-      <SectionCard icon={renderIcon(Bell, 'blue')} title="Notification Settings" subtitle="Configure what system notifications users receive">
+    <div className="flex flex-col gap-4 w-full">
+      <SectionCard
+        icon={renderIcon(FiBell, "blue")}
+        title="Notification Settings"
+        subtitle="Configure system-wide email and in-app triggers"
+      >
         <div className="flex flex-col md:flex-row w-full mt-4 border-t border-white/10">
-          
           <div className="flex flex-col flex-1 py-4 md:pr-6 md:border-r border-white/10 border-b md:border-b-0">
             <div className="flex items-center gap-2 mb-1">
-              <Mail className="w-3.5 h-3.5 text-secondary-blue" />
-              <span className="font-['Raleway'] font-bold text-[13px] text-white">Email Notifications</span>
+              <FiMail className="w-4 h-4 text-secondary-blue" />
+              <span className="font-bold text-xs text-white">
+                Email Notifications
+              </span>
             </div>
             <div className="flex flex-col w-full mt-1">
-              <CompactToggleRow title="New Collaboration Request" isActive={emailToggles.collabReq} onToggle={() => handleEmailToggle('collabReq')} />
-              <CompactToggleRow title="Payment Received" isActive={emailToggles.payment} onToggle={() => handleEmailToggle('payment')} />
-              <CompactToggleRow title="Dispute Filed / Resolved" isActive={emailToggles.dispute} onToggle={() => handleEmailToggle('dispute')} />
-              <CompactToggleRow title="Subscription Renewal Reminder" isActive={emailToggles.subscription} onToggle={() => handleEmailToggle('subscription')} />
-              <CompactToggleRow title="Identity Verification Status" isActive={emailToggles.identity} onToggle={() => handleEmailToggle('identity')} />
-              <CompactToggleRow title="Weekly Platform Digest" isActive={emailToggles.weeklyDigest} onToggle={() => handleEmailToggle('weeklyDigest')} isLast />
+              <CompactToggleRow
+                title="Global Email Delivery"
+                isActive={emailToggles.emailNotificationsEnabled}
+                onToggle={() => handleEmailToggle("emailNotificationsEnabled")}
+              />
+              <CompactToggleRow
+                title="New User Registration Alert"
+                isActive={emailToggles.notifyOnNewRegistration}
+                onToggle={() => handleEmailToggle("notifyOnNewRegistration")}
+              />
+              <CompactToggleRow
+                title="Project Invite Received"
+                isActive={emailToggles.notifyOnProjectInvite}
+                onToggle={() => handleEmailToggle("notifyOnProjectInvite")}
+              />
+              <CompactToggleRow
+                title="Payment / Escrow Funded Alert"
+                isActive={emailToggles.notifyOnPaymentReceived}
+                onToggle={() => handleEmailToggle("notifyOnPaymentReceived")}
+              />
+              <CompactToggleRow
+                title="Account Moderation / Flagged Alert"
+                isActive={emailToggles.notifyOnAccountFlagged}
+                onToggle={() => handleEmailToggle("notifyOnAccountFlagged")}
+                isLast
+              />
             </div>
           </div>
 
           <div className="flex flex-col flex-1 py-4 md:pl-6">
             <div className="flex items-center gap-2 mb-1">
-              <Bell className="w-3.5 h-3.5 text-[#A78BFA]" />
-              <span className="font-['Raleway'] font-bold text-[13px] text-white">In-App Notifications</span>
+              <FiBell className="w-4 h-4 text-primary-green" />
+              <span className="font-bold text-xs text-white">
+                In-App Notifications
+              </span>
             </div>
             <div className="flex flex-col w-full mt-1">
-              <CompactToggleRow title="Real-Time Messages" isActive={inAppToggles.realtime} onToggle={() => handleInAppToggle('realtime')} />
-              <CompactToggleRow title="Project Status Updates" isActive={inAppToggles.projectStatus} onToggle={() => handleInAppToggle('projectStatus')} />
-              <CompactToggleRow title="Escrow Milestone Alerts" isActive={inAppToggles.escrow} onToggle={() => handleInAppToggle('escrow')} />
-              <CompactToggleRow title="New Marketplace Listings" isActive={inAppToggles.newListings} onToggle={() => handleInAppToggle('newListings')} />
-              <CompactToggleRow title="Admin System Announcements" isActive={inAppToggles.adminSystem} onToggle={() => handleInAppToggle('adminSystem')} />
-              <CompactToggleRow title="Feature Release Announcements" isActive={inAppToggles.featureRelease} onToggle={() => handleInAppToggle('featureRelease')} isLast />
+              <CompactToggleRow
+                title="Global In-App Delivery"
+                isActive={inAppToggles.inAppNotificationsEnabled}
+                onToggle={() => handleInAppToggle("inAppNotificationsEnabled")}
+              />
+              <CompactToggleRow
+                title="Real-Time Direct Messages"
+                isActive={inAppToggles.notifyOnNewMessage}
+                onToggle={() => handleInAppToggle("notifyOnNewMessage")}
+              />
+              <CompactToggleRow
+                title="Collaborator Connection Requests"
+                isActive={inAppToggles.notifyOnConnectionRequest}
+                onToggle={() => handleInAppToggle("notifyOnConnectionRequest")}
+              />
+              <CompactToggleRow
+                title="Project Milestone & Status Updates"
+                isActive={inAppToggles.notifyOnProjectUpdate}
+                onToggle={() => handleInAppToggle("notifyOnProjectUpdate")}
+              />
+              <CompactToggleRow
+                title="System Announcement Banners"
+                isActive={inAppToggles.systemAnnouncementsEnabled}
+                onToggle={() =>
+                  handleInAppToggle("systemAnnouncementsEnabled")
+                }
+                isLast
+              />
             </div>
           </div>
-
         </div>
       </SectionCard>
 
-      <SystemAnnouncement />
-      
+      <SystemAnnouncement onPublish={onPublishAnnouncement} isSaving={isSaving} />
+
+      <div className="flex flex-row items-center justify-between px-5 py-3.5 w-full bg-card-bg/20 border border-white/5 rounded-xl mt-2">
+        <span className="text-xs text-white/50 leading-relaxed">
+          Notification preferences will take effect for all automated email & socket triggers
+        </span>
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="primary"
+            size="sm"
+            icon={FiSave}
+            iconPosition="left"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
 
-// --- Subcomponents ---
-
-function CompactToggleRow({ title, isActive, onToggle, isLast }: { title: string; isActive: boolean; onToggle: () => void; isLast?: boolean; }) {
+function CompactToggleRow({
+  title,
+  isActive,
+  onToggle,
+  isLast,
+}: {
+  title: string;
+  isActive: boolean;
+  onToggle: () => void;
+  isLast?: boolean;
+}) {
   return (
-    <div className={`flex items-center justify-between py-3.5 w-full ${!isLast ? 'border-b border-white/10' : ''}`}>
-      <span className="font-['Raleway'] font-semibold text-[13px] text-white pr-4">{title}</span>
+    <div
+      className={`flex items-center justify-between py-3.5 w-full ${
+        !isLast ? "border-b border-white/10" : ""
+      }`}
+    >
+      <span className="font-medium text-xs text-white pr-4">{title}</span>
       <Toggle active={isActive} onChange={onToggle} />
     </div>
   );

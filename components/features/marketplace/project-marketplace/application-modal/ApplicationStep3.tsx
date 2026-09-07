@@ -3,7 +3,7 @@
 import React from 'react';
 import { HiX, HiPlus } from 'react-icons/hi';
 
-export function ApplicationModalStep3({ onClose, onNext, onBack, projectData, appData,setAppData }) {
+export function ApplicationModalStep3({ onClose, onNext, onBack, projectData }: any) {
   // Safe fallbacks
   const project = projectData || {
     title: 'Neon Soul — R&B Album Production',

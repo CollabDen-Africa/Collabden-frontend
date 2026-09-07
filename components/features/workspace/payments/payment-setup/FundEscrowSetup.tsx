@@ -4,7 +4,6 @@ import {
   FiLock, 
   FiBriefcase, 
   FiShield, 
-  FiCheck,
   FiAlertCircle
 } from "react-icons/fi";
 import { IoWalletOutline } from "react-icons/io5";

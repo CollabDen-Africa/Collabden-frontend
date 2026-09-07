@@ -17,7 +17,6 @@ import {
   DISPUTE_STATUS_COLORS,
   DISPUTE_STATUS_DOT,
 } from "@/constants/disputes";
-import type { DisputeType, DisputeStatus } from "@/services/admin/disputes.service";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

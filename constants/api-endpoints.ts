@@ -284,6 +284,15 @@ export const API_ENDPOINTS = {
     MILESTONE_APPROVE: (projectId: string, milestoneId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/escrow/milestones/${milestoneId}/approve`,
     MILESTONE_DISPUTE: (projectId: string, milestoneId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/escrow/milestones/${milestoneId}/dispute`,
   },
+  ADMIN_SETTINGS: {
+    USERS: `${API_BASE_URL}/api/v1/admin/settings/users`,
+    USERS_HISTORY: `${API_BASE_URL}/api/v1/admin/settings/users/history`,
+    GENERAL: `${API_BASE_URL}/api/v1/admin/settings/general`,
+    NOTIFICATIONS: `${API_BASE_URL}/api/v1/admin/settings/notifications`,
+    NOTIFICATIONS_ANNOUNCEMENT: `${API_BASE_URL}/api/v1/admin/settings/notifications/announcement`,
+    NOTIFICATIONS_PREVIEW: `${API_BASE_URL}/api/v1/admin/settings/notifications/preview`,
+    MARKETPLACE: `${API_BASE_URL}/api/v1/admin/settings/marketplace`,
+  },
 };
 
 export interface API_RESPONSE<T = unknown> {

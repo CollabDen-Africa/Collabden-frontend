@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { FiAlertTriangle } from 'react-icons/fi';
 
 interface ConfirmChangeModalProps {
   isOpen: boolean;
@@ -20,15 +20,15 @@ subtitle = "This change significantly affects all user accounts.", impactTitle =
       
       {/* Container */}
       <div 
-        className="flex flex-col items-start px-7.5 py-7 w-full max-w-120 bg-[#10141C] border-[0.8px] border-accent-yellow/[0.267] rounded-[22px] shadow-[0px_24px_80px_rgba(0,0,0,0.6)]"
+        className="flex flex-col items-start px-7.5 py-7 w-full max-w-120 bg-card-bg-alt border border-accent-yellow/30 rounded-[22px] shadow-[0px_24px_80px_rgba(0,0,0,0.6)]"
         role="dialog"
         aria-modal="true"
       >
         
         {/* Header Section */}
         <div className="flex flex-row items-center gap-3.5 w-full">
-          <div className="flex justify-center items-center w-11 h-11 bg-accent-yellow/10 border-[0.8px] border-accent-yellow/[0.267] rounded-xl shrink-0">
-            <AlertTriangle className="w-5 h-5 text-accent-yellow" />
+          <div className="flex justify-center items-center w-11 h-11 bg-accent-yellow/10 border border-accent-yellow/30 rounded-xl shrink-0">
+            <FiAlertTriangle className="w-5 h-5 text-accent-yellow" />
           </div>
           <div className="flex flex-col">
             <h2 className="font-['Raleway'] font-bold text-base leading-normal text-white">
