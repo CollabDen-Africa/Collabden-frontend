@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { BsArrowUpRightCircleFill } from "react-icons/bs";
 import AboutHero from '@/components/features/about/AboutHero';
 import AboutSection from '@/components/features/about/AboutSection';
+import AboutTeam from '@/components/features/about/AboutTeam';
 import Button from '@/components/ui/Button';
 
 
@@ -67,6 +68,8 @@ export default function AboutPage() {
                         </Button>
                     </Link>
                 </AboutSection>
+
+                <AboutTeam />
             </div>
         </MarketingPageWrapper>
     );

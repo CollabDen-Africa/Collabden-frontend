@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IoMailOutline, IoCheckmarkCircle } from 'react-icons/io5';
+import { IoMailOutline, IoCheckmarkCircle, IoPersonOutline, IoCallOutline } from 'react-icons/io5';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BsArrowLeftCircleFill } from "react-icons/bs";
@@ -12,8 +12,8 @@ import { waitlistSchema, WaitlistInput } from '@/lib/validations/waitlist.schema
 import { useWaitlist } from '@/hooks/waitlist/useWaitlist';
 import { getErrorMessage } from '@/lib/error-handler';
 
-// Set target date to 6 months from now (September 9, 2026)
-const TARGET_DATE = new Date('2026-09-09T00:00:00');
+// Set target date to 2 months from now (November 4, 2026)
+const TARGET_DATE = new Date('2026-11-04T00:00:00');
 
 export default function WaitlistPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -173,6 +173,10 @@ export default function WaitlistPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   {/* Name Input */}
                   <div className="flex items-center bg-black/30 border border-white/10 rounded-full p-1.5 md:p-2 pl-4 md:pl-6 focus-within:border-primary-green transition-all shadow-xl group">
+                    <IoPersonOutline
+                      className="text-white group-focus-within:text-white/60 mr-2 md:mr-3 shrink-0"
+                      size={20}
+                    />
                     <input
                       type="text"
                       placeholder="Enter your name"
@@ -183,6 +187,10 @@ export default function WaitlistPage() {
 
                   {/* Phone Input */}
                   <div className="flex items-center bg-black/30 border border-white/10 rounded-full p-1.5 md:p-2 pl-4 md:pl-6 focus-within:border-primary-green transition-all shadow-xl group">
+                    <IoCallOutline
+                      className="text-white group-focus-within:text-white/60 mr-2 md:mr-3 shrink-0"
+                      size={20}
+                    />
                     <input
                       type="tel"
                       placeholder="Enter your phone number"
@@ -334,7 +342,7 @@ export default function WaitlistPage() {
       </motion.div>
 
       {/* Dashboard Preview - Anchored to bottom with fixed height ratio */}
-      <div className="relative w-full max-w-6xl px-4 z-0 pointer-events-none mt-[-35px]">
+      <div className="relative w-full max-w-6xl px-4 z-0 pointer-events-none -mt-8.75">
         <motion.div
           initial={{ opacity: 0, y: 100, rotateX: 20 }}
           animate={{ opacity: 1, y: 0, rotateX: 8 }}

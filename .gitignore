@@ -42,3 +42,7 @@ next-env.d.ts
 
 #documentation
 rules
+agents.md
+final prompt.md
+AGENTS_GUIDE.md
+
