@@ -673,8 +673,9 @@ export const getPaymentReports = async (params?: {
 
 // ─── Manual Payout (placeholder — no backend endpoint yet) ──────────────────
 
-export const processManualPayout = async (): Promise<boolean> => {
-  // No dedicated admin manual payout endpoint exists in the backend.
-  // Returning true as a placeholder until one is implemented.
+export const processManualPayout = async (
+  _payload?: { userId?: string; amount?: number; reason?: string }
+): Promise<boolean> => {
+  void _payload;
   return true;
 };

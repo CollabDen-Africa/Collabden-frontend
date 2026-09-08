@@ -52,7 +52,7 @@ interface FilterSelectProps {
   value: string;
   onChange: (v: string) => void;
   options: { label: string; value: string }[];
-  placeholder: string;
+  placeholder?: string;
 }
 
 const FilterSelect = ({ id, value, onChange, options, placeholder }: FilterSelectProps) => (
@@ -61,7 +61,8 @@ const FilterSelect = ({ id, value, onChange, options, placeholder }: FilterSelec
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="appearance-none bg-white/5 border border-white/10 rounded-xl pl-3.5 pr-8 py-2.5 text-sm text-white font-medium focus:outline-none focus:border-white/20 transition-all cursor-pointer hover:bg-white/8 min-w-[148px]"
+      aria-label={placeholder}
+      className="appearance-none bg-white/5 border border-white/10 rounded-xl pl-3.5 pr-8 py-2.5 text-sm text-white font-medium focus:outline-none focus:border-white/20 transition-all cursor-pointer hover:bg-white/8 min-w-37"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value} className="bg-[#0d0f10]">
@@ -200,7 +201,7 @@ export const AdminDisputesView: React.FC = () => {
         {statCards.map((card, idx) => (
           <div
             key={idx}
-            className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex flex-col gap-4"
+            className="bg-white/2 border border-white/5 rounded-2xl p-5 flex flex-col gap-4"
           >
             <div className="flex flex-col gap-1">
               <span className="text-2xl font-bold text-white tracking-tight">
@@ -229,13 +230,13 @@ export const AdminDisputesView: React.FC = () => {
             placeholder="Search by ID, user, project, or transaction..."
             value={rawSearch}
             onChange={handleSearch}
-            className="w-full bg-white/[0.02] border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 focus:bg-white/4 transition-all"
+            className="w-full bg-white/2 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 focus:bg-white/4 transition-all"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Filter indicator */}
-          <div className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/[0.02] text-white/60 text-sm font-medium">
+          <div className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/2 text-white/60 text-sm font-medium">
             <HiOutlineFilter size={15} />
             <span>Filters</span>
             {activeFilterCount > 0 && (

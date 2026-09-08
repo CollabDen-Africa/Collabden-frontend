@@ -80,7 +80,7 @@ export const ModerateUser: React.FC<ModerateUserProps> = ({ id }) => {
 
       <div className="w-full max-w-2xl mx-auto bg-[#121415] border border-white/5 rounded-3xl overflow-hidden flex flex-col">
         {/* Header Section */}
-        <div className="p-6 md:p-8 flex items-start gap-4 border-b border-white/5 bg-white/[0.02]">
+        <div className="p-6 md:p-8 flex items-start gap-4 border-b border-white/5 bg-white/2">
           <div className="w-12 h-12 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500 shrink-0">
             <HiOutlineMinusCircle size={24} />
           </div>
@@ -165,7 +165,7 @@ export const ModerateUser: React.FC<ModerateUserProps> = ({ id }) => {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-[#1a1c1d] border border-white/5 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-yellow-500/50 resize-none min-h-[120px]"
+              className="w-full bg-[#1a1c1d] border border-white/5 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-yellow-500/50 resize-none min-h-30"
               placeholder="Provide additional context for this action."
             />
           </div>
@@ -185,7 +185,7 @@ export const ModerateUser: React.FC<ModerateUserProps> = ({ id }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 md:p-8 flex items-center justify-end gap-4 border-t border-white/5 bg-white/[0.02]">
+        <div className="p-6 md:p-8 flex items-center justify-end gap-4 border-t border-white/5 bg-white/2">
           <button
             onClick={() => router.push(`/admin/users/${id}`)}
             disabled={isSubmitting}

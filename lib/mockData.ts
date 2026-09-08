@@ -3,14 +3,13 @@
 import { 
   FiGlobe, FiLinkedin, FiInstagram, FiTwitter, FiYoutube, 
   FiUsers, FiCheckCircle, FiAward, FiUser, 
-    FiEye, 
-    FiLink, 
-    FiCreditCard, 
-    FiBell, 
-    FiShield, 
-    FiLock, 
-    FiActivity, 
-    FiHelpCircle 
+  FiLink, 
+  FiCreditCard, 
+  FiBell, 
+  FiShield, 
+  FiLock, 
+  FiActivity, 
+  FiHelpCircle 
 } from "react-icons/fi";
 import { FaDribbble } from "react-icons/fa";
 

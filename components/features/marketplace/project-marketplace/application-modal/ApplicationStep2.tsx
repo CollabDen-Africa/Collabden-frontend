@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useState } from 'react';
+import React from 'react';
 import { HiX } from 'react-icons/hi';
 
 export function ApplicationModalStep2({ onClose, onNext, onBack, projectData, appData, setAppData }) {
