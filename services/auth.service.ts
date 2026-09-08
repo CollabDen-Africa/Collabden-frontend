@@ -1,4 +1,4 @@
-import axiosInstance, { localApi } from "@/lib/axios";
+import { localApi } from "@/lib/axios";
 
 export interface SignupPayload {
   email: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiUsers, FiSearch, FiMoreVertical, FiPlusCircle, FiTrash2 } from "react-icons/fi";
+import { FiUsers, FiSearch, FiPlusCircle, FiTrash2 } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar"; 
 import Select from "@/components/ui/Select";
 import { Project } from "@/types/api.types";
@@ -21,7 +21,7 @@ export default function MembersSettingsTab({ project }: MembersSettingsTabProps)
   const removeMutation = useRemoveCollaborator(project?.id || "");
 
   const { useUserConnections } = useConnections();
-  const { data: connections = [], isLoading: isLoadingConnections } = useUserConnections();
+  const { data: connections = [] } = useUserConnections();
 
   // Active collaborators inside this project
   const activeCollaborators = project?.collaborators || [];
