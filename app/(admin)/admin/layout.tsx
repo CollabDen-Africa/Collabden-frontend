@@ -67,6 +67,13 @@ export default function AdminLayout({
     setIsMobileMenuOpen(false);
   };
 
+  const adminName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ""}`.trim()
+    : user?.email?.split("@")[0] || "Administrator";
+  const adminRole = user?.role
+    ? user.role.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())
+    : "Administrator";
+
   // While checking auth state, render loading layout to prevent layout shift or content leak
   if (isCheckingAuth) {
     return (
@@ -90,7 +97,7 @@ export default function AdminLayout({
     { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
     { name: "Disputes", href: "/admin/disputes", icon: HiOutlineFlag, badge: "12", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
     { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
-    { name: "Verification", href: "/admin/verify", icon: HiOutlineShieldCheck, badge: "5", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
+    { name: "Verification", href: "/admin/verification", icon: HiOutlineShieldCheck, badge: "5", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Subscriptions", href: "/admin/subscriptions", icon: HiOutlineCreditCard, badge: "8", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
     { name: "Admin Roles", href: "/admin/roles", icon: HiOutlineShieldCheck },
@@ -105,7 +112,7 @@ export default function AdminLayout({
     if (path.startsWith("/admin/waitlist")) return "Waitlist Manager";
     if (path.startsWith("/admin/disputes")) return "Dispute Resolution";
     if (path.startsWith("/admin/moderation")) return "Content Moderation";
-    if (path.startsWith("/admin/verify")) return "Identity Verification";
+    if (path.startsWith("/admin/verification")) return "Identity Verification";
     if (path.startsWith("/admin/support")) return "Support Tickets";
     if (path.startsWith("/admin/subscriptions")) return "Subscription Management";
     if (path.startsWith("/admin/payments")) return "Payment Management";
@@ -257,15 +264,15 @@ export default function AdminLayout({
 
           <div className="flex items-center gap-3">
             <Avatar
-              name={user?.firstName || "Admin"}
+              name={adminName}
               className="w-9 h-9 border border-primary-green shadow-md text-sm"
             />
             <div className="hidden sm:flex flex-col items-start leading-none">
               <span className="text-white font-bold text-sm">
-                {user?.firstName || "Admin"}
+                {adminName}
               </span>
               <span className="text-white/40 text-[11px] mt-0.5">
-                Administrator
+                {adminRole}
               </span>
             </div>
           </div>

@@ -6,62 +6,45 @@ import {
   FiCheckSquare, 
   FiAlertTriangle, 
   FiShieldOff, 
-  FiHelpCircle, 
-  FiDollarSign 
+  FiHelpCircle
 } from "react-icons/fi";
+import { PendingActionsData } from "@/services/admin/dashboard.service";
 
 interface PendingActionsListProps {
-  onViewAll?: () => void;
+  pendingActions: PendingActionsData;
 }
 
-export const PendingActionsList: React.FC<PendingActionsListProps> = () => {
+export const PendingActionsList: React.FC<PendingActionsListProps> = ({ pendingActions }) => {
   const pendingItems = [
     {
       title: "Identity Verification Requests",
-      subtitle: "142 requests awaiting review",
-      badge: "High Priority",
-      meta: "Updated 5m ago",
+      count: pendingActions.identityVerificationRequests?.length ?? 0,
       icon: FiCheckSquare,
       isRed: false,
-      href: "/admin/users",
+      href: "/admin/verification",
     },
     {
       title: "Reported Users / Projects",
-      subtitle: "23 reports pending moderation",
-      badge: "Urgent",
-      meta: "2 new reports",
+      count: pendingActions.reportedItems?.length ?? 0,
       icon: FiAlertTriangle,
       isRed: true,
       href: "/admin/moderation",
     },
     {
       title: "Open Disputes",
-      subtitle: "38 disputes require attention",
-      badge: "38 Open",
-      meta: "6 resolved",
+      count: pendingActions.openDisputes?.length ?? 0,
       icon: FiShieldOff,
       isRed: true,
-      href: "/admin/moderation",
+      href: "/admin/disputes",
     },
     {
       title: "Unresolved Support Tickets",
-      subtitle: "91 tickets - 7 marked critical",
-      badge: "7 Critical",
-      meta: "25m avg wait",
+      count: pendingActions.supportTickets?.length ?? 0,
       icon: FiHelpCircle,
       isRed: true,
       href: "/admin/support",
     },
-    {
-      title: "Pending Escrow Releases",
-      subtitle: "$27,140 awaiting admin approval",
-      badge: "12 Pending",
-      meta: "Oldest: 48h",
-      icon: FiDollarSign,
-      isRed: false,
-      href: "/admin/payments",
-    },
-  ];
+  ].filter((item) => item.count > 0);
 
   return (
     <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col justify-between shadow-sm">
@@ -72,7 +55,7 @@ export const PendingActionsList: React.FC<PendingActionsListProps> = () => {
             <div className="w-1.5 h-5 bg-primary-green rounded-full" />
             <h3 className="text-lg font-bold text-white tracking-tight">Pending Actions</h3>
             <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
-              11
+              {pendingItems.length}
             </span>
           </div>
           <Link
@@ -85,7 +68,9 @@ export const PendingActionsList: React.FC<PendingActionsListProps> = () => {
 
         {/* Action Items List */}
         <div className="flex flex-col gap-3.5">
-          {pendingItems.map((item, idx) => (
+          {pendingItems.length === 0 ? (
+            <p className="py-8 text-center text-sm text-white/40">No pending actions.</p>
+          ) : pendingItems.map((item, idx) => (
             <Link
               key={idx}
               href={item.href}
@@ -110,7 +95,7 @@ export const PendingActionsList: React.FC<PendingActionsListProps> = () => {
                     {item.title}
                   </span>
                   <span className="text-white/40 text-xs truncate">
-                    {item.subtitle}
+                    {item.count} awaiting review
                   </span>
                 </div>
               </div>
@@ -123,10 +108,7 @@ export const PendingActionsList: React.FC<PendingActionsListProps> = () => {
                       : "bg-primary-green/15 text-primary-green border border-primary-green/25"
                   }`}
                 >
-                  {item.badge}
-                </span>
-                <span className="text-white/30 text-[10px] font-medium">
-                  {item.meta}
+                  {item.count} open
                 </span>
               </div>
             </Link>

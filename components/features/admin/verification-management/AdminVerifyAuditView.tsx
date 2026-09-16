@@ -30,7 +30,7 @@ export const AdminVerifyAuditView: React.FC = () => {
 
   const breadcrumbItems = [
     { label: "Admin Portal", href: "/admin/dashboard" },
-    { label: "Verification", href: "/admin/verify" },
+    { label: "Verification", href: "/admin/verification" },
     { label: "Audit Log & History" },
   ];
 

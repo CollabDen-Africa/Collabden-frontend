@@ -3,74 +3,18 @@
 import React from "react";
 import Link from "next/link";
 import { 
-  FiUserPlus, 
-  FiFolderPlus, 
-  FiCheckCircle, 
-  FiDollarSign, 
-  FiXCircle, 
-  FiAlertCircle, 
-  FiHelpCircle 
+  FiAlertCircle,
 } from "react-icons/fi";
+import { ActivityItem } from "@/services/admin/dashboard.service";
 
-export const RecentActivityList: React.FC = () => {
-  const activities = [
-    {
-      title: "Amara Osei registered as a new user",
-      badge: "New User",
-      time: "2m ago",
-      icon: FiUserPlus,
-      isRed: false,
-    },
-    {
-      title: 'Tolu Adeyemi created project "Afrobeats EP Vol. 2"',
-      badge: "Project",
-      time: "8m ago",
-      icon: FiFolderPlus,
-      isRed: false,
-    },
-    {
-      title: "Kochi Williams identity verification approved",
-      badge: "Verification",
-      time: "18m ago",
-      icon: FiCheckCircle,
-      isRed: false,
-    },
-    {
-      title: 'Escrow of $3,200 released for project "Jazz Fusion Album"',
-      badge: "Payment",
-      time: "22m ago",
-      icon: FiDollarSign,
-      isRed: false,
-    },
-    {
-      title: "Marcus Lee identity verification rejected",
-      badge: "Verification",
-      time: "34m ago",
-      icon: FiXCircle,
-      isRed: true,
-    },
-    {
-      title: 'Project "Dark Sessions" reported for content violation',
-      badge: "Reported",
-      time: "51m ago",
-      icon: FiAlertCircle,
-      isRed: true,
-    },
-    {
-      title: "Ngozi Ojo registered as a new user",
-      badge: "New User",
-      time: "1h ago",
-      icon: FiUserPlus,
-      isRed: false,
-    },
-    {
-      title: "Support ticket #1204 opened – billing issue",
-      badge: "Support",
-      time: "1h 20m ago",
-      icon: FiHelpCircle,
-      isRed: true,
-    },
-  ];
+interface RecentActivityListProps {
+  activities: ActivityItem[];
+}
+
+export const RecentActivityList: React.FC<RecentActivityListProps> = ({ activities }) => {
+  const isAlertActivity = (action: string) =>
+    /reject|fail|report|dispute|escalat|suspend|deactivat/i.test(action);
+
 
   return (
     <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col justify-between shadow-sm">
@@ -91,42 +35,48 @@ export const RecentActivityList: React.FC = () => {
 
         {/* Timeline Items */}
         <div className="flex flex-col gap-4">
-          {activities.map((item, idx) => (
+          {activities.length === 0 ? (
+            <p className="py-8 text-center text-sm text-white/40">No recent activity.</p>
+          ) : activities.map((item) => {
+            const isRed = isAlertActivity(item.action);
+
+            return (
             <div
-              key={idx}
+              key={item.id}
               className="flex items-start gap-3.5 pb-3.5 border-b border-white/5 last:border-b-0 last:pb-0"
             >
               <div
                 className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                  item.isRed
+                  isRed
                     ? "bg-red-500/10 text-red-500"
                     : "bg-primary-green/10 text-primary-green"
                 }`}
               >
-                <item.icon size={16} />
+                  <FiAlertCircle size={16} />
               </div>
 
               <div className="flex flex-col flex-1 min-w-0">
                 <span className="text-white/90 font-medium text-xs leading-relaxed truncate">
-                  {item.title}
+                  {item.action}
                 </span>
                 <div className="flex items-center gap-2 mt-1">
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                      item.isRed
+                    isRed
                         ? "bg-red-500/15 text-red-400"
                         : "bg-primary-green/15 text-primary-green"
                     }`}
                   >
-                    {item.badge}
+                    {item.user?.displayName || item.user?.email || "System"}
                   </span>
                   <span className="text-white/30 text-[10px] font-medium">
-                    {item.time}
+                    {new Date(item.createdAt).toLocaleString()}
                   </span>
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

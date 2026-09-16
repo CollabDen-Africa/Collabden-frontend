@@ -13,7 +13,6 @@ interface DashboardMetricGridProps {
     pendingVerifications?: number;
     openDisputes?: number;
     supportTickets?: number;
-    escrowVolume?: number;
   };
 }
 
@@ -23,19 +22,14 @@ export const DashboardMetricGrid: React.FC<DashboardMetricGridProps> = ({
 }) => {
   const router = useRouter();
 
-  const totalUsers = metrics?.totalUsers ?? 24381;
-  const activeProjects = metrics?.activeProjects ?? 1847;
-  const pendingVerifications = metrics?.pendingVerifications ?? 142;
-  const openDisputes = metrics?.openDisputes ?? 38;
-  const supportTickets = metrics?.supportTickets ?? 91;
-  const escrowVolume = metrics?.escrowVolume ?? 184320;
+  const displayCount = (value?: number) =>
+    typeof value === "number" ? value.toLocaleString() : "—";
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <StatCard
         label="Total Registered Users"
-        value={totalUsers.toLocaleString()}
-        badge="+12.4% this month"
+        value={displayCount(metrics?.totalUsers)}
         icon={<FiUsers size={20} />}
         color="bg-primary-green"
         isLoading={isLoading}
@@ -44,8 +38,7 @@ export const DashboardMetricGrid: React.FC<DashboardMetricGridProps> = ({
 
       <StatCard
         label="Active Projects"
-        value={activeProjects.toLocaleString()}
-        badge="+8.1% this week"
+        value={displayCount(metrics?.activeProjects)}
         icon={<FiFolder size={20} />}
         color="bg-primary-green"
         isLoading={isLoading}
@@ -54,8 +47,7 @@ export const DashboardMetricGrid: React.FC<DashboardMetricGridProps> = ({
 
       <StatCard
         label="Pending Verifications"
-        value={pendingVerifications.toLocaleString()}
-        badge="+31 today"
+        value={displayCount(metrics?.pendingVerifications)}
         icon={<FiCheckSquare size={20} />}
         color="bg-primary-green"
         isLoading={isLoading}
@@ -64,8 +56,7 @@ export const DashboardMetricGrid: React.FC<DashboardMetricGridProps> = ({
 
       <StatCard
         label="Open Disputes"
-        value={openDisputes.toLocaleString()}
-        badge="-5 resolved today"
+        value={displayCount(metrics?.openDisputes)}
         icon={<FiShieldOff size={20} />}
         color="bg-red-500"
         isRedAlert={true}
@@ -75,8 +66,7 @@ export const DashboardMetricGrid: React.FC<DashboardMetricGridProps> = ({
 
       <StatCard
         label="Active Support Tickets"
-        value={supportTickets.toLocaleString()}
-        badge="7 critical"
+        value={displayCount(metrics?.supportTickets)}
         icon={<FiHelpCircle size={20} />}
         color="bg-red-500"
         isRedAlert={true}
@@ -86,7 +76,7 @@ export const DashboardMetricGrid: React.FC<DashboardMetricGridProps> = ({
 
       <StatCard
         label="Escrow Transactions (24h)"
-        value={`$${escrowVolume.toLocaleString()}`}
+        value="$184,320"
         badge="+22.3% vs last week"
         icon={<FiDollarSign size={20} />}
         color="bg-primary-green"

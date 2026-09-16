@@ -22,6 +22,7 @@ interface User {
   identityVerified?: boolean;
   legalName?: string | null;
   isAdmin?: boolean;
+  role?: string;
 }
 
 export interface AdminVerify2FAPayload {

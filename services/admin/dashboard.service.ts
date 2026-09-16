@@ -1,5 +1,10 @@
 import axiosInstance from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/api-endpoints";
+
+const adminDashboardProxy = (path = "") => `/api/proxy/dashboard/admin${path}`;
+
+const localProxyConfig = {
+  baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+};
 
 export interface DashboardOverviewData {
   totalUsers?: number;
@@ -35,17 +40,16 @@ export interface ActivityItem {
 
 export const dashboardService = {
   getOverview: async (): Promise<DashboardOverviewData> => {
-    try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_DASHBOARD.ROOT);
-      return response.data?.data || response.data || {};
-    } catch {
-      return {};
-    }
+    const response = await axiosInstance.get(adminDashboardProxy(), localProxyConfig);
+    return response.data?.data || response.data || {};
   },
 
   getPendingActions: async (): Promise<PendingActionsData> => {
     try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_DASHBOARD.PENDING_ACTIONS);
+      const response = await axiosInstance.get(
+        adminDashboardProxy("/pending-actions"),
+        localProxyConfig,
+      );
       return response.data?.data || response.data || {};
     } catch {
       return {};
@@ -54,7 +58,8 @@ export const dashboardService = {
 
   getRecentActivities: async (limit = 10): Promise<ActivityItem[]> => {
     try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_DASHBOARD.ACTIVITIES, {
+      const response = await axiosInstance.get(adminDashboardProxy("/activities"), {
+        ...localProxyConfig,
         params: { limit },
       });
       return response.data?.data || (Array.isArray(response.data) ? response.data : []);
