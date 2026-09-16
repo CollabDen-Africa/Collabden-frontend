@@ -47,7 +47,7 @@ export const AdminVerifyDetailView: React.FC<AdminVerifyDetailViewProps> = ({ id
 
   const breadcrumbItems = [
     { label: "Admin Portal", href: "/admin/dashboard" },
-    { label: "Verification", href: "/admin/verify" },
+    { label: "Verification", href: "/admin/verification" },
     { label: detail?.requestId || id },
   ];
 
@@ -64,7 +64,7 @@ export const AdminVerifyDetailView: React.FC<AdminVerifyDetailViewProps> = ({ id
       });
       alert(`Verification request ${decisionType.toLowerCase()} successfully.`);
       setIsDecisionModalOpen(false);
-      router.push("/admin/verify");
+      router.push("/admin/verification");
     } catch (err) {
       console.error("Failed to submit decision:", err);
       alert("Failed to submit decision. Please try again.");
@@ -93,7 +93,7 @@ export const AdminVerifyDetailView: React.FC<AdminVerifyDetailViewProps> = ({ id
       {/* Back Link */}
       <div>
         <button
-          onClick={() => router.push("/admin/verify")}
+          onClick={() => router.push("/admin/verification")}
           className="text-xs font-semibold text-[#73BF44] hover:underline flex items-center gap-1.5 cursor-pointer"
         >
           <HiOutlineArrowLeft size={14} /> Back to Verification Overview

@@ -6,19 +6,32 @@ import { DashboardMetricGrid } from "./DashboardMetricGrid";
 import { FinancialSummaryRow } from "./FinancialSummaryRow";
 import { PendingActionsList } from "./PendingActionsList";
 import { RecentActivityList } from "./RecentActivityList";
-import { dashboardService, DashboardOverviewData } from "@/services/admin/dashboard.service";
+import {
+  dashboardService,
+  DashboardOverviewData,
+  PendingActionsData,
+  ActivityItem,
+} from "@/services/admin/dashboard.service";
 import { useAuth } from "@/context/AuthContext";
 
 export const DashboardView: React.FC = () => {
   const { user } = useAuth();
   const [overview, setOverview] = useState<DashboardOverviewData>({});
+  const [pendingActions, setPendingActions] = useState<PendingActionsData>({});
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
-      const data = await dashboardService.getOverview();
-      setOverview(data);
+      const [overviewData, pendingActionsData, recentActivities] = await Promise.all([
+        dashboardService.getOverview(),
+        dashboardService.getPendingActions(),
+        dashboardService.getRecentActivities(),
+      ]);
+      setOverview(overviewData);
+      setPendingActions(pendingActionsData);
+      setActivities(recentActivities);
     } catch (error) {
       console.error("Error fetching admin dashboard overview:", error);
     } finally {
@@ -38,7 +51,7 @@ export const DashboardView: React.FC = () => {
 
   const adminName = user?.firstName
     ? `${user.firstName} ${user.lastName || ""}`.trim()
-    : "Super Admin";
+    : user?.email?.split("@")[0] || "Administrator";
 
   return (
     <div className="w-full pb-12 animate-in fade-in duration-300">
@@ -61,13 +74,13 @@ export const DashboardView: React.FC = () => {
         }}
       />
 
-      {/* Financial Summary Mini Grid */}
+      {/* Financial API endpoints are not available yet, so this section retains its approved mock UI. */}
       <FinancialSummaryRow isLoading={isLoading} />
 
       {/* Bottom 2 Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <PendingActionsList />
-        <RecentActivityList />
+        <PendingActionsList pendingActions={pendingActions} />
+        <RecentActivityList activities={activities} />
       </div>
     </div>
   );

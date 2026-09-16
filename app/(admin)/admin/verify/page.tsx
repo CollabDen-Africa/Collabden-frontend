@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { AdminVerifyView } from "@/components/features/admin/verification-management/AdminVerifyView";
+import { Admin2FAModal } from "@/components/features/admin/auth/Admin2FAModal";
 
 export default function AdminVerifyPage() {
-  return <AdminVerifyView />;
+  return <Admin2FAModal />;
 }

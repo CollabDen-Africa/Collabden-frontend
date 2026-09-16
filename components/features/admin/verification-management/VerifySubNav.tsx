@@ -8,16 +8,16 @@ export const VerifySubNav: React.FC = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { label: "Overview & Requests", href: "/admin/verify", badge: "5", badgeColor: "bg-[#73BF44]/20 text-[#73BF44] border border-[#73BF44]/30" },
-    { label: "Audit Log & History", href: "/admin/verify/audit", badge: null },
+    { label: "Overview & Requests", href: "/admin/verification", badge: "5", badgeColor: "bg-[#73BF44]/20 text-[#73BF44] border border-[#73BF44]/30" },
+    { label: "Audit Log & History", href: "/admin/verification/audit", badge: null },
   ];
 
   return (
     <div className="w-full border-b border-white/10 flex items-center gap-6 overflow-x-auto custom-scrollbar">
       {navItems.map((item) => {
         const isActive =
-          item.href === "/admin/verify"
-            ? pathname === "/admin/verify"
+          item.href === "/admin/verification"
+            ? pathname === "/admin/verification"
             : pathname.startsWith(item.href);
 
         return (

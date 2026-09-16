@@ -231,7 +231,7 @@ export const AdminVerifyView: React.FC = () => {
           <Table
             columns={columns}
             data={requests}
-            onRowClick={(row) => router.push(`/admin/verify/${row.id || row.requestId}`)}
+            onRowClick={(row) => router.push(`/admin/verification/${row.id || row.requestId}`)}
           />
         )}
       </div>
