@@ -172,13 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (data: LoginPayload) => {
     try {
       const response = await loginMutation.mutateAsync(data);
-      // Grab the token and save it so axios can use it later
-            const token = response.data?.token || response.token;
-            if (typeof window !== 'undefined' && token) {
-              localStorage.setItem('auth_token', token);
-      }
-      // If a user object is returned, the login was successful.
-      if (response.data?.user || response.data) {
+      if (response.success) {
         const loggedUser =
           response.user || response.data?.user || response.data;
         setUser(loggedUser);
@@ -197,9 +191,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           router.push(ROUTES.DASHBOARD.ROOT); // Redirect to dashboard
         }
       }
-    } catch (error) {
+    } catch {
       // Error is managed globally by AuthContext via mutations
-      console.error("Login Context Error: ", error)
     }
   };
 
