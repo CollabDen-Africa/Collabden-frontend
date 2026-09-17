@@ -6,6 +6,7 @@ export interface SignupPayload {
   password: string;
   firstName: string;
   lastName: string;
+  agreedToTerms: boolean;
 }
 
 export interface LoginPayload {

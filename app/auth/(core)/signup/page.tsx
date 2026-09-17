@@ -69,6 +69,7 @@ export default function SignupPage() {
   };
 
   const onSubmit = async (data: SignUpInput) => {
+    console.log("Form Payload:", data);
     clearError();
     setResendMessage("");
     try {
@@ -77,6 +78,7 @@ export default function SignupPage() {
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
+        agreedToTerms: data.agreedToTerms,
       });
     } catch {
       // Error is managed globally by AuthContext
