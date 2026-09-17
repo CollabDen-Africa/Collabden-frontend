@@ -13,6 +13,19 @@ export const axiosInstance = axios.create({
   },
 });
 
+// For the token
+axiosInstance.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 /**
  * @deprecated Deprecated in favor of direct API calls using `axiosInstance` with `withCredentials: true`.
  */

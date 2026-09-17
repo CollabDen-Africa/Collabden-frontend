@@ -77,6 +77,7 @@ export default function SignupPage() {
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
+        agreedToTerms: data.agreedToTerms,
       });
     } catch {
       // Error is managed globally by AuthContext
