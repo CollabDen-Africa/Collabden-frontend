@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   FiAlertCircle,
   FiInfo,
@@ -15,21 +15,13 @@ import {
 import { SectionCard } from "@/components/ui/SectionCard";
 import Toggle from "@/components/ui/Toggle";
 
-export default function FeaturesTab() {
-  const [features, setFeatures] = useState({
-    marketplace: true,
-    payments: true,
-    legal: true,
-    verification: true,
-    workspace: true,
-    subscriptions: true,
-    disputes: true,
-    analytics: false,
-  });
+interface FeaturesTabProps {
+  marketplaceEnabled: boolean;
+  onToggleMarketplace: () => Promise<boolean>;
+  isSaving?: boolean;
+}
 
-  const handleToggle = (key: keyof typeof features) => {
-    setFeatures((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+export default function FeaturesTab({ marketplaceEnabled, onToggleMarketplace, isSaving = false }: FeaturesTabProps) {
 
   const renderHeaderIcon = () => (
     <div className="flex justify-center items-center w-9 h-9 bg-accent-yellow/10 border border-accent-yellow/20 rounded-xl shrink-0">
@@ -57,59 +49,67 @@ export default function FeaturesTab() {
             title="Marketplace"
             description="User listings, buying, and selling"
             tag="CRITICAL"
-            isActive={features.marketplace}
-            onToggle={() => handleToggle("marketplace")}
+            isActive={marketplaceEnabled}
+            onToggle={onToggleMarketplace}
+            isSaving={isSaving}
           />
           <FeatureToggleRow
             icon={FiCreditCard}
             title="Payments & Escrow"
             description="Transaction processing and escrow system"
             tag="CRITICAL"
-            isActive={features.payments}
-            onToggle={() => handleToggle("payments")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
           />
           <FeatureToggleRow
             icon={FiFileText}
             title="Legal Agreements"
             description="Collaboration contracts and digital signing"
-            isActive={features.legal}
-            onToggle={() => handleToggle("legal")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
           />
           <FeatureToggleRow
             icon={FiShield}
             title="Verification System"
             description="Identity verification workflows for users"
-            isActive={features.verification}
-            onToggle={() => handleToggle("verification")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
           />
           <FeatureToggleRow
             icon={FiBriefcase}
             title="Project Workspace"
             description="Collaborative project rooms and file sharing"
-            isActive={features.workspace}
-            onToggle={() => handleToggle("workspace")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
           />
           <FeatureToggleRow
             icon={FiLayers}
             title="Subscription Plans"
             description="Pro/Basic plan access and billing"
             tag="CRITICAL"
-            isActive={features.subscriptions}
-            onToggle={() => handleToggle("subscriptions")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
           />
           <FeatureToggleRow
             icon={FiTrendingUp}
             title="Dispute Resolution"
             description="User complaint and arbitration system"
-            isActive={features.disputes}
-            onToggle={() => handleToggle("disputes")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
           />
           <FeatureToggleRow
             icon={FiTrendingUp}
             title="Analytics Dashboard"
             description="Real-time metrics visible to users and admins"
-            isActive={features.analytics}
-            onToggle={() => handleToggle("analytics")}
+            isActive={false}
+            onToggle={() => undefined}
+            unavailable
             isLast
           />
         </div>
@@ -133,17 +133,21 @@ function FeatureToggleRow({
   isActive,
   onToggle,
   isLast,
+  unavailable = false,
+  isSaving = false,
 }: {
   icon: any;
   title: string;
   description: string;
   tag?: "CRITICAL";
   isActive: boolean;
-  onToggle: () => void;
+  onToggle: () => void | Promise<boolean>;
   isLast?: boolean;
+  unavailable?: boolean;
+  isSaving?: boolean;
 }) {
   const isDisabledRow = !isActive;
-  const displayTag = isDisabledRow ? "DISABLED" : tag;
+  const displayTag = unavailable ? "NOT CONFIGURABLE" : isDisabledRow ? "DISABLED" : tag;
 
   return (
     <div
@@ -173,7 +177,7 @@ function FeatureToggleRow({
             {displayTag && (
               <span
                 className={`px-1.5 py-0.5 rounded-md font-bold text-[9px] transition-colors duration-300 ${
-                  displayTag === "DISABLED" || displayTag === "CRITICAL"
+                  displayTag === "DISABLED" || displayTag === "CRITICAL" || displayTag === "NOT CONFIGURABLE"
                     ? "bg-accent-red/10 text-accent-red border border-accent-red/20"
                     : ""
                 }`}
@@ -197,8 +201,12 @@ function FeatureToggleRow({
             </span>
           </div>
         )}
-        <Toggle active={isActive} onChange={onToggle} />
+        {unavailable ? (
+          <span className="text-[10px] text-white/40">No API setting</span>
+        ) : (
+          <Toggle active={isActive} onChange={onToggle} disabled={isSaving} />
+        )}
       </div>
     </div>
   );
-}
+}

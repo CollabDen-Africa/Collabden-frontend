@@ -1,5 +1,14 @@
+import axios from "axios";
 import { axiosInstance } from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
+
+const ADMIN_TRANSACTIONS_PROXY = "/api/proxy/admin/transactions";
+const ADMIN_PAYMENTS_PROXY = "/api/proxy/admin/payments";
+
+const adminProxyGet = async <T>(path: string, params?: Record<string, unknown>): Promise<T> => {
+  const response = await axios.get<T>(path, { params, withCredentials: true });
+  return response.data;
+};
 
 // ─── Backend Response Shapes ─────────────────────────────────────────────────
 // These interfaces match the actual backend Prisma model includes
@@ -349,27 +358,17 @@ export const getPaymentTransactions = async (params?: {
   status?: string;
   type?: string;
 }): Promise<{ transactions: PaymentTransactionItem[]; total: number; stats: TransactionsResponse["stats"] }> => {
-  try {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_TRANSACTIONS.LIST, { params });
-    const data = res.data as TransactionsResponse;
-    return {
-      transactions: (data.transactions || []).map(mapTransaction),
-      total: data.total || 0,
-      stats: data.stats || { totalTransactions: 0, pending: 0, completed: 0, failed: 0 },
-    };
-  } catch {
-    return {
-      transactions: [],
-      total: 0,
-      stats: { totalTransactions: 0, pending: 0, completed: 0, failed: 0 },
-    };
-  }
+  const data = await adminProxyGet<TransactionsResponse>(ADMIN_TRANSACTIONS_PROXY, params);
+  return {
+    transactions: (data.transactions || []).map(mapTransaction),
+    total: data.total || 0,
+    stats: data.stats || { totalTransactions: 0, pending: 0, completed: 0, failed: 0 },
+  };
 };
 
 export const getPaymentDetail = async (id: string): Promise<PaymentTransactionItem | null> => {
   try {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_TRANSACTIONS.DETAIL(id));
-    const t = res.data as BackendTransaction;
+    const t = await adminProxyGet<BackendTransaction>(`${ADMIN_TRANSACTIONS_PROXY}/${id}`);
     return mapTransaction(t);
   } catch {
     return null;
@@ -380,23 +379,27 @@ export const getPaymentDetail = async (id: string): Promise<PaymentTransactionIt
 
 export const getPaymentStats = async (): Promise<PaymentStats> => {
   try {
-    // Fetch transaction stats and report summary in parallel
+    // These endpoints return platform-wide aggregates, independent of the table's filters.
     const [txRes, reportRes] = await Promise.allSettled([
-      axiosInstance.get(API_ENDPOINTS.ADMIN_TRANSACTIONS.LIST, { params: { page: 1, limit: 1 } }),
-      axiosInstance.get(API_ENDPOINTS.ADMIN_PAYMENTS.REPORTS, { params: { page: 1, limit: 1 } }),
+      adminProxyGet<TransactionsResponse>(ADMIN_TRANSACTIONS_PROXY, { page: 1, limit: 1 }),
+      adminProxyGet<PaymentReportResponse>(`${ADMIN_PAYMENTS_PROXY}/reports`, { page: 1, limit: 1 }),
     ]);
 
     const txStats = txRes.status === "fulfilled"
-      ? (txRes.value.data as TransactionsResponse).stats
+      ? txRes.value.stats
       : null;
 
     const reportSummary = reportRes.status === "fulfilled"
-      ? (reportRes.value.data as PaymentReportResponse).summary
+      ? reportRes.value.summary
       : null;
+
+    const completedVolume = reportSummary?.breakdownByStatus.find(
+      (entry) => entry.status === "COMPLETED"
+    )?.totalAmount;
 
     return {
       totalPayments: Number(reportSummary?.totalVolume || 0),
-      netRevenue: Number(reportSummary?.totalVolume || 0) * 0.1,
+      netRevenue: Number(completedVolume || 0),
       escrowHeld: 0,
       pendingPayouts: txStats?.pending || 0,
       refundClaims: txStats?.failed || 0,

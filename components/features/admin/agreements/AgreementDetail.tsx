@@ -25,9 +25,11 @@ export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
   if (isLoadingDetail) return <div className="p-12 text-white/40 text-center text-sm">Loading agreement details...</div>;
   if (isErrorDetail || !remoteDetail) return <div className="p-12 text-accent-red text-center text-sm">Error loading agreement details from API.</div>;
 
+  const projectOwner = remoteDetail.project?.owner || remoteDetail.owner;
+
   const infoData: AgreementInfoData = {
     agreementId: remoteDetail.agreementId || `AGR-${id.slice(-4)}`,
-    projectName: remoteDetail.projectName || remoteDetail.project?.title || "Project Agreement",
+    projectName: remoteDetail.projectName || remoteDetail.project?.name || remoteDetail.project?.title || "Project Agreement",
     projectId: remoteDetail.projectId || remoteDetail.project?.id || "proj-1",
     status: remoteDetail.status || "Signed",
     dateCreated: remoteDetail.createdAt ? new Date(remoteDetail.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A",
@@ -36,8 +38,8 @@ export const AgreementDetail: React.FC<AgreementDetailProps> = ({ id }) => {
     format: remoteDetail.format || "PDF Document",
     displayFile: remoteDetail.displayFile || "Agreement_Copy.pdf",
     fileSize: remoteDetail.fileSize || "2.4 MB",
-    ownerId: remoteDetail.ownerId || remoteDetail.owner?.id || "user-1",
-    ownerName: remoteDetail.ownerName || remoteDetail.owner?.displayName || "Project Owner",
+    ownerId: remoteDetail.ownerId || projectOwner?.id || "user-1",
+    ownerName: remoteDetail.ownerName || projectOwner?.displayName || projectOwner?.legalName || [projectOwner?.firstName, projectOwner?.lastName].filter(Boolean).join(" ") || "Project Owner",
     ownerRole: remoteDetail.ownerRole || "Project Owner",
     signatories: Array.isArray(remoteDetail.signatories) ? remoteDetail.signatories : [],
     dispute: remoteDetail.dispute,

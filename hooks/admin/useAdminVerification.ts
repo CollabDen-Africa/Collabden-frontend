@@ -36,8 +36,8 @@ export function useAdminVerification(initialParams?: { page?: number; limit?: nu
         verificationType: typeFilter !== "ALL" ? typeFilter : undefined,
       });
 
-      const body = res?.data || res;
-      const items = body?.requests || body?.verifications || (Array.isArray(body) ? body : []);
+      const body = res;
+      const items = body?.requests || [];
       setRequests(items);
       setTotal(body?.total || items.length);
 

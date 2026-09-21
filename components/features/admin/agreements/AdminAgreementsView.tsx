@@ -15,18 +15,27 @@ export const AdminAgreementsView: React.FC = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const { overview, isLoadingOverview, agreements, agreementsTotal, isLoadingAgreements } =
+  const { overview, isLoadingOverview, agreements, agreementsTotal, isLoadingAgreements, agreementsError } =
     useAdminAgreements({ page, limit, search: searchTerm || undefined });
 
   const rows: AgreementRow[] = Array.isArray(agreements)
     ? agreements.map((a: any) => ({
         id: a.id || a._id,
         agreementId: a.agreementId || `AGR-${a.id?.slice(-4) || '0000'}`,
-        projectName: a.projectName || a.project?.title || "Untitled Agreement",
-        ownerName: a.ownerName || a.owner?.displayName || "Project Owner",
-        collaborators: Array.isArray(a.collaborators) ? a.collaborators : [],
-        status: a.status === "DISPUTED" ? "Disputed" : a.status === "PENDING" ? "Pending Signatures" : a.status === "DRAFT" ? "Draft" : "Signed",
-        dateSigned: a.signedAt ? new Date(a.signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A",
+        projectName: a.projectName || a.project?.name || a.title || "Untitled Agreement",
+        ownerName: a.ownerName || a.owner?.displayName || a.project?.owner?.displayName || "Project Owner",
+        collaborators: Array.isArray(a.collaborators)
+          ? a.collaborators
+          : Array.isArray(a.signatures)
+            ? a.signatures.map((signature: any) => ({
+                id: signature.id || signature.userId,
+                name: signature.legalName || "Signatory",
+              }))
+            : [],
+        status: a.status === "DISPUTED" ? "Disputed" : a.status === "PENDING" || a.status === "PENDING_SIGNATURE" ? "Pending Signatures" : a.status === "DRAFT" ? "Draft" : "Signed",
+        dateSigned: (a.signedAt || a.signatures?.at(-1)?.signedAt)
+          ? new Date(a.signedAt || a.signatures.at(-1).signedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+          : "N/A",
       }))
     : [];
 
@@ -74,13 +83,13 @@ export const AdminAgreementsView: React.FC = () => {
         />
         <StatCard
           label="Active"
-          value={overview?.activeAgreements?.toLocaleString() || overview?.activeCount?.toLocaleString() || "0"}
+          value={overview?.activeAgreements?.toLocaleString() || overview?.activeCount?.toLocaleString() || overview?.signedCount?.toLocaleString() || "0"}
           color="bg-primary-green"
           isLoading={isLoadingOverview}
         />
         <StatCard
           label="Pending Signatures"
-          value={overview?.pendingSignatures?.toLocaleString() || overview?.pendingCount?.toLocaleString() || "0"}
+          value={overview?.pendingSignatures?.toLocaleString() || overview?.pendingCount?.toLocaleString() || overview?.pendingSignatureCount?.toLocaleString() || "0"}
           color="bg-primary-blue"
           isLoading={isLoadingOverview}
         />
@@ -123,7 +132,13 @@ export const AdminAgreementsView: React.FC = () => {
         </div>
 
         {/* Real-time Data Table */}
-        <AgreementsTable data={rows} isLoading={isLoadingAgreements} />
+        {agreementsError ? (
+          <div className="rounded-xl border border-accent-red/30 bg-accent-red/10 px-4 py-5 text-sm text-accent-red">
+            Unable to load agreements. Check your network connection or try again later.
+          </div>
+        ) : (
+          <AgreementsTable data={rows} isLoading={isLoadingAgreements} />
+        )}
 
         {/* Pagination */}
         <Pagination
