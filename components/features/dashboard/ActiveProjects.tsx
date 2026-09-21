@@ -7,12 +7,12 @@ import OnboardingTooltip from '@/components/ui/Tooltip';
 
 // Active Project data structure
 export interface ActiveProject {
-  id: number;
+  id: string;
   title: string;
   genre: string;
   tracks: string;
   collaborators: ProjectCollaborator[];
-  progress: number;
+  progress?: number;
   updated: string;
   status?: string;
 }

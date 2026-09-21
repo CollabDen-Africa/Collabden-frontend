@@ -11,14 +11,17 @@ import { useTour } from '@/context/TourContext';
 import { useDashboard } from '@/hooks/dashboard/useDashboard';
 import { handleApiError } from '@/lib/error-handler';
 
-// MOCK DATA (fallback)
-import { 
-  MOCK_TOP_STATS, 
-  MOCK_ACTIVE_PROJECTS, 
-  MOCK_RECENT_ACTIVITY, 
-  MOCK_SUGGESTED_PROJECTS, 
-  MOCK_SUGGESTED_COLLABORATORS 
-} from '@/lib/mockData';
+const formatRelativeTime = (value: string) => {
+  const timestamp = new Date(value).getTime();
+  if (Number.isNaN(timestamp)) return 'Recently';
+
+  const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60_000));
+  if (minutes < 1) return 'now';
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+};
 
 export default function DashboardPage() {
   // Tour state context
@@ -31,54 +34,76 @@ export default function DashboardPage() {
     handleApiError(error);
   }
 
-  // Memoize transformation logic for performance and stable references
+  // The dashboard endpoint returns active projects and notifications. All summary
+  // values below are derived from that response so the page never falls back to
+  // sample content when an account has no data.
   const topStats = useMemo(() => {
-    if (!apiData?.stats?.length) return MOCK_TOP_STATS;
-    return apiData.stats.map(s => ({
-      title: s.title,
-      count: String(s.count),
-      subtitle: s.subtitle,
-      orbClass: "",
-    }));
-  }, [apiData?.stats]);
+    const projects = apiData?.activeProjects ?? [];
+    const collaboratorIds = new Set(
+      projects.flatMap((project) =>
+        (project.collaborators ?? []).map((collaborator) => collaborator.userId)
+      )
+    );
+    const taskNotifications = (apiData?.notifications ?? []).filter(
+      (notification) => notification.type === 'TASK_ASSIGNED'
+    ).length;
+
+    return [
+      {
+        title: 'Active Projects',
+        count: projects.length,
+        subtitle: projects.length === 1 ? 'project in progress' : 'projects in progress',
+        orbClass: '',
+      },
+      {
+        title: 'Task Assignments',
+        count: taskNotifications,
+        subtitle: taskNotifications === 1 ? 'task notification' : 'task notifications',
+        orbClass: '',
+      },
+      {
+        title: 'Collaborators',
+        count: collaboratorIds.size,
+        subtitle: collaboratorIds.size === 1 ? 'active collaborator' : 'active collaborators',
+        orbClass: '',
+      },
+    ];
+  }, [apiData?.activeProjects, apiData?.notifications]);
 
   const activeProjects = useMemo(() => {
-    if (!apiData?.activeProjects?.length) return MOCK_ACTIVE_PROJECTS.slice(0, 3);
-    
     // Sort by updatedAt descending and take top 3
-    return [...apiData.activeProjects]
+    return [...(apiData?.activeProjects ?? [])]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
       .slice(0, 3)
-      .map((p, i) => ({
-        id: i + 1,
+      .map((p) => ({
+        id: p.id,
         title: p.name,
         genre: p.genre || "Unknown",
         tracks: p.description || "No description",
         collaborators: (p.collaborators || []).map(c => ({
           name: c.user?.email?.split("@")[0] || "User",
-          avatarUrl: "/mock-profiles/small.png",
         })),
-        progress: 0,
+        progress: undefined,
         updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
         status: (p.status || "ACTIVE").charAt(0) + (p.status || "ACTIVE").slice(1).toLowerCase(),
       }));
   }, [apiData?.activeProjects]);
 
   const recentActivity = useMemo(() => {
-    if (!apiData?.recentActivity?.length) return MOCK_RECENT_ACTIVITY;
-    return apiData.recentActivity.map((a, i) => ({
-      id: Number(a.id) || i + 1,
-      user: a.user,
-      action: a.action,
-      time: a.time,
-      avatarUrl: a.avatarUrl || "/avatar.svg",
+    return (apiData?.notifications ?? [])
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 4)
+      .map((notification) => ({
+      id: notification.id,
+      user: notification.title || 'Project update',
+      action: notification.message,
+      time: formatRelativeTime(notification.createdAt),
     }));
-  }, [apiData?.recentActivity]);
+  }, [apiData?.notifications]);
 
   const suggestedProjects = useMemo(() => {
-    if (!apiData?.suggestedProjects?.length) return MOCK_SUGGESTED_PROJECTS;
-    return apiData.suggestedProjects.map((p, i) => ({
-      id: i + 1,
+    return (apiData?.suggestedProjects ?? []).map((p) => ({
+      id: p.id,
       title: p.name,
       needs: p.description || "",
       members: (p.collaborators || []).length,
@@ -87,15 +112,13 @@ export default function DashboardPage() {
   }, [apiData?.suggestedProjects]);
 
   const suggestedCollaborators = useMemo(() => {
-    if (!apiData?.suggestedCollaborators?.length) return MOCK_SUGGESTED_COLLABORATORS;
-    return apiData.suggestedCollaborators.map((c, i) => ({
-      id: i + 1,
+    return (apiData?.suggestedCollaborators ?? []).map((c) => ({
+      id: c.id || c.userId || c.user?.id,
       userId: c.userId || c.user?.id,
       name: c.user?.email?.split("@")[0] || "User",
       role: c.role || "Collaborator",
       members: 0,
       rating: "5.0",
-      avatarUrl: "/mock-profiles/small.png",
     }));
   }, [apiData?.suggestedCollaborators]);
 

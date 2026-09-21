@@ -5,6 +5,12 @@ import { handleApiError } from "@/lib/error-handler";
 export const useProfile = () => {
   const queryClient = useQueryClient();
 
+  const useCurrentProfile = () =>
+    useQuery({
+      queryKey: ["auth", "profile"],
+      queryFn: () => profileService.getCurrentProfile(),
+    });
+
   // Fetch single user profile
   const useUserProfile = (userId: string) =>
     useQuery({
@@ -86,6 +92,7 @@ export const useProfile = () => {
     });
 
   return {
+    useCurrentProfile,
     useUserProfile,
     useUpdateProfile,
     useUpdateEmail,
