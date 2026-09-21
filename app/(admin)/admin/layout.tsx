@@ -95,11 +95,11 @@ export default function AdminLayout({
     { name: "Marketplace", href: "/admin/marketplace", icon: HiOutlineShoppingBag },
     { name: "Agreements", href: "/admin/agreements", icon: HiOutlineDocumentText },
     { name: "Payments", href: "/admin/payments", icon: HiOutlineCreditCard },
-    { name: "Disputes", href: "/admin/disputes", icon: HiOutlineFlag, badge: "12", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
-    { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck, badge: "3", badgeColor: "bg-red-500/20 text-red-400 border border-red-500/30" },
-    { name: "Verification", href: "/admin/verification", icon: HiOutlineShieldCheck, badge: "5", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
-    { name: "Support", href: "/admin/support", icon: HiOutlineTicket, badge: "7", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
-    { name: "Subscriptions", href: "/admin/subscriptions", icon: HiOutlineCreditCard, badge: "8", badgeColor: "bg-primary-green/20 text-primary-green border border-primary-green/30" },
+    { name: "Disputes", href: "/admin/disputes", icon: HiOutlineFlag },
+    { name: "Moderation", href: "/admin/moderation", icon: HiOutlineShieldCheck },
+    { name: "Verification", href: "/admin/verification", icon: HiOutlineShieldCheck },
+    { name: "Support", href: "/admin/support", icon: HiOutlineTicket },
+    { name: "Subscriptions", href: "/admin/subscriptions", icon: HiOutlineCreditCard },
     { name: "Admin Roles", href: "/admin/roles", icon: HiOutlineShieldCheck },
     { name: "Settings", href: "/admin/settings", icon: HiOutlineCog },
     { name: "Waitlist", href: "/admin/waitlist", icon: IoMailOutline },
@@ -163,12 +163,6 @@ export default function AdminLayout({
                     <item.icon size={17} className={isActive ? "text-primary-green" : "text-white/40 group-hover:text-white"} />
                     <span>{item.name}</span>
                   </div>
-
-                  {item.badge && (
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold leading-none ${item.badgeColor}`}>
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}

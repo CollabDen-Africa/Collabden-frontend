@@ -8,8 +8,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { 
   adminRolesService, 
   AdminRoleItem, 
-  PermissionLevel, 
-  INITIAL_ROLES_DATA 
+  PermissionLevel
 } from "@/services/admin/roles.service";
 
 interface EditRoleMatrixViewProps {
@@ -17,22 +16,23 @@ interface EditRoleMatrixViewProps {
 }
 
 interface ModuleRowState {
+  moduleKey: string;
   moduleName: string;
   level: PermissionLevel;
 }
 
 const ALL_MODULES = [
-  "User Management",
-  "Project Management",
-  "Marketplace Management",
-  "Legal Agreements",
-  "Payments & Escrow",
-  "Dispute Resolution",
-  "Verification",
-  "Subscriptions",
-  "Support",
-  "Platform Settings",
-  "Audit Logs"
+  { key: "user_management", name: "User Management" },
+  { key: "projects", name: "Project Management" },
+  { key: "marketplace", name: "Marketplace Management" },
+  { key: "agreements", name: "Legal Agreements" },
+  { key: "finance", name: "Payments & Escrow" },
+  { key: "escrow", name: "Escrow" },
+  { key: "verification", name: "Verification" },
+  { key: "subscriptions", name: "Subscriptions" },
+  { key: "support_requests", name: "Support" },
+  { key: "settings", name: "Platform Settings" },
+  { key: "audit_logs", name: "Audit Logs" },
 ];
 
 export const EditRoleMatrixView: React.FC<EditRoleMatrixViewProps> = ({ roleId }) => {
@@ -43,25 +43,43 @@ export const EditRoleMatrixView: React.FC<EditRoleMatrixViewProps> = ({ roleId }
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Initial matrix state
   const [matrix, setMatrix] = useState<ModuleRowState[]>(
-    ALL_MODULES.map((m) => ({
-      moduleName: m,
-      level: roleId.includes("super") || roleId.includes("SUPER") ? "Full Access" : "Manage",
+    ALL_MODULES.map((module) => ({
+      moduleKey: module.key,
+      moduleName: module.name,
+      level: "None",
     }))
   );
 
   useEffect(() => {
     const fetchRole = async () => {
-      const allRoles = await adminRolesService.getRoles();
-      const match = allRoles.find((r) => r.id === roleId || r.roleKey.toLowerCase() === roleId.toLowerCase()) || INITIAL_ROLES_DATA[0];
-      if (match) {
-        setRole(match);
-        setRoleName(match.name);
-        setDescription(match.description);
-        setStatus(match.status);
-      }
+      const roleKey = roleId.toUpperCase();
+      const config = await adminRolesService.getRoleDetail(roleKey);
+      const roleConfig = config?.data || config;
+      const roleItem: AdminRoleItem = {
+        id: roleConfig.role,
+        name: roleConfig.role.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (letter: string) => letter.toUpperCase()),
+        roleKey: roleConfig.role,
+        status: "Active",
+        description: "Administrative permissions configuration.",
+        permissionsCount: roleConfig.permissions?.length || 0,
+        adminsCount: roleConfig.assignedAdmins || 0,
+        themeColor: "blue",
+        permissions: roleConfig.permissions || [],
+        modules: roleConfig.modules || [],
+      };
+      setRole(roleItem);
+      setRoleName(roleItem.name);
+      setDescription(roleItem.description);
+      setStatus(roleItem.status);
+      setMatrix(ALL_MODULES.map((module) => ({
+        moduleKey: module.key,
+        moduleName: module.name,
+        level: roleItem.modules.includes(module.key) ? "Manage" : "None",
+      })));
     };
 
     fetchRole();
@@ -81,15 +99,25 @@ export const EditRoleMatrixView: React.FC<EditRoleMatrixViewProps> = ({ roleId }
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
+    setSaveError(null);
+    try {
+      if (!role) throw new Error("Role configuration is unavailable.");
+      await adminRolesService.updateRolePermissions(
+        role.roleKey,
+        role.permissions,
+        matrix.filter((row) => row.level !== "None").map((row) => row.moduleKey)
+      );
       setIsSaving(false);
       setSaveSuccess(true);
       setTimeout(() => {
         router.push("/admin/roles");
       }, 1000);
-    }, 600);
+    } catch (error) {
+      setIsSaving(false);
+      setSaveError(error instanceof Error ? error.message : "Unable to save role permissions.");
+    }
   };
 
   return (
@@ -121,6 +149,11 @@ export const EditRoleMatrixView: React.FC<EditRoleMatrixViewProps> = ({ roleId }
       {saveSuccess && (
         <div className="p-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm font-semibold flex items-center justify-between animate-in fade-in">
           <span>Permissions saved successfully! Redirecting to Roles overview...</span>
+        </div>
+      )}
+      {saveError && (
+        <div className="p-4 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-semibold">
+          {saveError}
         </div>
       )}
 

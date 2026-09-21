@@ -1,5 +1,21 @@
-import axiosInstance from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/api-endpoints";
+import axios from "axios";
+
+const ADMIN_SETTINGS_PROXY = "/api/proxy/admin/settings";
+
+const adminProxyGet = async <T>(path: string, params?: Record<string, unknown>): Promise<T> => {
+  const response = await axios.get<T>(path, { params, withCredentials: true });
+  return response.data;
+};
+
+const adminProxyPatch = async <T>(path: string, payload: unknown): Promise<T> => {
+  const response = await axios.patch<T>(path, payload, { withCredentials: true });
+  return response.data;
+};
+
+const adminProxyPost = async <T>(path: string, payload: unknown): Promise<T> => {
+  const response = await axios.post<T>(path, payload, { withCredentials: true });
+  return response.data;
+};
 
 export type SupportedCurrency = "NGN" | "USD" | "GBP" | "EUR" | "KES" | "GHS";
 
@@ -130,54 +146,46 @@ export interface SettingsUpdateResponse<T> {
 export const adminSettingsService = {
   // General Platform Settings
   getGeneralSettings: async (): Promise<GeneralSettingsData> => {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SETTINGS.GENERAL);
-    return res.data?.data || res.data;
+    return adminProxyGet(`${ADMIN_SETTINGS_PROXY}/general`);
   },
 
   updateGeneralSettings: async (
     payload: Partial<GeneralSettingsData>
   ): Promise<SettingsUpdateResponse<GeneralSettingsData> | GeneralSettingsData> => {
-    const res = await axiosInstance.patch(API_ENDPOINTS.ADMIN_SETTINGS.GENERAL, payload);
-    return res.data;
+    return adminProxyPatch(`${ADMIN_SETTINGS_PROXY}/general`, payload);
   },
 
   // User & Account Settings
   getUserSettings: async (): Promise<UserSettingsData> => {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SETTINGS.USERS);
-    return res.data?.data || res.data;
+    return adminProxyGet(`${ADMIN_SETTINGS_PROXY}/users`);
   },
 
   updateUserSettings: async (
     payload: Partial<UserSettingsData>
   ): Promise<SettingsUpdateResponse<UserSettingsData> | UserSettingsData> => {
-    const res = await axiosInstance.patch(API_ENDPOINTS.ADMIN_SETTINGS.USERS, payload);
-    return res.data;
+    return adminProxyPatch(`${ADMIN_SETTINGS_PROXY}/users`, payload);
   },
 
   // Marketplace Settings
   getMarketplaceSettings: async (): Promise<MarketplaceSettingsData> => {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SETTINGS.MARKETPLACE);
-    return res.data?.data || res.data;
+    return adminProxyGet(`${ADMIN_SETTINGS_PROXY}/marketplace`);
   },
 
   updateMarketplaceSettings: async (
     payload: Partial<MarketplaceSettingsData>
   ): Promise<SettingsUpdateResponse<MarketplaceSettingsData> | MarketplaceSettingsData> => {
-    const res = await axiosInstance.patch(API_ENDPOINTS.ADMIN_SETTINGS.MARKETPLACE, payload);
-    return res.data;
+    return adminProxyPatch(`${ADMIN_SETTINGS_PROXY}/marketplace`, payload);
   },
 
   // Notification Settings
   getNotificationSettings: async (): Promise<NotificationSettingsData> => {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SETTINGS.NOTIFICATIONS);
-    return res.data?.data || res.data;
+    return adminProxyGet(`${ADMIN_SETTINGS_PROXY}/notifications`);
   },
 
   updateNotificationSettings: async (
     payload: Partial<NotificationSettingsData>
   ): Promise<SettingsUpdateResponse<NotificationSettingsData> | NotificationSettingsData> => {
-    const res = await axiosInstance.patch(API_ENDPOINTS.ADMIN_SETTINGS.NOTIFICATIONS, payload);
-    return res.data;
+    return adminProxyPatch(`${ADMIN_SETTINGS_PROXY}/notifications`, payload);
   },
 
   // System Announcement
@@ -185,9 +193,8 @@ export const adminSettingsService = {
     title: string;
     body: string;
     type?: "info" | "warning" | "critical";
-  }) => {
-    const res = await axiosInstance.post(API_ENDPOINTS.ADMIN_SETTINGS.NOTIFICATIONS_ANNOUNCEMENT, payload);
-    return res.data;
+  }): Promise<any> => {
+    return adminProxyPost(`${ADMIN_SETTINGS_PROXY}/notifications/announcement`, payload);
   },
 
   // Notification Preview
@@ -196,8 +203,7 @@ export const adminSettingsService = {
     templateKey: string;
     variables?: Record<string, any>;
   }) => {
-    const res = await axiosInstance.post(API_ENDPOINTS.ADMIN_SETTINGS.NOTIFICATIONS_PREVIEW, payload);
-    return res.data;
+    return adminProxyPost(`${ADMIN_SETTINGS_PROXY}/notifications/preview`, payload);
   },
 
   // Settings Audit History
@@ -209,8 +215,8 @@ export const adminSettingsService = {
     settingName?: string;
     adminId?: string;
   }): Promise<AuditHistoryResponse> => {
-    const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SETTINGS.USERS_HISTORY, { params });
-    const raw = res.data?.data || res.data;
+    const response = await adminProxyGet<any>(`${ADMIN_SETTINGS_PROXY}/users/history`, params);
+    const raw = response?.data || response;
     const rawLogs: any[] = raw?.logs || raw?.history || raw?.items || (Array.isArray(raw) ? raw : []);
 
     const items: AuditHistoryItem[] = rawLogs.map((log) => ({
@@ -251,4 +257,3 @@ export const adminSettingsService = {
     };
   },
 };
-

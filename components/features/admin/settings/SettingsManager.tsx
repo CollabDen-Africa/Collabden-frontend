@@ -280,7 +280,17 @@ export default function SettingsManager({
               isSaving={adminSettings.isSaving}
             />
           )}
-          {activeTab === "Features" && <FeaturesTab />}
+          {activeTab === "Features" && (
+            <FeaturesTab
+              marketplaceEnabled={adminSettings.generalSettings.enableMarketplace ?? false}
+              onToggleMarketplace={() =>
+                adminSettings.saveGeneralSettings({
+                  enableMarketplace: !adminSettings.generalSettings.enableMarketplace,
+                })
+              }
+              isSaving={adminSettings.isSaving}
+            />
+          )}
           {activeTab === "Change History" && (
             <ChangeHistoryTab
               auditHistory={adminSettings.auditHistory}

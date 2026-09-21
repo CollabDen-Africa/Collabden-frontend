@@ -8,6 +8,7 @@ export function useAdminSubscriptions(initialParams?: { page?: number; limit?: n
   const [subscriptions, setSubscriptions] = useState<SubscriptionItem[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [backendStats, setBackendStats] = useState<{ totalInvoices: number; paid: number; pending: number; failed: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [planFilter, setPlanFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -30,6 +31,7 @@ export function useAdminSubscriptions(initialParams?: { page?: number; limit?: n
 
       setSubscriptions(res.subscriptions);
       setTotal(res.total);
+      setBackendStats(res.stats || null);
     } catch (err) {
       console.error("Error loading subscriptions:", err);
     } finally {
@@ -43,12 +45,12 @@ export function useAdminSubscriptions(initialParams?: { page?: number; limit?: n
 
   // Derived KPI Stat Metrics
   const stats = {
-    totalSubscribers: total || subscriptions.length,
-    active: subscriptions.filter((s) => s.status === "Active").length,
-    cancelled: subscriptions.filter((s) => s.status === "Cancelled").length,
-    failedPayments: subscriptions.filter((s) => s.paymentStatus === "Failed").length,
-    trialsPending: subscriptions.filter((s) => s.status === "Pending").length,
-    mrr: "₦43.2M",
+    totalSubscribers: backendStats?.totalInvoices || total,
+    active: backendStats?.paid || 0,
+    cancelled: 0,
+    failedPayments: backendStats?.failed || 0,
+    trialsPending: backendStats?.pending || 0,
+    mrr: "—",
   };
 
   return {

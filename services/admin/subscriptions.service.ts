@@ -1,5 +1,13 @@
+import axios from "axios";
 import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
+
+const ADMIN_SUBSCRIPTION_PAYMENTS_PROXY = "/api/proxy/admin/finance/subscription-payments";
+
+const adminProxyGet = async <T>(path: string, params?: Record<string, unknown>): Promise<T> => {
+  const response = await axios.get<T>(path, { params, withCredentials: true });
+  return response.data;
+};
 
 export type SubscriptionPlanTier = "Free" | "Basic" | "Pro" | "Enterprise";
 export type SubscriptionStatus = "Active" | "Paused" | "Cancelled" | "Expired" | "Pending";
@@ -108,139 +116,6 @@ export interface SubscriptionReportMetrics {
   }[];
 }
 
-// ─── Initial Data Generators (Mock Fallbacks when API returns empty) ────────
-
-export const INITIAL_SUBSCRIPTIONS: SubscriptionItem[] = [
-  {
-    id: "sub-1013",
-    subscriptionId: "SUB-1013",
-    userId: "usr-0041",
-    userName: "Amara Osei",
-    userEmail: "amara@gmail.com",
-    plan: "Pro",
-    status: "Active",
-    startDate: "2025-03-07",
-    renewalDate: "2026-03-07",
-    paymentStatus: "Paid",
-    amount: 4800,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Card **** 4011",
-  },
-  {
-    id: "sub-1018",
-    subscriptionId: "SUB-1018",
-    userId: "usr-0210",
-    userName: "Marcus Lee",
-    userEmail: "marcus@example.com",
-    plan: "Basic",
-    status: "Active",
-    startDate: "2025-01-14",
-    renewalDate: "2026-01-14",
-    paymentStatus: "Paid",
-    amount: 2400,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Card **** 6023",
-  },
-  {
-    id: "sub-1027",
-    subscriptionId: "SUB-1027",
-    userId: "usr-0054",
-    userName: "Ngozi Obi",
-    userEmail: "ngozi@example.com",
-    plan: "Enterprise",
-    status: "Active",
-    startDate: "2024-10-01",
-    renewalDate: "2025-10-01",
-    paymentStatus: "Paid",
-    amount: 18000,
-    currency: "NGN",
-    billingCycle: "Annual",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    id: "sub-1019",
-    subscriptionId: "SUB-1019",
-    userId: "usr-0112",
-    userName: "Tola Adeyemi",
-    userEmail: "tola@example.com",
-    plan: "Pro",
-    status: "Paused",
-    startDate: "2024-08-20",
-    renewalDate: "2025-08-20",
-    paymentStatus: "Failed",
-    amount: 4800,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Card **** 1109",
-  },
-  {
-    id: "sub-1014",
-    subscriptionId: "SUB-1014",
-    userId: "usr-0091",
-    userName: "Chisom Eze",
-    userEmail: "chisom@example.com",
-    plan: "Basic",
-    status: "Cancelled",
-    startDate: "2024-06-05",
-    renewalDate: "2025-06-05",
-    paymentStatus: "Paid",
-    amount: 2400,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Card **** 8812",
-  },
-  {
-    id: "sub-1006",
-    subscriptionId: "SUB-1006",
-    userId: "usr-0067",
-    userName: "Yomi Oladipo",
-    userEmail: "yomi@example.com",
-    plan: "Pro",
-    status: "Expired",
-    startDate: "2024-07-19",
-    renewalDate: "2025-07-19",
-    paymentStatus: "Paid",
-    amount: 4800,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Card **** 4490",
-  },
-  {
-    id: "sub-1002",
-    subscriptionId: "SUB-1002",
-    userId: "usr-0033",
-    userName: "Emeka Iwuchukwu",
-    userEmail: "emeka@example.com",
-    plan: "Basic",
-    status: "Pending",
-    startDate: "2025-07-15",
-    renewalDate: "2025-08-15",
-    paymentStatus: "Pending",
-    amount: 2400,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Card **** 2011",
-  },
-  {
-    id: "sub-0991",
-    subscriptionId: "SUB-0991",
-    userId: "usr-0021",
-    userName: "Kelechi Okeke",
-    userEmail: "kelechi@example.com",
-    plan: "Free",
-    status: "Active",
-    startDate: "2024-02-02",
-    renewalDate: "2026-02-02",
-    paymentStatus: "Paid",
-    amount: 0,
-    currency: "NGN",
-    billingCycle: "Monthly",
-    paymentMethod: "Free Tier",
-  },
-];
-
 export const INITIAL_PLANS: SubscriptionPlanCardData[] = [
   {
     id: "plan-free",
@@ -333,10 +208,16 @@ export const adminSubscriptionsService = {
     paymentStatus?: string;
   }): Promise<{ subscriptions: SubscriptionItem[]; total: number; stats?: any }> => {
     try {
-      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUBSCRIPTIONS.LIST, { params });
-      const body = res.data;
-      const raw = body?.data || body;
-      const items = raw?.payments || raw?.subscriptions || (Array.isArray(raw) ? raw : []);
+      const tierFilters: Record<string, string> = { Basic: "BASIC", Pro: "PRO", Enterprise: "ELITE", Free: "FREE" };
+      const paymentStatusFilters: Record<string, string> = { Paid: "PAID", Failed: "FAILED", Pending: "PENDING", Retrying: "PENDING" };
+      const raw = await adminProxyGet<any>(ADMIN_SUBSCRIPTION_PAYMENTS_PROXY, {
+        page: params?.page,
+        limit: params?.limit,
+        search: params?.search,
+        tier: params?.plan ? tierFilters[params.plan] || params.plan : undefined,
+        status: params?.paymentStatus ? paymentStatusFilters[params.paymentStatus] || params.paymentStatus : undefined,
+      });
+      const items = raw?.invoices || [];
 
       const formatted: SubscriptionItem[] = items.map((item: any) => ({
         id: item.id || item._id,
@@ -345,32 +226,31 @@ export const adminSubscriptionsService = {
         userName: item.userName || item.user?.displayName || `${item.user?.firstName || ''} ${item.user?.lastName || ''}`.trim() || item.user?.email || "Subscriber",
         userEmail: item.userEmail || item.user?.email || "n/a",
         userAvatar: item.userAvatar || item.user?.avatarUrl || "",
-        plan: (item.plan || item.tier || "Pro") as SubscriptionPlanTier,
-        status: (item.status || "Active") as SubscriptionStatus,
-        startDate: item.startDate || item.createdAt || "2025-01-01",
-        renewalDate: item.renewalDate || item.nextBillingDate || "2026-01-01",
-        paymentStatus: (item.paymentStatus || "Paid") as PaymentStatus,
-        amount: item.amount || 4800,
+        plan: ({ BASIC: "Basic", PRO: "Pro", ELITE: "Enterprise", FREE: "Free" }[item.tier] || "Basic") as SubscriptionPlanTier,
+        status: ({ ACTIVE: "Active", PAUSED: "Paused", CANCELLED: "Cancelled", EXPIRED: "Expired", PENDING: "Pending" }[item.user?.subscription?.status] || "Pending") as SubscriptionStatus,
+        startDate: item.periodStart || item.createdAt || "N/A",
+        renewalDate: item.periodEnd || "N/A",
+        paymentStatus: ({ PAID: "Paid", FAILED: "Failed", PENDING: "Pending" }[item.status] || "Pending") as PaymentStatus,
+        amount: Number(item.amount || 0),
         currency: item.currency || "NGN",
-        billingCycle: item.billingCycle || "Monthly",
-        paymentMethod: item.paymentMethod || "Card **** 4011",
+        billingCycle: item.billingCycle === "ANNUAL" ? "Annual" : "Monthly",
+        paymentMethod: item.paymentMethod || "N/A",
       }));
 
       return {
-        subscriptions: formatted.length > 0 ? formatted : INITIAL_SUBSCRIPTIONS,
-        total: raw?.total || (formatted.length > 0 ? formatted.length : INITIAL_SUBSCRIPTIONS.length),
+        subscriptions: formatted,
+        total: raw?.total || 0,
         stats: raw?.stats,
       };
     } catch (err) {
       console.error("Error fetching admin subscriptions list:", err);
-      return { subscriptions: INITIAL_SUBSCRIPTIONS, total: INITIAL_SUBSCRIPTIONS.length };
+      return { subscriptions: [], total: 0 };
     }
   },
 
   getSubscriptionDetail: async (id: string): Promise<SubscriptionDetailData | null> => {
     try {
-      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUBSCRIPTIONS.DETAIL(id));
-      const body = res.data;
+      const body = await adminProxyGet<any>(`${ADMIN_SUBSCRIPTION_PAYMENTS_PROXY}/${id}`);
       const item = body?.data || body;
       if (!item) return null;
 
@@ -420,31 +300,7 @@ export const adminSubscriptionsService = {
       };
     } catch (err) {
       console.error("Error fetching subscription detail:", err);
-      // Return default detail for fallback
-      const mockBase = INITIAL_SUBSCRIPTIONS.find((s) => s.id === id) || INITIAL_SUBSCRIPTIONS[0];
-      return {
-        ...mockBase,
-        accountType: "Individual Artist",
-        memberSince: "Mar 3, 2024",
-        emailVerified: true,
-        activeSubscriptionsCount: 1,
-        planFeatures: [
-          "Unlimited project collaborations",
-          "Marketplace priority access",
-          "Priority support",
-          "Custom page name",
-          "Advanced analytics",
-          "50GB cloud storage",
-        ],
-        billingHistory: [
-          { id: "tx-10041", date: "Mar 7, 2025", amount: 4800, method: "Card **** 4011", reference: "TXN-10041", status: "Paid" },
-          { id: "tx-10071", date: "Feb 7, 2025", amount: 4800, method: "Card **** 4011", reference: "TXN-10071", status: "Paid" },
-        ],
-        activityStream: [
-          { id: "act-1", title: "Upgraded to Pro", date: "Mar 7, 2025", type: "upgrade" },
-          { id: "act-2", title: "Renewal payment successful", date: "Feb 7, 2025", type: "renewal" },
-        ],
-      };
+      return null;
     }
   },
 
