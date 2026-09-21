@@ -11,7 +11,7 @@ export interface ProjectCardProps {
   genre: string;
   tracks: string;
   collaborators: ProjectCollaborator[];
-  progress: number;
+  progress?: number;
   updated: string;
   status?: string; 
 }
@@ -104,14 +104,18 @@ export default function ProjectCard({
         
         <div className="flex justify-between items-center w-full">
           <span className="text-foreground/60 font-medium text-[14px]">Progress</span>
-          <span className="text-foreground font-bold text-[14px]">{progress}%</span>
+          <span className="text-foreground font-bold text-[14px]">
+            {typeof progress === 'number' ? `${progress}%` : status}
+          </span>
         </div>
         
         <div className="w-full h-[7px] bg-white/20 rounded-[40px] overflow-hidden flex">
-          <div 
-            className="h-full bg-primary-blue rounded-[40px] transition-all duration-500 ease-out" 
-            style={{ width: `${progress}%` }} 
-          />
+          {typeof progress === 'number' && (
+            <div
+              className="h-full bg-primary-blue rounded-[40px] transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          )}
         </div>
 
         <div className="flex justify-between items-end w-full mt-1">

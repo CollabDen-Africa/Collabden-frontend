@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createProjectSchema, CreateProjectInput } from "@/lib/validations/project.schema";
@@ -10,7 +11,6 @@ import {
   HiOutlineLockClosed,
   HiOutlineGlobeAlt,
   HiCheck,
-  HiOutlineUserAdd,
   HiPaperAirplane
 } from "react-icons/hi";
 
@@ -19,9 +19,12 @@ import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import { PROJECT_GENRES, MOCK_COLLABORATORS } from "@/lib/mockData";
 import { useProjects } from "@/hooks/projects/useProjects";
+import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
+import { useDebounce } from "@/hooks/useDebounce";
+import projectService from "@/services/project.service";
 import { ROUTES } from "@/constants/routes";
+import { getErrorMessage } from "@/lib/error-handler";
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -51,36 +54,51 @@ export default function CreateProjectPage() {
 
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [collaboratorSearch, setCollaboratorSearch] = useState("");
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const debouncedSearch = useDebounce(collaboratorSearch, 300);
 
   const { useCreateProject } = useProjects();
+  const { useCollaborators, useMarketplaceGenres } = useCollaborator();
   const createProjectMutation = useCreateProject();
+  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCollaborators({
+    name: debouncedSearch || undefined,
+    openToCollaborate: "true",
+  });
+  const { data: genres = [], isLoading: isLoadingGenres } = useMarketplaceGenres();
 
-  const toggleCollaborator = (name: string) => {
+  const toggleCollaborator = (id: string) => {
     const current = watchedCollabs || [];
-    const next = current.includes(name)
-      ? current.filter(n => n !== name)
-      : [...current, name];
+    const next = current.includes(id)
+      ? current.filter((collaboratorId) => collaboratorId !== id)
+      : [...current, id];
     setValue("selectedCollabs", next, { shouldValidate: true });
   };
 
-  const filteredCollabs = MOCK_COLLABORATORS.filter(c =>
-    c.name.toLowerCase().includes(collaboratorSearch.toLowerCase())
-  );
-
   const onSubmit = async (data: CreateProjectInput) => {
+    setSubmissionError(null);
+    createProjectMutation.reset();
     try {
-      await createProjectMutation.mutateAsync({
+      const project = await createProjectMutation.mutateAsync({
         name: data.projectName.trim(),
         description: data.description?.trim() || undefined,
         genre: data.selectedGenre,
         startDate: data.selectedDate.toISOString(),
         visibility: data.visibility,
       });
+      await Promise.all(
+        data.selectedCollabs.map((collaboratorId) =>
+          projectService.invite(project.id, { collaboratorId })
+        )
+      );
       router.push(ROUTES.PROJECTS.SUCCESS);
     } catch (err) {
       console.error("Project creation failed:", err);
+      setSubmissionError(getErrorMessage(err));
     }
   };
+
+  const errorMessage = submissionError || (createProjectMutation.error ? getErrorMessage(createProjectMutation.error) : null);
+  const requiresProfileSetup = Boolean(errorMessage && /identity verification|legal name/i.test(errorMessage));
 
   return (
     <div className="w-full min-h-screen flex items-start justify-center pb-20 pt-4 px-4 sm:px-6 lg:px-8">
@@ -136,10 +154,11 @@ export default function CreateProjectPage() {
                 label="Genre / Category"
                 value={watchedGenre || ""}
                 onChange={(val) => setValue("selectedGenre", val, { shouldValidate: true })}
-                options={PROJECT_GENRES}
+                options={genres}
                 placeholder="Select genre"
                 error={errors.selectedGenre?.message}
                 variant="glass"
+                disabled={isLoadingGenres}
               />
 
               {/* Start Date */}
@@ -182,59 +201,54 @@ export default function CreateProjectPage() {
                   <div className="fixed inset-0 z-10" onClick={() => setIsCollabOpen(false)} />
                   <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#121A1F]/90 backdrop-blur-2xl border border-white/20 rounded-[20px] py-[4px] shadow-[0px_12px_16px_-4px_rgba(10,13,18,0.08),0px_4px_6px_-2px_rgba(10,13,18,0.03)] z-30 max-h-[320px] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex flex-col items-center">
-                      {filteredCollabs.map((collab, i) => {
-                        const isAdded = watchedCollabs.includes(collab.name);
-
-                        // Connect and Invite button logic
-                        const isConnect = i % 2 !== 0;
-                        const actionType = isConnect ? "Connect" : "Invite";
-                        const addedText = isConnect ? "Connected" : "Invited";
+                      {collaborators.map((collab) => {
+                        const isAdded = watchedCollabs.includes(collab.id);
+                        const name = collab.displayName || collab.legalName || collab.email.split("@")[0];
 
                         return (
                           <div
-                            key={i}
-                            onClick={() => toggleCollaborator(collab.name)}
+                            key={collab.id}
+                            onClick={() => toggleCollaborator(collab.id)}
                             className={`flex items-center justify-between w-[98%] h-[46px] px-[14px] py-[10px] rounded-[50px] cursor-pointer transition-colors group ${isAdded ? "bg-primary-green" : "hover:bg-primary-green"
                               }`}
                           >
                             {/* Avatar & Text */}
                             <div className="flex items-center gap-[8px]">
                               <Avatar
-                                name={collab.name}
-                                src={collab.image}
+                                name={name}
+                                src={collab.avatarUrl}
                                 className="w-[24px] h-[24px]"
                               />
                               <span className="font-sans font-bold text-[16px] leading-[19px] text-white">
-                                {collab.name}
+                                {name}
                               </span>
                             </div>
 
-                            {/* Buttons for Invite and Connect */}
+                            {/* Select an available collaborator to invite after creation. */}
                             <Button
                               type="button"
                               variant="ghost"
                               className={`w-[88px]! h-[26px]! rounded-[30px]! flex items-center justify-center gap-[4px] px-0! py-0! transition-colors ${isAdded
                                   ? "bg-white text-primary-green"
-                                  : isConnect
-                                    ? "bg-white text-primary-green shadow-sm hover:brightness-95"
-                                    : "bg-white/10 text-white hover:bg-white/20"
+                                  : "bg-white/10 text-white hover:bg-white/20"
                                 }`}
                             >
                               {isAdded ? (
                                 <HiCheck size={12} className="stroke-[2px]" />
-                              ) : isConnect ? (
-                                <HiOutlineUserAdd size={14} />
                               ) : (
                                 <HiPaperAirplane size={12} />
                               )}
                               <span className="font-sans font-medium text-[12px] leading-[24px]">
-                                {isAdded ? addedText : actionType}
+                                {isAdded ? "Selected" : "Invite"}
                               </span>
                             </Button>
                           </div>
                         );
                       })}
-                      {filteredCollabs.length === 0 && (
+                      {isLoadingCollaborators && (
+                        <div className="text-center py-4 text-white/50 text-[14px] font-sans">Loading collaborators…</div>
+                      )}
+                      {!isLoadingCollaborators && collaborators.length === 0 && (
                         <div className="text-center py-4 text-white/50 text-[14px] font-sans">
                           No collaborators found
                         </div>
@@ -280,9 +294,14 @@ export default function CreateProjectPage() {
             </div>
 
             {/* Error Message */}
-            {createProjectMutation.error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-[16px] text-sm font-medium">
-                {createProjectMutation.error instanceof Error ? createProjectMutation.error.message : "Failed to create project"}
+            {errorMessage && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-[16px] text-sm font-medium">
+                <p>{errorMessage}</p>
+                {requiresProfileSetup && (
+                  <p className="mt-2 text-red-200/90">
+                    Add your legal name in <Link href="/profile-settings" className="font-semibold underline underline-offset-2 hover:text-white">Account Settings</Link> and complete identity verification before trying again.
+                  </p>
+                )}
               </div>
             )}
 

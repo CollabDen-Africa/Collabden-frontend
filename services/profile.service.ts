@@ -2,6 +2,11 @@ import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 const profileService = {
+  /** Fetch the authenticated user's profile. */
+  getCurrentProfile: async (): Promise<any> => {
+    const response = await axiosInstance.get(API_ENDPOINTS.AUTH.PROFILE);
+    return response.data?.user || response.data?.data || response.data;
+  },
   /**
    * Update profile info.
    */
