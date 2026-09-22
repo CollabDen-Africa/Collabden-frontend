@@ -9,7 +9,7 @@ export interface SubscriptionPlan {
 export interface UserSubscription {
   id: string;
   userId: string;
-  tier: "ADVANCE" | "PRO" | "ELITE";
+  tier: "BASIC" | "ADVANCE" | "PRO" | "ELITE";
   status: "ACTIVE" | "PAST_DUE" | "CANCELED" | "UNPAID";
   billingCycle: "MONTHLY" | "ANNUAL";
   currentPeriodStart: string;

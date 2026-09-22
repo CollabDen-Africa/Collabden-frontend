@@ -23,7 +23,7 @@ export interface ProjectCollaborator {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  user: { id: string; email: string };
+  user: { id: string; email: string; avatarUrl: string; };
 }
 
 export interface ProjectListResponse {

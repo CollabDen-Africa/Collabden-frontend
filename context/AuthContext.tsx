@@ -23,6 +23,7 @@ interface User {
   legalName?: string | null;
   isAdmin?: boolean;
   role?: string;
+  avatarUrl?: string;
 }
 
 export interface AdminVerify2FAPayload {

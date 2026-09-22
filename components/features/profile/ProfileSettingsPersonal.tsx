@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import { FiSun, FiMoon, FiMonitor, FiLoader } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar";
+import VerificationPanel from "@/components/features/profile/VerificationPanel";
 import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/hooks/profile/useProfile";
 import profileService from "@/services/profile.service";
@@ -28,6 +29,7 @@ export default function ProfileSettingsContent() {
       { id: "phoneNumber", label: "Phone Number", value: profile.phoneNumber || "Not set", readonly: false },
       { id: "legalName", label: "Legal Name", value: profile.legalName || "Not set", readonly: false },
       { id: "displayName", label: "Stage / Display Name", value: profile.displayName || "Not set", readonly: false },
+      { id: "role", label: "Role", value: profile.role || "Not set", readonly: false },
       { id: "bio", label: "Bio", value: profile.bio || "Not set", readonly: false },
     ];
   }, [profile]);
@@ -70,6 +72,8 @@ export default function ProfileSettingsContent() {
       </div>
     );
   }
+
+  const isVerified = Boolean(profile?.isVerified || user?.isVerified);
 
   return (
     <div className="flex flex-col w-full flex-1 gap-8.75">
@@ -120,6 +124,9 @@ export default function ProfileSettingsContent() {
           </div>
         </div>
       </div>
+
+      {/* NEW VERIFICATION COMPONENT PLACEMENT */}
+        <VerificationPanel isVerified={isVerified} />
 
       {/* Form Fields Card */}
       <div className="w-full bg-white/5 border-[1.6px] border-white/10 rounded-[35px] flex flex-col backdrop-blur-md overflow-hidden">

@@ -18,12 +18,7 @@ export interface UserProfile {
 }
 
 export default function DashboardHeader({
-  user = {
-    firstName: "Emmanuel",
-    lastName: "O.",
-    role: "Producer",
-    avatarUrl: '/mock-profiles/small.png',
-  },
+  user,
   currentStep,
   setStep,
   onSkip,

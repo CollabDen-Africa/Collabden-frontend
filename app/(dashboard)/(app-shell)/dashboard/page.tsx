@@ -11,14 +11,6 @@ import { useTour } from '@/context/TourContext';
 import { useDashboard } from '@/hooks/dashboard/useDashboard';
 import { handleApiError } from '@/lib/error-handler';
 
-// MOCK DATA (fallback)
-import { 
-  MOCK_TOP_STATS, 
-  MOCK_ACTIVE_PROJECTS, 
-  MOCK_RECENT_ACTIVITY, 
-  MOCK_SUGGESTED_PROJECTS, 
-  MOCK_SUGGESTED_COLLABORATORS 
-} from '@/lib/mockData';
 
 export default function DashboardPage() {
   // Tour state context
@@ -33,7 +25,7 @@ export default function DashboardPage() {
 
   // Memoize transformation logic for performance and stable references
   const topStats = useMemo(() => {
-    if (!apiData?.stats?.length) return MOCK_TOP_STATS;
+    if (!apiData?.stats?.length) return [];
     return apiData.stats.map(s => ({
       title: s.title,
       count: String(s.count),
@@ -43,7 +35,7 @@ export default function DashboardPage() {
   }, [apiData?.stats]);
 
   const activeProjects = useMemo(() => {
-    if (!apiData?.activeProjects?.length) return MOCK_ACTIVE_PROJECTS.slice(0, 3);
+    if (!apiData?.activeProjects?.length) return [].slice(0, 3);
     
     // Sort by updatedAt descending and take top 3
     return [...apiData.activeProjects]
@@ -56,7 +48,7 @@ export default function DashboardPage() {
         tracks: p.description || "No description",
         collaborators: (p.collaborators || []).map(c => ({
           name: c.user?.email?.split("@")[0] || "User",
-          avatarUrl: "/mock-profiles/small.png",
+          avatarUrl: c.user?.avatarUrl,
         })),
         progress: 0,
         updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
@@ -65,18 +57,18 @@ export default function DashboardPage() {
   }, [apiData?.activeProjects]);
 
   const recentActivity = useMemo(() => {
-    if (!apiData?.recentActivity?.length) return MOCK_RECENT_ACTIVITY;
+    if (!apiData?.recentActivity?.length) return [];
     return apiData.recentActivity.map((a, i) => ({
       id: Number(a.id) || i + 1,
       user: a.user,
       action: a.action,
       time: a.time,
-      avatarUrl: a.avatarUrl || "/avatar.svg",
+      avatarUrl: a.avatarUrl,
     }));
   }, [apiData?.recentActivity]);
 
   const suggestedProjects = useMemo(() => {
-    if (!apiData?.suggestedProjects?.length) return MOCK_SUGGESTED_PROJECTS;
+    if (!apiData?.suggestedProjects?.length) return [];
     return apiData.suggestedProjects.map((p, i) => ({
       id: i + 1,
       title: p.name,
@@ -87,7 +79,7 @@ export default function DashboardPage() {
   }, [apiData?.suggestedProjects]);
 
   const suggestedCollaborators = useMemo(() => {
-    if (!apiData?.suggestedCollaborators?.length) return MOCK_SUGGESTED_COLLABORATORS;
+    if (!apiData?.suggestedCollaborators?.length) return [];
     return apiData.suggestedCollaborators.map((c, i) => ({
       id: i + 1,
       userId: c.userId || c.user?.id,
@@ -95,24 +87,24 @@ export default function DashboardPage() {
       role: c.role || "Collaborator",
       members: 0,
       rating: "5.0",
-      avatarUrl: "/mock-profiles/small.png",
+      avatarUrl: c.user?.avatarUrl,
     }));
   }, [apiData?.suggestedCollaborators]);
 
   return (
-    <div className="w-full flex flex-col gap-[60px] animate-in fade-in duration-500 pt-2">
+    <div className="w-full flex flex-col gap-15 animate-in fade-in duration-500 pt-2">
       
       {/* Loading indicator */}
       {isLoading && (
-        <div className="fixed top-0 left-0 w-full h-[3px] z-100">
+        <div className="fixed top-0 left-0 w-full h-0.75 z-100">
           <div className="h-full bg-primary-green animate-pulse rounded-full" style={{ width: '60%' }} />
         </div>
       )}
 
       {/* --- TOP ROW --- */}
-      <div className="w-full flex flex-col xl:flex-row gap-[40px] 2xl:gap-[70px]">
+      <div className="w-full flex flex-col xl:flex-row gap-10 2xl:gap-17.5">
         {/* Left Column */}
-        <div className="flex-1 w-full flex flex-col gap-[50px] xl:max-w-[711px]">
+        <div className="flex-1 w-full flex flex-col gap-12.5 xl:max-w-177.75">
           <TopStatsPanel stats={topStats} /> 
 
           {/* STEP 6 TOOLTIP: Final */}
@@ -144,21 +136,21 @@ export default function DashboardPage() {
         </div>
         
         {/* Right Column */}
-        <div className="w-full xl:w-[413px] flex flex-col shrink-0">
+        <div className="w-full xl:w-103.25 flex flex-col shrink-0">
           <RecentCollaboratorActivityPanel activities={recentActivity} />
         </div>
       </div>
 
       {/* --- BOTTOM ROW --- */}
-      <div className="w-full flex flex-col xl:flex-row gap-[10px] 2xl:gap-[10px] items-stretch">
-        <div className="flex-1 w-full flex flex-col xl:max-w-[700px]">
-          <h3 className="text-foreground text-[23px] font-bold font-sans transform rotate-1 mb-[16px] origin-left">
+      <div className="w-full flex flex-col xl:flex-row gap-2.5 items-stretch">
+        <div className="flex-1 w-full flex flex-col xl:max-w-175">
+          <h3 className="text-foreground text-[23px] font-bold font-sans transform rotate-1 mb-4 origin-left">
             Suggested For You
           </h3>
           <SuggestedProjectsPanel projects={suggestedProjects} />
         </div>
         
-        <div className="w-full xl:w-[500px] flex flex-col shrink-0">
+        <div className="w-full xl:w-125 flex flex-col shrink-0">
           <SuggestedCollaboratorsPanel collaborators={suggestedCollaborators} />
         </div>
       </div>
