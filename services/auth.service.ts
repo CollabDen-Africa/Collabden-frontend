@@ -47,6 +47,11 @@ const authService = {
    * Login a user
    */
   login: async (data: LoginPayload) => {
+    if (typeof window !== "undefined") {
+      const response = await axios.post("/api/auth/login", data);
+      return response.data;
+    }
+
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.LOGIN, data);
     return response.data;
   },
