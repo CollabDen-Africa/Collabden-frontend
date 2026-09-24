@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,8 @@ import {
   HiOutlineLockClosed,
   HiOutlineGlobeAlt,
   HiCheck,
-  HiPaperAirplane
+  HiPaperAirplane,
+  HiX
 } from "react-icons/hi";
 
 import DatePicker from "@/components/ui/DatePicker";
@@ -21,8 +22,8 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
+import { useProfile } from "@/hooks/profile/useProfile";
 import { useDebounce } from "@/hooks/useDebounce";
-import projectService from "@/services/project.service";
 import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
 
@@ -55,22 +56,66 @@ export default function CreateProjectPage() {
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [collaboratorSearch, setCollaboratorSearch] = useState("");
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [selectedCollabMap, setSelectedCollabMap] = useState<
+    Record<string, { id: string; name: string; avatarUrl?: string }>
+  >({});
   const debouncedSearch = useDebounce(collaboratorSearch, 300);
 
   const { useCreateProject } = useProjects();
   const { useCollaborators, useMarketplaceGenres } = useCollaborator();
+  const { useCurrentProfile } = useProfile();
+  const { data: currentProfile } = useCurrentProfile();
+  const currentUserId = currentProfile?.id;
+
   const createProjectMutation = useCreateProject();
-  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCollaborators({
+  const {
+    data: rawCollaborators = [],
+    isLoading: isLoadingCollaborators,
+    isError: isCollaboratorsError,
+    error: collaboratorsError,
+  } = useCollaborators({
     name: debouncedSearch || undefined,
-    openToCollaborate: "true",
+    connectedOnly: true,
   });
   const { data: genres = [], isLoading: isLoadingGenres } = useMarketplaceGenres();
 
+  const collaborators = useMemo(() => {
+    if (!rawCollaborators) return [];
+    return rawCollaborators.filter(
+      (c) => c.id !== currentUserId && (c as any).userId !== currentUserId
+    );
+  }, [rawCollaborators, currentUserId]);
+
+  // Cache fetched collaborator details in map so selected pills display even if search changes
+  useEffect(() => {
+    if (collaborators.length > 0) {
+      setSelectedCollabMap((prev) => {
+        const updated = { ...prev };
+        let changed = false;
+        collaborators.forEach((c) => {
+          if (!updated[c.id]) {
+            const name = c.displayName || c.legalName || c.email.split("@")[0];
+            updated[c.id] = { id: c.id, name, avatarUrl: c.avatarUrl };
+            changed = true;
+          }
+        });
+        return changed ? updated : prev;
+      });
+    }
+  }, [collaborators]);
+
   const toggleCollaborator = (id: string) => {
     const current = watchedCollabs || [];
-    const next = current.includes(id)
+    const isAdded = current.includes(id);
+    const next = isAdded
       ? current.filter((collaboratorId) => collaboratorId !== id)
       : [...current, id];
+    setValue("selectedCollabs", next, { shouldValidate: true });
+  };
+
+  const removeCollaborator = (id: string) => {
+    const current = watchedCollabs || [];
+    const next = current.filter((collaboratorId) => collaboratorId !== id);
     setValue("selectedCollabs", next, { shouldValidate: true });
   };
 
@@ -78,18 +123,14 @@ export default function CreateProjectPage() {
     setSubmissionError(null);
     createProjectMutation.reset();
     try {
-      const project = await createProjectMutation.mutateAsync({
+      await createProjectMutation.mutateAsync({
         name: data.projectName.trim(),
         description: data.description?.trim() || undefined,
         genre: data.selectedGenre,
         startDate: data.selectedDate.toISOString(),
         visibility: data.visibility,
+        collaboratorIds: data.selectedCollabs,
       });
-      await Promise.all(
-        data.selectedCollabs.map((collaboratorId) =>
-          projectService.invite(project.id, { collaboratorId })
-        )
-      );
       router.push(ROUTES.PROJECTS.SUCCESS);
     } catch (err) {
       console.error("Project creation failed:", err);
@@ -180,9 +221,46 @@ export default function CreateProjectPage() {
 
             {/* Collaborators */}
             <div className="flex flex-col gap-4 relative">
-              <label className="font-sans font-semibold text-[18px] text-white">
-                Collaborators
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="font-sans font-semibold text-[18px] text-white">
+                  Collaborators
+                </label>
+                {watchedCollabs && watchedCollabs.length > 0 && (
+                  <span className="font-sans text-[13px] text-primary-green font-medium">
+                    {watchedCollabs.length} selected
+                  </span>
+                )}
+              </div>
+
+              {/* Selected Collaborators Preview List */}
+              {watchedCollabs && watchedCollabs.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/15 rounded-[20px] backdrop-blur-md animate-in fade-in duration-200">
+                  {watchedCollabs.map((id) => {
+                    const details = selectedCollabMap[id];
+                    const displayName = details?.name || "Collaborator";
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center gap-2 bg-primary-green/20 border border-primary-green/40 hover:border-primary-green/60 rounded-full px-3 py-1.5 transition-all duration-200"
+                      >
+                        <Avatar name={displayName} src={details?.avatarUrl} className="w-[20px] h-[20px]" />
+                        <span className="font-sans font-semibold text-[13px] text-white">
+                          {displayName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeCollaborator(id)}
+                          className="text-white/60 hover:text-white hover:bg-white/20 rounded-full p-0.5 transition-colors ml-0.5"
+                          aria-label={`Remove ${displayName}`}
+                        >
+                          <HiX size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className={`w-full h-[50px] bg-white/10 border rounded-full px-6 flex items-center gap-3 relative z-20 transition-all duration-300 ${isCollabOpen ? "border-primary-green" : "border-white/20 hover:border-primary-green"
                 }`}>
                 <HiOutlineSearch className="text-white/50" size={20} />
@@ -248,7 +326,12 @@ export default function CreateProjectPage() {
                       {isLoadingCollaborators && (
                         <div className="text-center py-4 text-white/50 text-[14px] font-sans">Loading collaborators…</div>
                       )}
-                      {!isLoadingCollaborators && collaborators.length === 0 && (
+                      {!isLoadingCollaborators && isCollaboratorsError && (
+                        <div className="text-center py-4 text-red-300 text-[14px] font-sans">
+                          Unable to load collaborators: {getErrorMessage(collaboratorsError)}
+                        </div>
+                      )}
+                      {!isLoadingCollaborators && !isCollaboratorsError && collaborators.length === 0 && (
                         <div className="text-center py-4 text-white/50 text-[14px] font-sans">
                           No collaborators found
                         </div>

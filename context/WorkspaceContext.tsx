@@ -5,6 +5,7 @@ import { Project } from "@/types/api.types";
 
 interface WorkspaceContextType {
   activeProject: Project | null;
+  projectDetails: Project | null;
   setActiveProjectByName: (name: string) => void;
   isLoading: boolean;
 }
@@ -14,12 +15,14 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefin
 export function WorkspaceProvider({
   children,
   projects,
+  projectDetails,
   activeProjectName,
   onSelectProject,
   isLoading,
 }: {
   children: ReactNode;
   projects: Project[];
+  projectDetails?: Project | null;
   activeProjectName: string;
   onSelectProject: (name: string) => void;
   isLoading: boolean;
@@ -31,6 +34,7 @@ export function WorkspaceProvider({
     <WorkspaceContext.Provider
       value={{
         activeProject,
+        projectDetails: projectDetails || null,
         setActiveProjectByName: onSelectProject,
         isLoading,
       }}

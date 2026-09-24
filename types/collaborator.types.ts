@@ -5,6 +5,7 @@ export interface MarketplaceCollaborator {
   legalName: string | null;
   avatarUrl: string | null;
   bio: string | null;
+  experience?: string | null;
   skills: string[];
   genres: string[];
   openToCollaborate: boolean;

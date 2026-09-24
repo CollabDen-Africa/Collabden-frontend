@@ -3,45 +3,15 @@
 import React from "react";
 // Ensure this path correctly points to your CollaboratorCard component
 import CollaboratorCard from "@/components/features/marketplace/collab-search/CollaboratorCard"; 
-
-const CREATORS = [
-  {
-    name: "Yemi Sounds",
-    role: "Music Producer · Lagos, NG · 8y exp",
-    bio: "Award-winning producer with 8 years crafting chart-topping hits across Afrobeats, R&B, and Hip-Hop.",
-    genres: ["Afrobeats", "R&B", "Hip-Hop"],
-    projects: 25,
-    rating: 4.5,
-    endorsements: 88,
-    image: "/mock-profiles/David.png",
-  },
-  {
-    name: "Tim Martin",
-    role: "Vocalist & Topliner · London, UK · 6y exp",
-    bio: "Soulful vocal delivery and catchy hook arrangements designed for commercial radio success.",
-    genres: ["R&B Soul", "Pop", "Afrobeats"],
-    projects: 19,
-    rating: 4.9,
-    endorsements: 64,
-    image: "/mock-profiles/Tayo.png",
-  },
-  {
-    name: "Andre Collins",
-    role: "Mixing & Mastering Engineer · Atlanta, US · 10y exp",
-    bio: "Precision mixing and spatial audio specialist ensuring your mix translates perfectly on all sound systems.",
-    genres: ["Hip-Hop", "Trap", "Pop"],
-    projects: 42,
-    rating: 4.8,
-    endorsements: 112,
-    image: "/mock-profiles/small2.png",
-  },
-];
+import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
 
 interface FeaturedCreatorsProps {
   onSearch: () => void;
 }
 
 export default function FeaturedCreators({ onSearch }: FeaturedCreatorsProps) {
+  const { useCollaborators } = useCollaborator();
+  const { data: creators = [] } = useCollaborators({ openToCollaborate: "true" });
   return (
     <section className="flex flex-col w-full gap-8 my-10">
       {/* Header */}
@@ -56,14 +26,14 @@ export default function FeaturedCreators({ onSearch }: FeaturedCreatorsProps) {
           onClick={onSearch}
           className="px-5 py-1.5 bg-white/5 border border-white/30 rounded-full text-white font-sans text-[15px] hover:bg-white/10 transition-colors shrink-0"
         >
-          View all 2400+ creators
+          View all creators
         </button>
       </div>
 
       {/* Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 w-full">
-        {CREATORS.map((creator, idx) => (
-          <CollaboratorCard key={idx} {...creator} />
+        {creators.slice(0, 3).map((creator) => (
+          <CollaboratorCard key={creator.id} name={creator.displayName || creator.legalName || creator.email.split("@")[0]} role={creator.experience || "Collaborator"} bio={creator.bio || "No bio provided."} genres={creator.genres || []} image={creator.avatarUrl || undefined} openToCollaborate={creator.openToCollaborate} />
         ))}
       </div>
     </section>
