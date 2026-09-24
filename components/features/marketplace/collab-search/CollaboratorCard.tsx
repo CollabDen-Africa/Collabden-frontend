@@ -3,20 +3,18 @@
 import React from "react";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
-import { HiStar, HiHeart, HiBadgeCheck } from "react-icons/hi";
+import { HiHeart, HiBadgeCheck } from "react-icons/hi";
 
 interface CollaboratorCardProps {
   name: string;
   role: string;
   bio: string;
   genres: string[];
-  projects: number;
-  rating: number;
-  endorsements: number;
-  image: string;
+  image?: string;
+  openToCollaborate?: boolean;
 }
 
-export default function CollaboratorCard({ name, role, bio, genres, projects, rating, endorsements, image }: CollaboratorCardProps) {
+export default function CollaboratorCard({ name, role, bio, genres, image, openToCollaborate }: CollaboratorCardProps) {
   return (
     <div className="relative w-full max-w-90.5 min-h-110.25 bg-black/15 border border-border-muted/15 rounded-[47px] flex flex-col mx-auto overflow-hidden">
       
@@ -26,7 +24,7 @@ export default function CollaboratorCard({ name, role, bio, genres, projects, ra
         {/* Status Pill */}
         <div className="absolute top-7 left-6.5 flex items-center justify-center px-2 py-1.25 border-[0.6px] border-primary-green rounded-full">
           <span className="font-sans font-medium text-[9px] sm:text-[9.4px] leading-none text-primary-green">
-            Open to collaborate
+            {openToCollaborate ? "Open to collaborate" : "Not currently available"}
           </span>
         </div>
 
@@ -75,32 +73,7 @@ export default function CollaboratorCard({ name, role, bio, genres, projects, ra
           </div>
 
           {/* Stats Row */}
-          <div className="w-full flex items-center justify-between z-20 px-5.5 mt-4 mb-9.5">
-            <div className="flex items-center gap-1.25 px-auto">
-            <span className="font-sans font-bold text-[11px] sm:text-[12.2px] leading-none text-white whitespace-nowrap">
-                {projects}
-                <span className="ml-0.5 font-normal">
-                  Projects
-                </span>
-            </span>
-            
-            <span className="w-0.75 h-0.75 bg-text-muted rounded-full shrink-0" />
-            
-            <div className="flex items-center gap-[3.3px]">
-              <HiStar size={14} className="text-accent-yellow" />
-              <span className="font-sans font-bold text-[11px] sm:text-[12.2px] leading-none text-white">
-                {rating}
-              </span>
-            </div>
-          </div>
-            
-            <span className="font-sans font-bold text-[11px] sm:text-[12.2px] leading-none text-white whitespace-nowrap">
-              {endorsements}
-              <span className="ml-0.5 font-normal">
-                Endorsements
-              </span>
-            </span>
-          </div>
+          <div className="w-full px-5.5 mt-4 mb-9.5 text-center text-[11px] text-white/60">Marketplace profile</div>
 
           {/* Action Buttons Row */}
           <div className="w-full flex items-center justify-center gap-2.75 z-20 px-4">

@@ -4,35 +4,53 @@ import React from "react";
 import Link from "next/link";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 
+import { Project } from "@/types/api.types";
+
 interface WorkspaceSidebarProps {
   projects: string[];
   activeProject: string;
+  activeProjectObj?: Project | null;
   onSelectProject: (project: string) => void;
 }
 
-export default function WorkspaceSidebar({ projects, activeProject, onSelectProject }: WorkspaceSidebarProps) {
+export default function WorkspaceSidebar({
+  projects,
+  activeProject,
+  activeProjectObj,
+  onSelectProject,
+}: WorkspaceSidebarProps) {
+  const projectName = activeProjectObj?.name || activeProject || "Active Project";
+  const genre = activeProjectObj?.genre || "";
+  const formattedDate = activeProjectObj?.startDate
+    ? `Started ${new Date(activeProjectObj.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+    : "";
+
   return (
     <aside className="w-[222px] min-h-[788px] bg-black/20 rounded-[30px] shrink-0 overflow-hidden hidden md:block">
       
       {/* Back to Dashboard Link */}
-            <div className="p-4 border-b border-white/5">
-              <Link 
-                href="/dashboard"
-                className="flex items-center gap-2 text-white/60 hover:text-white transition-colors font-sans font-medium text-[13px] px-2 py-1 rounded-md hover:bg-white/5"
-              >
-                <HiOutlineArrowLeft size={14} />
-                Back to Dashboard
-              </Link>
-            </div>
+      <div className="p-4 border-b border-white/5">
+        <Link 
+          href="/dashboard"
+          className="flex items-center gap-2 text-white/60 hover:text-white transition-colors font-sans font-medium text-[13px] px-2 py-1 rounded-md hover:bg-white/5"
+        >
+          <HiOutlineArrowLeft size={14} />
+          Back to Dashboard
+        </Link>
+      </div>
       
       {/* Active Project Header Info */}
       <div className="flex flex-col gap-1 p-6 pb-4">
-        <h3 className="font-semibold text-[18px] text-white">Urban Beats Vol.2</h3>
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-[10px] text-white/60">Hip Pop</span>
-          <div className="w-1 h-1 bg-white/60 rounded-full" />
-          <span className="font-medium text-[10px] text-white/60">Started Mar 1st, 2026</span>
-        </div>
+        <h3 className="font-semibold text-[18px] text-white truncate" title={projectName}>
+          {projectName}
+        </h3>
+        {(genre || formattedDate) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {genre && <span className="font-medium text-[10px] text-white/60">{genre}</span>}
+            {genre && formattedDate && <div className="w-1 h-1 bg-white/60 rounded-full" />}
+            {formattedDate && <span className="font-medium text-[10px] text-white/60">{formattedDate}</span>}
+          </div>
+        )}
       </div>
 
       {/* Project List */}

@@ -1,3 +1,4 @@
+import axios from "axios";
 import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
@@ -98,18 +99,32 @@ const authService = {
    * Logout user / admin
    */
   logout: async () => {
-    try {
-      const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.ME.replace('/me', '/logout'));
+    if (typeof window !== "undefined") {
+      const response = await axios.post("/api/auth/logout");
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("collabden_admin_logged_in");
       return response.data;
-    } catch {
-      return { success: true };
     }
+
+    return { success: true };
   },
 
   /**
    * Get current user profile
    */
   getProfile: async () => {
+    if (typeof window !== "undefined") {
+      try {
+        const response = await axios.get("/api/auth/profile");
+        localStorage.removeItem("auth_token");
+        return response.data;
+      } catch (error) {
+        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+          throw error;
+        }
+      }
+    }
+
     const response = await axiosInstance.get(API_ENDPOINTS.AUTH.PROFILE);
     return response.data;
   },
@@ -171,9 +186,20 @@ const authService = {
    * Update user onboarding status
    */
   updateOnboarding: async (data: { hasCompletedOnboarding: boolean }) => {
-    const response = await axiosInstance.patch(API_ENDPOINTS.AUTH.ONBOARDING, {
-      completed: data.hasCompletedOnboarding
-    });
+    const payload = { completed: data.hasCompletedOnboarding };
+
+    if (typeof window !== "undefined") {
+      try {
+        const response = await axios.patch("/api/proxy/user/onboarding", payload);
+        return response.data;
+      } catch (error) {
+        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+          throw error;
+        }
+      }
+    }
+
+    const response = await axiosInstance.patch(API_ENDPOINTS.AUTH.ONBOARDING, payload);
     return response.data;
   },
 };

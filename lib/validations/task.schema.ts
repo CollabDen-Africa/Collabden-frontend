@@ -9,16 +9,7 @@ export const createTaskSchema = z.object({
     .string()
     .max(2000, "Description cannot exceed 2000 characters")
     .optional(),
-  priority: z.enum(["High", "Medium", "Low"]),
   selectedDate: z.date().optional(),
-  assignees: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        avatar: z.string(),
-      })
-    ),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

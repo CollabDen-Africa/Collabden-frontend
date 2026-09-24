@@ -75,18 +75,44 @@ export default function DashboardPage() {
     return [...(apiData?.activeProjects ?? [])]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
       .slice(0, 3)
-      .map((p) => ({
-        id: p.id,
-        title: p.name,
-        genre: p.genre || "Unknown",
-        tracks: p.description || "No description",
-        collaborators: (p.collaborators || []).map(c => ({
-          name: c.user?.email?.split("@")[0] || "User",
-        })),
-        progress: undefined,
-        updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
-        status: (p.status || "ACTIVE").charAt(0) + (p.status || "ACTIVE").slice(1).toLowerCase(),
-      }));
+      .map((p) => {
+        const collabsMap = new Map<string, { name: string; avatarUrl?: string }>();
+        if (p.owner) {
+          const ownerName =
+            p.owner.displayName ||
+            p.owner.legalName ||
+            p.owner.email?.split("@")[0] ||
+            "Owner";
+          collabsMap.set(p.owner.id, {
+            name: ownerName,
+            avatarUrl: p.owner.avatarUrl || undefined,
+          });
+        }
+        (p.collaborators || []).forEach((c) => {
+          if (c.user) {
+            const name =
+              c.user.displayName ||
+              c.user.legalName ||
+              c.user.email?.split("@")[0] ||
+              "Collaborator";
+            collabsMap.set(c.user.id, {
+              name,
+              avatarUrl: c.user.avatarUrl || undefined,
+            });
+          }
+        });
+
+        return {
+          id: p.id,
+          title: p.name,
+          genre: p.genre || "Unknown",
+          tracks: p.description || "No description",
+          collaborators: Array.from(collabsMap.values()),
+          progress: undefined,
+          updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
+          status: (p.status || "ACTIVE").charAt(0) + (p.status || "ACTIVE").slice(1).toLowerCase(),
+        };
+      });
   }, [apiData?.activeProjects]);
 
   const recentActivity = useMemo(() => {

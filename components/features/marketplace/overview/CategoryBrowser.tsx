@@ -2,45 +2,16 @@
 
 import React from "react";
 import { HiArrowUp } from "react-icons/hi";
-
-const CATEGORIES = [
-  {
-    title: "Producers",
-    count: "860+ Creators",
-    desc: "Beats, full production & sound design",
-    image: "/mock-profiles/David.png",
-  },
-  {
-    title: "Vocalists",
-    count: "640+ Creators",
-    desc: "Leads, stacks, hooks & ad-libs",
-    image: "/mock-profiles/Tayo.png",
-  },
-  {
-    title: "Songwriters",
-    count: "520+ Creators",
-    desc: "Toplines, lyrics & melody doctors",
-    image: "/mock-profiles/small2.png",
-  },
-  {
-    title: "Engineers",
-    count: "380+ Creators",
-    desc: "Mixing, mastering & spatial audio",
-    image: "/mock-profiles/Sam.png",
-  },
-  {
-    title: "Instrumentalists",
-    count: "380+ Creators",
-    desc: "Live instrumentation & sessions",
-    image: "/mock-profiles/small3.png",
-  },
-];
+import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
 
 interface CategoryBrowserProps {
   onCategoryClick?: (categoryTitle: string) => void;
 }
 
 export default function CategoryBrowser({ onCategoryClick }: CategoryBrowserProps) {
+  const { useCollaborators } = useCollaborator();
+  const { data: collaborators = [] } = useCollaborators({ openToCollaborate: "true" });
+  const categories = Object.entries(collaborators.flatMap((creator) => creator.skills || []).reduce<Record<string, number>>((counts, skill) => ({ ...counts, [skill]: (counts[skill] || 0) + 1 }), {})).slice(0, 5);
   return (
     <section className="flex flex-col w-full gap-8 my-10">
       {/* Header */}
@@ -57,12 +28,11 @@ export default function CategoryBrowser({ onCategoryClick }: CategoryBrowserProp
 
       {/* Grid of 5 Craft Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 w-full">
-        {CATEGORIES.map((cat, idx) => (
+        {categories.map(([title, count]) => (
           <div
-            key={idx}
-            onClick={() => onCategoryClick && onCategoryClick(cat.title)}
-            className="relative h-66.75 w-full rounded-[30px] overflow-hidden flex flex-col justify-end p-6 bg-cover bg-center border border-white/10 group cursor-pointer hover:border-primary-green transition-all shadow-lg"
-            style={{ backgroundImage: `url(${cat.image})` }}
+            key={title}
+            onClick={() => onCategoryClick && onCategoryClick(title)}
+            className="relative h-66.75 w-full rounded-[30px] overflow-hidden flex flex-col justify-end p-6 bg-black/30 border border-white/10 group cursor-pointer hover:border-primary-green transition-all shadow-lg"
           >
             {/* Dark Overlay Gradient */}
             <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent group-hover:via-black/50 transition-colors" />
@@ -75,13 +45,13 @@ export default function CategoryBrowser({ onCategoryClick }: CategoryBrowserProp
             {/* Content Details */}
             <div className="relative z-10 flex flex-col gap-1">
               <span className="font-sans font-bold text-[10px] text-primary-green uppercase tracking-wider">
-                {cat.count}
+                {count} creator{count === 1 ? "" : "s"}
               </span>
               <h3 className="font-sans font-extrabold text-[20px] leading-5.75 text-white drop-shadow-md">
-                {cat.title}
+                {title}
               </h3>
               <p className="font-sans font-medium text-[10px] text-text-muted leading-tight">
-                {cat.desc}
+                Browse collaborators with this skill
               </p>
             </div>
           </div>

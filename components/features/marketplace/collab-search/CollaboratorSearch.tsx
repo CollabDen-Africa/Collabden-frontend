@@ -4,49 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import DirectoryFilters from "./DirectoryFilters";
 import CollaboratorCard from "./CollaboratorCard";
 import { FiSearch, FiChevronDown, FiFilter } from "react-icons/fi";
-
-// --- Mock Data for Filtering ---
-const MOCK_DATA = [
-  {
-    name: "Yemi Sounds",
-    role: "Music Producer · Lagos, NG · 8y exp",
-    categoryRoles: ["Producers"],
-    bio: "Award-winning producer with 8 years crafting chart-topping hits across Afrobeats, R&B, and Hip-Hop. Known for rhythmic versatility.",
-    genres: ["Afrobeats", "R&B", "Hip-Hop"],
-    projects: 25,
-    rating: 4.5,
-    endorsements: 88,
-    image: "/mock-profiles/David.png",
-    availability: ["Open to collaborate"],
-    verified: true
-  },
-  {
-    name: "Tim Martin",
-    role: "Vocalist & Topliner · London, UK · 6y exp",
-    categoryRoles: ["Vocalists", "Songwriters"],
-    bio: "Soulful vocal delivery and catchy hook arrangements designed for commercial radio success.",
-    genres: ["R&B Soul", "Pop", "Afrobeats"],
-    projects: 19,
-    rating: 4.9,
-    endorsements: 64,
-    image: "/mock-profiles/Tayo.png",
-    availability: ["Open to collaborate", "Recently active"],
-    verified: false
-  },
-  {
-    name: "Andre Collins",
-    role: "Mixing Engineer · Atlanta, US · 10y exp",
-    categoryRoles: ["Engineers", "Mix & Master"],
-    bio: "Precision mixing and spatial audio specialist ensuring your mix translates perfectly on all sound systems.",
-    genres: ["Hip-Hop", "Trap", "Pop"],
-    projects: 42,
-    rating: 4.8,
-    endorsements: 112,
-    image: "/mock-profiles/small2.png",
-    availability: ["Open to collaborate"],
-    verified: true
-  }
-];
+import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
 
 const ROLE_OPTIONS = ["All Genres", "Producers", "Engineers", "Vocalists", "Instrumentalists", "Songwriters", "Mix & Master"];
 const SORT_OPTIONS = ["Most relevant", "Highest Rated", "Most Projects", "Most Endorsed"];
@@ -70,6 +28,13 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [sortBy, setSortBy] = useState("Most relevant");
+  const { useCollaborators } = useCollaborator();
+  const requestedRole = activeFilters.roles.find((role) => role !== "All Genres");
+  const { data: collaborators = [], isLoading, isError } = useCollaborators({
+    name: searchQuery || undefined,
+    role: requestedRole,
+    openToCollaborate: activeFilters.availability.includes("Open to collaborate") ? "true" : "all",
+  });
 
   // Refs for closing dropdowns on outside click
   const roleRef = useRef<HTMLDivElement>(null);
@@ -123,46 +88,7 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
   };
 
   // Filters the Data
-  const filteredData = MOCK_DATA.filter((creator) => {
-    const query = searchQuery.toLowerCase();
-    const matchesSearch = 
-      !query ||
-      creator.name.toLowerCase().includes(query) ||
-      creator.role.toLowerCase().includes(query) ||
-      creator.genres.some((g) => g.toLowerCase().includes(query));
-    if (!matchesSearch) return false;
-
-    if (activeFilters.availability.length > 0) {
-      const passesAvailability = activeFilters.availability.every(req => {
-        if (req === "Verified only") return creator.verified;
-        return creator.availability.includes(req);
-      });
-      if (!passesAvailability) return false;
-    }
-
-    if (activeFilters.roles.length > 0 && !activeFilters.roles.includes("All Genres")) {
-      const matchesRole = activeFilters.roles.some(role => creator.categoryRoles.includes(role));
-      if (!matchesRole) return false;
-    }
-
-    if (activeFilters.rating.length > 0 && !activeFilters.rating.includes("All Rating")) {
-      const numericRatings = activeFilters.rating.map(r => parseFloat(r));
-      const minRequiredRating = Math.min(...numericRatings);
-      if (creator.rating < minRequiredRating) return false;
-    }
-    return true;
-  });
-
-  // Sorts the Data based on Dropdown Selection
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (sortBy === "Highest Rated") return b.rating - a.rating;
-    if (sortBy === "Most Projects") return b.projects - a.projects;
-    if (sortBy === "Most Endorsed") return b.endorsements - a.endorsements;
-    return 0; // Default "Most relevant" relies on standard array order
-  });
-
-  // Duplicates to fill grid
-  const displayData = [...sortedData, ...sortedData, ...sortedData, ...sortedData];
+  const displayData = collaborators;
 
   // Determines current active role label for top button
   const currentRoleLabel = activeFilters.roles.length === 1 && !activeFilters.roles.includes("All Genres") 
@@ -288,7 +214,7 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
             </div>
 
             {/* Cards Grid */}
-            {displayData.length === 0 ? (
+            {isLoading ? <div className="w-full py-20 text-center text-white/60">Loading collaborators…</div> : isError ? <div className="w-full py-20 text-center text-red-300">Unable to load collaborators.</div> : displayData.length === 0 ? (
               <div className="w-full py-20 text-center bg-black/30 backdrop-blur-md rounded-[30px] border border-white/5">
                 <p className="text-white/60">No collaborators found matching your exact filters.</p>
                 <button 
@@ -303,8 +229,8 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-6 w-full">
-                {displayData.map((creator, i) => (
-                  <CollaboratorCard key={`${creator.name}-${i}`} {...creator} />
+                {displayData.map((creator) => (
+                  <CollaboratorCard key={creator.id} name={creator.displayName || creator.legalName || creator.email.split("@")[0]} role={creator.experience || "Collaborator"} bio={creator.bio || "No bio provided."} genres={creator.genres || []} image={creator.avatarUrl || undefined} openToCollaborate={creator.openToCollaborate} />
                 ))}
               </div>
             )}
