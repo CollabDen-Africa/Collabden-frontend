@@ -67,7 +67,7 @@ export default function MarketplaceHero({ onSearch }: MarketplaceHeroProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search by name, skill, role, genre or keyword..."
+              placeholder="Search by collaborator name..."
               className="flex-1 ml-3 bg-transparent border-none outline-none font-sans text-[16px] text-white placeholder:text-white/80"
             />
             <button

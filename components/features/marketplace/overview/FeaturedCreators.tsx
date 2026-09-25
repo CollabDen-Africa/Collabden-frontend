@@ -33,7 +33,7 @@ export default function FeaturedCreators({ onSearch }: FeaturedCreatorsProps) {
       {/* Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 w-full">
         {creators.slice(0, 3).map((creator) => (
-          <CollaboratorCard key={creator.id} name={creator.displayName || creator.legalName || creator.email.split("@")[0]} role={creator.experience || "Collaborator"} bio={creator.bio || "No bio provided."} genres={creator.genres || []} image={creator.avatarUrl || undefined} openToCollaborate={creator.openToCollaborate} />
+          <CollaboratorCard key={creator.id} userId={creator.id} name={creator.displayName || creator.legalName || creator.email.split("@")[0]} role={creator.experience || "Collaborator"} bio={creator.bio || "No bio provided."} genres={creator.genres || []} image={creator.avatarUrl || undefined} openToCollaborate={creator.openToCollaborate} isVerified={Boolean(creator.identityVerified || creator.isVerified)} />
         ))}
       </div>
     </section>

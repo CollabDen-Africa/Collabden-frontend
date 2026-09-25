@@ -24,14 +24,8 @@ const collaboratorService = {
       : API_ENDPOINTS.COLLABORATORS.LIST;
 
     if (typeof window !== "undefined") {
-      try {
-        const response = await axios.get(proxyUrl, { params: queryParams });
-        return response.data?.data || response.data || [];
-      } catch (error) {
-        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
-          throw error;
-        }
-      }
+      const response = await axios.get(proxyUrl, { params: queryParams });
+      return response.data?.data || response.data || [];
     }
 
     const response = await axiosInstance.get(directUrl, { params: queryParams });

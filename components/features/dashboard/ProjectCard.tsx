@@ -1,5 +1,6 @@
 import React from 'react';
 import Avatar from '@/components/ui/Avatar';
+import Truncate from '@/components/ui/Truncate';
 
 export interface ProjectCollaborator {
   name: string;
@@ -49,22 +50,22 @@ export default function ProjectCard({
       {/* TOP SECTION */}
       <div className="flex justify-between items-start w-full">
         
-        <div className="flex gap-[20px] md:gap-[24px] items-start">
+        <div className="flex flex-1 min-w-0 gap-[20px] md:gap-[24px] items-start">
           <div className="w-[54px] h-[54px] bg-black/50 rounded-[9px] flex items-center justify-center shrink-0">
             <AudioLinesIcon />
           </div>
           
-          <div className="flex flex-col gap-[12px] md:gap-[16px]">
+          <div className="flex flex-1 min-w-0 flex-col gap-[12px] md:gap-[16px]">
             <h3 className="font-semibold text-[18px] md:text-[20px] text-foreground leading-none">
-              {title}
+              <Truncate text={title} />
             </h3>
             
-            <div className="flex items-center gap-[10px] text-foreground/60 font-medium text-[14px] md:text-[16px] leading-none">
-              {genre} 
+            <div className="flex min-w-0 items-center gap-[10px] text-foreground/60 font-medium text-[14px] md:text-[16px] leading-none">
+              <span className="shrink-0">{genre}</span>
               <div className="w-[8px] h-[8px] flex items-center justify-center">
                 <span className="w-[6.4px] h-[6.4px] bg-foreground/60 rounded-full" /> 
               </div>
-              {tracks}
+              <Truncate text={tracks} className="flex-1" />
             </div>
 
             <div className="flex items-center gap-[6px]">
@@ -91,7 +92,7 @@ export default function ProjectCard({
         </div>
 
         {/* Status Badge */}
-        <div className={`flex justify-center items-center px-[10px] py-[4px] rounded-[30px] ${badgeBg}`}>
+        <div className={`ml-4 flex shrink-0 justify-center items-center px-[10px] py-[4px] rounded-[30px] ${badgeBg}`}>
           <span className={`font-medium text-[10px] drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] ${badgeText}`}>
             {status}
           </span>

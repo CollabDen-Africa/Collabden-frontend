@@ -17,6 +17,7 @@ export default function middleware(request: NextRequest) {
   // Protected route prefixes
   const protectedRoutes = [
     ROUTES.DASHBOARD.ROOT,
+    ROUTES.CONNECTIONS,
     ROUTES.PROJECTS.LIST,
     "/projects", // Catch-all for projects subroutes
     "/workspace", // Protected workspace

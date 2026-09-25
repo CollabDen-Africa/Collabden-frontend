@@ -1,5 +1,6 @@
 import React from 'react';
 import { LuHeadphones } from "react-icons/lu";
+import Truncate from '@/components/ui/Truncate';
 
 //Data structure
 export interface SuggestedProjectItemProps {
@@ -22,13 +23,13 @@ export default function SuggestedProjectItem({ title, needs, members, tags }: Su
       <div className="flex flex-col gap-[12px] min-w-0 py-1">
         
         {/* Title */}
-        <h4 className="font-bold text-[16px] leading-[19px] text-foreground truncate">
-          {title}
+        <h4 className="font-bold text-[16px] leading-[19px] text-foreground">
+          <Truncate text={title} />
         </h4>
         
         {/* Needs & Members */}
         <div className="flex items-center gap-[10px] text-[14px] leading-[16px] text-foreground/60 font-medium truncate mt-[-4px]">
-          <span>{needs}</span>
+          <Truncate text={needs} className="flex-1" />
           <span className="w-[6px] h-[6px] bg-foreground/60 rounded-full shrink-0" />
           <span>{members} members</span>
         </div>

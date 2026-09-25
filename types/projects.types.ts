@@ -104,7 +104,9 @@ export interface CreateProjectPayload {
   description?: string;
   genre: string;
   startDate: string;
+  endDate?: string;
   visibility?: ProjectVisibility;
+  openToCollaborators?: boolean;
   collaboratorIds?: string[];
 }
 
@@ -161,6 +163,7 @@ export interface ProjectInvite {
 
 export interface MarketplaceProject {
   id: string;
+  ownerId?: string;
   name: string;
   description: string | null;
   genre: string;

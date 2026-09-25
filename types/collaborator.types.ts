@@ -10,6 +10,8 @@ export interface MarketplaceCollaborator {
   genres: string[];
   openToCollaborate: boolean;
   onboardingCompleted: boolean;
+  identityVerified?: boolean;
+  isVerified?: boolean;
 }
 
 export interface UpdateAvailabilityPayload {

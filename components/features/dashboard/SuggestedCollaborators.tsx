@@ -7,8 +7,8 @@ export interface SuggestedCollaborator {
   userId?: string;
   name: string;
   role: string;
-  members: number;
-  rating: string;
+  members?: number;
+  rating?: string;
   avatarUrl?: string;
 }
 

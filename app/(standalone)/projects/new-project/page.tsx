@@ -27,6 +27,37 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
 
+interface ProjectDateFieldProps {
+  label: string;
+  selectedDate: Date | null | undefined;
+  onSelect: (date: Date | null) => void;
+  error?: string;
+  dropdownMode?: "overlay" | "inline";
+  minDate?: Date;
+}
+
+function ProjectDateField({
+  label,
+  selectedDate,
+  onSelect,
+  error,
+  dropdownMode,
+  minDate,
+}: ProjectDateFieldProps) {
+  return (
+    <div className="flex flex-col gap-2 relative z-40">
+      <label className="text-sm font-semibold pl-1 text-white">{label}</label>
+      <DatePicker
+        selectedDate={selectedDate}
+        onSelect={onSelect}
+        dropdownMode={dropdownMode}
+        minDate={minDate}
+      />
+      {error && <p className="text-xs text-red-400 font-medium pl-4 mt-1">{error}</p>}
+    </div>
+  );
+}
+
 export default function CreateProjectPage() {
   const router = useRouter();
 
@@ -43,15 +74,19 @@ export default function CreateProjectPage() {
       description: "",
       selectedGenre: "",
       selectedDate: undefined,
+      deadlineDate: undefined,
       visibility: "PRIVATE",
+      openToCollaborators: false,
       selectedCollabs: [],
     },
   });
 
   const watchedGenre = watch("selectedGenre");
   const watchedDate = watch("selectedDate");
+  const watchedDeadline = watch("deadlineDate");
   const watchedCollabs = watch("selectedCollabs");
   const watchedVisibility = watch("visibility");
+  const watchedOpenToCollaborators = watch("openToCollaborators");
 
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [collaboratorSearch, setCollaboratorSearch] = useState("");
@@ -128,7 +163,9 @@ export default function CreateProjectPage() {
         description: data.description?.trim() || undefined,
         genre: data.selectedGenre,
         startDate: data.selectedDate.toISOString(),
+        endDate: data.deadlineDate?.toISOString(),
         visibility: data.visibility,
+        openToCollaborators: data.openToCollaborators,
         collaboratorIds: data.selectedCollabs,
       });
       router.push(ROUTES.PROJECTS.SUCCESS);
@@ -187,8 +224,8 @@ export default function CreateProjectPage() {
               )}
             </div>
 
-            {/* Genre & Start Date Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {/* Genre, Start Date & Deadline Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
               {/* Genre Dropdown Select */}
               <Select
@@ -202,21 +239,21 @@ export default function CreateProjectPage() {
                 disabled={isLoadingGenres}
               />
 
-              {/* Start Date */}
-              <div className="flex flex-col gap-2 relative z-30">
-                <label className="text-sm font-semibold pl-1 text-white">
-                  Start Date
-                </label>
-                <DatePicker
-                  selectedDate={watchedDate || null}
-                  onSelect={(date) => setValue("selectedDate", date || undefined, { shouldValidate: true })}
-                />
-                {errors.selectedDate && (
-                  <p className="text-xs text-red-400 font-medium pl-4 mt-1">
-                    {errors.selectedDate.message}
-                  </p>
-                )}
-              </div>
+              <ProjectDateField
+                label="Start Date"
+                selectedDate={watchedDate || null}
+                onSelect={(date) => setValue("selectedDate", date || undefined, { shouldValidate: true })}
+                error={errors.selectedDate?.message}
+                minDate={new Date()}
+              />
+
+              <ProjectDateField
+                label="Deadline"
+                selectedDate={watchedDeadline || null}
+                onSelect={(date) => setValue("deadlineDate", date || undefined, { shouldValidate: true })}
+                error={errors.deadlineDate?.message}
+                minDate={watchedDate || new Date()}
+              />
             </div>
 
             {/* Collaborators */}
@@ -350,7 +387,10 @@ export default function CreateProjectPage() {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setValue("visibility", "PRIVATE", { shouldValidate: true })}
+                  onClick={() => {
+                    setValue("visibility", "PRIVATE", { shouldValidate: true });
+                    setValue("openToCollaborators", false, { shouldValidate: true });
+                  }}
                   className={`flex items-center gap-2 px-5 py-2 rounded-full font-sans font-medium text-[14px] transition-all duration-300 ${watchedVisibility === "PRIVATE"
                       ? "bg-primary-green/10 border border-primary-green text-white"
                       : "bg-white/10 border border-transparent text-white hover:border-primary-green hover:bg-white/15"
@@ -374,6 +414,45 @@ export default function CreateProjectPage() {
               <span className="font-sans font-medium text-[13px] text-white/60">
                 You can invite up to 5 collaborators on the free plan
               </span>
+            </div>
+
+            {/* Marketplace Availability */}
+            <div className="flex flex-col gap-3 rounded-[20px] border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <label htmlFor="open-to-collaborators" className="font-sans font-medium text-[16px] text-white">
+                    Open to collaborators
+                  </label>
+                  <p className="mt-1 font-sans text-[13px] text-white/60">
+                    List this project in the marketplace for collaborators to discover.
+                  </p>
+                </div>
+                <button
+                  id="open-to-collaborators"
+                  type="button"
+                  role="switch"
+                  aria-checked={watchedOpenToCollaborators}
+                  onClick={() => {
+                    const nextValue = !watchedOpenToCollaborators;
+                    setValue("openToCollaborators", nextValue, { shouldValidate: true });
+                    if (nextValue) setValue("visibility", "PUBLIC", { shouldValidate: true });
+                  }}
+                  className={`relative h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-green/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+                    watchedOpenToCollaborators ? "bg-primary-green" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none absolute left-1 top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+                      watchedOpenToCollaborators ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+              {watchedOpenToCollaborators && (
+                <p className="font-sans text-[13px] text-primary-green">
+                  Your visibility has been set to Public so this project can appear in the marketplace.
+                </p>
+              )}
             </div>
 
             {/* Error Message */}

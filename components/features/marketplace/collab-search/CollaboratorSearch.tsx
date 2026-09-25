@@ -16,6 +16,7 @@ interface CollaboratorSearchProps {
 
 export default function CollaboratorSearch({ initialSearchQuery = "", initialRole = "All Genres" }: CollaboratorSearchProps) {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialSearchQuery);
   
   // Sidebar Filter State
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({
@@ -31,7 +32,7 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
   const { useCollaborators } = useCollaborator();
   const requestedRole = activeFilters.roles.find((role) => role !== "All Genres");
   const { data: collaborators = [], isLoading, isError } = useCollaborators({
-    name: searchQuery || undefined,
+    name: debouncedSearchQuery || undefined,
     role: requestedRole,
     openToCollaborate: activeFilters.availability.includes("Open to collaborate") ? "true" : "all",
   });
@@ -43,6 +44,11 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
   useEffect(() => {
     setSearchQuery(initialSearchQuery);
   }, [initialSearchQuery]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
+    return () => window.clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   useEffect(() => {
       setActiveFilters(prev => ({
@@ -118,7 +124,7 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name, skill, role, genre or keyword..."
+                placeholder="Search by collaborator name..."
                 className="flex-1 bg-transparent border-none outline-none font-sans text-[14px] leading-4 text-white placeholder:text-text-muted"
               />
             </div>
@@ -230,7 +236,7 @@ export default function CollaboratorSearch({ initialSearchQuery = "", initialRol
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-6 w-full">
                 {displayData.map((creator) => (
-                  <CollaboratorCard key={creator.id} name={creator.displayName || creator.legalName || creator.email.split("@")[0]} role={creator.experience || "Collaborator"} bio={creator.bio || "No bio provided."} genres={creator.genres || []} image={creator.avatarUrl || undefined} openToCollaborate={creator.openToCollaborate} />
+                  <CollaboratorCard key={creator.id} userId={creator.id} name={creator.displayName || creator.legalName || creator.email.split("@")[0]} role={creator.experience || "Collaborator"} bio={creator.bio || "No bio provided."} genres={creator.genres || []} image={creator.avatarUrl || undefined} openToCollaborate={creator.openToCollaborate} isVerified={Boolean(creator.identityVerified || creator.isVerified)} />
                 ))}
               </div>
             )}
