@@ -35,6 +35,7 @@ export default function DashboardHeader({
   const notifRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isMainDashboard = pathname === "/dashboard";
+  const greetingName = user?.firstName || user?.email?.split("@")[0] || "there";
 
   // Auto-open notification dropdown for Step 5
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function DashboardHeader({
           {isMainDashboard ? (
           <div className="relative flex-1 flex flex-col gap-1.5 w-full xl:max-w-max">
             <h1 className="text-foreground text-[26px] lg:text-[32px] font-semibold font-sans leading-tight wrap-break-word">
-              Welcome back, {user.firstName}!
+              Welcome back, {greetingName}!
             </h1>
             <p className="text-foreground/60 text-[14px] lg:text-[16px] font-medium font-sans wrap-break-word">
               Here’s what’s happening with your projects today
@@ -115,7 +116,7 @@ export default function DashboardHeader({
 
               <div className="flex items-center gap-3 lg:gap-4 cursor-pointer relative z-50">
 
-                <ProfileMenu user={user} />
+                {user && <ProfileMenu user={user} />}
                 
               </div>
 

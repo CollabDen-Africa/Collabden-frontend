@@ -1,10 +1,11 @@
 "use client";
 
+import PendingInvitesBanner from "@/components/projects/PendingInvitesBanner";
 import React from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { HiPlus, HiOutlineClock } from "react-icons/hi";
+import Avatar from "@/components/ui/Avatar";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { handleApiError } from "@/lib/error-handler";
 import type { Project } from "@/types/api.types";
@@ -37,13 +38,41 @@ interface UIProject {
   progressPercent: number;
   progressColor: string;
   lastUpdated: string;
-  collaborators: { name: string; avatar: string }[];
+  collaborators: { name: string; avatar?: string }[];
   totalCollab: number;
 }
 
 function mapApiToUI(project: Project): UIProject {
   const status = project.status || "ACTIVE";
   const style = STATUS_STYLES[status] || STATUS_STYLES.ACTIVE;
+
+  const collabsMap = new Map<string, { name: string; avatar?: string }>();
+  if (project.owner) {
+    const ownerName =
+      project.owner.displayName ||
+      project.owner.legalName ||
+      project.owner.email?.split("@")[0] ||
+      "Owner";
+    collabsMap.set(project.owner.id, {
+      name: ownerName,
+      avatar: project.owner.avatarUrl || undefined,
+    });
+  }
+  (project.collaborators || []).forEach((c) => {
+    if (c.user) {
+      const name =
+        c.user.displayName ||
+        c.user.legalName ||
+        c.user.email?.split("@")[0] ||
+        "Collaborator";
+      collabsMap.set(c.user.id, {
+        name,
+        avatar: c.user.avatarUrl || undefined,
+      });
+    }
+  });
+  const collaborators = Array.from(collabsMap.values());
+
   return {
     id: project.id,
     title: project.name,
@@ -57,11 +86,8 @@ function mapApiToUI(project: Project): UIProject {
     lastUpdated: project.updatedAt
       ? new Date(project.updatedAt).toLocaleDateString()
       : "Recently",
-    collaborators: (project.collaborators || []).map(c => ({
-      name: c.user?.email?.split("@")[0] || "User",
-      avatar: "/mock-profiles/small.png",
-    })),
-    totalCollab: (project.collaborators || []).length,
+    collaborators,
+    totalCollab: collaborators.length,
   };
 }
 
@@ -99,6 +125,8 @@ export default function ProjectsPage() {
           <span className="font-sans font-semibold text-[16px]">New Project</span>
         </Button>
       </div>
+
+      <PendingInvitesBanner />
 
       {/* Loading State */}
       {isLoading && (
@@ -188,8 +216,8 @@ export default function ProjectsPage() {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center">
                       {project.collaborators.slice(0, 4).map((collab, i) => (
-                        <div key={i} className={`w-[32px] h-[32px] rounded-full border-2 border-primary-green overflow-hidden relative ${i > 0 ? '-ml-3' : ''}`}>
-                          <Image src={collab.avatar} alt={collab.name} fill className="object-cover" />
+                        <div key={i} className={`relative ${i > 0 ? '-ml-3' : ''}`} style={{ zIndex: 10 - i }}>
+                          <Avatar name={collab.name} src={collab.avatar} className="w-[32px] h-[32px] text-[11px] border-2 border-primary-green" />
                         </div>
                       ))}
                     </div>

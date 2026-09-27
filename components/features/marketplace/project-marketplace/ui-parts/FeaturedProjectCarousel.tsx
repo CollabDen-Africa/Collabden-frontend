@@ -1,57 +1,11 @@
 import React, { useState } from 'react';
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiCheckCircle } from 'react-icons/hi';
-import { MdSecurity } from 'react-icons/md';
 import Button from '@/components/ui/Button';
 
-export const FeaturedCarousel = ({ featuredProjects = [] }) => {
-  // Safe fallbacks to perfectly map your static Figma specs
-  const defaultProjects = [
-      {
-        id: 1,
-        badge: 'R&B / Neo-Soul',
-        title: 'Neon Soul — R&B Album Production',
-        authorInitials: 'MW',
-        authorName: 'Marcus Webb',
-        description: 'Crafting a 12-track R&B album blending neo-soul with modern electronic elements.',
-        timeline: '4 months',
-        deadline: 'Aug 30, 2026',
-        compensation: '$2,400–$3,800',
-        openRoles: '4 positions',
-        applicants: '18 applied',
-        image: '/Neon-Soul.png',
-      },
-      {
-        id: 2,
-        badge: 'Cinematic',
-        title: 'Sci-Fi Short Film Scoring',
-        authorInitials: 'SJ',
-        authorName: 'Sarah Jenkins',
-        description: 'Looking for a synth-heavy composer to score a 15-minute indie sci-fi short.',
-        timeline: '2 Weeks',
-        deadline: 'Aug 22, 2026',
-        compensation: '$800',
-        openRoles: '2 positions',
-        applicants: '4 applied',
-        image: '/hero_video_poster.png',
-      },
-      {
-        id: 3,
-        badge: 'Electronic',
-        title: 'Lo-Fi Chillhop Compilation',
-        authorInitials: 'MK',
-        authorName: 'Marcus King',
-        description: 'Need smooth instrumental beatmakers for an upcoming seasonal Spotify compilation album.',
-        timeline: '1 Week',
-        deadline: 'Aug 15, 2026',
-        compensation: '$400',
-        openRoles: '1 position',
-        applicants: '28 applied',
-        image: '',
-      }
-    ];
-
-  const projects = featuredProjects?.length > 0 ? featuredProjects : defaultProjects;
-    const [currentIndex, setCurrentIndex] = useState(0);
+export const FeaturedCarousel = ({ featuredProjects = [] }: { featuredProjects?: any[] }) => {
+  const projects = featuredProjects;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  if (projects.length === 0) return null;
   
     const nextSlide = () => {
       setCurrentIndex((prev) => (prev === projects.length - 1 ? 0 : prev + 1));
@@ -154,13 +108,6 @@ export const FeaturedCarousel = ({ featuredProjects = [] }) => {
                   </div>
                 </div>
 
-                {/* Escrow Badge */}
-                <div className="flex items-center px-1.75 py-1.5 gap-0.75 bg-primary-green/10 rounded-full">
-                  <MdSecurity className="text-primary-green h-3" />
-                  <span className="text-[11px] font-semibold text-primary-green leading-3.75">
-                    Escrow Protected
-                  </span>
-                </div>
               </div>
 
               {/* Description */}

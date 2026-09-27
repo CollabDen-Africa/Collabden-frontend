@@ -24,18 +24,9 @@ const TABS = [
   { name: "Payment", path: "/workspace/payment" },
 ];
 
-// Mock data for avatars
-const MOCK_COLLABORATORS = [
-  { id: 1, name: "David Chen", image: "/mock-profiles/David.png" },
-  { id: 2, name: "Tayo Oni", image: "/mock-profiles/Tayo.png" },
-  { id: 3, name: "Michael Awe", image: "/mock-profiles/small2.png" },
-  { id: 4, name: "Chika Ike", image: "/mock-profiles/Sam.png" }
-];
-
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [activeProject, setActiveProject] = useState("Urban Beats Vol.2");
-  const projectProgress = 40;
+  const [activeProject, setActiveProject] = useState("");
   //Panel States
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
@@ -45,7 +36,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   const { data: apiProjects, error, isLoading } = useAllProjects();
 
   const sidebarProjects = useMemo(() => {
-    if (!apiProjects?.length) return ["Urban Beats Vol.2", "Acoustic Sessions"]; // Fallback
+    if (!apiProjects?.length) return [];
     return apiProjects.map(p => p.name);
   }, [apiProjects]);
 
@@ -94,6 +85,33 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   // Query for the full details (includes collaborators, etc.)
   const { data: projectDetails } = useProjectDetail(selectedProject?.id || "");
 
+  // Dynamic collaborators list for header stack
+  const headerCollaborators = useMemo(() => {
+    const proj = projectDetails || selectedProject;
+    if (!proj) return [];
+
+    const map = new Map<string, { id: string; name: string; avatarUrl?: string }>();
+    if (proj.owner) {
+      const name = proj.owner.displayName || proj.owner.legalName || proj.owner.email?.split("@")[0] || "Owner";
+      map.set(proj.owner.id, { id: proj.owner.id, name, avatarUrl: proj.owner.avatarUrl || undefined });
+    }
+    (proj.collaborators || []).forEach((c) => {
+      if (c.user) {
+        const name = c.user.displayName || c.user.legalName || c.user.email?.split("@")[0] || "Collaborator";
+        map.set(c.user.id, { id: c.user.id, name, avatarUrl: c.user.avatarUrl || undefined });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [projectDetails, selectedProject]);
+
+  // Dynamic project progress percentage based on tasks
+  const projectProgress = useMemo(() => {
+    if (!projectDetails?.tasks || projectDetails.tasks.length === 0) return 0;
+    const completed = projectDetails.tasks.filter((t: any) => t.status === "COMPLETED" || t.status === "DONE").length;
+    return Math.round((completed / projectDetails.tasks.length) * 100);
+  }, [projectDetails?.tasks]);
+
   if (error) {
     handleApiError(error);
   }
@@ -101,6 +119,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   return (
     <WorkspaceProvider
       projects={apiProjects || []}
+      projectDetails={projectDetails || selectedProject || null}
       activeProjectName={activeProject}
       onSelectProject={handleSelectProject}
       isLoading={isLoading}
@@ -110,6 +129,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
       <WorkspaceSidebar
         projects={sidebarProjects}
         activeProject={activeProject}
+        activeProjectObj={projectDetails || selectedProject}
         onSelectProject={handleSelectProject}
       />
 
@@ -145,10 +165,10 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
           <div className="flex flex-row items-center justify-between xl:justify-end w-full xl:w-auto gap-4 sm:gap-6">
 
             {/* Dynamic Avatars */}
-            <div className="flex items-center -space-x-4 sm:-space-x-6">
-              {MOCK_COLLABORATORS.map((member) => (
-                <div key={member.id} className="relative w-[36px] h-[36px] sm:w-[47px] sm:h-[47px] rounded-full border-2 border-primary-green overflow-hidden">
-                  <Avatar name={member.name} src={member.image} className="w-full h-full" />
+            <div className="flex items-center -space-x-3 sm:-space-x-4">
+              {headerCollaborators.slice(0, 5).map((member, i) => (
+                <div key={member.id} className="relative" style={{ zIndex: 10 - i }}>
+                  <Avatar name={member.name} src={member.avatarUrl} className="w-[36px] h-[36px] sm:w-[44px] sm:h-[44px] text-[12px] border-2 border-primary-green" />
                 </div>
               ))}
             </div>

@@ -9,6 +9,9 @@ import SuggestedCollaboratorsPanel from '@/components/features/dashboard/Suggest
 import OnboardingTooltip from '@/components/ui/Tooltip';
 import { useTour } from '@/context/TourContext';
 import { useDashboard } from '@/hooks/dashboard/useDashboard';
+import { useCollaborator } from '@/hooks/collaborator/useCollaborator';
+import { useProjects } from '@/hooks/projects/useProjects';
+import { useAuth } from '@/context/AuthContext';
 import { handleApiError } from '@/lib/error-handler';
 
 const formatRelativeTime = (value: string) => {
@@ -26,9 +29,14 @@ const formatRelativeTime = (value: string) => {
 export default function DashboardPage() {
   // Tour state context
   const { currentStep, setStep, onSkip } = useTour();
+  const { user } = useAuth();
 
   const { useDashboardData } = useDashboard();
+  const { useCollaborators } = useCollaborator();
+  const { useMarketplaceProjects } = useProjects();
   const { data: apiData, isLoading, error } = useDashboardData();
+  const { data: marketplaceCollaborators = [] } = useCollaborators({ openToCollaborate: 'true' });
+  const { data: marketplaceProjects } = useMarketplaceProjects({ page: 1, limit: 10 });
 
   if (error) {
     handleApiError(error);
@@ -75,18 +83,44 @@ export default function DashboardPage() {
     return [...(apiData?.activeProjects ?? [])]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
       .slice(0, 3)
-      .map((p) => ({
-        id: p.id,
-        title: p.name,
-        genre: p.genre || "Unknown",
-        tracks: p.description || "No description",
-        collaborators: (p.collaborators || []).map(c => ({
-          name: c.user?.email?.split("@")[0] || "User",
-        })),
-        progress: undefined,
-        updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
-        status: (p.status || "ACTIVE").charAt(0) + (p.status || "ACTIVE").slice(1).toLowerCase(),
-      }));
+      .map((p) => {
+        const collabsMap = new Map<string, { name: string; avatarUrl?: string }>();
+        if (p.owner) {
+          const ownerName =
+            p.owner.displayName ||
+            p.owner.legalName ||
+            p.owner.email?.split("@")[0] ||
+            "Owner";
+          collabsMap.set(p.owner.id, {
+            name: ownerName,
+            avatarUrl: p.owner.avatarUrl || undefined,
+          });
+        }
+        (p.collaborators || []).forEach((c) => {
+          if (c.user) {
+            const name =
+              c.user.displayName ||
+              c.user.legalName ||
+              c.user.email?.split("@")[0] ||
+              "Collaborator";
+            collabsMap.set(c.user.id, {
+              name,
+              avatarUrl: c.user.avatarUrl || undefined,
+            });
+          }
+        });
+
+        return {
+          id: p.id,
+          title: p.name,
+          genre: p.genre || "Unknown",
+          tracks: p.description || "No description",
+          collaborators: Array.from(collabsMap.values()),
+          progress: undefined,
+          updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
+          status: (p.status || "ACTIVE").charAt(0) + (p.status || "ACTIVE").slice(1).toLowerCase(),
+        };
+      });
   }, [apiData?.activeProjects]);
 
   const recentActivity = useMemo(() => {
@@ -102,25 +136,30 @@ export default function DashboardPage() {
   }, [apiData?.notifications]);
 
   const suggestedProjects = useMemo(() => {
-    return (apiData?.suggestedProjects ?? []).map((p) => ({
+    return (marketplaceProjects?.projects ?? [])
+      .filter((project) => {
+        const ownerId = project.owner?.id || project.ownerId;
+        return Boolean(ownerId) && ownerId !== user?.id;
+      })
+      .slice(0, 3)
+      .map((p) => ({
       id: p.id,
       title: p.name,
-      needs: p.description || "",
-      members: (p.collaborators || []).length,
-      tags: [p.genre],
-    }));
-  }, [apiData?.suggestedProjects]);
+      needs: p.requiredRoles?.length ? `Looking for ${p.requiredRoles.join(', ')}` : p.description || 'No roles specified',
+      members: p._count?.collaborators ?? 0,
+      tags: p.genre ? [p.genre] : [],
+      }));
+  }, [marketplaceProjects?.projects, user?.id]);
 
   const suggestedCollaborators = useMemo(() => {
-    return (apiData?.suggestedCollaborators ?? []).map((c) => ({
-      id: c.id || c.userId || c.user?.id,
-      userId: c.userId || c.user?.id,
-      name: c.user?.email?.split("@")[0] || "User",
-      role: c.role || "Collaborator",
-      members: 0,
-      rating: "5.0",
+    return marketplaceCollaborators.slice(0, 3).map((collaborator) => ({
+      id: collaborator.id,
+      userId: collaborator.id,
+      name: collaborator.displayName || collaborator.legalName || collaborator.email.split('@')[0],
+      role: collaborator.experience || 'Collaborator',
+      avatarUrl: collaborator.avatarUrl || undefined,
     }));
-  }, [apiData?.suggestedCollaborators]);
+  }, [marketplaceCollaborators]);
 
   return (
     <div className="w-full flex flex-col gap-15 animate-in fade-in duration-500 pt-2">

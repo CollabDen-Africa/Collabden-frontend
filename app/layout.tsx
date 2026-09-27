@@ -1,16 +1,8 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import QueryProvider from "@/components/providers/QueryProvider";
 import NextTopLoader from "nextjs-toploader";
-
-
-
-const raleway = Raleway({
-  variable: "--font-raleway",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "CollabDen",
@@ -28,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${raleway.variable} antialiased relative overflow-x-hidden`}
+        className="antialiased relative overflow-x-hidden"
         suppressHydrationWarning
       >
         <QueryProvider>
@@ -53,4 +45,3 @@ export default function RootLayout({
     </html>
   );
 }
-

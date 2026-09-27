@@ -11,6 +11,7 @@ export const useCollaborator = () => {
     genres?: string;
     role?: string;
     openToCollaborate?: "true" | "false" | "all";
+    connectedOnly?: boolean;
   }) =>
     useQuery({
       queryKey: ["collaborators", "list", filters],

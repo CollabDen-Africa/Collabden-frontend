@@ -6,10 +6,12 @@ import { HiOutlineChevronDown, HiOutlineChevronLeft, HiOutlineChevronRight } fro
 interface DatePickerProps {
   selectedDate: Date | null | undefined;
   onSelect: (date: Date) => void;
-  className?: string; 
+  className?: string;
+  dropdownMode?: "overlay" | "inline";
+  minDate?: Date;
 }
 
-export default function DatePicker({ selectedDate, onSelect, className }: DatePickerProps) {
+export default function DatePicker({ selectedDate, onSelect, className, dropdownMode = "overlay", minDate }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -35,6 +37,9 @@ export default function DatePicker({ selectedDate, onSelect, className }: DatePi
     if (!date) return "mm/dd/yyyy";
     return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
   };
+
+  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const minimumDate = minDate ? startOfDay(minDate) : undefined;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -64,7 +69,9 @@ export default function DatePicker({ selectedDate, onSelect, className }: DatePi
 
       {/* Dropdown Calendar */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-[312px] bg-[#1A2329] backdrop-blur-xl border border-white/20 rounded-[20px] p-[25px] shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 font-sans">
+        <div className={`${
+          dropdownMode === "inline" ? "relative mt-2" : "absolute top-[calc(100%+8px)] left-0 z-100"
+        } w-[312px] bg-[#1A2329] backdrop-blur-xl border border-white/20 rounded-[20px] p-[25px] shadow-2xl animate-in fade-in zoom-in-95 duration-200 font-sans`}>
           
           <div className="flex items-center justify-between mb-[20px]">
             <span className="font-semibold text-[18px] text-white">
@@ -99,16 +106,21 @@ export default function DatePicker({ selectedDate, onSelect, className }: DatePi
               const isSelected = selectedDate?.getDate() === day && 
                                selectedDate?.getMonth() === currentMonth.getMonth() && 
                                selectedDate?.getFullYear() === currentMonth.getFullYear();
+              const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+              const isDisabled = Boolean(minimumDate && date < minimumDate);
               
               return (
                 <div key={day} className="h-[37px] w-[37px] flex items-center justify-center">
                   <button
                     type="button"
                     onClick={() => handleDateSelect(day)}
+                    disabled={isDisabled}
                     className={`flex items-center justify-center font-medium text-[14px] transition-all rounded-full w-[32px] h-[32px]
                       ${isSelected 
                         ? 'bg-primary-green text-white shadow-[0_0_10px_rgba(115,191,68,0.5)]' 
-                        : 'text-white hover:bg-white/10'
+                        : isDisabled
+                          ? 'cursor-not-allowed text-white/20'
+                          : 'text-white hover:bg-white/10'
                       }
                     `}
                   >

@@ -1,8 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { FiDownload, FiUserX, FiTrash2 } from "react-icons/fi";
 import Toggle from "@/components/ui/Toggle";
+import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
+import { useProfile } from "@/hooks/profile/useProfile";
 
 const MESSAGE_OPTIONS = [
   "Everyone",
@@ -13,10 +15,28 @@ const MESSAGE_OPTIONS = [
 
 export default function ProfileSettingsPrivacy() {
   // Merged States
-  const [openToCollaborate, setOpenToCollaborate] = useState(true);
+  const [openToCollaborate, setOpenToCollaborate] = useState(false);
   const [displayName, setDisplayName] = useState<"legal" | "stage">("legal");
   const [showLocation, setShowLocation] = useState(true);
   const [whoCanMessage, setWhoCanMessage] = useState("Everyone");
+  const { useCurrentProfile } = useProfile();
+  const { useUpdateAvailability } = useCollaborator();
+  const { data: profile } = useCurrentProfile();
+  const updateAvailability = useUpdateAvailability();
+
+  useEffect(() => {
+    if (typeof profile?.openToCollaborate === "boolean") {
+      setOpenToCollaborate(profile.openToCollaborate);
+    }
+  }, [profile?.openToCollaborate]);
+
+  const handleAvailabilityChange = () => {
+    const nextValue = !openToCollaborate;
+    setOpenToCollaborate(nextValue);
+    updateAvailability.mutate(nextValue, {
+      onError: () => setOpenToCollaborate(!nextValue),
+    });
+  };
 
   return (
     <div className="flex flex-col w-full flex-1 gap-8.75 animate-in fade-in duration-300 pb-10">
@@ -49,7 +69,7 @@ export default function ProfileSettingsPrivacy() {
           </div>
           <Toggle 
             active={openToCollaborate} 
-            onChange={() => setOpenToCollaborate(!openToCollaborate)} 
+            onChange={handleAvailabilityChange}
           />
         </div>
 

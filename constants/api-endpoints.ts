@@ -13,6 +13,9 @@ export const API_ENDPOINTS = {
     GOOGLE_CALLBACK: `${API_BASE_URL}/api/v1/user/auth/google/callback`,
     ONBOARDING: `${API_BASE_URL}/api/v1/user/onboarding`,
   },
+  PERSONA: {
+    CREATE_INQUIRY: `${API_BASE_URL}/api/v1/user/persona/create-inquiry`,
+  },
   ADMIN_AUTH: {
     LOGIN: `${API_BASE_URL}/api/v1/admin/auth/login`,
     VERIFY_2FA: `${API_BASE_URL}/api/v1/admin/auth/verify-2fa`,
@@ -175,9 +178,14 @@ export const API_ENDPOINTS = {
     LIST: `${API_BASE_URL}/api/v1/projects`,
     CREATE: `${API_BASE_URL}/api/v1/projects`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}`,
+    TASKS: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/tasks`,
+    TASK: (projectId: string, taskId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/tasks/${taskId}`,
+    MARKETPLACE: `${API_BASE_URL}/api/v1/projects/marketplace`,
     UPDATE: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}`,
     DELETE: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}`,
     INVITE: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/invite`,
+    MY_INVITES: `${API_BASE_URL}/api/v1/projects/invitations/my-invites`,
+    RESPOND_INVITE: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/invitations/respond`,
     REMOVE_COLLABORATOR: (projectId: string, collaboratorId: string) => 
       `${API_BASE_URL}/api/v1/projects/${projectId}/collaborators/${collaboratorId}`,
     METADATA: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/metadata`,
@@ -249,6 +257,7 @@ export const API_ENDPOINTS = {
   },
   COLLABORATORS: {
     LIST: `${API_BASE_URL}/api/v1/user/collaborators`,
+    CONNECTED: `${API_BASE_URL}/api/v1/user/collaborators/connected`,
     SKILLS: `${API_BASE_URL}/api/v1/user/collaborators/skills`,
     GENRES: `${API_BASE_URL}/api/v1/user/collaborators/genres`,
     AVAILABILITY: `${API_BASE_URL}/api/v1/user/collaborators/availability`,

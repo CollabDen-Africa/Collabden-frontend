@@ -7,10 +7,8 @@ import { FilterSidebar } from './ui-parts/FilterSidebar';
 import { ProjectListCard } from './ui-parts/ProjectListCard';
 import { ProjectGridCard } from './ui-parts/ProjectGridCard';
 import { ApplicationModalManager } from './application-modal/ApplicationModalManager';
-import { ProjectsYouMayLike } from './ui-parts/RecommendedProjects';
 import { Pagination } from '@/components/ui/Pagination';
 
-// --- Types & Mock Data ---
 interface Project {
   id: string;
   title: string;
@@ -24,98 +22,11 @@ interface Project {
   authorName: string;
   authorInitials: string;
   postedAt: string;
-  isUrgent: boolean;
+  isUrgent?: boolean;
   openRolesCount: number;
   image: string;
   
-  // Kept these properties strictly so your FilterSidebar categories don't break
-  compensationType: 'Paid / Budget' | 'Royalty Split' | 'Unpaid / Collab';
-  status: 'Accepting Pitches' | 'In Progress' | 'Almost Full';
-  isEscrowProtected: boolean;
 }
-
-const ALL_PROJECTS: Project[] = [
-  {
-    id: '1',
-    title: 'Sci-Fi Short Film Scoring',
-    description: 'Looking for a synth-heavy composer to score a 15-minute indie sci-fi short. References include Blade Runner and Dune.',
-    genres: ['Cinematic', 'Electronic'],
-    roles: ['Composer', 'Sound Designer'],
-    compensation: '$800',
-    duration: '2 Weeks',
-    deadline: 'Aug 22, 2026',
-    applicants: 4,
-    authorName: 'Sarah Jenkins',
-    authorInitials: 'SJ',
-    postedAt: '2 days ago',
-    isUrgent: true,
-    openRolesCount: 2,
-    compensationType: 'Paid / Budget',
-    status: 'Accepting Pitches',
-    isEscrowProtected: true,
-    image: '/Ambient.png',
-  },
-  {
-    id: '2',
-    title: 'Neon Soul — R&B Album Production',
-    description: 'Looking for experienced vocalists and beatmakers to collaborate on a 7-track neo-soul project. Stems provided.',
-    genres: ['R&B', 'Neo-Soul'],
-    roles: ['Vocalist', 'Beatmaker'],
-    compensation: '50% Split',
-    duration: '4 Weeks',
-    deadline: 'Sep 15, 2026',
-    applicants: 12,
-    authorName: 'Emmanuel Osei',
-    authorInitials: 'EO',
-    postedAt: '5 hours ago',
-    isUrgent: false,
-    openRolesCount: 2,
-    compensationType: 'Royalty Split',
-    status: 'Accepting Pitches',
-    isEscrowProtected: true,
-    image: '/Jazz.png',
-  },
-  {
-    id: '3',
-    title: 'Lo-Fi Chillhop Compilation',
-    description: 'Need smooth instrumental beatmakers for an upcoming seasonal Spotify compilation album.',
-    genres: ['Electronic', 'Lo-Fi'],
-    roles: ['Beatmaker'],
-    compensation: '$400',
-    duration: '1 Week',
-    deadline: 'Aug 15, 2026',
-    applicants: 28,
-    authorName: 'Marcus King',
-    authorInitials: 'MK',
-    postedAt: '1 week ago',
-    isUrgent: true,
-    openRolesCount: 1,
-    compensationType: 'Paid / Budget',
-    status: 'Almost Full',
-    isEscrowProtected: true,
-    image: '/Hip-Hop.png',
-  },
-  {
-    id: '4',
-    title: 'Lo-Fi Chillhop Compilation',
-    description: 'Need smooth instrumental beatmakers for an upcoming seasonal Spotify compilation album.',
-    genres: ['Electronic', 'Lo-Fi'],
-    roles: ['Beatmaker'],
-    compensation: '$400',
-    duration: '1 Week',
-    deadline: 'Aug 15, 2026',
-    applicants: 28,
-    authorName: 'Marcus King',
-    authorInitials: 'MK',
-    postedAt: '1 week ago',
-    isUrgent: true,
-    openRolesCount: 1,
-    compensationType: 'Paid / Budget',
-    status: 'Almost Full',
-    isEscrowProtected: true,
-    image: '/Hip-Hop.png',
-  },
-];
 
 const FILTER_CATEGORIES = [
   { title: 'Role Needed', key: 'roles' as const, options: ['Vocalist', 'Mixing Engineer', 'Mastering Engineer', 'Beatmaker', 'Composer', 'Session Guitar', 'Sound Designer'] },
@@ -130,9 +41,10 @@ const FILTER_CATEGORIES = [
 interface BrowsingSectionProps {
   selectedGenre: string;
   onClearGenre: () => void;
+  projects: Project[];
 }
 
-export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre }: BrowsingSectionProps) {
+export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre, projects }: BrowsingSectionProps) {
   // --- State ---
   const [filters, setFilters] = useState<{
     roles: string[];
@@ -188,20 +100,13 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
     };
   
     // --- Derived State ---
-    const filteredProjects = ALL_PROJECTS.filter(project => {
+    const filteredProjects = projects.filter(project => {
       // Top level pill filter
       if (selectedGenre !== 'All Genres' && !project.genres.includes(selectedGenre)) return false;
       
       // Sidebar Checkbox filters
       if (filters.roles.length > 0 && !project.roles.some(r => filters.roles.includes(r))) return false;
       if (filters.genre.length > 0 && !project.genres.some(g => filters.genre.includes(g))) return false;
-      if (filters.compensationType.length > 0 && !filters.compensationType.includes(project.compensationType)) return false;
-      if (filters.status.length > 0 && !filters.status.includes(project.status)) return false;
-      
-      // Quick Options
-      if (filters.quickOptions.includes('Escrow Protected') && !project.isEscrowProtected) return false;
-      if (filters.quickOptions.includes('Deadline Soon') && !project.isUrgent) return false;
-      
       return true;
     });
 
@@ -325,9 +230,6 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
                   </div>
           )}
 
-          <section className="w-full pb-16">
-                  <ProjectsYouMayLike />
-                </section>
         </div>
       </div>
     </div>

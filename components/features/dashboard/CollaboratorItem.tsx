@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import Avatar from '@/components/ui/Avatar';
 import { HiStar } from "react-icons/hi2";
 import { useConnections } from '@/hooks/connections/useConnections';
+import { getErrorMessage } from '@/lib/error-handler';
 
 //Data structure
 export interface CollaboratorItemProps {
@@ -10,17 +11,19 @@ export interface CollaboratorItemProps {
   userId?: string;
   name: string;
   role: string;
-  members: number;
-  rating: string;
+  members?: number;
+  rating?: string;
   avatarUrl?: string;
 }
 
 export default function CollaboratorItem({ id, userId, name, role, members, rating, avatarUrl }: CollaboratorItemProps) {
-  const numRating = parseFloat(rating);
+  const numRating = rating ? parseFloat(rating) : 0;
   const fullStars = Math.floor(numRating);
 
   const [isRequested, setIsRequested] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" | "info" } | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     useUserConnections,
@@ -48,6 +51,16 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
     );
   }, [pendingRequests, targetId]);
 
+  const showToast = (message: string, tone: "success" | "error" | "info") => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToast({ message, tone });
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 4000);
+  };
+
+  useEffect(() => () => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+  }, []);
+
   const handleConnect = () => {
     if (isConnected || isRequested || isPendingIncoming || sendRequestMutation.isPending || isSimulating) {
       return;
@@ -59,6 +72,17 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
         {
           onSuccess: () => {
             setIsRequested(true);
+            showToast("Connection invitation sent successfully.", "success");
+          },
+          onError: (error) => {
+            const message = getErrorMessage(error);
+            const isDuplicateRequest = /already|exists|duplicate|pending/i.test(message);
+            showToast(
+              isDuplicateRequest
+                ? "Connection invitation already sent."
+                : `Unable to send invitation. ${message}`,
+              isDuplicateRequest ? "info" : "error",
+            );
           },
         }
       );
@@ -96,7 +120,7 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
         <Avatar 
           name={name} 
           src={avatarUrl} 
-          className="w-[55px] h-[55px] md:w-[73px] md:h-[73px] text-[20px] md:text-[24px] shrink-0" 
+          className="w-10 h-10 md:w-12 md:h-12 text-[14px] md:text-[16px] shrink-0"
         />
         
         <div className="flex flex-col gap-[6px] min-w-0">
@@ -105,24 +129,30 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
           </h4>
           
           <div className="flex items-center gap-[8px] md:gap-[10px] text-[13px] md:text-[14px] leading-[16px] text-foreground/60 font-medium mt-[-2px]">
-            <span className="truncate">{role}</span> 
-            <span className="w-[6px] h-[6px] bg-foreground/60 rounded-full shrink-0" /> 
-            <span className="whitespace-nowrap">{members} members</span>
+            <span className="truncate">{role}</span>
+            {members !== undefined && (
+              <>
+                <span className="w-[6px] h-[6px] bg-foreground/60 rounded-full shrink-0" />
+                <span className="whitespace-nowrap">{members} members</span>
+              </>
+            )}
           </div>
           
-          <div className="flex items-center gap-[4px]">
-             <div className="flex">
-               {[...Array(5)].map((_, i) => (
-                 <HiStar 
-                   key={i} 
-                   className={`w-[14px] h-[14px] ${i < fullStars ? "text-foreground" : "text-foreground/20"}`} 
-                 />
-               ))}
-             </div>
-             <span className="text-[12px] leading-[14px] text-foreground/60 font-medium ml-[2px]">
-               {rating}
-             </span>
-          </div>
+          {rating && (
+            <div className="flex items-center gap-[4px]">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <HiStar
+                    key={i}
+                    className={`w-[14px] h-[14px] ${i < fullStars ? "text-foreground" : "text-foreground/20"}`}
+                  />
+                ))}
+              </div>
+              <span className="text-[12px] leading-[14px] text-foreground/60 font-medium ml-[2px]">
+                {rating}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -141,7 +171,22 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
           {buttonText}
         </Button>
       </div>
-      
+
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed right-5 top-5 z-[100] max-w-sm rounded-xl border px-4 py-3 text-sm font-medium shadow-xl backdrop-blur-md ${
+            toast.tone === "success"
+              ? "border-primary-green/60 bg-primary-green/20 text-white"
+              : toast.tone === "error"
+                ? "border-red-400/60 bg-red-950/90 text-red-100"
+                : "border-white/30 bg-black/80 text-white"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,8 @@ import {
   HiOutlineLockClosed,
   HiOutlineGlobeAlt,
   HiCheck,
-  HiPaperAirplane
+  HiPaperAirplane,
+  HiX
 } from "react-icons/hi";
 
 import DatePicker from "@/components/ui/DatePicker";
@@ -21,10 +22,41 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
+import { useProfile } from "@/hooks/profile/useProfile";
 import { useDebounce } from "@/hooks/useDebounce";
-import projectService from "@/services/project.service";
 import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
+
+interface ProjectDateFieldProps {
+  label: string;
+  selectedDate: Date | null | undefined;
+  onSelect: (date: Date | null) => void;
+  error?: string;
+  dropdownMode?: "overlay" | "inline";
+  minDate?: Date;
+}
+
+function ProjectDateField({
+  label,
+  selectedDate,
+  onSelect,
+  error,
+  dropdownMode,
+  minDate,
+}: ProjectDateFieldProps) {
+  return (
+    <div className="flex flex-col gap-2 relative z-40">
+      <label className="text-sm font-semibold pl-1 text-white">{label}</label>
+      <DatePicker
+        selectedDate={selectedDate}
+        onSelect={onSelect}
+        dropdownMode={dropdownMode}
+        minDate={minDate}
+      />
+      {error && <p className="text-xs text-red-400 font-medium pl-4 mt-1">{error}</p>}
+    </div>
+  );
+}
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -42,35 +74,83 @@ export default function CreateProjectPage() {
       description: "",
       selectedGenre: "",
       selectedDate: undefined,
+      deadlineDate: undefined,
       visibility: "PRIVATE",
+      openToCollaborators: false,
       selectedCollabs: [],
     },
   });
 
   const watchedGenre = watch("selectedGenre");
   const watchedDate = watch("selectedDate");
+  const watchedDeadline = watch("deadlineDate");
   const watchedCollabs = watch("selectedCollabs");
   const watchedVisibility = watch("visibility");
+  const watchedOpenToCollaborators = watch("openToCollaborators");
 
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [collaboratorSearch, setCollaboratorSearch] = useState("");
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [selectedCollabMap, setSelectedCollabMap] = useState<
+    Record<string, { id: string; name: string; avatarUrl?: string }>
+  >({});
   const debouncedSearch = useDebounce(collaboratorSearch, 300);
 
   const { useCreateProject } = useProjects();
   const { useCollaborators, useMarketplaceGenres } = useCollaborator();
+  const { useCurrentProfile } = useProfile();
+  const { data: currentProfile } = useCurrentProfile();
+  const currentUserId = currentProfile?.id;
+
   const createProjectMutation = useCreateProject();
-  const { data: collaborators = [], isLoading: isLoadingCollaborators } = useCollaborators({
+  const {
+    data: rawCollaborators = [],
+    isLoading: isLoadingCollaborators,
+    isError: isCollaboratorsError,
+    error: collaboratorsError,
+  } = useCollaborators({
     name: debouncedSearch || undefined,
-    openToCollaborate: "true",
+    connectedOnly: true,
   });
   const { data: genres = [], isLoading: isLoadingGenres } = useMarketplaceGenres();
 
+  const collaborators = useMemo(() => {
+    if (!rawCollaborators) return [];
+    return rawCollaborators.filter(
+      (c) => c.id !== currentUserId && (c as any).userId !== currentUserId
+    );
+  }, [rawCollaborators, currentUserId]);
+
+  // Cache fetched collaborator details in map so selected pills display even if search changes
+  useEffect(() => {
+    if (collaborators.length > 0) {
+      setSelectedCollabMap((prev) => {
+        const updated = { ...prev };
+        let changed = false;
+        collaborators.forEach((c) => {
+          if (!updated[c.id]) {
+            const name = c.displayName || c.legalName || c.email.split("@")[0];
+            updated[c.id] = { id: c.id, name, avatarUrl: c.avatarUrl };
+            changed = true;
+          }
+        });
+        return changed ? updated : prev;
+      });
+    }
+  }, [collaborators]);
+
   const toggleCollaborator = (id: string) => {
     const current = watchedCollabs || [];
-    const next = current.includes(id)
+    const isAdded = current.includes(id);
+    const next = isAdded
       ? current.filter((collaboratorId) => collaboratorId !== id)
       : [...current, id];
+    setValue("selectedCollabs", next, { shouldValidate: true });
+  };
+
+  const removeCollaborator = (id: string) => {
+    const current = watchedCollabs || [];
+    const next = current.filter((collaboratorId) => collaboratorId !== id);
     setValue("selectedCollabs", next, { shouldValidate: true });
   };
 
@@ -78,18 +158,16 @@ export default function CreateProjectPage() {
     setSubmissionError(null);
     createProjectMutation.reset();
     try {
-      const project = await createProjectMutation.mutateAsync({
+      await createProjectMutation.mutateAsync({
         name: data.projectName.trim(),
         description: data.description?.trim() || undefined,
         genre: data.selectedGenre,
         startDate: data.selectedDate.toISOString(),
+        endDate: data.deadlineDate?.toISOString(),
         visibility: data.visibility,
+        openToCollaborators: data.openToCollaborators,
+        collaboratorIds: data.selectedCollabs,
       });
-      await Promise.all(
-        data.selectedCollabs.map((collaboratorId) =>
-          projectService.invite(project.id, { collaboratorId })
-        )
-      );
       router.push(ROUTES.PROJECTS.SUCCESS);
     } catch (err) {
       console.error("Project creation failed:", err);
@@ -146,8 +224,8 @@ export default function CreateProjectPage() {
               )}
             </div>
 
-            {/* Genre & Start Date Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {/* Genre, Start Date & Deadline Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
               {/* Genre Dropdown Select */}
               <Select
@@ -161,28 +239,65 @@ export default function CreateProjectPage() {
                 disabled={isLoadingGenres}
               />
 
-              {/* Start Date */}
-              <div className="flex flex-col gap-2 relative z-30">
-                <label className="text-sm font-semibold pl-1 text-white">
-                  Start Date
-                </label>
-                <DatePicker
-                  selectedDate={watchedDate || null}
-                  onSelect={(date) => setValue("selectedDate", date || undefined, { shouldValidate: true })}
-                />
-                {errors.selectedDate && (
-                  <p className="text-xs text-red-400 font-medium pl-4 mt-1">
-                    {errors.selectedDate.message}
-                  </p>
-                )}
-              </div>
+              <ProjectDateField
+                label="Start Date"
+                selectedDate={watchedDate || null}
+                onSelect={(date) => setValue("selectedDate", date || undefined, { shouldValidate: true })}
+                error={errors.selectedDate?.message}
+                minDate={new Date()}
+              />
+
+              <ProjectDateField
+                label="Deadline"
+                selectedDate={watchedDeadline || null}
+                onSelect={(date) => setValue("deadlineDate", date || undefined, { shouldValidate: true })}
+                error={errors.deadlineDate?.message}
+                minDate={watchedDate || new Date()}
+              />
             </div>
 
             {/* Collaborators */}
             <div className="flex flex-col gap-4 relative">
-              <label className="font-sans font-semibold text-[18px] text-white">
-                Collaborators
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="font-sans font-semibold text-[18px] text-white">
+                  Collaborators
+                </label>
+                {watchedCollabs && watchedCollabs.length > 0 && (
+                  <span className="font-sans text-[13px] text-primary-green font-medium">
+                    {watchedCollabs.length} selected
+                  </span>
+                )}
+              </div>
+
+              {/* Selected Collaborators Preview List */}
+              {watchedCollabs && watchedCollabs.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/15 rounded-[20px] backdrop-blur-md animate-in fade-in duration-200">
+                  {watchedCollabs.map((id) => {
+                    const details = selectedCollabMap[id];
+                    const displayName = details?.name || "Collaborator";
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center gap-2 bg-primary-green/20 border border-primary-green/40 hover:border-primary-green/60 rounded-full px-3 py-1.5 transition-all duration-200"
+                      >
+                        <Avatar name={displayName} src={details?.avatarUrl} className="w-[20px] h-[20px]" />
+                        <span className="font-sans font-semibold text-[13px] text-white">
+                          {displayName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeCollaborator(id)}
+                          className="text-white/60 hover:text-white hover:bg-white/20 rounded-full p-0.5 transition-colors ml-0.5"
+                          aria-label={`Remove ${displayName}`}
+                        >
+                          <HiX size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className={`w-full h-[50px] bg-white/10 border rounded-full px-6 flex items-center gap-3 relative z-20 transition-all duration-300 ${isCollabOpen ? "border-primary-green" : "border-white/20 hover:border-primary-green"
                 }`}>
                 <HiOutlineSearch className="text-white/50" size={20} />
@@ -248,7 +363,12 @@ export default function CreateProjectPage() {
                       {isLoadingCollaborators && (
                         <div className="text-center py-4 text-white/50 text-[14px] font-sans">Loading collaborators…</div>
                       )}
-                      {!isLoadingCollaborators && collaborators.length === 0 && (
+                      {!isLoadingCollaborators && isCollaboratorsError && (
+                        <div className="text-center py-4 text-red-300 text-[14px] font-sans">
+                          Unable to load collaborators: {getErrorMessage(collaboratorsError)}
+                        </div>
+                      )}
+                      {!isLoadingCollaborators && !isCollaboratorsError && collaborators.length === 0 && (
                         <div className="text-center py-4 text-white/50 text-[14px] font-sans">
                           No collaborators found
                         </div>
@@ -267,7 +387,10 @@ export default function CreateProjectPage() {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setValue("visibility", "PRIVATE", { shouldValidate: true })}
+                  onClick={() => {
+                    setValue("visibility", "PRIVATE", { shouldValidate: true });
+                    setValue("openToCollaborators", false, { shouldValidate: true });
+                  }}
                   className={`flex items-center gap-2 px-5 py-2 rounded-full font-sans font-medium text-[14px] transition-all duration-300 ${watchedVisibility === "PRIVATE"
                       ? "bg-primary-green/10 border border-primary-green text-white"
                       : "bg-white/10 border border-transparent text-white hover:border-primary-green hover:bg-white/15"
@@ -291,6 +414,45 @@ export default function CreateProjectPage() {
               <span className="font-sans font-medium text-[13px] text-white/60">
                 You can invite up to 5 collaborators on the free plan
               </span>
+            </div>
+
+            {/* Marketplace Availability */}
+            <div className="flex flex-col gap-3 rounded-[20px] border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <label htmlFor="open-to-collaborators" className="font-sans font-medium text-[16px] text-white">
+                    Open to collaborators
+                  </label>
+                  <p className="mt-1 font-sans text-[13px] text-white/60">
+                    List this project in the marketplace for collaborators to discover.
+                  </p>
+                </div>
+                <button
+                  id="open-to-collaborators"
+                  type="button"
+                  role="switch"
+                  aria-checked={watchedOpenToCollaborators}
+                  onClick={() => {
+                    const nextValue = !watchedOpenToCollaborators;
+                    setValue("openToCollaborators", nextValue, { shouldValidate: true });
+                    if (nextValue) setValue("visibility", "PUBLIC", { shouldValidate: true });
+                  }}
+                  className={`relative h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-green/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+                    watchedOpenToCollaborators ? "bg-primary-green" : "bg-white/20"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none absolute left-1 top-1 h-5 w-5 rounded-full bg-white transition-transform ${
+                      watchedOpenToCollaborators ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+              {watchedOpenToCollaborators && (
+                <p className="font-sans text-[13px] text-primary-green">
+                  Your visibility has been set to Public so this project can appear in the marketplace.
+                </p>
+              )}
             </div>
 
             {/* Error Message */}

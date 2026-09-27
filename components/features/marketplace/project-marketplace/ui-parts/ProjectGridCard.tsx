@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
-import { HiShare, HiShieldCheck, HiLightningBolt, HiOutlineBookmark } from 'react-icons/hi';
+import { HiShare, HiLightningBolt, HiOutlineBookmark } from 'react-icons/hi';
 
 export const ProjectGridCard = ({ project, onApply }: { project: any, onApply  : () => void }) => {
   return (
@@ -30,9 +30,6 @@ export const ProjectGridCard = ({ project, onApply }: { project: any, onApply  :
             <HiLightningBolt className="w-2 h-2" /> Deadline Soon
           </div>
         )}
-        <div className="absolute bottom-3 right-3 z-20 bg-primary-green/10 text-primary-green text-[10px] px-2 py-0.5 rounded-full flex gap-1 items-center">
-          <HiShieldCheck className="w-2 h-2" /> Escrow Protected
-        </div>
       </div>
 
       {/* Card Body */}

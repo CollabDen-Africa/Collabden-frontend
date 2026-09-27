@@ -16,7 +16,9 @@ export const createProjectSchema = z.object({
     .date({
       message: "Start date is required",
     }),
+  deadlineDate: z.date().optional(),
   visibility: z.enum(["PUBLIC", "PRIVATE"]),
+  openToCollaborators: z.boolean(),
   selectedCollabs: z.array(z.string()),
 });
 

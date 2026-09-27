@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --font-raleway: Arial, Helvetica, sans-serif;
   /* Primary Brand Colors */
   --primary-blue: #204F99;
   --primary-green: #73BF44;
@@ -204,4 +205,3 @@ textarea.custom-scrollbar {
 .rounded-msg-them {
   border-radius: 16.8px 16.8px 16.8px 0px;
 }
-

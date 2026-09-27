@@ -36,9 +36,9 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       )}
 
       {/* Desktop Sidebar */}
-      <div className={`hidden lg:block relative shrink-0 pl-[18px] pt-[52px] pb-8 transition-all ${isTourActive && [2, 3].includes(currentStep) ? "z-50" : "z-10"
-        }`}>
-        <div className="sticky top-[52px] h-[788px] w-[209px]">
+      <div className="hidden lg:block w-[227px] shrink-0">
+        <div className={`fixed left-[18px] top-[52px] h-[calc(100vh-84px)] max-h-[788px] w-[209px] transition-all ${isTourActive && [2, 3].includes(currentStep) ? "z-50" : "z-10"
+          }`}>
           <DashboardSidebar
             currentStep={currentStep}
             setStep={setStep}
