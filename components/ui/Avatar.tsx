@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 export interface AvatarProps {
@@ -37,11 +37,26 @@ const getInitials = (name: string): string => {
 };
 
 export default function Avatar({ name, src, className = "w-10 h-10" }: AvatarProps) {
-  // If a valid image URL is provided, render the image
-  if (src) {
+  const [hasImageError, setHasImageError] = useState(false);
+  const hasSource = Boolean(src?.trim()) && !hasImageError;
+
+  useEffect(() => {
+    setHasImageError(false);
+  }, [src]);
+
+  // If a valid image URL is provided, render the image. Image-load failures
+  // intentionally fall through to the initials avatar below.
+  if (hasSource) {
     return (
       <div className={`relative rounded-full overflow-hidden shrink-0 bg-card-bg ${className}`}>
-        <Image src={src} alt={`${name}'s profile picture`} fill className="object-cover" sizes="100px" />
+        <Image
+          src={src!}
+          alt={`${name}'s profile picture`}
+          fill
+          className="object-cover"
+          sizes="100px"
+          onError={() => setHasImageError(true)}
+        />
       </div>
     );
   }

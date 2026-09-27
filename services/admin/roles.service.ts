@@ -1,5 +1,18 @@
+import axios from "axios";
 import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
+
+const ADMIN_PERMISSIONS_PROXY = "/api/proxy/admin/permissions";
+
+const adminProxyGet = async <T>(path: string): Promise<T> => {
+  const response = await axios.get<T>(path, { withCredentials: true });
+  return response.data;
+};
+
+const adminProxyPut = async <T>(path: string, payload: unknown): Promise<T> => {
+  const response = await axios.put<T>(path, payload, { withCredentials: true });
+  return response.data;
+};
 
 export interface AdminRoleItem {
   id: string;
@@ -73,93 +86,6 @@ export interface AccessHistoryLog {
   isSuspicious?: boolean;
 }
 
-export const INITIAL_ROLES_DATA: AdminRoleItem[] = [
-  {
-    id: "super-admin",
-    name: "Super Admin",
-    roleKey: "SUPER_ADMIN",
-    status: "Active",
-    description: "Full platform access. Manages all users, settings, and other admins.",
-    permissionsCount: 11,
-    adminsCount: 2,
-    themeColor: "green",
-    permissions: [
-      "manage_users",
-      "manage_admins",
-      "manage_roles",
-      "manage_settings",
-      "manage_payments",
-      "manage_moderation",
-      "manage_agreements",
-      "manage_projects",
-      "manage_support",
-      "view_audit_logs",
-      "export_data"
-    ],
-    modules: [
-      "User Management",
-      "Project Management",
-      "Marketplace Management",
-      "Legal Agreements",
-      "Payments & Escrow",
-      "Dispute Resolution",
-      "Verification",
-      "Subscriptions",
-      "Support",
-      "Platform Settings",
-      "Audit Logs"
-    ]
-  },
-  {
-    id: "support-admin",
-    name: "Support Admin",
-    roleKey: "SUPPORT_ADMIN",
-    status: "Active",
-    description: "Handles support tickets, user account issues, and escalations.",
-    permissionsCount: 4,
-    adminsCount: 6,
-    themeColor: "blue",
-    permissions: ["manage_support", "view_users", "manage_user_tickets", "send_notifications"],
-    modules: ["Support", "User Management"]
-  },
-  {
-    id: "finance-admin",
-    name: "Finance Admin",
-    roleKey: "FINANCE_ADMIN",
-    status: "Active",
-    description: "Monitors payments, escrow transactions, withdrawals, and financial reports.",
-    permissionsCount: 5,
-    adminsCount: 3,
-    themeColor: "green",
-    permissions: ["manage_payments", "manage_escrow", "process_withdrawals", "view_financial_reports", "refund_transactions"],
-    modules: ["Payments & Escrow", "Legal Agreements"]
-  },
-  {
-    id: "verification-admin",
-    name: "Verification Admin",
-    roleKey: "VERIFICATION_ADMIN",
-    status: "Active",
-    description: "Reviews identity documents and manages the verification queue.",
-    permissionsCount: 4,
-    adminsCount: 4,
-    themeColor: "purple",
-    permissions: ["verify_identity", "review_documents", "approve_verifications", "reject_verifications"],
-    modules: ["Verification", "User Management"]
-  },
-  {
-    id: "marketplace-moderator",
-    name: "Marketplace Moderator",
-    roleKey: "MARKETPLACE_MODERATOR",
-    status: "Inactive",
-    description: "Moderates collaborator profiles, project listings, and reported content.",
-    permissionsCount: 5,
-    adminsCount: 5,
-    themeColor: "yellow",
-    permissions: ["manage_marketplace", "moderate_listings", "flag_profiles", "review_reports", "ban_spammers"],
-    modules: ["Marketplace Management", "Dispute Resolution"]
-  }
-];
-
 export const INITIAL_ADMIN_ACCOUNTS: AdminAccountItem[] = [
   {
     id: "admin-1",
@@ -202,14 +128,33 @@ export const INITIAL_ACCESS_LOGS: AccessHistoryLog[] = [
 class AdminRolesService {
   async getRoles(): Promise<AdminRoleItem[]> {
     try {
-      const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_PERMISSIONS.ROLES);
-      if (response.data?.data && Array.isArray(response.data.data)) {
-        return response.data.data;
-      }
+      const roles = await adminProxyGet<any[]>(ADMIN_PERMISSIONS_PROXY);
+      const themeColors: Record<string, AdminRoleItem["themeColor"]> = {
+        SUPER_ADMIN: "green",
+        SUPPORT_ADMIN: "blue",
+        FINANCE_ADMIN: "green",
+        VERIFICATION_ADMIN: "purple",
+        MARKETPLACE_MODERATOR: "yellow",
+      };
+
+      return roles.map((role) => ({
+        id: role.role,
+        name: role.role.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (letter: string) => letter.toUpperCase()),
+        roleKey: role.role,
+        status: "Active",
+        description: "Administrative permissions configuration.",
+        permissionsCount: role.permissions?.length || 0,
+        adminsCount: role.assignedAdmins || 0,
+        themeColor: themeColors[role.role] || "gray",
+        permissions: role.permissions || [],
+        modules: role.modules || [],
+        createdAt: role.createdAt,
+        updatedAt: role.updatedAt,
+      }));
     } catch (error) {
-      console.warn("Could not fetch remote roles from API, utilizing fallback data", error);
+      console.warn("Could not fetch live admin roles", error);
     }
-    return INITIAL_ROLES_DATA;
+    return [];
   }
 
   async getAvailableRoles(): Promise<any> {
@@ -223,8 +168,11 @@ class AdminRolesService {
   }
 
   async getRoleDetail(role: string): Promise<any> {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_PERMISSIONS.ROLE_DETAIL(role));
-    return response.data?.data || response.data;
+    return adminProxyGet(`${ADMIN_PERMISSIONS_PROXY}/${role}`);
+  }
+
+  async updateRolePermissions(role: string, permissions: string[], modules: string[]): Promise<any> {
+    return adminProxyPut(`${ADMIN_PERMISSIONS_PROXY}/${role}`, { permissions, modules });
   }
 
   async updateRole(role: string, payload: Partial<CreateRolePayload>): Promise<any> {

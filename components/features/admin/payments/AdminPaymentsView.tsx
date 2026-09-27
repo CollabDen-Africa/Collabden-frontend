@@ -24,6 +24,7 @@ export const AdminPaymentsView: React.FC = () => {
     transactions,
     totalTransactions,
     isLoadingTransactions,
+    transactionsError,
     triggerManualPayout,
   } = useAdminPayments({
     page,
@@ -43,7 +44,8 @@ export const AdminPaymentsView: React.FC = () => {
             Payment Management
           </h1>
           <p className="text-text-muted text-sm mt-1">
-            Monitor escrow balances, track payment transactions, and audit payouts across the platform.
+            Monitor escrow balances, track payment transactions, and audit
+            payouts across the platform.
           </p>
         </div>
 
@@ -135,7 +137,10 @@ export const AdminPaymentsView: React.FC = () => {
         {/* Search & Status Filter Bar */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md w-full">
-            <HiOutlineSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+            <HiOutlineSearch
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted"
+              size={18}
+            />
             <input
               type="text"
               placeholder="Search by transaction ID, user, or type..."
@@ -175,12 +180,26 @@ export const AdminPaymentsView: React.FC = () => {
         </div>
 
         {/* Payments Data Grid */}
-        <PaymentsTable data={filteredTransactions} isLoading={isLoadingTransactions} />
+        {transactionsError ? (
+          <div className="rounded-xl border border-accent-red/30 bg-accent-red/10 px-4 py-5 text-sm text-accent-red">
+            {transactionsError} Please confirm your network connection and
+            refresh the page.
+          </div>
+        ) : (
+          <PaymentsTable
+            data={filteredTransactions}
+            isLoading={isLoadingTransactions}
+          />
+        )}
 
         {/* Pagination */}
         <Pagination
           currentPage={page}
-          totalPages={Math.ceil((totalTransactions || filteredTransactions.length) / limit) || 1}
+          totalPages={
+            Math.ceil(
+              (totalTransactions || filteredTransactions.length) / limit
+            ) || 1
+          }
           onPageChange={setPage}
           currentItemsCount={filteredTransactions.length}
           totalItems={totalTransactions || filteredTransactions.length}

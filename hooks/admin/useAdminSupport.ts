@@ -22,6 +22,7 @@ export const useAdminSupport = () => {
     try {
       const data = await adminSupportService.getTickets({
         page,
+        limit: 10,
         search: searchQuery || undefined,
         status: statusFilter !== "ALL" ? statusFilter : undefined,
         priority: priorityFilter !== "ALL" ? priorityFilter : undefined,

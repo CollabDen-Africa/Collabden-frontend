@@ -9,12 +9,12 @@ import EmptyState from '@/components/ui/EmptyState';
 
 // Active Project data structure
 export interface ActiveProject {
-  id: number;
+  id: string;
   title: string;
   genre: string;
   tracks: string;
   collaborators: ProjectCollaborator[];
-  progress: number;
+  progress?: number;
   updated: string;
   status?: string;
 }

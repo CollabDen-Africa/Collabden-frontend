@@ -32,6 +32,7 @@ export const AdminSupportView: React.FC = () => {
   const router = useRouter();
   const {
     tickets,
+    totalTickets,
     stats,
     isLoading,
     searchQuery,
@@ -63,8 +64,6 @@ export const AdminSupportView: React.FC = () => {
   ];
 
   const criticalCount = tickets.filter((t) => t.priority === "Critical" && t.status === "Open").length;
-
-  const paginatedTickets = tickets.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const columns: Column<SupportTicketItem>[] = [
     {
@@ -279,7 +278,7 @@ export const AdminSupportView: React.FC = () => {
             <div className="w-8 h-8 border-2 border-primary-green border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs text-text-muted mt-3">Loading tickets...</p>
           </div>
-        ) : paginatedTickets.length === 0 ? (
+        ) : tickets.length === 0 ? (
           <EmptyState
             title="No tickets found"
             description="No support tickets match your current filters."
@@ -288,7 +287,7 @@ export const AdminSupportView: React.FC = () => {
         ) : (
           <Table
             columns={columns}
-            data={paginatedTickets}
+            data={tickets}
             onRowClick={(row) => router.push(`/admin/support/${row.id}`)}
           />
         )}
@@ -297,10 +296,10 @@ export const AdminSupportView: React.FC = () => {
       {/* Pagination */}
       <Pagination
         currentPage={page}
-        totalPages={Math.ceil(tickets.length / ITEMS_PER_PAGE) || 1}
+        totalPages={Math.ceil(totalTickets / ITEMS_PER_PAGE) || 1}
         onPageChange={setPage}
-        currentItemsCount={paginatedTickets.length}
-        totalItems={tickets.length}
+        currentItemsCount={tickets.length}
+        totalItems={totalTickets}
         itemName="tickets"
       />
     </div>

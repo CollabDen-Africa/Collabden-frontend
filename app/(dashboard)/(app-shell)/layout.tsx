@@ -90,8 +90,9 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
               user={user ? {
                 firstName: user.firstName || "User",
                 lastName: user.lastName || "Name",
-                role: user.role || "Add Role",
-                avatarUrl: user.avatarUrl
+                role: user.role || "Member",
+                avatarUrl: user.avatarUrl,
+                email: user.email,
               } : undefined}
               currentStep={currentStep}
               setStep={setStep}

@@ -15,6 +15,7 @@ export interface UserProfile {
   lastName: string;
   role: string;
   avatarUrl?: string | null;
+  email?: string;
 }
 
 export default function DashboardHeader({

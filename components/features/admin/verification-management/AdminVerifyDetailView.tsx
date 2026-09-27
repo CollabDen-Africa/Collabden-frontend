@@ -31,11 +31,10 @@ export const AdminVerifyDetailView: React.FC<AdminVerifyDetailViewProps> = ({ id
 
   useEffect(() => {
     async function loadDetail() {
-      setIsLoading(true);
+        setIsLoading(true);
       try {
         const res = await verificationService.getVerificationDetails(id);
-        const item = res?.data || res;
-        setDetail(item);
+        setDetail(res);
       } catch (err) {
         console.error("Failed to load verification detail:", err);
       } finally {

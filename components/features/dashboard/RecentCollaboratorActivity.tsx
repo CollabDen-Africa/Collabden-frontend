@@ -3,7 +3,7 @@ import Avatar from '@/components/ui/Avatar';
 
 //Activity Item structure
 export interface ActivityItem {
-  id: number;
+  id: string;
   user: string;
   action: string;
   time: string;

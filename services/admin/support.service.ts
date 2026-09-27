@@ -1,5 +1,13 @@
+import axios from "axios";
 import axiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
+
+const ADMIN_SUPPORT_PROXY = "/api/proxy/admin/support-tickets";
+
+const adminProxyGet = async <T>(path: string, params?: Record<string, unknown>): Promise<T> => {
+  const response = await axios.get<T>(path, { params, withCredentials: true });
+  return response.data;
+};
 
 // ─── TypeScript Interfaces ──────────────────────────────────────────────────
 
@@ -133,6 +141,18 @@ export const toBackendStatus = (status: string): string => {
   }
 };
 
+const toBackendCategory = (category?: string): string | undefined => {
+  const categories: Record<string, string> = {
+    "Payment Issue": "BILLING",
+    "Escrow Dispute": "DISPUTE",
+    "Account Access": "ACCOUNT",
+    Verification: "VERIFICATION",
+    "Platform Bug": "TECHNICAL",
+    "General Inquiry": "OTHER",
+  };
+  return category ? categories[category] || category : undefined;
+};
+
 // Normalize backend ticket item to frontend UI shape
 const transformTicketItem = (item: any): SupportTicketItem => {
   const userName =
@@ -184,10 +204,12 @@ export const adminSupportService = {
       }
       if (apiParams.category === "ALL" || apiParams.category === "All") {
         delete apiParams.category;
+      } else {
+        apiParams.category = toBackendCategory(apiParams.category);
       }
 
-      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.LIST, { params: apiParams });
-      const body = res.data;
+      // The admin token is an HTTP-only cookie, so this must use the Next.js proxy.
+      const body = await adminProxyGet<any>(ADMIN_SUPPORT_PROXY, apiParams);
       const rawData = body?.data || body;
       const ticketsArray = rawData?.tickets || (Array.isArray(rawData) ? rawData : []);
       const formatted = ticketsArray.map(transformTicketItem);
@@ -205,8 +227,7 @@ export const adminSupportService = {
 
   getTicketDetail: async (id: string): Promise<SupportTicketDetail | null> => {
     try {
-      const res = await axiosInstance.get(API_ENDPOINTS.ADMIN_SUPPORT.DETAIL(id));
-      const body = res.data;
+      const body = await adminProxyGet<any>(`${ADMIN_SUPPORT_PROXY}/${id}`);
       const item = body?.data || body;
       if (!item) return null;
 

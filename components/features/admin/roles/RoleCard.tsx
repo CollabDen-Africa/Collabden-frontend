@@ -7,21 +7,18 @@ import {
   HiOutlinePencil, 
   HiOutlineDotsHorizontal 
 } from "react-icons/hi";
-import { HiOutlinePower } from "react-icons/hi2";
 import { AdminRoleItem } from "@/services/admin/roles.service";
 
 interface RoleCardProps {
   role: AdminRoleItem;
   onView: (role: AdminRoleItem) => void;
   onEdit: (role: AdminRoleItem) => void;
-  onToggleStatus: (roleId: string) => void;
 }
 
 export const RoleCard: React.FC<RoleCardProps> = ({
   role,
   onView,
   onEdit,
-  onToggleStatus,
 }) => {
   const getThemeBadgeStyles = (color: AdminRoleItem["themeColor"]) => {
     switch (color) {
@@ -107,18 +104,6 @@ export const RoleCard: React.FC<RoleCardProps> = ({
             className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer"
           >
             <HiOutlinePencil size={16} />
-          </button>
-
-          <button
-            onClick={() => onToggleStatus(role.id)}
-            title={role.status === "Active" ? "Deactivate Role" : "Activate Role"}
-            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
-              role.status === "Active" 
-                ? "bg-white/5 border-white/10 text-red-400/80 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20" 
-                : "bg-white/5 border-white/10 text-emerald-400/80 hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20"
-            }`}
-          >
-            <HiOutlinePower size={17} />
           </button>
 
           <button

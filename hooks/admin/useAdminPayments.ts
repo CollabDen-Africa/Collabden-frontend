@@ -44,6 +44,7 @@ export const useAdminPayments = (params?: UseAdminPaymentsParams) => {
 
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
   const [isLoadingDisputes, setIsLoadingDisputes] = useState(true);
   const [isLoadingWithdrawals, setIsLoadingWithdrawals] = useState(true);
   const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState(true);
@@ -68,15 +69,23 @@ export const useAdminPayments = (params?: UseAdminPaymentsParams) => {
   const fetchTransactions = useCallback(async () => {
     if (!shouldLoadTransactions) { setIsLoadingTransactions(false); return; }
     setIsLoadingTransactions(true);
-    const data = await getPaymentTransactions({
-      page: params?.page,
-      limit: params?.limit,
-      search: params?.search,
-      status: params?.status,
-    });
-    setTransactions(data.transactions);
-    setTotalTransactions(data.total);
-    setIsLoadingTransactions(false);
+    setTransactionsError(null);
+    try {
+      const data = await getPaymentTransactions({
+        page: params?.page,
+        limit: params?.limit,
+        search: params?.search,
+        status: params?.status,
+      });
+      setTransactions(data.transactions);
+      setTotalTransactions(data.total);
+    } catch {
+      setTransactions([]);
+      setTotalTransactions(0);
+      setTransactionsError("Unable to load payment transactions.");
+    } finally {
+      setIsLoadingTransactions(false);
+    }
   }, [shouldLoadTransactions, params?.page, params?.limit, params?.search, params?.status]);
 
   const fetchDisputes = useCallback(async () => {
@@ -155,6 +164,7 @@ export const useAdminPayments = (params?: UseAdminPaymentsParams) => {
     transactions,
     totalTransactions,
     isLoadingTransactions,
+    transactionsError,
     disputes,
     totalDisputes,
     isLoadingDisputes,

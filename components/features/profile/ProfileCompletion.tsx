@@ -4,11 +4,13 @@ import { FiEdit3 } from "react-icons/fi";
 interface ProfileCompletionProps {
   percentage?: number;
   suggestion?: string;
+  onEdit?: () => void;
 }
 
 export default function ProfileCompletion({
-  percentage = 92, 
-    suggestion = "Add portfolio links to reach 100%" 
+  percentage = 0,
+    suggestion = "Complete your profile to help collaborators find you.",
+    onEdit,
   }: ProfileCompletionProps) {
     
     // Math for the Circular Progress Ring
@@ -62,7 +64,7 @@ export default function ProfileCompletion({
                   </span>
         </div>
       </div>
-      <button className="flex items-center gap-1 bg-primary-green/20 hover:bg-primary-green/30 transition-colors rounded-full px-3 py-1 border border-primary-green/50">
+      <button onClick={onEdit} className="flex items-center gap-1 bg-primary-green/20 hover:bg-primary-green/30 transition-colors rounded-full px-3 py-1 border border-primary-green/50">
         <FiEdit3 className="text-primary-green" size={12} />
         <span className="font-semibold text-[12px] text-primary-green">Edit</span>
       </button>

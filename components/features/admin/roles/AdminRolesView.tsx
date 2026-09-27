@@ -2,15 +2,14 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { HiOutlineSearch, HiPlus } from "react-icons/hi";
+import { HiOutlineSearch } from "react-icons/hi";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import EmptyState from "@/components/ui/EmptyState";
 import { AdminRolesSubNav } from "./AdminRolesSubNav";
 import { RoleCard } from "./RoleCard";
-import { CreateRoleModal } from "./CreateRoleModal";
 import { RoleDetailsModal } from "./RoleDetailsModal";
 import { useAdminRoles } from "@/hooks/admin/useAdminRoles";
-import { AdminRoleItem, CreateRolePayload } from "@/services/admin/roles.service";
+import { AdminRoleItem } from "@/services/admin/roles.service";
 
 export const AdminRolesView: React.FC = () => {
   const router = useRouter();
@@ -22,13 +21,9 @@ export const AdminRolesView: React.FC = () => {
     setSearchQuery,
     statusFilter,
     setStatusFilter,
-    handleCreateRole,
-    handleToggleRoleStatus,
   } = useAdminRoles();
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedRoleForView, setSelectedRoleForView] = useState<AdminRoleItem | null>(null);
-  const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<AdminRoleItem | null>(null);
 
   const breadcrumbItems = [
     { label: "Admin Portal", href: "/admin/dashboard" },
@@ -50,11 +45,6 @@ export const AdminRolesView: React.FC = () => {
 
   const handleOpenEdit = (role: AdminRoleItem) => {
     router.push(`/admin/roles/${role.id}/edit`);
-  };
-
-  const handleFormSubmit = (payload: CreateRolePayload) => {
-    handleCreateRole(payload);
-    setSelectedRoleForEdit(null);
   };
 
   return (
@@ -130,17 +120,6 @@ export const AdminRolesView: React.FC = () => {
           </div>
         </div>
 
-        {/* Primary Action Button */}
-        <button
-          onClick={() => {
-            setSelectedRoleForEdit(null);
-            setIsCreateModalOpen(true);
-          }}
-          className="px-5 py-2.5 rounded-xl bg-[#72c043] text-[#0d0f10] font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shrink-0 cursor-pointer"
-        >
-          <HiPlus size={18} />
-          <span>Create New Role</span>
-        </button>
       </div>
 
       {/* Roles Cards List */}
@@ -157,7 +136,6 @@ export const AdminRolesView: React.FC = () => {
               role={role}
               onView={(r) => setSelectedRoleForView(r)}
               onEdit={(r) => handleOpenEdit(r)}
-              onToggleStatus={handleToggleRoleStatus}
             />
           ))
         ) : (
@@ -173,17 +151,6 @@ export const AdminRolesView: React.FC = () => {
           />
         )}
       </div>
-
-      {/* Create Role Modal */}
-      <CreateRoleModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          setSelectedRoleForEdit(null);
-        }}
-        onSubmit={handleFormSubmit}
-        initialRole={selectedRoleForEdit}
-      />
 
       {/* Role Details Modal */}
       <RoleDetailsModal

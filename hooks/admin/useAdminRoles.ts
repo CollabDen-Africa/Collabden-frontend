@@ -3,23 +3,20 @@ import {
   adminRolesService, 
   AdminRoleItem, 
   RolesStats, 
-  INITIAL_ROLES_DATA,
   CreateRolePayload 
 } from "@/services/admin/roles.service";
 
 export const useAdminRoles = () => {
-  const [roles, setRoles] = useState<AdminRoleItem[]>(INITIAL_ROLES_DATA);
+  const [roles, setRoles] = useState<AdminRoleItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadRoles = async () => {
     setIsLoading(true);
     try {
       const fetched = await adminRolesService.getRoles();
-      if (fetched && fetched.length > 0) {
-        setRoles(fetched);
-      }
+      setRoles(fetched);
     } catch (error) {
       console.error("Failed to load admin roles", error);
     } finally {

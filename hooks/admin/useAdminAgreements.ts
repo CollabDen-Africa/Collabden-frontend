@@ -4,11 +4,6 @@ import { adminAgreementsService } from "@/services/admin/agreements.service";
 export const useAdminAgreements = (params?: { page?: number; limit?: number; search?: string; status?: string }) => {
   const queryClient = useQueryClient();
 
-  const overviewQuery = useQuery({
-    queryKey: ["admin", "agreements", "overview"],
-    queryFn: () => adminAgreementsService.getAgreementsOverview(),
-  });
-
   const agreementsQuery = useQuery({
     queryKey: ["admin", "agreements", "list", params?.page, params?.search, params?.status],
     queryFn: () => adminAgreementsService.getAgreements(params),
@@ -41,13 +36,20 @@ export const useAdminAgreements = (params?: { page?: number; limit?: number; sea
   });
 
   return {
-    overview: overviewQuery.data,
-    isLoadingOverview: overviewQuery.isLoading,
-    agreements: agreementsQuery.data?.items || agreementsQuery.data || [],
+    overview: agreementsQuery.data?.summary,
+    isLoadingOverview: agreementsQuery.isLoading,
+    agreements:
+      agreementsQuery.data?.agreements ||
+      agreementsQuery.data?.items ||
+      agreementsQuery.data ||
+      [],
     agreementsTotal: agreementsQuery.data?.total || 0,
     isLoadingAgreements: agreementsQuery.isLoading,
+    agreementsError: agreementsQuery.error,
     reports: reportsQuery.data?.items || reportsQuery.data || [],
-    reportsTotal: reportsQuery.data?.total || (Array.isArray(reportsQuery.data) ? reportsQuery.data.length : 0),
+    reportsTotal:
+      reportsQuery.data?.total ||
+      (Array.isArray(reportsQuery.data) ? reportsQuery.data.length : 0),
     isLoadingReports: reportsQuery.isLoading,
     auditHistory: auditQuery.data,
     isLoadingAudit: auditQuery.isLoading,

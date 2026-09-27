@@ -3,7 +3,7 @@ import SuggestedProjectItem from './SuggestedProjectsItem';
 
 // Data structure
 export interface SuggestedProject {
-  id: number;
+  id: string | number;
   title: string;
   needs: string;
   members: number;
