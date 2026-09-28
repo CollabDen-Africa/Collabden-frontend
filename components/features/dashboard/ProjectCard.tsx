@@ -9,7 +9,7 @@ export interface ProjectCollaborator {
 }
 
 export interface ProjectCardProps {
-  id: number;
+  id: string;
   title: string;
   genre: string;
   tracks: string;

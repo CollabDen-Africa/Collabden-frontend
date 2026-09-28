@@ -73,7 +73,7 @@ export default function ProfileSettingsContent() {
     );
   }
 
-  const isVerified = Boolean(profile?.isVerified || user?.isVerified);
+  const isVerified = Boolean(profile?.isVerified || user?.identityVerified);
 
   return (
     <div className="flex flex-col w-full flex-1 gap-8.75">

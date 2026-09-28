@@ -83,7 +83,7 @@ export default function ProfileOverview() {
           <IoIosArrowBack size={24} />
         </Link>
 
-        <div>
+        <div className="pl-10 sm:pl-0">
           <h1 className="font-semibold text-[38px] leading-5.75">
             Profile Overview
           </h1>
@@ -103,7 +103,7 @@ export default function ProfileOverview() {
       <div className="flex flex-col xl:flex-row gap-6 2xl:gap-8 w-full items-stretch">
         
         {/* Left Column */}
-        <div className="flex-1 w-full min-w-75">
+        <div className="flex-1 w-full min-w-0 xl:min-w-75">
           <ProfileLeftColumn user={{
             firstName: profile?.firstName || user?.firstName || "",
             lastName: profile?.lastName || user?.lastName || "",
@@ -118,7 +118,7 @@ export default function ProfileOverview() {
         </div>
         
         {/* Middle Column */}
-        <div className="flex-[1.2] w-full min-w-[320px]">
+        <div className="flex-[1.2] w-full min-w-0 xl:min-w-[320px]">
           <ProfileMiddleColumn
             bio={profile?.bio}
             yearsOfExperience={profile?.yearsOfExperience}
@@ -128,7 +128,7 @@ export default function ProfileOverview() {
         </div>
         
         {/* Right Column */}
-        <div className="flex-1 w-full min-w-75">
+        <div className="flex-1 w-full min-w-0 xl:min-w-75">
           <ProfileRightColumn portfolioCount={portfolio.length} skillCount={skills.length} role={profile?.role} />
         </div>
 

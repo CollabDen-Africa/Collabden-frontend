@@ -22,7 +22,7 @@ export default function AddFundsOverlay({ isOpen, onClose, onAdd }: { isOpen: bo
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-[20px] animate-in fade-in duration-300">
       <div className="fixed inset-0 bg-[#121A1F]/80 backdrop-blur-md" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-[400px] bg-white/10 border border-white/20 rounded-[40px] p-[40px] shadow-2xl backdrop-blur-xl flex flex-col items-center animate-in zoom-in-95 duration-300">
+      <div className="relative z-10 w-full max-w-100 bg-white/10 border border-white/20 rounded-[40px] p-[40px] shadow-2xl backdrop-blur-xl flex flex-col items-center animate-in zoom-in-95 duration-300">
         <button onClick={onClose} className="absolute top-[24px] right-[24px] w-[32px] h-[32px] bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center transition-colors">
           <FiX className="text-white/60" size={16} />
         </button>
@@ -35,7 +35,7 @@ export default function AddFundsOverlay({ isOpen, onClose, onAdd }: { isOpen: bo
         <p className="font-raleway text-[14px] text-white/60 text-center mb-[32px]">Enter the amount you wish to add to your CollabDen wallet.</p>
 
         <div className="relative w-full mb-[32px]">
-          <span className="absolute left-[20px] top-[16px] text-white/60 font-raleway text-[20px]">$</span>
+          <span className="absolute left-[20px] top-[16px] text-white/60 font-raleway text-[20px]">₦</span>
           <input 
             type="number" 
             value={amount} 

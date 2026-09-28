@@ -22,12 +22,12 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
   const selfieRef = useRef<HTMLInputElement>(null);
   const poaRef = useRef<HTMLInputElement>(null);
 
-  const memberSince = user?.createdAt 
-    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const memberSince = (user as any) 
+    ? new Date(user as any).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : "Recently";
 
   const statusLabel = isVerified ? "Verified" : (localPending ? "Under Review" : "Unverified");
-  const statusColor = isVerified ? "text-primary-green" : (localPending ? "text-accent-yellow" : "text-FC6B6B"); // Using the red from your Figma for unverified
+  const statusColor = isVerified ? "text-primary-green" : (localPending ? "text-accent-yellow" : "text-FC6B6B"); 
 
   // --- STATE 1: UPLOAD FORM (User hasn't submitted yet) ---
   if (!isVerified && !localPending) {
@@ -114,7 +114,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
 
   // --- STATE 2 & 3: SUMMARY VIEW (Pending or Verified) ---
   return (
-    <div className="w-full flex flex-col xl:flex-row gap-5 xl:gap-6 w-full max-w-[800px]">
+    <div className="w-full flex flex-col xl:flex-row gap-5 xl:gap-6">
       
       {/* LEFT COLUMN: User Information */}
       <div className="flex-1 bg-white/5 border-[0.8px] border-white/10 rounded-[18px] p-[20px] flex flex-col backdrop-blur-md">

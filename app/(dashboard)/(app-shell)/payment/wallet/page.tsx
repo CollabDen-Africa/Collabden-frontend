@@ -19,7 +19,7 @@ import { useSubscription } from "@/hooks/subscription/useSubscription";
 import Button from "@/components/ui/Button";
 import { usePayment } from "@/hooks/payment/usePayment";
 
-// --- TIER DATA (Matches PDF) ---
+// --- TIER DATA ---
 const TIERS = {
   BASIC: {
     name: "Basic",
@@ -50,8 +50,9 @@ const TIERS = {
 export default function WalletPage() {
   const router = useRouter();
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
-
-  const WALLET_BALANCE = 0; // To be properly implemented
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
+  const WALLET_BALANCE = walletData?.balance || 0; 
   
     // Subscription State & Mutations
   const { useMySubscription, useSubscribe, useCancelSubscription, useReactivateSubscription } = useSubscription();

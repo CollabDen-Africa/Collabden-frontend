@@ -34,7 +34,7 @@ export default function ProfileMiddleColumn({
         <p className="font-raleway font-normal text-[14px] text-white/70 leading-5.75 flex-1">
          {bio || "Add a bio in Account Settings to tell collaborators about your work and creative process."}
         </p>
-        <div className="flex flex-row items-center gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-4">
           <div className="flex-1 bg-white/5 rounded-[14px] p-4 flex flex-col justify-center">
             <span className="font-raleway font-normal text-[12px] text-white/40">Years of Experience</span>
             <span className="font-raleway font-bold text-[20px] text-white mt-1">{yearsOfExperience || "Not set"}</span>
@@ -85,7 +85,7 @@ export default function ProfileMiddleColumn({
 
         {/* --- GRID VIEW LAYOUT --- */}
         {viewMode === 'grid' && (
-          <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-300">
             {portfolio.map((item) => (
               <div key={item.id} className="h-45 border border-white/10 rounded-[14px] relative overflow-hidden group cursor-pointer">
                 

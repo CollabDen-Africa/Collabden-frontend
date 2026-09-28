@@ -3,6 +3,7 @@ import paymentService from "@/services/payment.service";
 import type {
   InitializeFundingPayload,
   AddBankAccountPayload,
+  UpdateBankAccountPayload,
   RequestWithdrawalPayload,
 } from "@/types/api.types";
 import { handleApiError } from "@/lib/error-handler";
@@ -48,6 +49,17 @@ export const usePayment = () => {
       onError: (error) => handleApiError(error),
     });
 
+  // Update Bank Account
+  const useUpdateBankAccount = () =>
+    useMutation({
+      mutationFn: ({ id, data }: { id: string; data: UpdateBankAccountPayload }) => 
+          paymentService.updateBankAccount(id, data),
+      onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["payments", "bank-accounts"] });
+        },
+      onError: (error) => handleApiError(error),
+      });
+
   // Remove Bank Account
   const useRemoveBankAccount = () =>
     useMutation({
@@ -91,6 +103,7 @@ export const usePayment = () => {
     useInitializeFunding,
     useBankAccounts,
     useAddBankAccount,
+    useUpdateBankAccount,
     useRemoveBankAccount,
     useWithdraw,
     useWithdrawals,

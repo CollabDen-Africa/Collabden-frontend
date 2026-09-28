@@ -7,6 +7,7 @@ import type {
   WithdrawalRecord,
   InitializeFundingPayload,
   AddBankAccountPayload,
+  UpdateBankAccountPayload,
   RequestWithdrawalPayload,
 } from "@/types/api.types";
 
@@ -69,6 +70,14 @@ const paymentService = {
    */
   addBankAccount: async (data: AddBankAccountPayload): Promise<BankAccount> => {
     const response = await axiosInstance.post(API_ENDPOINTS.PAYMENTS.BANK_ACCOUNTS, data);
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Update an existing bank account.
+   */
+  updateBankAccount: async (id: string, data: UpdateBankAccountPayload): Promise<BankAccount> => {
+    const response = await axiosInstance.put(API_ENDPOINTS.PAYMENTS.BANK_ACCOUNT_DETAIL(id), data);
     return response.data?.data || response.data;
   },
 

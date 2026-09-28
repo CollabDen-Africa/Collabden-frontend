@@ -51,6 +51,12 @@ export interface AddBankAccountPayload {
   accountNumber: string;
 }
 
+export interface UpdateBankAccountPayload {
+  bankCode?: string;
+  accountNumber?: string;
+  isDefault?: boolean;
+}
+
 export interface RequestWithdrawalPayload {
   bankAccountId: string;
   amount: number;

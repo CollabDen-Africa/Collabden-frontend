@@ -21,12 +21,12 @@ export default function ProfileRightColumn({
       {/* Achievements Section */}
       <div className="w-full bg-white/5 border border-white/10 rounded-[35px] p-6 flex flex-col backdrop-blur-md">
         <h2 className="font-raleway font-bold text-[18px] text-white mb-4">Profile Details</h2>
-        <div className="flex items-center justify-between gap-2.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-2.5 w-full">
           {profileDetails.map((item) => {
             const DetailIcon = item.icon;
             
             return (
-              <div key={item.label} className="flex-1 h-30 bg-white/5 border border-white/20 rounded-[30px] flex flex-col items-center justify-center gap-2 hover:bg-white/10 transition-colors">
+              <div key={item.label} className="w-full sm:w-auto flex-1 h-24 sm:h-30 bg-white/5 border border-white/20 rounded-[20px] sm:rounded-[30px] flex flex-col items-center justify-center gap-1 sm:gap-2 hover:bg-white/10 transition-colors p-3">
                 <DetailIcon className="text-white/40 mb-1" size={20} />
                 <span className="font-raleway font-bold text-[22px] text-white leading-none text-center break-words">{item.value}</span>
                 <span className="font-raleway font-normal text-[11px] text-white/45 text-center leading-4 px-2">{item.label}</span>
