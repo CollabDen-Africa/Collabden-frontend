@@ -41,10 +41,10 @@ export default function SettingsPage() {
     };
   
   return (
-    <div className="w-full flex flex-col xl:flex-row gap-8 pt-4 animate-in fade-in duration-300">
+    <div className="w-full flex flex-col lg:flex-row gap-8 pt-4 animate-in fade-in duration-300">
       
       {/* Left Sidebar */}
-      <div className="w-full xl:w-70 shrink-0 h-full">
+      <div className="w-full lg:w-70 shrink-0">
         <SettingsSidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}/>

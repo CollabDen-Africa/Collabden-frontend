@@ -1,106 +1,78 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs } from "@/components/ui/Tabs";
 import Input from "@/components/ui/Input";
 import EmptyState from "@/components/ui/EmptyState";
 import { FiSearch, FiFileText } from "react-icons/fi";
-import AgreementCard, { AgreementData } from "@/components/features/dashboard-agreements/AgreementCard";
+import AgreementCard from "@/components/features/dashboard-agreements/AgreementCard";
+import { LegalAgreement } from "@/types/api.types";
+import { useUserAgreements } from "@/hooks/projects/useAgreements";
 
-// Mock Data
-const MOCK_AGREEMENTS: AgreementData[] = [
-  {
-    id: "1",
-    title: "Sponsorship Contract",
-    project: "AfroVibe Festival Launch",
-    createdDate: "April 23 2026",
-    lastUpdated: "May 4 2026",
-    collaboratorsCount: 5,
-    collaborators: [{ id: "c1", name: "Alice" }, { id: "c2", name: "Chase" }, { id: "c3", name: "Nefo" }, { id: "c4", name: "Genshin" }, { id: "c5", name: "Natsu" }],
-    status: "pending",
-    completedSignatures: 3,
-    totalSignatures: 5,
-  },
-  {
-    id: "2",
-    title: "Content Creator Agreement",
-    project: "Studio Pro Campaign",
-    createdDate: "28 August 2026",
-    lastUpdated: "5 minutes ago",
-    collaboratorsCount: 2,
-    collaborators: [{ id: "c6", name: "Bob" }, { id: "c7", name: "Charlie" }],
-    status: "signed",
-    completedSignatures: 2,
-    totalSignatures: 2,
-  },
-  {
-    id: "3",
-    title: "Collaboration Terms",
-    project: "Music Production Series",
-    createdDate: "25 July 2026",
-    lastUpdated: "8 hours ago",
-    collaboratorsCount: 5,
-    collaborators: [{ id: "c8", name: "David" }, { id: "c9", name: "Sidney" }, { id: "c9", name: "Cyan" }, { id: "c11", name: "Omotola" }, { id: "c12", name: "Genevieve" }],
-    status: "pending",
-    completedSignatures: 3,
-    totalSignatures: 5,
-  },
-  {
-    id: "4",
-    title: "License Agreement",
-    project: "Beat Library Access",
-    createdDate: "15 February 2026",
-    lastUpdated: "30 February 2026",
-    collaboratorsCount: 3,
-    collaborators: [{ id: "c13", name: "Eve" }],
-    status: "expired",
-    completedSignatures: 0,
-    totalSignatures: 3,
-  },
-];
-
-// Tabs
-const TAB_OPTIONS = [
-  "Overview", 
-  "Pending Signatures(2)", 
-  "Signed Agreements", 
-];
 
 export default function AgreementsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("Overview");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleTriggerSign = (agreement: AgreementData) => {
-    console.log("Trigger signing flow for:", agreement.title);
-  };
+  const { data: agreements = [], isLoading } = useUserAgreements();
 
-  const handleDownload = (agreement: AgreementData) => {
-      console.log("Downloading signed agreement for:", agreement.title);
+  const handleTriggerSign = (agreement: LegalAgreement) => {
+    // Redirect to the specific project workspace agreements tab
+    router.push(`/projects/${agreement.projectId}/agreements`);
+      };
+
+  const handleDownload = (agreement: LegalAgreement) => {
+    if (agreement.fileUrl) {
+        window.open(agreement.fileUrl, '_blank');
+      }
     };
   
-    const handleView = (agreement: AgreementData) => {
-      console.log("Opening read-only view for:", agreement.title);
+  const handleView = (agreement: LegalAgreement) => {
+      // Either open the document directly or route to the workspace view
+      if (agreement.fileUrl) {
+        window.open(agreement.fileUrl, '_blank');
+      } else {
+        router.push(`/projects/${agreement.projectId}/agreements`);
+      }
     };
 
   // Map tab strings to filter statuses
   const getFilterStatus = (tab: string) => {
-    if (tab.includes("Pending")) return "pending";
-    if (tab.includes("Signed")) return "signed";
-    return "all";
+    if (tab.includes("Pending")) return "PENDING_SIGNATURE";
+    if (tab.includes("Signed")) return "SIGNED";
+    return "ALL";
   };
 
   const activeStatus = getFilterStatus(activeTab);
 
-  const filteredAgreements = MOCK_AGREEMENTS.filter((agreement) => {
-    const matchesSearch = agreement.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeStatus === "all" || agreement.status === activeStatus;
+  const filteredAgreements = agreements.filter((agreement: LegalAgreement) => {
+    const matchesSearch = (agreement.title || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeStatus === "ALL" || agreement.status === activeStatus;
     return matchesSearch && matchesTab;
   });
+
+  const pendingCount = agreements.filter((a: LegalAgreement) => a.status === "PENDING_SIGNATURE").length;
+    
+    const TAB_OPTIONS = [
+      "Overview", 
+      `Pending Signatures (${pendingCount})`, 
+      "Signed Agreements", 
+    ];
+  
+    if (isLoading) {
+      return (
+        <div className="flex w-full min-h-screen items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-green"></div>
+        </div>
+      );
+    }
 
   return (
     <div className="relative w-full min-h-screen lg:p-3 overflow-hidden">
 
-      <div className="flex flex-col gap-[50px] max-w-300 mx-auto">
+      <div className="flex flex-col gap-12.5 max-w-300 mx-auto">
         
         {/* Navigation Tabs */}
         <div className="flex justify-start px-3">
@@ -127,7 +99,7 @@ export default function AgreementsPage() {
         {/* Agreements List */}
         <div className="flex flex-col gap-6">
           {filteredAgreements.length > 0 ? (
-            filteredAgreements.map((agreement) => (
+            filteredAgreements.map((agreement: LegalAgreement) => (
               <AgreementCard
                 key={agreement.id}
                 agreement={agreement}

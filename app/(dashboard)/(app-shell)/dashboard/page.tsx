@@ -162,19 +162,19 @@ export default function DashboardPage() {
   }, [marketplaceCollaborators]);
 
   return (
-    <div className="w-full flex flex-col gap-[60px] animate-in fade-in duration-500 pt-2">
+    <div className="w-full flex flex-col gap-15 animate-in fade-in duration-500 pt-2">
       
       {/* Loading indicator */}
       {isLoading && (
-        <div className="fixed top-0 left-0 w-full h-[3px] z-100">
+        <div className="fixed top-0 left-0 w-full h-0.75 z-100">
           <div className="h-full bg-primary-green animate-pulse rounded-full" style={{ width: '60%' }} />
         </div>
       )}
 
       {/* --- TOP ROW --- */}
-      <div className="w-full flex flex-col xl:flex-row gap-[40px] 2xl:gap-[70px]">
+      <div className="w-full flex flex-col xl:flex-row gap-10 2xl:gap-17.5">
         {/* Left Column */}
-        <div className="flex-1 w-full flex flex-col gap-[50px] xl:max-w-[711px]">
+        <div className="flex-1 w-full flex flex-col gap-12.5 xl:max-w-177.75">
           <TopStatsPanel stats={topStats} /> 
 
           {/* STEP 6 TOOLTIP: Final */}
@@ -206,21 +206,21 @@ export default function DashboardPage() {
         </div>
         
         {/* Right Column */}
-        <div className="w-full xl:w-[413px] flex flex-col shrink-0">
+        <div className="w-full xl:w-103.25 flex flex-col shrink-0">
           <RecentCollaboratorActivityPanel activities={recentActivity} />
         </div>
       </div>
 
       {/* --- BOTTOM ROW --- */}
-      <div className="w-full flex flex-col xl:flex-row gap-[10px] 2xl:gap-[10px] items-stretch">
-        <div className="flex-1 w-full flex flex-col xl:max-w-[700px]">
-          <h3 className="text-foreground text-[23px] font-bold font-sans transform rotate-1 mb-[16px] origin-left">
+      <div className="w-full flex flex-col xl:flex-row gap-2.5 items-stretch">
+        <div className="flex-1 w-full flex flex-col xl:max-w-175">
+          <h3 className="text-foreground text-[23px] font-bold font-sans transform rotate-1 mb-4 origin-left">
             Suggested For You
           </h3>
           <SuggestedProjectsPanel projects={suggestedProjects} />
         </div>
         
-        <div className="w-full xl:w-[500px] flex flex-col shrink-0">
+        <div className="w-full xl:w-125 flex flex-col shrink-0">
           <SuggestedCollaboratorsPanel collaborators={suggestedCollaborators} />
         </div>
       </div>

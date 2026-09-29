@@ -1,5 +1,6 @@
 import React from 'react';
 import Avatar from '@/components/ui/Avatar';
+import Link from 'next/link';
 import Truncate from '@/components/ui/Truncate';
 
 export interface ProjectCollaborator {
@@ -8,6 +9,7 @@ export interface ProjectCollaborator {
 }
 
 export interface ProjectCardProps {
+  id: string;
   title: string;
   genre: string;
   tracks: string;
@@ -30,6 +32,7 @@ const AudioLinesIcon = () => (
 );
 
 export default function ProjectCard({ 
+  id,
   title, 
   genre, 
   tracks, 
@@ -45,7 +48,7 @@ export default function ProjectCard({
   const badgeText = isReview ? 'text-accent-yellow' : 'text-accent-green-bright/70';
 
   return (
-    <div className="w-full bg-white/5 hover:bg-white/10 transition-colors rounded-[20px] px-[20px] md:px-[32px] py-[24px] md:py-[32px] flex flex-col gap-[19px]">
+    <div className="w-full bg-white/5 hover:bg-white/10 transition-colors rounded-[20px] px-5 md:px-8 py-6 md:py-8 flex flex-col gap-4.75">
           
       {/* TOP SECTION */}
       <div className="flex justify-between items-start w-full">
@@ -68,18 +71,18 @@ export default function ProjectCard({
               <Truncate text={tracks} className="flex-1" />
             </div>
 
-            <div className="flex items-center gap-[6px]">
+            <div className="flex items-center gap-1.5">
               <div className="flex items-center">
                 {collaborators.map((user, index) => (
                   <div 
                     key={index} 
-                    className={`relative ${index > 0 ? '-ml-[8px]' : ''}`}
+                    className={`relative ${index > 0 ? '-ml-2' : ''}`}
                     style={{ zIndex: 10 - index }} 
                   >
                     <Avatar 
                       name={user.name} 
                       src={user.avatarUrl} 
-                      className="w-[23px] h-[23px] text-[9px] border-[1.15px] border-primary-green" 
+                      className="w-5.75 h-5.75 text-[9px] border-[1.15px] border-primary-green" 
                     />
                   </div>
                 ))}
@@ -101,7 +104,7 @@ export default function ProjectCard({
       </div>
 
       {/* Progress Bar + Timestamp + Project Dropdown */}
-      <div className="flex flex-col gap-[8px] w-full mt-[10px]">
+      <div className="flex flex-col gap-2 w-full mt-2.5">
         
         <div className="flex justify-between items-center w-full">
           <span className="text-foreground/60 font-medium text-[14px]">Progress</span>
@@ -120,18 +123,18 @@ export default function ProjectCard({
         </div>
 
         <div className="flex justify-between items-end w-full mt-1">
-          <div className="flex items-center gap-[5px] text-foreground/60">
-            <div className="w-[16px] h-[16px] flex items-center justify-center">
+          <div className="flex items-center gap-1.25 text-foreground/60">
+            <div className="w-4 h-4 flex items-center justify-center">
               <span className="w-[12.6px] h-[11.8px] bg-foreground/60 opacity-50" style={{ clipPath: 'circle(50%)' }} />
             </div>
             <span className="text-[12px] font-medium">Updated {updated}</span>
           </div>
           
           {/* Open Project Dropdown */}
-          <button className="flex items-center gap-[4px] hover:opacity-80 transition-opacity group">
+          <Link href={`/projects/${id}`} className="flex items-center gap-1 hover:opacity-80 transition-opacity group">
             <span className="text-primary-green font-medium text-[12px] group-hover:underline">Open Project</span>
-            <span className="w-[15px] h-[7px] bg-primary-green" style={{ clipPath: 'polygon(0 0, 50% 100%, 100% 0, 80% 0, 50% 60%, 20% 0)' }} />
-          </button>
+            <span className="w-3.75 h-1.75 bg-primary-green" style={{ clipPath: 'polygon(0 0, 50% 100%, 100% 0, 80% 0, 50% 60%, 20% 0)' }} />
+          </Link>
         </div>
 
       </div>
