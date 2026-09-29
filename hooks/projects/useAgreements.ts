@@ -67,3 +67,13 @@ export const useAgreements = (projectId: string) => {
     useEsignAgreement,
   };
 };
+
+// To fetch agreements across all projects for the dashboard agreements page
+export const useUserAgreements = () => {
+  const queryClient = useQueryClient();
+  
+  return useQuery({
+    queryKey: ['user', 'agreements'],
+    queryFn: () => agreementService.getUserAgreements(),
+  });
+};
