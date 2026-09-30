@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { FiBell, FiMail, FiSmartphone, FiClock, FiLoader } from "react-icons/fi";
 import Toggle from "@/components/ui/Toggle";
 import { useNotificationSettingsHook } from "@/hooks/notifications/useNotificationSettings";
@@ -10,15 +10,43 @@ export default function ProfileSettingsNotifications() {
   const { data: settings, isLoading } = useNotificationSettings();
   const updateSettingsMutation = useUpdateNotificationSettings();
 
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+
+  const showToast = (message: string, tone: "success" | "error") => {
+    setToast({ message, tone });
+    setTimeout(() => {
+      setToast(null);
+    }, 3500);
+  };
+
   const handleToggleChannel = (channel: "inApp" | "email" | "sms") => {
     if (!settings) return;
-    updateSettingsMutation.mutate({
-      [channel]: !settings[channel],
-    });
+    const newValue = !settings[channel];
+    updateSettingsMutation.mutate(
+      { [channel]: newValue },
+      {
+        onSuccess: () => {
+          showToast("Notification settings updated successfully.", "success");
+        },
+        onError: (err: any) => {
+          showToast(err?.response?.data?.error || "Failed to update notification settings.", "error");
+        },
+      }
+    );
   };
 
   const handleFrequencyChange = (frequency: "IMMEDIATE" | "DAILY" | "WEEKLY") => {
-    updateSettingsMutation.mutate({ frequency });
+    updateSettingsMutation.mutate(
+      { frequency },
+      {
+        onSuccess: () => {
+          showToast(`Email summary frequency set to ${frequency.toLowerCase()}.`, "success");
+        },
+        onError: (err: any) => {
+          showToast(err?.response?.data?.error || "Failed to update frequency.", "error");
+        },
+      }
+    );
   };
 
   if (isLoading) {
@@ -30,7 +58,7 @@ export default function ProfileSettingsNotifications() {
   }
 
   return (
-    <div className="flex flex-col w-full flex-1 gap-8.75 animate-in fade-in duration-300">
+    <div className="flex flex-col w-full flex-1 gap-8.75 animate-in fade-in duration-300 relative">
       {/* Header */}
       <div className="flex flex-col gap-1.5">
         <h1 className="font-raleway font-semibold text-[26.4px] leading-8.5 text-white/90">
@@ -116,7 +144,8 @@ export default function ProfileSettingsNotifications() {
             <button
               key={freq}
               onClick={() => handleFrequencyChange(freq)}
-              className={`px-6 py-3 rounded-full border transition-all text-[15px] font-medium ${
+              disabled={updateSettingsMutation.isPending}
+              className={`px-6 py-3 rounded-full border transition-all text-[15px] font-medium disabled:opacity-60 ${
                 settings?.frequency === freq
                   ? "bg-primary-green border-primary-green text-white"
                   : "bg-white/5 border-white/10 text-white/50 hover:border-white/30"
@@ -127,6 +156,19 @@ export default function ProfileSettingsNotifications() {
           ))}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-999 flex items-center gap-2.5 rounded-2xl px-5 py-3.5 text-sm font-semibold text-white shadow-2xl backdrop-blur-md transition-all animate-in fade-in slide-in-from-bottom-4 border ${
+            toast.tone === "success"
+              ? "bg-primary-green/20 border-primary-green/50 text-primary-green"
+              : "bg-red-500/20 border-red-500/50 text-red-400"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

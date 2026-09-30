@@ -38,13 +38,19 @@ export const useProfile = () => {
       onError: (error) => handleApiError(error),
     });
 
-  // Update avatar URL
+  // Update avatar URL or file upload
   const useUpdateAvatar = (userId: string) =>
     useMutation({
-      mutationFn: (avatarUrl: string) => profileService.updateAvatar(avatarUrl),
+      mutationFn: (avatarInput: File | string) => {
+        if (typeof avatarInput === "string") {
+          return profileService.updateAvatar(avatarInput);
+        }
+        return profileService.uploadAvatarFile(avatarInput);
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["profile", userId] });
         queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
+        queryClient.invalidateQueries({ queryKey: ["subscriptions", "me"] });
       },
       onError: (error) => handleApiError(error),
     });

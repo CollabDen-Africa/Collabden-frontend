@@ -22,9 +22,12 @@ export async function POST(request: Request) {
       }
 
       // Create the response with standardized user extraction
+      // NOTE: We also include the token in the body so the client can store it in localStorage
+      // for axiosInstance (which uses Bearer auth for direct backend API calls).
       const nextResponse = NextResponse.json({
         success: true,
         user: data.user || data.data?.user || data.data,
+        token,
         message: data.message || 'Login successful',
       });
 

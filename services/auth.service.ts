@@ -1,5 +1,6 @@
 import axios from "axios";
 import axiosInstance from "@/lib/axios";
+import { proxyAxios } from "@/lib/axios";
 import { API_ENDPOINTS } from "@/constants/api-endpoints";
 
 export interface SignupPayload {
@@ -36,7 +37,8 @@ export interface AdminResend2FAPayload {
 
 const authService = {
   /**
-   * Register a new user
+   * Register a new user.
+   * Public endpoint — no auth required.
    */
   signup: async (data: SignupPayload) => {
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.SIGNUP, data);
@@ -44,14 +46,14 @@ const authService = {
   },
 
   /**
-   * Login a user
+   * Login a user.
+   * Goes through Next.js proxy to set the HTTP-only auth-token cookie.
    */
   login: async (data: LoginPayload) => {
     if (typeof window !== "undefined") {
       const response = await axios.post("/api/auth/login", data);
       return response.data;
     }
-
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.LOGIN, data);
     return response.data;
   },
@@ -61,7 +63,7 @@ const authService = {
    */
   adminLogin: async (data: LoginPayload) => {
     const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.PROXY_LOGIN, data, {
-      baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
+      baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
     });
     return response.data;
   },
@@ -71,13 +73,13 @@ const authService = {
    */
   adminVerify2FA: async (data: AdminVerify2FAPayload) => {
     const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.PROXY_VERIFY_2FA, data, {
-      baseURL: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
+      baseURL: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
     });
     return response.data;
   },
 
   /**
-   * Resend admin 2FA code
+   * Resend admin 2FA code.
    */
   adminResend2FA: async (data: AdminResend2FAPayload) => {
     const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.RESEND_2FA, data);
@@ -85,7 +87,7 @@ const authService = {
   },
 
   /**
-   * Admin forgot password request
+   * Admin forgot password request.
    */
   adminForgotPassword: async (email: string) => {
     const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.FORGOT_PASSWORD, { email });
@@ -93,7 +95,7 @@ const authService = {
   },
 
   /**
-   * Admin reset password
+   * Admin reset password.
    */
   adminResetPassword: async (data: { resetToken: string; newPassword: string }) => {
     const response = await axiosInstance.post(API_ENDPOINTS.ADMIN_AUTH.RESET_PASSWORD, data);
@@ -101,110 +103,87 @@ const authService = {
   },
 
   /**
-   * Logout user / admin
+   * Logout user / admin.
+   * Clears the HTTP-only cookie via the Next.js logout route.
    */
   logout: async () => {
     if (typeof window !== "undefined") {
       const response = await axios.post("/api/auth/logout");
+      // Clean up any lingering localStorage keys (belt-and-suspenders)
       localStorage.removeItem("auth_token");
       localStorage.removeItem("collabden_admin_logged_in");
       return response.data;
     }
-
     return { success: true };
   },
 
   /**
-   * Get current user profile
+   * Get current user profile.
+   * Uses the Next.js proxy which reads the HTTP-only cookie server-side.
    */
   getProfile: async () => {
     if (typeof window !== "undefined") {
-      try {
-        const response = await axios.get("/api/auth/profile");
-        localStorage.removeItem("auth_token");
-        return response.data;
-      } catch (error) {
-        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
-          throw error;
-        }
-      }
+      const response = await axios.get("/api/auth/profile");
+      return response.data;
     }
-
     const response = await axiosInstance.get(API_ENDPOINTS.AUTH.PROFILE);
     return response.data;
   },
 
   /**
-   * Verify user email via OTP/code
+   * Verify user email via OTP/code.
+   * Public endpoint.
    */
   verifyEmail: async (data: VerifyPayload) => {
     if (!data.email) {
       throw new Error("Email is required for verification.");
     }
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.VERIFY,
-      {
-        email: data.email.trim(),
-        verificationToken: data.verificationToken,
-      }
-    );
+    const response = await axiosInstance.post(API_ENDPOINTS.AUTH.VERIFY, {
+      email: data.email.trim(),
+      verificationToken: data.verificationToken,
+    });
     return response.data;
   },
 
   /**
-   * Resend verification email
+   * Resend verification email.
+   * Public endpoint.
    */
   resendVerification: async (email: string) => {
     if (!email) {
       throw new Error("Email is required to resend verification code.");
     }
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.RESEND_VERIFY,
-      { email: email.trim() }
-    );
+    const response = await axiosInstance.post(API_ENDPOINTS.AUTH.RESEND_VERIFY, {
+      email: email.trim(),
+    });
     return response.data;
   },
 
   /**
-   * Request password reset link
+   * Request password reset link.
+   * Public endpoint.
    */
   forgotPassword: async (email: string) => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
-      { email }
-    );
+    const response = await axiosInstance.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
     return response.data;
   },
 
   /**
-   * Reset password with token
+   * Reset password with token.
+   * Public endpoint.
    */
   resetPassword: async (data: ResetPasswordPayload) => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AUTH.RESET_PASSWORD,
-      data
-    );
+    const response = await axiosInstance.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, data);
     return response.data;
   },
 
   /**
-   * Update user onboarding status
+   * Update user onboarding status.
+   * Authenticated — goes through proxyAxios (cookie auth).
    */
   updateOnboarding: async (data: { hasCompletedOnboarding: boolean }) => {
     const payload = { completed: data.hasCompletedOnboarding };
-
-    if (typeof window !== "undefined") {
-      try {
-        const response = await axios.patch("/api/proxy/user/onboarding", payload);
-        return response.data;
-      } catch (error) {
-        if (!axios.isAxiosError(error) || error.response?.status !== 401) {
-          throw error;
-        }
-      }
-    }
-
-    const response = await axiosInstance.patch(API_ENDPOINTS.AUTH.ONBOARDING, payload);
+    const response = await proxyAxios.patch("/user/onboarding", payload);
     return response.data;
   },
 };

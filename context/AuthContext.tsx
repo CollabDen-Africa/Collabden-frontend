@@ -114,19 +114,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   return; // Exit early so the real API is not called
                 }
                 //  --- DEV BYPASS END ---
-                 
-                
+
         const data = await authService.getProfile();
-        const profileUser = data.user || data.data;
+        // Guard: if backend returned no user data, treat as unauthenticated
+        const profileUser = data?.user || data?.data;
+        if (!profileUser) {
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
         setUser(profileUser);
         setIsAuthenticated(true);
         if (profileUser?.isAdmin) {
           localStorage.setItem("collabden_admin_logged_in", "true");
         }
-      } catch {
-        // Not authenticated
+      } catch (err: any) {
+        // 401 = expected when not logged in; any other error is unexpected
+        const status = err?.response?.status;
+        if (status && status !== 401) {
+          console.error('[AuthContext] fetchProfile unexpected error:', err);
+        }
+        // Either way, mark as unauthenticated and clear stale localStorage token
         setUser(null);
         setIsAuthenticated(false);
+        localStorage.removeItem('auth_token');
       } finally {
         setIsInitializing(false);
       }
@@ -147,12 +158,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshUser = async () => {
     try {
       const data = await authService.getProfile();
-      const updatedUser = data.user || data.data;
+      const updatedUser = data?.user || data?.data;
+      if (!updatedUser) {
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('auth_token');
+        return;
+      }
       setUser(updatedUser);
       setIsAuthenticated(true);
     } catch {
       setUser(null);
       setIsAuthenticated(false);
+      localStorage.removeItem('auth_token');
     }
   };
 
@@ -174,8 +192,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await loginMutation.mutateAsync(data);
       // Browser logins are routed through /api/auth/login, which sets the
-      // HTTP-only auth-token cookie used by middleware and server-side proxies.
+      // HTTP-only auth-token cookie used by middleware, proxyAxios, and server-side routes.
       const loggedUser = response.user || response.data?.user || response.data;
+
       if (loggedUser) {
         setUser(loggedUser);
         setIsAuthenticated(true);

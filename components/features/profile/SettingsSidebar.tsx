@@ -127,25 +127,26 @@ export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSide
           const Icon = link.icon;
           const isCurrentlyActive = activeTab === link.id;
           return (
-            <button 
+            <button
               key={link.id}
               onClick={() => onTabChange(link.id)}
               className={`relative flex items-center w-full h-13 px-6.75 gap-3.75 transition-colors ${
-                link.isActive 
-                  ? "bg-linear-to-r from-primary-green/20 to-transparent" 
+                isCurrentlyActive
+                  ? "bg-gradient-to-r from-primary-green/20 to-transparent"
                   : "hover:bg-white/5"
               }`}
             >
-              {/* Active Left Border Indicator */}
               {isCurrentlyActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-12 bg-primary-green rounded-r-[50px]" />
               )}
-              
-              <Icon 
-                size={20} 
-                className={isCurrentlyActive ? "text-primary-green" : "text-white/70"} 
+
+              <Icon
+                size={20}
+                className={
+                  isCurrentlyActive ? "text-primary-green" : "text-white/70"
+                }
               />
-              <span 
+              <span
                 className={`font-raleway font-medium text-[16px] leading-4.75 ${
                   isCurrentlyActive ? "text-primary-green" : "text-white/90"
                 }`}

@@ -1,5 +1,5 @@
-import axiosInstance from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/api-endpoints";
+import { proxyAxios } from "@/lib/axios";
+import { PROXY_ENDPOINTS } from "@/constants/api-endpoints";
 import type { NotificationSetting, UpdateNotificationSettingsPayload } from "@/types/api.types";
 
 const notificationSettingsService = {
@@ -7,7 +7,7 @@ const notificationSettingsService = {
    * Get notification settings for the authenticated user.
    */
   getNotificationSettings: async (): Promise<NotificationSetting> => {
-    const response = await axiosInstance.get(API_ENDPOINTS.NOTIFICATION_SETTINGS.ROOT);
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.NOTIFICATION_SETTINGS.ROOT);
     return response.data?.data || response.data;
   },
 
@@ -15,7 +15,7 @@ const notificationSettingsService = {
    * Update notification settings.
    */
   updateNotificationSettings: async (payload: UpdateNotificationSettingsPayload): Promise<NotificationSetting> => {
-    const response = await axiosInstance.put(API_ENDPOINTS.NOTIFICATION_SETTINGS.ROOT, payload);
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.NOTIFICATION_SETTINGS.ROOT, payload);
     return response.data?.data || response.data;
   },
 };

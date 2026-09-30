@@ -22,12 +22,28 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
   const selfieRef = useRef<HTMLInputElement>(null);
   const poaRef = useRef<HTMLInputElement>(null);
 
-  const memberSince = (user as any) 
-    ? new Date(user as any).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const userCreated = profile?.createdAt || (user as any)?.createdAt;
+  const memberSince = userCreated && !isNaN(new Date(userCreated).getTime())
+    ? new Date(userCreated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : "Recently";
 
   const statusLabel = isVerified ? "Verified" : (localPending ? "Under Review" : "Unverified");
   const statusColor = isVerified ? "text-primary-green" : (localPending ? "text-accent-yellow" : "text-FC6B6B"); 
+
+  const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ")
+    || profile?.legalName
+    || profile?.displayName
+    || [(user as any)?.firstName, (user as any)?.lastName].filter(Boolean).join(" ")
+    || "Not Set";
+
+  const userIdDisplay = profile?.id
+    ? `USR-${profile.id.substring(0, 6)}`
+    : (user as any)?.id
+    ? `USR-${(user as any).id.substring(0, 6)}`
+    : "USR-----";
+
+  const userEmail = profile?.email || (user as any)?.email || "Not Set";
+  const accountType = profile?.role || (user as any)?.role || "Collaborator";
 
   // --- STATE 1: UPLOAD FORM (User hasn't submitted yet) ---
   if (!isVerified && !localPending) {
@@ -128,7 +144,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
           <div className="flex justify-between items-center py-[9px] border-b border-white/10">
             <span className="font-inter text-[12px] text-white/45">Full Name</span>
             <span className="font-raleway font-semibold text-[12px] text-white">
-              {profile?.legalName || profile?.displayName || "Not Set"}
+              {fullName}
             </span>
           </div>
 
@@ -136,7 +152,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
           <div className="flex justify-between items-center py-[9px] border-b border-white/10">
             <span className="font-inter text-[12px] text-white/45">User ID</span>
             <span className="font-raleway font-semibold text-[12px] text-accent-soft-blue">
-              USR-{user?.id?.substring(0,4) || "0102"}
+              {userIdDisplay}
             </span>
           </div>
 
@@ -144,7 +160,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
           <div className="flex justify-between items-center py-[9px] border-b border-white/10">
             <span className="font-inter text-[12px] text-white/45">Email</span>
             <span className="font-raleway font-semibold text-[12px] text-white">
-              {profile?.email || user?.email}
+              {userEmail}
             </span>
           </div>
 
@@ -152,7 +168,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
           <div className="flex justify-between items-center py-[9px] border-b border-white/10">
             <span className="font-inter text-[12px] text-white/45">Account Type</span>
             <span className="font-raleway font-semibold text-[12px] text-white">
-              {profile?.role || "Collaborator"}
+              {accountType}
             </span>
           </div>
 
@@ -202,7 +218,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
             </div>
             <div className="p-3 bg-transparent">
               <h4 className="font-raleway font-bold text-[12px] text-white">National ID (Front)</h4>
-              <p className="font-inter text-[10px] text-white/45 mt-0.5">NGA-NIN · JPG · 2.1 MB</p>
+              <p className="font-inter text-[10px] text-white/45 mt-0.5">Submitted · Encrypted</p>
             </div>
           </div>
 
@@ -217,7 +233,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
             </div>
             <div className="p-3 bg-transparent">
               <h4 className="font-raleway font-bold text-[12px] text-white">National ID (Back)</h4>
-              <p className="font-inter text-[10px] text-white/45 mt-0.5">NGA-NIN · JPG · 1.9 MB</p>
+              <p className="font-inter text-[10px] text-white/45 mt-0.5">Submitted · Encrypted</p>
             </div>
           </div>
 
@@ -232,7 +248,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
             </div>
             <div className="p-3 bg-transparent">
               <h4 className="font-raleway font-bold text-[12px] text-white">Selfie Photo</h4>
-              <p className="font-inter text-[10px] text-white/45 mt-0.5">Self-captured · PNG · 3.4 MB</p>
+              <p className="font-inter text-[10px] text-white/45 mt-0.5">Submitted · Encrypted</p>
             </div>
           </div>
 
@@ -247,7 +263,7 @@ export default function VerificationPanel({ isVerified, isPending = false, profi
             </div>
             <div className="p-3 bg-transparent">
               <h4 className="font-raleway font-bold text-[12px] text-white">Proof of Address</h4>
-              <p className="font-inter text-[10px] text-white/45 mt-0.5">Utility bill · PDF · 0.8 MB</p>
+              <p className="font-inter text-[10px] text-white/45 mt-0.5">Submitted · Encrypted</p>
             </div>
           </div>
 
