@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import { HiHeart, HiBadgeCheck } from "react-icons/hi";
@@ -177,14 +178,16 @@ export default function CollaboratorCard({ userId, name, role, bio, genres, imag
               </span>
             </Button>
             
-            <Button 
-              variant="outline" 
-              className="flex-1 px-2! py-[7.5px] border-[0.75px] flex items-center justify-center hover:bg-white/30 transition-colors"
-            >
-              <span className="font-sans font-medium text-[9.4px] leading-none text-white whitespace-nowrap">
-                View Profile
-              </span>
-            </Button>
+            <Link href={`/profile?id=${userId}`} className="flex-1">
+              <Button 
+                variant="outline" 
+                className="w-full px-2! py-[7.5px] border-[0.75px] flex items-center justify-center hover:bg-white/30 transition-colors"
+              >
+                <span className="font-sans font-medium text-[9.4px] leading-none text-white whitespace-nowrap">
+                  View Profile
+                </span>
+              </Button>
+            </Link>
           </div>
           
         </div>

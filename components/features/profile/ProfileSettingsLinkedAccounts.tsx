@@ -12,19 +12,44 @@ import {
   FaYoutube, 
   FaXTwitter 
 } from "react-icons/fa6";
+import { useAuth } from "@/context/AuthContext";
+import { useProfile } from "@/hooks/profile/useProfile";
 
-const ACCOUNTS = [
-  { id: "linkedin", platform: "LinkedIn", username: "oyinda-Babalola", sync: "Synced 2 hours ago", connected: true, bg: "bg-[#0A66C2]", icon: FaLinkedinIn },
-  { id: "instagram", platform: "Instagram", username: "@oyinda.creates", sync: "Synced 1 day ago", connected: true, bg: "bg-gradient-to-tr from-[#FFDD55] via-[#FF543E] to-[#C837AB]", icon: FaInstagram },
-  { id: "behance", platform: "Behance", username: "", sync: "Not connected", connected: false, bg: "bg-[#000000] border border-white/20", icon: FaBehance },
-  { id: "dribbble", platform: "Dribbble", username: "oyinda", sync: "Synced 3 days ago", connected: true, bg: "bg-[#EA4C89]", icon: FaDribbble },
-  { id: "spotify", platform: "Spotify", username: "", sync: "Not connected", connected: false, bg: "bg-[#1ED760]", icon: FaSpotify },
-  { id: "youtube", platform: "YouTube", username: "", sync: "Not connected", connected: false, bg: "bg-[#FF0000]", icon: FaYoutube },
-  { id: "twitter", platform: "X (Twitter)", username: "@oyinda_", sync: "Synced 5 hours ago", connected: true, bg: "bg-[#000000] border border-white/20", icon: FaXTwitter },
-  { id: "web", platform: "Personal Website", username: "", sync: "Not connected", connected: false, bg: "bg-[#204F99]", icon: FiGlobe }
+const BASE_ACCOUNTS = [
+  { id: "linkedin", platform: "LinkedIn", matchKey: "linkedin", bg: "bg-[#0A66C2]", icon: FaLinkedinIn },
+  { id: "instagram", platform: "Instagram", matchKey: "instagram", bg: "bg-gradient-to-tr from-[#FFDD55] via-[#FF543E] to-[#C837AB]", icon: FaInstagram },
+  { id: "behance", platform: "Behance", matchKey: "behance", bg: "bg-[#000000] border border-white/20", icon: FaBehance },
+  { id: "dribbble", platform: "Dribbble", matchKey: "dribbble", bg: "bg-[#EA4C89]", icon: FaDribbble },
+  { id: "spotify", platform: "Spotify", matchKey: "spotify", bg: "bg-[#1ED760]", icon: FaSpotify },
+  { id: "youtube", platform: "YouTube", matchKey: "youtube", bg: "bg-[#FF0000]", icon: FaYoutube },
+  { id: "twitter", platform: "X (Twitter)", matchKey: "twitter", bg: "bg-[#000000] border border-white/20", icon: FaXTwitter },
+  { id: "web", platform: "Personal Website", matchKey: "http", bg: "bg-[#204F99]", icon: FiGlobe }
 ];
 
 export default function ProfileSettingsLinkedAccounts() {
+  const { user } = useAuth();
+  const { useUserProfile } = useProfile();
+  const { data: profile } = useUserProfile(user?.id || "");
+
+  const userLinks: string[] = Array.isArray(profile?.socialLinks) 
+    ? profile.socialLinks 
+    : Array.isArray(profile?.portfolioLinks)
+    ? profile.portfolioLinks
+    : [];
+
+  const accounts = BASE_ACCOUNTS.map((account) => {
+    const matchedUrl = userLinks.find((url) => 
+      typeof url === "string" && url.toLowerCase().includes(account.matchKey)
+    );
+    const connected = Boolean(matchedUrl);
+    return {
+      ...account,
+      username: matchedUrl ? matchedUrl.replace(/^https?:\/\/(www\.)?/, "") : "",
+      sync: connected ? "Connected" : "Not connected",
+      connected,
+    };
+  });
+
   return (
     <div className="flex flex-col w-full flex-1 gap-8.75 animate-in fade-in duration-300">
       
@@ -40,7 +65,7 @@ export default function ProfileSettingsLinkedAccounts() {
 
       {/* Grid Container */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
-        {ACCOUNTS.map((account) => {
+        {accounts.map((account) => {
           const Icon = account.icon;
           
           return (

@@ -41,20 +41,14 @@ export default function SettingsPage() {
     };
   
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-8 pt-4 animate-in fade-in duration-300">
-      
-      {/* Left Sidebar */}
-      <div className="w-full lg:w-70 shrink-0">
-        <SettingsSidebar
-          activeTab={activeTab}
-          onTabChange={setActiveTab}/>
-      </div>
-      
-      {/* Right Content Area - render based on active tab */}
-      <div className="flex-1 w-full min-w-0">
-        {renderTabContent()}
+    <div className="w-full flex flex-col lg:flex-row gap-8 py-4 lg:h-[calc(100vh-2rem)] lg:overflow-hidden animate-in fade-in duration-300">
+      <div className="w-full lg:w-72 shrink-0 lg:sticky lg:top-4 lg:self-start">
+        <SettingsSidebar activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
+      <div className="flex-1 w-full min-w-0 lg:h-full lg:overflow-y-auto pr-2 pb-16 custom-scrollbar">
+        {renderTabContent()}
+      </div>
     </div>
   );
 }

@@ -64,9 +64,11 @@ export default function ProfileEditModal({
         specializations: asList(form.specializations),
         primaryRoles: asList(form.primaryRoles),
       });
-      onClose();
+    } catch (err) {
+      console.error("Save profile error:", err);
     } finally {
       setIsSaving(false);
+      onClose();
     }
   };
 

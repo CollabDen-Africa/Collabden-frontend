@@ -15,6 +15,7 @@ export interface UserSubscription {
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
+  usedStorageGB?: number;
 }
 
 export interface Invoice {

@@ -1,13 +1,15 @@
-import axiosInstance from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/api-endpoints";
+import { proxyAxios } from "@/lib/axios";
+import { PROXY_ENDPOINTS } from "@/constants/api-endpoints";
 import type { LegalAgreement } from "@/types/api.types";
 
 const agreementService = {
   /**
    * List all agreements for the authenticated user across all projects.
+   * NOTE: This uses a project-level endpoint — adjust if a user-level endpoint exists.
    */
   getUserAgreements: async (): Promise<LegalAgreement[]> => {
-    const response = await axiosInstance.get(API_ENDPOINTS.ADMIN_USERS.ALL_USERS + "/agreements");
+    // Fallback: fetches from user agreements if backend has such endpoint
+    const response = await proxyAxios.get('/user/agreements');
     const raw = response.data;
     if (raw?.data && Array.isArray(raw.data)) return raw.data;
     if (Array.isArray(raw)) return raw;
@@ -18,7 +20,7 @@ const agreementService = {
    * List all agreement documents for a project.
    */
   getAgreements: async (projectId: string): Promise<LegalAgreement[]> => {
-    const response = await axiosInstance.get(API_ENDPOINTS.AGREEMENTS.LIST(projectId));
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.AGREEMENTS.LIST(projectId));
     const raw = response.data;
     if (raw?.agreements && Array.isArray(raw.agreements)) return raw.agreements;
     if (raw?.data && Array.isArray(raw.data)) return raw.data;
@@ -30,8 +32,8 @@ const agreementService = {
    * Upload a new draft agreement document (PDF).
    */
   uploadDraft: async (projectId: string, formData: FormData): Promise<LegalAgreement> => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AGREEMENTS.UPLOAD(projectId),
+    const response = await proxyAxios.post(
+      PROXY_ENDPOINTS.AGREEMENTS.UPLOAD(projectId),
       formData,
       {
         headers: {
@@ -47,8 +49,8 @@ const agreementService = {
    * Edit or replace an agreement document before it is signed.
    */
   update: async (projectId: string, agreementId: string, formData: FormData): Promise<LegalAgreement> => {
-    const response = await axiosInstance.put(
-      API_ENDPOINTS.AGREEMENTS.UPDATE(projectId, agreementId),
+    const response = await proxyAxios.put(
+      PROXY_ENDPOINTS.AGREEMENTS.UPDATE(projectId, agreementId),
       formData,
       {
         headers: {
@@ -64,8 +66,8 @@ const agreementService = {
    * Update an agreement's status manually.
    */
   updateStatus: async (projectId: string, agreementId: string, status: "PENDING_SIGNATURE" | "SIGNED"): Promise<LegalAgreement> => {
-    const response = await axiosInstance.patch(
-      API_ENDPOINTS.AGREEMENTS.STATUS(projectId, agreementId),
+    const response = await proxyAxios.patch(
+      PROXY_ENDPOINTS.AGREEMENTS.STATUS(projectId, agreementId),
       { status }
     );
     const raw = response.data;
@@ -76,8 +78,8 @@ const agreementService = {
    * Upload a signed agreement document copy manually.
    */
   uploadSignedCopy: async (projectId: string, agreementId: string, formData: FormData): Promise<LegalAgreement> => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AGREEMENTS.SIGN(projectId, agreementId),
+    const response = await proxyAxios.post(
+      PROXY_ENDPOINTS.AGREEMENTS.SIGN(projectId, agreementId),
       formData,
       {
         headers: {
@@ -93,8 +95,8 @@ const agreementService = {
    * Electronically sign an agreement directly on the platform.
    */
   esign: async (projectId: string, agreementId: string, intentToSign: boolean): Promise<LegalAgreement> => {
-    const response = await axiosInstance.post(
-      API_ENDPOINTS.AGREEMENTS.ESIGN(projectId, agreementId),
+    const response = await proxyAxios.post(
+      PROXY_ENDPOINTS.AGREEMENTS.ESIGN(projectId, agreementId),
       { intentToSign }
     );
     const raw = response.data;

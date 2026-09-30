@@ -116,11 +116,24 @@ export default function ProfileSettingsSubscriptions() {
   const statusColorClass = subscription?.status === "ACTIVE" ? "text-primary-green" : "text-red-400";
 
   
-  // Mocking storage usage for the UI (e.g., 72% used)
-  const usedStorageGB = (subscription as any)?.usedStorageGB || 0; 
+  // Storage usage formatting and percentage calculation
+  const usedStorageGB = subscription?.usedStorageGB ?? 0;
   const storagePercentage = activePlanData.storageGB > 0 
-    ? Math.min((usedStorageGB /activePlanData.storageGB) * 100, 100) 
+    ? Math.min((usedStorageGB / activePlanData.storageGB) * 100, 100) 
     : 0;
+
+  const formatStorageLabel = (gb: number) => {
+    if (gb <= 0) return "0 GB";
+    if (gb < 0.1) {
+      const mb = gb * 1024;
+      return `${mb >= 1 ? mb.toFixed(1) : mb.toFixed(2)} MB`;
+    }
+    return `${gb} GB`;
+  };
+
+  const isStorageFull = storagePercentage >= 100;
+  const isStorageWarning = storagePercentage >= 80;
+  const storageBarColor = isStorageFull ? "bg-red-500" : (isStorageWarning ? "bg-amber-400" : "bg-primary-green");
 
   if (isSubLoading) {
     return (
@@ -182,16 +195,24 @@ export default function ProfileSettingsSubscriptions() {
               <span className="font-raleway font-normal text-[17.6px]">Storage</span>
             </div>
             <span className="font-raleway font-normal text-[17.6px] text-white/80">
-              {usedStorageGB} gb/{activePlanData.storageGB} gb
+              {formatStorageLabel(usedStorageGB)} / {activePlanData.storageGB} GB
             </span>
           </div>
           {/* Progress Bar */}
           <div className="w-full h-[11.7px] bg-white/10 rounded-full overflow-hidden">
              <div 
-               className="h-full bg-primary-green rounded-full transition-all duration-1000 ease-out" 
-               style={{ width: `${storagePercentage}%` }}
+               className={`h-full ${storageBarColor} rounded-full transition-all duration-1000 ease-out`} 
+               style={{ width: `${usedStorageGB > 0 ? Math.max(storagePercentage, 1.5) : 0}%` }}
              />
           </div>
+          {isStorageFull && (
+            <div className="mt-2 flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-red-400 text-sm font-medium">
+              <span>You have reached your {activePlanData.storageGB} GB storage limit. Upgrade your plan to upload more files.</span>
+              <button onClick={() => setActiveView("UPGRADE")} className="underline font-bold hover:text-red-300 ml-4 shrink-0">
+                Upgrade Plan
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Bottom Section: Buttons */}

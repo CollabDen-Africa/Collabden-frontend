@@ -21,6 +21,15 @@ export default function ProfileSettingsContent() {
   const [editValue, setEditValue] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+
+  const showToast = (message: string, tone: "success" | "error") => {
+    setToast({ message, tone });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
+
   // Map the backend profile data into the form structure
   const formFields = useMemo(() => {
     if (!profile) return [];
@@ -49,20 +58,42 @@ export default function ProfileSettingsContent() {
           [fieldId]: editValue,
         });
       }
+      showToast("Profile information updated successfully.", "success");
       setEditingField(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update profile field:", err);
+      showToast(err?.response?.data?.error || err?.message || "Failed to update profile field.", "error");
     }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real application, you would upload the file to S3/Cloudinary first
-      // For this integration, we simulate the upload by setting a mock URL or object URL
-      const mockUrl = URL.createObjectURL(file);
-      updateAvatarMutation.mutate(mockUrl);
+      updateAvatarMutation.mutate(file, {
+        onSuccess: () => {
+          showToast("Profile picture updated successfully.", "success");
+        },
+        onError: (err: any) => {
+          showToast(err?.response?.data?.error || err?.message || "Failed to update profile picture.", "error");
+        },
+        onSettled: () => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        },
+      });
     }
+  };
+
+  const handleRemoveAvatar = () => {
+    updateAvatarMutation.mutate("", {
+      onSuccess: () => {
+        showToast("Profile picture removed successfully.", "success");
+      },
+      onError: (err: any) => {
+        showToast(err?.response?.data?.error || err?.message || "Failed to remove profile picture.", "error");
+      },
+    });
   };
 
   if (isLoading) {
@@ -76,7 +107,7 @@ export default function ProfileSettingsContent() {
   const isVerified = Boolean(profile?.isVerified || user?.identityVerified);
 
   return (
-    <div className="flex flex-col w-full flex-1 gap-8.75">
+    <div className="flex flex-col w-full flex-1 gap-8.75 relative">
       {/* Header */}
       <div className="flex flex-col gap-1.5">
         <h1 className="font-raleway font-semibold text-[26.4px] leading-8.5 text-white">
@@ -109,14 +140,23 @@ export default function ProfileSettingsContent() {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-primary-green hover:bg-primary-green/90 text-white font-raleway font-semibold text-[17.6px] px-4.5 py-2.25 rounded-[17.6px] transition-colors"
+              disabled={updateAvatarMutation.isPending}
+              className="bg-primary-green hover:bg-primary-green/90 text-white font-raleway font-semibold text-[17.6px] px-4.5 py-2.25 rounded-[17.6px] transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Upload New
+              {updateAvatarMutation.isPending ? (
+                <>
+                  <FiLoader className="animate-spin" size={20} />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <span>Upload New</span>
+              )}
             </button>
             {profile?.avatarUrl && (
               <button
-                onClick={() => updateAvatarMutation.mutate("")}
-                className="border-[1.6px] border-white/10 hover:border-white/30 text-white/60 hover:text-white font-raleway font-medium text-[17.6px] px-4.5 py-2.25 rounded-[17.6px] transition-all"
+                onClick={handleRemoveAvatar}
+                disabled={updateAvatarMutation.isPending}
+                className="border-[1.6px] border-white/10 hover:border-white/30 text-white/60 hover:text-white font-raleway font-medium text-[17.6px] px-4.5 py-2.25 rounded-[17.6px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Remove
               </button>
@@ -126,7 +166,7 @@ export default function ProfileSettingsContent() {
       </div>
 
       {/* NEW VERIFICATION COMPONENT PLACEMENT */}
-        <VerificationPanel isVerified={isVerified} />
+        <VerificationPanel isVerified={isVerified} profile={profile} />
 
       {/* Form Fields Card */}
       <div className="w-full bg-white/5 border-[1.6px] border-white/10 rounded-[35px] flex flex-col backdrop-blur-md overflow-hidden">
@@ -230,6 +270,19 @@ export default function ProfileSettingsContent() {
           </button>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-999 flex items-center gap-2.5 rounded-2xl px-5 py-3.5 text-sm font-semibold text-white shadow-2xl backdrop-blur-md transition-all animate-in fade-in slide-in-from-bottom-4 border ${
+            toast.tone === "success"
+              ? "bg-primary-green/20 border-primary-green/50 text-primary-green"
+              : "bg-red-500/20 border-red-500/50 text-red-400"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
