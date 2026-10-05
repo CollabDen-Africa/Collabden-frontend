@@ -11,6 +11,19 @@ export interface UserConnection {
   receiver?: { id: string; email: string };
 }
 
+export interface ConnectedUser {
+  id: string;
+  email: string;
+  displayName?: string | null;
+  legalName?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface GetConnectionsParams {
+  projectId?: string;
+  excludeProjectId?: string;
+}
+
 export interface ConnectionRequestPayload {
   receiverId: string;
 }

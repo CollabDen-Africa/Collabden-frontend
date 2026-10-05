@@ -2,6 +2,8 @@ import { proxyAxios } from "@/lib/axios";
 import { PROXY_ENDPOINTS } from "@/constants/api-endpoints";
 import type {
   UserConnection,
+  ConnectedUser,
+  GetConnectionsParams,
   ConnectionRequestPayload,
   RespondConnectionPayload,
 } from "@/types/api.types";
@@ -24,10 +26,10 @@ const connectionService = {
   },
 
   /**
-   * List all accepted connections.
+   * List all accepted connections. Optionally filter out members of a specific project.
    */
-  getConnections: async (): Promise<{ id: string; email: string }[]> => {
-    const response = await proxyAxios.get(PROXY_ENDPOINTS.CONNECTIONS.LIST);
+  getConnections: async (params?: GetConnectionsParams): Promise<ConnectedUser[]> => {
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.CONNECTIONS.LIST, { params });
     return response.data?.data || response.data || [];
   },
 

@@ -7,30 +7,35 @@ import { FeaturedCarousel } from './ui-parts/FeaturedProjectCarousel';
 import { GenreFilters } from './ui-parts/GenreFilters';
 import { useProjects } from '@/hooks/projects/useProjects';
 
+import { useAuth } from '@/context/AuthContext';
+
 const formatDate = (value?: string | null) => value ? new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value)) : 'Not specified';
 
 export default function MarketplaceProjects() {
   const [selectedGenre, setSelectedGenre] = useState<string>('All Genres');
+  const { user } = useAuth();
   const { useMarketplaceProjects } = useProjects();
   const { data, isLoading, isError } = useMarketplaceProjects({ limit: 100 });
-  const projects = useMemo(() => (data?.projects || []).map((project) => ({
-    id: project.id,
-    title: project.name,
-    description: project.description || 'No description provided.',
-    genres: project.genre ? [project.genre] : [],
-    roles: project.requiredRoles || [],
-    compensation: project.budget !== null && project.budget !== undefined ? `${project.pricingType === 'hourly' ? '' : 'Budget '}₦${Number(project.budget).toLocaleString()}` : 'Not specified',
-    duration: project.startDate && project.endDate ? `${formatDate(project.startDate)} – ${formatDate(project.endDate)}` : 'Not specified',
-    deadline: formatDate(project.endDate),
-    applicants: project._count?.applications || 0,
-    authorName: project.owner?.displayName || project.owner?.legalName || project.owner?.email?.split('@')[0] || 'Project owner',
-    authorInitials: (project.owner?.displayName || project.owner?.legalName || project.owner?.email || 'PO').slice(0, 2).toUpperCase(),
-    postedAt: formatDate(project.createdAt),
-    openRolesCount: project.requiredRoles?.length || 0,
-    badge: project.genre || 'Project',
-    openRoles: `${project.requiredRoles?.length || 0} position${(project.requiredRoles?.length || 0) === 1 ? '' : 's'}`,
-    image: '',
-  })), [data]);
+  const projects = useMemo(() => (data?.projects || [])
+    .filter((project) => project.owner?.id !== user?.id && (project as any).ownerId !== user?.id)
+    .map((project) => ({
+      id: project.id,
+      title: project.name,
+      description: project.description || 'No description provided.',
+      genres: project.genre ? [project.genre] : [],
+      roles: project.requiredRoles || [],
+      compensation: project.budget !== null && project.budget !== undefined ? `${project.pricingType === 'hourly' ? '' : 'Budget '}₦${Number(project.budget).toLocaleString()}` : 'Not specified',
+      duration: project.startDate && project.endDate ? `${formatDate(project.startDate)} – ${formatDate(project.endDate)}` : 'Not specified',
+      deadline: formatDate(project.endDate),
+      applicants: project._count?.applications || 0,
+      authorName: project.owner?.displayName || project.owner?.legalName || project.owner?.email?.split('@')[0] || 'Project owner',
+      authorInitials: (project.owner?.displayName || project.owner?.legalName || project.owner?.email || 'PO').slice(0, 2).toUpperCase(),
+      postedAt: formatDate(project.createdAt),
+      openRolesCount: project.requiredRoles?.length || 0,
+      badge: project.genre || 'Project',
+      openRoles: `${project.requiredRoles?.length || 0} position${(project.requiredRoles?.length || 0) === 1 ? '' : 's'}`,
+      image: '',
+    })), [data, user]);
 
   return (
     <div className="w-full flex flex-col h-full animate-in fade-in duration-500">

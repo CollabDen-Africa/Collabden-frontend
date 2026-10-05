@@ -1,9 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { HiX } from 'react-icons/hi';
+import { useProjects } from '@/hooks/projects/useProjects';
+import { getErrorMessage } from '@/lib/error-handler';
 
-export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, applicationData }) {
+export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, applicationData, rawAppData }: any) {
+  const { useApplyToProject } = useProjects();
+  const applyMutation = useApplyToProject();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   // Safe fallbacks
   const project = projectData || {
     title: 'Neon Soul — R&B Album Production',
@@ -16,6 +22,23 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
 
   const totalSteps = 5;
   const currentStep = 4;
+
+  const handleSubmit = async () => {
+    if (!projectData?.id) {
+      onNext();
+      return;
+    }
+    setErrorMsg(null);
+    try {
+      await applyMutation.mutateAsync({
+        projectId: projectData.id,
+        message: rawAppData?.introduction || '',
+      });
+      onNext();
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err));
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4">
@@ -71,6 +94,10 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
             Your application looks great. Ready to send?
           </p>
 
+          {errorMsg && (
+            <p className="mt-2 text-sm text-red-300 w-full">{errorMsg}</p>
+          )}
+
           {/* Review Card */}
           <div className="flex flex-col items-start p-[21.4px_24.08px] gap-3.25 mt-5.25 mb-9.25 w-full bg-black/15 rounded-2xl">
             
@@ -112,7 +139,8 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
           
           <button 
             onClick={onBack}
-            className="flex flex-col justify-center items-center py-3.5 flex-1 border-2 border-border-muted/30 hover:bg-white/30 transition-colors rounded-full"
+            disabled={applyMutation.isPending}
+            className="flex flex-col justify-center items-center py-3.5 flex-1 border-2 border-border-muted/30 hover:bg-white/30 transition-colors rounded-full disabled:opacity-50"
           >
             <span className="text-[17.39px] font-semibold text-text-muted leading-6.5 text-center hover:text-white">
               Back
@@ -120,11 +148,12 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
           </button>
 
           <button 
-            onClick={onNext}
-            className="flex flex-col justify-center items-center py-3.5 flex-1 bg-primary-green transition-colors rounded-full"
+            onClick={handleSubmit}
+            disabled={applyMutation.isPending}
+            className="flex flex-col justify-center items-center py-3.5 flex-1 bg-primary-green transition-colors rounded-full disabled:opacity-50"
           >
             <span className="text-[17.39px] font-semibold text-white leading-6.5">
-              Submit Application
+              {applyMutation.isPending ? "Submitting..." : "Submit Application"}
             </span>
           </button>
 

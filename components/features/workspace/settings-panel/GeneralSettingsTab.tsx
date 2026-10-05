@@ -11,7 +11,7 @@ import { useProjects } from "@/hooks/projects/useProjects";
 
 const generalSchema = z.object({
   name: z.string().min(1, "Project name is required").max(100),
-  description: z.string().max(120, "Description cannot exceed 120 characters").optional().or(z.literal("")),
+  description: z.string().max(1000, "Description cannot exceed 1000 characters").optional().or(z.literal("")),
   startDate: z.date({ message: "Due date is required" }),
 });
 
@@ -19,9 +19,10 @@ type GeneralInput = z.infer<typeof generalSchema>;
 
 interface GeneralSettingsTabProps {
   project?: Project;
+  onSuccess?: () => void;
 }
 
-export default function GeneralSettingsTab({ project }: GeneralSettingsTabProps) {
+export default function GeneralSettingsTab({ project, onSuccess }: GeneralSettingsTabProps) {
   const { useUpdateProject } = useProjects();
   const updateMutation = useUpdateProject(project?.id || "");
 
@@ -59,18 +60,17 @@ export default function GeneralSettingsTab({ project }: GeneralSettingsTabProps)
         description: data.description,
         startDate: data.startDate.toISOString(),
       });
+      onSuccess?.();
     } catch (err) {
       console.error("Failed to update general settings:", err);
     }
   };
 
-  const descriptionValue = watch("description") || "";
   const startDateValue = watch("startDate");
-  const MAX_DESC_LENGTH = 120;
 
   if (!project) {
     return (
-      <div className="w-full max-w-[931px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] lg:rounded-[50px] p-[32px] lg:p-[48px] shadow-2xl flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <p className="text-white/60">No active project selected.</p>
       </div>
     );
@@ -79,84 +79,76 @@ export default function GeneralSettingsTab({ project }: GeneralSettingsTabProps)
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-[931px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] lg:rounded-[50px] p-[32px] lg:p-[48px] shadow-2xl animate-in fade-in slide-in-from-right-8 duration-500"
+      className="w-full flex flex-col gap-[28px] lg:gap-[32px]"
     >
-      <div className="flex flex-col gap-[32px] lg:gap-[40px] w-full max-w-[860px]">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center p-[20px] lg:p-[24px] gap-[16px] bg-black/10 rounded-[30px] border border-white/5 shadow-inner">
-          <div className="w-[54px] h-[54px] bg-white/20 rounded-[15px] flex items-center justify-center shrink-0 border border-white/10 shadow-sm">
-            <FiSliders className="text-white" size={24} />
-          </div>
-          <div className="flex flex-col justify-center gap-[4px]">
-            <h2 className="font-raleway font-semibold text-[22px] lg:text-[25px] leading-[29px] text-white">
-              General
-            </h2>
-            <p className="font-raleway font-medium text-[15px] lg:text-[18px] leading-[21px] text-white/60">
-              Core information about your project, visible to everyone you collaborate with.
-            </p>
-          </div>
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center p-[20px] lg:p-[24px] pr-[56px] sm:pr-[64px] gap-[16px] bg-black/20 rounded-[24px] border border-white/5 shadow-inner">
+        <div className="w-[54px] h-[54px] bg-white/10 rounded-[15px] flex items-center justify-center shrink-0 border border-white/10 shadow-sm">
+          <FiSliders className="text-white" size={24} />
+        </div>
+        <div className="flex flex-col justify-center gap-[4px]">
+          <h2 className="font-raleway font-semibold text-[22px] lg:text-[25px] leading-[29px] text-white">
+            General
+          </h2>
+          <p className="font-raleway font-medium text-[14px] lg:text-[16px] leading-[21px] text-white/60">
+            Core information about your project, visible to everyone you collaborate with.
+          </p>
+        </div>
+      </div>
+
+      {/* Project Name Field */}
+      <div className="flex flex-col gap-[12px] w-full">
+        <div className="flex flex-col gap-[4px]">
+          <label className="font-raleway font-semibold text-[16px] lg:text-[18px] text-white">
+            Project Name
+          </label>
+          <span className="font-raleway font-normal text-[13px] lg:text-[14px] text-white/60">
+            Shown to all collaborators and on shared links.
+          </span>
         </div>
 
-        {/* Project Name Field */}
-        <div className="flex flex-col gap-[16px] w-full">
-          <div className="flex flex-col gap-[4px] lg:gap-[8px]">
-            <label className="font-raleway font-semibold text-[16px] lg:text-[18px] text-white">
-              Project Name
-            </label>
-            <span className="font-raleway font-normal text-[14px] lg:text-[15px] text-white/60">
-              Shown to all collaborators and on shared links.
-            </span>
-          </div>
+        <div className="w-full h-[50px] bg-black/20 border border-white/10 focus-within:border-primary-green focus-within:bg-black/30 rounded-full flex items-center px-[24px] transition-all duration-300 shadow-sm">
+          <input
+            type="text"
+            className="w-full bg-transparent border-none outline-none font-raleway font-medium text-[16px] text-white placeholder:text-white/40"
+            placeholder="Enter project name..."
+            {...register("name")}
+          />
+        </div>
+        {errors.name && (
+          <span className="text-red-400 font-sans text-[12px]">{errors.name.message}</span>
+        )}
+      </div>
 
-          <div className="w-full h-[50px] bg-white/10 border border-transparent focus-within:border-primary-green focus-within:bg-white/15 rounded-full flex items-center px-[24px] transition-all duration-300 shadow-sm">
-            <input
-              type="text"
-              className="w-full bg-transparent border-none outline-none font-raleway font-medium text-[16px] text-white placeholder:text-white/40"
-              placeholder="Enter project name..."
-              {...register("name")}
+      {/* Description Field */}
+      <div className="flex flex-col gap-[12px] w-full">
+        <div className="flex flex-col gap-[4px]">
+          <label className="font-raleway font-semibold text-[16px] lg:text-[18px] text-white">
+            Description
+          </label>
+          <span className="font-raleway font-normal text-[13px] lg:text-[14px] text-white/60">
+            A short summary of what this project is about.
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-[8px] w-full">
+          <div className="w-full min-h-[120px] bg-black/20 border border-white/10 focus-within:border-primary-green focus-within:bg-black/30 rounded-[24px] p-[20px] lg:p-[24px] transition-all duration-300 shadow-sm">
+            <textarea
+              className="w-full h-full min-h-[80px] bg-transparent border-none outline-none font-raleway font-medium text-[15px] leading-[24px] text-white placeholder:text-white/40 resize-none custom-scrollbar"
+              placeholder="Describe your project..."
+              {...register("description")}
             />
           </div>
-          {errors.name && (
-            <span className="text-red-400 font-sans text-[12px]">{errors.name.message}</span>
-          )}
-        </div>
 
-        {/* Description Field */}
-        <div className="flex flex-col gap-[16px] w-full">
-          <div className="flex flex-col gap-[4px] lg:gap-[8px]">
-            <label className="font-raleway font-semibold text-[16px] lg:text-[18px] text-white">
-              Description
-            </label>
-            <span className="font-raleway font-normal text-[14px] lg:text-[15px] text-white/60">
-              A short summary of what this project is about.
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-[8px] w-full">
-            <div className="w-full min-h-[118px] bg-white/10 border border-transparent focus-within:border-primary-green focus-within:bg-white/15 rounded-[30px] p-[24px] lg:p-[32px] transition-all duration-300 shadow-sm">
-              <textarea
-                maxLength={MAX_DESC_LENGTH}
-                className="w-full h-full min-h-[70px] bg-transparent border-none outline-none font-raleway font-medium text-[16px] leading-[24px] text-white placeholder:text-white/40 resize-none custom-scrollbar"
-                placeholder="Describe your project..."
-                {...register("description")}
-              />
-            </div>
-
-            {/* Character Count & Error Message */}
-            <div className="w-full flex justify-between items-center px-[8px]">
-              <div>
-                {errors.description && (
-                  <span className="text-red-400 font-sans text-[12px]">
-                    {errors.description.message}
-                  </span>
-                )}
-              </div>
-              <span className="font-sans font-medium text-[12px] text-[#8B9092]">
-                {descriptionValue.length}/{MAX_DESC_LENGTH}
+          {errors.description && (
+            <div className="w-full px-[8px]">
+              <span className="text-red-400 font-sans text-[12px]">
+                {errors.description.message}
               </span>
             </div>
-          </div>
+          )}
         </div>
+      </div>
 
         {/* Due Date Field */}
         <div className="flex flex-col gap-[16px] w-full lg:w-[403px]">
@@ -198,7 +190,6 @@ export default function GeneralSettingsTab({ project }: GeneralSettingsTabProps)
             )}
           </button>
         </div>
-      </div>
     </form>
   );
 }

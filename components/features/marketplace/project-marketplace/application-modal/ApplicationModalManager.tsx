@@ -64,7 +64,7 @@ export function ApplicationModalManager({ isOpen, onClose, project }) {
     case 3:
       return <ApplicationModalStep3 onClose={handleResetAndClose} onNext={handleNext} onBack={handleBack} projectData={project} appData={appData} setAppData={setAppData} />;
     case 4:
-      return <ApplicationModalStep4 onClose={handleResetAndClose} onNext={handleNext} onBack={handleBack} projectData={project} applicationData={reviewData} />;
+      return <ApplicationModalStep4 onClose={handleResetAndClose} onNext={handleNext} onBack={handleBack} projectData={project} applicationData={reviewData} rawAppData={appData} />;
     case 5:
       return <ApplicationModalStep5 onClose={handleResetAndClose} onViewApplications={() => setShowApplication(true)} projectData={project} />;
     default:

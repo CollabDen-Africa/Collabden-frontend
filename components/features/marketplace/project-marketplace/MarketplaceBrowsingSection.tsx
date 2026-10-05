@@ -70,34 +70,42 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [applyingProject, setApplyingProject] = useState<Project | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const ITEMS_PER_PAGE = 2; //For testing (to be changed)
+  const ITEMS_PER_PAGE = 6;
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGenre, filters]);
 
   // --- Handlers ---
-  const handleCheckboxToggle = (categoryKey: keyof typeof filters, option: string) => {
-    setFilters(prev => {
+  const handleCheckboxToggle = (
+    categoryKey: keyof typeof filters,
+    option: string
+  ) => {
+    setFilters((prev) => {
       const currentList = prev[categoryKey];
       const exists = currentList.includes(option);
       return {
         ...prev,
-        [categoryKey]: exists 
-          ? currentList.filter(item => item !== option)
-          : [...currentList, option]
+        [categoryKey]: exists
+          ? currentList.filter((item) => item !== option)
+          : [...currentList, option],
       };
     });
   };
 
   const clearAllFilters = () => {
-      onClearGenre();
-      setFilters({ 
-        roles: [], 
-        genre: [],
-        compensationType: [], 
-        status: [],
-        timeline: [],
-        experience: [],
-        quickOptions: []
-      });
-    };
+    onClearGenre();
+    setCurrentPage(1);
+    setFilters({
+      roles: [],
+      genre: [],
+      compensationType: [],
+      status: [],
+      timeline: [],
+      experience: [],
+      quickOptions: [],
+    });
+  };
   
     // --- Derived State ---
     const filteredProjects = projects.filter(project => {
