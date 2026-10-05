@@ -16,7 +16,22 @@ const formatTime = (value: string) => {
 export default function MessagesPage() {
   const { projectDetails, activeProject, isLoading } = useWorkspace();
   const { user } = useAuth();
-  const projectId = projectDetails?.id || activeProject?.id || "";
+  const currentProject = projectDetails || activeProject;
+  const projectId = currentProject?.id || "";
+
+  const activeCollaborators = useMemo(() => {
+    if (!currentProject) return [];
+    const collaborators = currentProject.collaborators || [];
+    const ownerId = currentProject.owner?.id || currentProject.ownerId;
+    return collaborators.filter((c) => {
+      const cUserId = c.user?.id || c.userId;
+      return (c.isActive !== false) && cUserId !== ownerId;
+    });
+  }, [currentProject]);
+
+  const hasActiveCollaborators = activeCollaborators.length > 0;
+  const isSoloProject = !isLoading && !!currentProject && !hasActiveCollaborators;
+
   const messages = useMemo(
     () => [...(projectDetails?.messages || activeProject?.messages || [])]
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
@@ -35,7 +50,7 @@ export default function MessagesPage() {
   const handleSendMessage = async (event: React.FormEvent) => {
     event.preventDefault();
     const content = inputText.trim();
-    if (!content || !projectId || sendMessage.isPending) return;
+    if (!content || !projectId || !hasActiveCollaborators || sendMessage.isPending) return;
 
     setSendError(null);
     try {
@@ -49,9 +64,18 @@ export default function MessagesPage() {
   return (
     <div className="w-full h-full flex justify-center">
       <div className="w-full max-w-[1224px] h-[638px] bg-white/5 border border-white/10 rounded-[30px] flex flex-col relative overflow-hidden backdrop-blur-md shadow-2xl">
+        {isSoloProject && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-6 py-3 text-center text-amber-200 text-sm font-medium z-10">
+            You are currently the only member in this project. Invite collaborators to start messaging in this workspace.
+          </div>
+        )}
         <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar p-6 flex flex-col gap-8 pb-[104px]">
           {isLoading && <p className="text-center text-sm text-white/60 py-8">Loading messages…</p>}
-          {!isLoading && messages.length === 0 && <p className="text-center text-sm text-white/60 py-8">No messages in this project yet.</p>}
+          {!isLoading && messages.length === 0 && (
+            <p className="text-center text-sm text-white/60 py-8">
+              {isSoloProject ? "No collaborators in this project yet." : "No messages in this project yet."}
+            </p>
+          )}
           {!isLoading && messages.map((message) => {
             const isMe = message.senderId === user?.id;
             const senderName = message.sender?.displayName || message.sender?.legalName || message.sender?.email?.split("@")[0] || "Project member";
@@ -73,8 +97,26 @@ export default function MessagesPage() {
 
         <div className="absolute bottom-6 left-0 w-full px-6 z-20">
           <form onSubmit={handleSendMessage} className="w-full h-[56px] bg-white rounded-full flex items-center px-6 relative shadow-xl focus-within:outline-2 focus-within:outline-primary-green">
-            <input type="text" value={inputText} onChange={(event) => setInputText(event.target.value)} disabled={!projectId || sendMessage.isPending} className="flex-1 h-full bg-transparent border-none outline-none font-sans font-medium text-[16px] text-black/80 disabled:cursor-not-allowed" placeholder={projectId ? "Message..." : "Select a project to message"} />
-            <button type="submit" disabled={!inputText.trim() || !projectId || sendMessage.isPending} className="absolute right-0 w-[54px] h-[54px] bg-primary-green rounded-full flex items-center justify-center hover:brightness-110 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Send message">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(event) => setInputText(event.target.value)}
+              disabled={!projectId || !hasActiveCollaborators || sendMessage.isPending}
+              className="flex-1 h-full bg-transparent border-none outline-none font-sans font-medium text-[16px] text-black/80 disabled:cursor-not-allowed disabled:placeholder-black/40"
+              placeholder={
+                !projectId
+                  ? "Select a project to message"
+                  : !hasActiveCollaborators
+                  ? "Invite collaborators to start chatting..."
+                  : "Message..."
+              }
+            />
+            <button
+              type="submit"
+              disabled={!inputText.trim() || !projectId || !hasActiveCollaborators || sendMessage.isPending}
+              className="absolute right-0 w-[54px] h-[54px] bg-primary-green rounded-full flex items-center justify-center hover:brightness-110 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Send message"
+            >
               <FiSend size={20} className="text-white relative right-[1px] top-[1px]" />
             </button>
           </form>

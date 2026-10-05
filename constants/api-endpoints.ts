@@ -336,6 +336,7 @@ export const PROXY_ENDPOINTS = {
     METADATA: (id: string) => `/projects/${id}/metadata`,
     FILES: (id: string) => `/projects/${id}/files`,
     MESSAGES: (id: string) => `/projects/${id}/messages`,
+    APPLY: (id: string) => `/projects/${id}/apply`,
   },
   CONNECTIONS: {
     SEND_REQUEST: '/user/connections/request',

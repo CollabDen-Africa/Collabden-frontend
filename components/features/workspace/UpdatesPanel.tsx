@@ -139,7 +139,7 @@ export default function UpdatesPanel({ isOpen, onClose }: UpdatesPanelProps) {
 
       {/* Panel */}
       <aside className="fixed inset-y-0 right-0 z-[100] w-[85vw] sm:w-[322px] bg-[#162026] border-l border-white/10 p-[26px_17px] shadow-2xl animate-in slide-in-from-right-8 duration-300 flex flex-col shrink-0
-                        lg:relative lg:inset-auto lg:z-auto lg:w-[322px] lg:h-[879px] lg:bg-white/10 lg:border-none lg:rounded-[30px] lg:shadow-none">
+                        lg:sticky lg:top-6 lg:inset-auto lg:z-auto lg:w-[322px] lg:h-auto lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto lg:bg-white/10 lg:border-none lg:rounded-[30px] lg:shadow-none custom-scrollbar">
         
         {/* Mobile Header with Close Button */}
         <div className="flex lg:hidden justify-between items-center mb-4 px-2 shrink-0">

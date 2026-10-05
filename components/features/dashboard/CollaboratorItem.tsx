@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Button from '@/components/ui/Button';
-import Avatar from '@/components/ui/Avatar';
-import { HiStar } from "react-icons/hi2";
-import { useConnections } from '@/hooks/connections/useConnections';
-import { getErrorMessage } from '@/lib/error-handler';
+"use client";
 
-//Data structure
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import Button from "@/components/ui/Button";
+import Avatar from "@/components/ui/Avatar";
+import { HiStar } from "react-icons/hi2";
+import { useConnections } from "@/hooks/connections/useConnections";
+import { getErrorMessage } from "@/lib/error-handler";
+
 export interface CollaboratorItemProps {
   id: string | number;
   userId?: string;
@@ -16,28 +18,35 @@ export interface CollaboratorItemProps {
   avatarUrl?: string;
 }
 
-export default function CollaboratorItem({ id, userId, name, role, members, rating, avatarUrl }: CollaboratorItemProps) {
+export default function CollaboratorItem({
+  id,
+  userId,
+  name,
+  role,
+  members,
+  rating,
+  avatarUrl,
+}: CollaboratorItemProps) {
   const numRating = rating ? parseFloat(rating) : 0;
   const fullStars = Math.floor(numRating);
 
   const [isRequested, setIsRequested] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" | "info" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    tone: "success" | "error" | "info";
+  } | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const {
-    useUserConnections,
-    usePendingRequests,
-    useSendConnectionRequest,
-  } = useConnections();
+  const { useUserConnections, usePendingRequests, useSendConnectionRequest } =
+    useConnections();
 
   const { data: connections = [] } = useUserConnections();
   const { data: pendingRequests = [] } = usePendingRequests();
   const sendRequestMutation = useSendConnectionRequest();
 
-  // A collaborator ID is real if it is a non-empty string that looks like a database CUID or UUID
-  const targetId = userId || (typeof id === 'string' ? id : undefined);
-  const isRealUser = typeof targetId === 'string' && targetId.length > 5;
+  const targetId = userId || (typeof id === "string" ? id : undefined);
+  const isRealUser = typeof targetId === "string" && targetId.length > 5;
 
   const isConnected = useMemo(() => {
     if (!targetId) return false;
@@ -57,12 +66,21 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
     toastTimeoutRef.current = setTimeout(() => setToast(null), 4000);
   };
 
-  useEffect(() => () => {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    },
+    []
+  );
 
   const handleConnect = () => {
-    if (isConnected || isRequested || isPendingIncoming || sendRequestMutation.isPending || isSimulating) {
+    if (
+      isConnected ||
+      isRequested ||
+      isPendingIncoming ||
+      sendRequestMutation.isPending ||
+      isSimulating
+    ) {
       return;
     }
 
@@ -76,18 +94,19 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
           },
           onError: (error) => {
             const message = getErrorMessage(error);
-            const isDuplicateRequest = /already|exists|duplicate|pending/i.test(message);
+            const isDuplicateRequest = /already|exists|duplicate|pending/i.test(
+              message
+            );
             showToast(
               isDuplicateRequest
                 ? "Connection invitation already sent."
                 : `Unable to send invitation. ${message}`,
-              isDuplicateRequest ? "info" : "error",
+              isDuplicateRequest ? "info" : "error"
             );
           },
         }
       );
     } else {
-      // Simulate beautiful premium UX for mock/local dashboard collaborator items
       setIsSimulating(true);
       setTimeout(() => {
         setIsSimulating(false);
@@ -112,55 +131,72 @@ export default function CollaboratorItem({ id, userId, name, role, members, rati
     isDisabled = true;
   }
 
-  return (
-    <div className="flex justify-between items-center w-full p-2 -mx-2 rounded-[16px] hover:bg-white/5 transition-colors cursor-pointer group">
-      
-      <div className="flex gap-[12px] md:gap-[16px] items-center min-w-0">
-        {/* Avatar */}
-        <Avatar 
-          name={name} 
-          src={avatarUrl} 
-          className="w-10 h-10 md:w-12 md:h-12 text-[14px] md:text-[16px] shrink-0"
-        />
-        
-        <div className="flex flex-col gap-[6px] min-w-0">
-          <h4 className="font-bold text-[16px] leading-[19px] text-foreground truncate">
-            {name}
-          </h4>
-          
-          <div className="flex items-center gap-[8px] md:gap-[10px] text-[13px] md:text-[14px] leading-[16px] text-foreground/60 font-medium mt-[-2px]">
-            <span className="truncate">{role}</span>
-            {members !== undefined && (
-              <>
-                <span className="w-[6px] h-[6px] bg-foreground/60 rounded-full shrink-0" />
-                <span className="whitespace-nowrap">{members} members</span>
-              </>
-            )}
-          </div>
-          
-          {rating && (
-            <div className="flex items-center gap-[4px]">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <HiStar
-                    key={i}
-                    className={`w-[14px] h-[14px] ${i < fullStars ? "text-foreground" : "text-foreground/20"}`}
-                  />
-                ))}
-              </div>
-              <span className="text-[12px] leading-[14px] text-foreground/60 font-medium ml-[2px]">
-                {rating}
-              </span>
-            </div>
+  const profileHref =
+    isRealUser && targetId ? `/profile?id=${targetId}` : undefined;
+
+  const infoContent = (
+    <>
+      <Avatar
+        name={name}
+        src={avatarUrl}
+        className={`w-10 h-10 md:w-12 md:h-12 text-[14px] md:text-[16px] shrink-0 ring-2 ring-transparent transition-all duration-200 ${profileHref ? "group-hover:ring-primary-green/40" : ""}`}
+      />
+
+      <div className="flex flex-col gap-[6px] min-w-0">
+        <h4
+          className={`font-bold text-[16px] leading-[19px] text-foreground truncate transition-colors duration-200 ${profileHref ? "group-hover:text-primary-green" : ""}`}
+        >
+          {name}
+        </h4>
+
+        <div className="flex items-center gap-[8px] md:gap-[10px] text-[13px] md:text-[14px] leading-[16px] text-foreground/60 font-medium mt-[-2px]">
+          <span className="truncate">{role}</span>
+          {members !== undefined && (
+            <>
+              <span className="w-[6px] h-[6px] bg-foreground/60 rounded-full shrink-0" />
+              <span className="whitespace-nowrap">{members} members</span>
+            </>
           )}
         </div>
-      </div>
 
-      {/* Connect Button */}
+        {rating && (
+          <div className="flex items-center gap-[4px]">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <HiStar
+                  key={i}
+                  className={`w-[14px] h-[14px] ${i < fullStars ? "text-foreground" : "text-foreground/20"}`}
+                />
+              ))}
+            </div>
+            <span className="text-[12px] leading-[14px] text-foreground/60 font-medium ml-[2px]">
+              {rating}
+            </span>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex justify-between items-center w-full p-2 -mx-2 rounded-[16px] hover:bg-white/5 transition-colors group">
+      {profileHref ? (
+        <Link
+          href={profileHref}
+          className="flex gap-[12px] md:gap-[16px] items-center min-w-0 flex-1"
+        >
+          {infoContent}
+        </Link>
+      ) : (
+        <div className="flex gap-[12px] md:gap-[16px] items-center min-w-0 flex-1">
+          {infoContent}
+        </div>
+      )}
+
       <div className="shrink-0 ml-2">
-        <Button 
+        <Button
           variant={isConnected ? "secondary" : "primary"}
-          size="sm" 
+          size="sm"
           disabled={isDisabled}
           onClick={(e) => {
             e.stopPropagation();

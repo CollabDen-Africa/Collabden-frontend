@@ -128,6 +128,14 @@ const projectService = {
   respondToInvite: async (projectId: string, action: "ACCEPT" | "DECLINE"): Promise<void> => {
     await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.RESPOND_INVITE(projectId), { action });
   },
+
+  /**
+   * Apply to join a project.
+   */
+  applyToProject: async (projectId: string, message?: string): Promise<any> => {
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.APPLY(projectId), { message });
+    return response.data?.application || response.data?.data || response.data;
+  },
 };
 
 export default projectService;

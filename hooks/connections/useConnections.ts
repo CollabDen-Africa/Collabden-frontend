@@ -1,15 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import connectionService from '@/services/connection.service';
 import { handleApiError } from '@/lib/error-handler';
-import type { ConnectionRequestPayload, RespondConnectionPayload } from '@/types/api.types';
+import type {
+  ConnectionRequestPayload,
+  RespondConnectionPayload,
+  GetConnectionsParams,
+} from '@/types/api.types';
 
 export const useConnections = () => {
   const queryClient = useQueryClient();
 
-  // 1. Query to fetch all accepted user connections
-  const useUserConnections = () => useQuery({
-    queryKey: ['connections', 'list'],
-    queryFn: () => connectionService.getConnections(),
+  // 1. Query to fetch all accepted user connections (optionally filtered by projectId)
+  const useUserConnections = (params?: GetConnectionsParams) => useQuery({
+    queryKey: ['connections', 'list', params],
+    queryFn: () => connectionService.getConnections(params),
   });
 
   // 2. Query to fetch all pending connection requests

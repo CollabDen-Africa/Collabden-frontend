@@ -42,8 +42,12 @@ export const useProjects = () => {
   // Delete project
   const useDeleteProject = () => useMutation({
     mutationFn: (id: string) => projectService.deleteProject(id),
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects', id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['connections'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -65,6 +69,7 @@ export const useProjects = () => {
     mutationFn: (data: InviteCollaboratorPayload) => projectService.invite(projectId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['connections'] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -124,11 +129,13 @@ export const useProjects = () => {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId] }),
   });
 
-  // Remove collaborator
+  // Remove collaborator / Cancel invitation
   const useRemoveCollaborator = (projectId: string) => useMutation({
     mutationFn: (collaboratorId: string) => projectService.removeCollaborator(projectId, collaboratorId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['connections'] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -152,6 +159,17 @@ export const useProjects = () => {
     onError: (error) => handleApiError(error),
   });
 
+  // Apply to join a project
+  const useApplyToProject = () => useMutation({
+    mutationFn: ({ projectId, message }: { projectId: string; message?: string }) =>
+      projectService.applyToProject(projectId, message),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+    onError: (error) => handleApiError(error),
+  });
+
   return {
     useAllProjects,
     useProjectDetail,
@@ -168,5 +186,6 @@ export const useProjects = () => {
     useRemoveCollaborator,
     useMyInvites,
     useRespondToInvite,
+    useApplyToProject,
   };
 };

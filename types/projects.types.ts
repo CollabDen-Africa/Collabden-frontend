@@ -67,6 +67,7 @@ export interface Project {
   status: string;
   ownerId: string;
   owner?: ProjectOwner;
+  openToCollaborators?: boolean;
   createdAt: string;
   updatedAt: string;
   collaborators?: ProjectCollaborator[];
@@ -83,7 +84,7 @@ export interface ProjectCollaborator {
   userId: string;
   role: string;
   isActive: boolean;
-  inviteStatus?: "PENDING" | "ACCEPTED" | "DECLINED";
+  inviteStatus?: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED";
   createdAt: string;
   updatedAt: string;
   user?: ProjectCollaboratorUser;
@@ -149,7 +150,7 @@ export interface ProjectInvite {
   userId: string;
   role: string;
   isActive: boolean;
-  inviteStatus: "PENDING" | "ACCEPTED" | "DECLINED";
+  inviteStatus: "PENDING" | "ACCEPTED" | "DECLINED" | "CANCELLED";
   createdAt: string;
   updatedAt: string;
   project: {

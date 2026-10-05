@@ -18,6 +18,7 @@ import {
 import DatePicker from "@/components/ui/DatePicker";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
+import { DEFAULT_MUSIC_GENRES } from "@/constants/genres";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import { useProjects } from "@/hooks/projects/useProjects";
@@ -112,7 +113,12 @@ export default function CreateProjectPage() {
     name: debouncedSearch || undefined,
     connectedOnly: true,
   });
-  const { data: genres = [], isLoading: isLoadingGenres } = useMarketplaceGenres();
+  const { data: rawGenres = [], isLoading: isLoadingGenres } = useMarketplaceGenres();
+
+  const genres = useMemo(() => {
+    const combined = Array.from(new Set([...DEFAULT_MUSIC_GENRES, ...(rawGenres || [])]));
+    return combined.sort();
+  }, [rawGenres]);
 
   const collaborators = useMemo(() => {
     if (!rawCollaborators) return [];
