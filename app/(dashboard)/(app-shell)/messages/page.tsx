@@ -1,6 +1,6 @@
-import type { DirectMessage } from "@/types/api.types";
 "use client";
 
+import type { DirectMessage } from "@/types/api.types";
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import Avatar from "@/components/ui/Avatar";
 import { 
