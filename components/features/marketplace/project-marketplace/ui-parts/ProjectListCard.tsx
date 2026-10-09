@@ -3,9 +3,12 @@ import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import { HiShare, HiShieldCheck, HiLightningBolt, HiOutlineBookmark } from 'react-icons/hi';
 
-export const ProjectListCard = ({ project, onApply }: { project: any, onApply: () => void }) => {
+export const ProjectListCard = ({ project, onApply, onView }: { project: any, onApply: () => void, onView?: () => void }) => {
   return (
-    <div className="flex flex-row bg-white/15 border border-border-muted/30 rounded-2xl overflow-hidden w-full transition-colors group h-full max-h-70">
+    <div 
+      onClick={onView}
+      className="flex flex-row bg-white/15 border border-border-muted/30 hover:border-white/40 rounded-2xl overflow-hidden w-full transition-colors group h-full max-h-70 cursor-pointer"
+    >
       
       {/* Thumbnail */}
       <div className="relative w-27.5 sm:w-48 md:w-70 shrink-0 bg-black/15">
@@ -48,8 +51,12 @@ export const ProjectListCard = ({ project, onApply }: { project: any, onApply: (
         
         {/* Title & Bookmark */}
         <div className="flex justify-between items-start gap-2 sm:gap-4">
-          <h3 className="text-[14px] sm:text-[16px] font-bold text-white line-clamp-1 transition-colors">{project.title}</h3>
-          <Button variant="ghost" size="sm" className="p-1 h-auto min-h-0 shrink-0 hover:bg-white/5 -mt-1 -mr-1 sm:m-0">
+          <h3 className="text-[14px] sm:text-[16px] font-bold text-white line-clamp-1 transition-colors hover:underline">{project.title}</h3>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={(e) => { e.stopPropagation(); }}
+            className="p-1 h-auto min-h-0 shrink-0 hover:bg-white/5 -mt-1 -mr-1 sm:m-0">
             <HiOutlineBookmark size={18} className="text-white/50 hover:text-white transition-colors w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </Button>
         </div>
@@ -110,13 +117,27 @@ export const ProjectListCard = ({ project, onApply }: { project: any, onApply: (
               <div className="hidden min-[360px]:block bg-primary-blue/20 text-accent-soft-blue text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-1 rounded-md font-medium">
                 {project.openRolesCount} open
               </div>
-              <Button
-                onClick={onApply}
-                size="sm"
-                className="bg-primary-green hover:bg-primary-green/90 text-white text-[10px] sm:text-xs font-bold rounded-full px-4 sm:px-6 py-1.5 transition-colors">
-                Apply
-              </Button>
-              <Button variant="ghost" size="sm" className="hidden sm:flex p-1.5 h-auto min-h-0 border border-border-muted/30 rounded-full hover:bg-white/5">
+              {project.isOwner ? (
+                <Button
+                  onClick={(e) => { e.stopPropagation(); onView?.(); }}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-white/10 hover:bg-white/20 text-white text-[10px] sm:text-xs font-bold rounded-full px-4 sm:px-6 py-1.5 transition-colors border border-white/20">
+                  View
+                </Button>
+              ) : (
+                <Button
+                  onClick={(e) => { e.stopPropagation(); onApply(); }}
+                  size="sm"
+                  className="bg-primary-green hover:bg-primary-green/90 text-white text-[10px] sm:text-xs font-bold rounded-full px-4 sm:px-6 py-1.5 transition-colors">
+                  Apply
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={(e) => { e.stopPropagation(); }}
+                className="hidden sm:flex p-1.5 h-auto min-h-0 border border-border-muted/30 rounded-full hover:bg-white/5">
                 <HiShare size={14} className="text-text-muted hover:text-white transition-colors" />
               </Button>
             </div>

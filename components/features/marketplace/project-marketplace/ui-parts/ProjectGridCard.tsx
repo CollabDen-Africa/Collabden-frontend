@@ -3,9 +3,12 @@ import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import { HiShare, HiLightningBolt, HiOutlineBookmark } from 'react-icons/hi';
 
-export const ProjectGridCard = ({ project, onApply }: { project: any, onApply  : () => void }) => {
+export const ProjectGridCard = ({ project, onApply, onView }: { project: any, onApply: () => void, onView?: () => void }) => {
   return (
-    <div className="flex flex-col bg-white/15 border border-border-muted/30 rounded-2xl overflow-hidden w-full">
+    <div 
+      onClick={onView} 
+      className="flex flex-col bg-white/15 border border-border-muted/30 hover:border-white/40 rounded-2xl overflow-hidden w-full cursor-pointer transition-all"
+    >
       {/* Card Header Image */}
       <div className="relative h-40 w-full bg-black/15 shrink-0">
               {project.image && (
@@ -35,9 +38,10 @@ export const ProjectGridCard = ({ project, onApply }: { project: any, onApply  :
       {/* Card Body */}
       <div className="flex flex-col p-4">
         <div className="flex justify-between items-start gap-2">
-          <h3 className="text-[14px] font-bold text-white truncate">{project.title}</h3>
+          <h3 className="text-[14px] font-bold text-white truncate hover:underline">{project.title}</h3>
           <Button variant="ghost"
             size="sm"
+            onClick={(e) => { e.stopPropagation(); }}
             className="rounded-md shrink-0">
             <HiOutlineBookmark size={16} className="text-white" />
           </Button>
@@ -90,13 +94,27 @@ export const ProjectGridCard = ({ project, onApply }: { project: any, onApply  :
             <div className="bg-primary-blue text-accent-soft-blue text-[10px] px-2 py-1 rounded-md">
               {project.openRolesCount} open
             </div>
-            <Button
-              onClick={onApply}
-              size="sm"
-              className="text-white text-xs font-semibold rounded-full px-8 py-2">
-              Apply
-            </Button>
-            <Button variant="ghost" size="sm" className="border border-[#262626] rounded-full">
+            {project.isOwner ? (
+              <Button
+                onClick={(e) => { e.stopPropagation(); onView?.(); }}
+                size="sm"
+                variant="secondary"
+                className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-full px-8 py-2 border border-white/20 transition-colors">
+                View
+              </Button>
+            ) : (
+              <Button
+                onClick={(e) => { e.stopPropagation(); onApply(); }}
+                size="sm"
+                className="text-white text-xs font-semibold rounded-full px-8 py-2">
+                Apply
+              </Button>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={(e) => { e.stopPropagation(); }}
+              className="border border-[#262626] rounded-full">
               <HiShare className="text-white/30" />
             </Button>
           </div>

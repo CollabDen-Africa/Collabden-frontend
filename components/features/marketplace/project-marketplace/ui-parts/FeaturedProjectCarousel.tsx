@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiCheckCircle } from 'react-icons/hi';
 import Button from '@/components/ui/Button';
 
 export const FeaturedCarousel = ({ featuredProjects = [] }: { featuredProjects?: any[] }) => {
+  const router = useRouter();
   const projects = featuredProjects;
   const [currentIndex, setCurrentIndex] = useState(0);
   if (projects.length === 0) return null;
@@ -64,7 +66,10 @@ export const FeaturedCarousel = ({ featuredProjects = [] }: { featuredProjects?:
 
       {/* Carousel Card Container */}
       <div className="flex flex-col items-start pt-4 w-full h-full lg:h-80">
-        <div className="flex flex-col lg:flex-row w-full h-full bg-black/15 border border-border-muted/35 rounded-2xl box-border overflow-hidden">
+        <div 
+          onClick={() => project?.id && router.push(`/workspace?projectId=${project.id}`)}
+          className="flex flex-col lg:flex-row w-full h-full bg-black/15 border border-border-muted/35 hover:border-white/40 transition-colors rounded-2xl box-border overflow-hidden cursor-pointer"
+        >
           
           {/* Left Image Section */}
           <div className="relative w-full lg:max-w-80 h-full shrink-0 isolate">
@@ -172,7 +177,9 @@ export const FeaturedCarousel = ({ featuredProjects = [] }: { featuredProjects?:
               </div>
 
               {/* View Project Button */}
-              <Button className="flex flex-col justify-center items-center py-3 h-10">
+              <Button
+                onClick={() => project?.id && router.push(`/workspace?projectId=${project.id}`)}
+                className="flex flex-col justify-center items-center py-3 h-10 hover:bg-primary-blue/90 transition-colors cursor-pointer">
                 <span className="text-[12.19px] font-semibold text-white leading-4.5 text-center">
                   View Project
                 </span>

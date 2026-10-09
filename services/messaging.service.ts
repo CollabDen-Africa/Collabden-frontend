@@ -9,6 +9,16 @@ import type {
 
 const messagingService = {
   /**
+   * Create or fetch a direct chat session with a connected user.
+   */
+  createChat: async (recipientId: string): Promise<DirectChat> => {
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.MESSAGING.CREATE_CHAT, {
+      recipientId,
+    });
+    return response.data?.data || response.data;
+  },
+
+  /**
    * Send a message request to an unconnected user.
    */
   sendRequest: async (receiverId: string, message: string): Promise<MessageRequest> => {
@@ -23,7 +33,7 @@ const messagingService = {
    * Respond to a pending message request (Accept or Decline).
    */
   respondRequest: async (id: string, status: "ACCEPTED" | "DECLINED"): Promise<any> => {
-    const response = await proxyAxios.put(PROXY_ENDPOINTS.MESSAGING.RESPOND_REQUEST(id), {
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.MESSAGING.RESPOND_REQUEST(id), {
       status,
     });
     return response.data?.data || response.data;
@@ -73,7 +83,7 @@ const messagingService = {
    * Mark all unread messages in a chat as read.
    */
   markChatAsRead: async (chatId: string): Promise<{ success: boolean }> => {
-    const response = await proxyAxios.put(PROXY_ENDPOINTS.MESSAGING.READ(chatId));
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.MESSAGING.READ(chatId));
     return response.data?.data || response.data;
   },
 
@@ -91,7 +101,7 @@ const messagingService = {
    * Archive or unarchive a direct chat conversation.
    */
   archiveChat: async (chatId: string, isArchived: boolean): Promise<any> => {
-    const response = await proxyAxios.put(PROXY_ENDPOINTS.MESSAGING.ARCHIVE(chatId), {
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.MESSAGING.ARCHIVE(chatId), {
       isArchived,
     });
     return response.data?.data || response.data;

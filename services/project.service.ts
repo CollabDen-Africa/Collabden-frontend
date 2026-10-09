@@ -136,6 +136,46 @@ const projectService = {
     const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.APPLY(projectId), { message });
     return response.data?.application || response.data?.data || response.data;
   },
+
+  /**
+   * List all applications for a specific project (Project Owner only).
+   */
+  getProjectApplications: async (projectId: string): Promise<any[]> => {
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.PROJECTS.APPLICATIONS(projectId));
+    const raw = response.data;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw?.applications)) return raw.applications;
+    if (Array.isArray(raw?.data)) return raw.data;
+    return [];
+  },
+
+  /**
+   * Review (Accept / Decline) an application.
+   */
+  reviewApplication: async (projectId: string, applicationId: string, status: "ACCEPTED" | "DECLINED" | "REJECTED" | "CANCELLED"): Promise<any> => {
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.PROJECTS.UPDATE_APPLICATION_STATUS(projectId, applicationId), { status });
+    return response.data?.application || response.data?.data || response.data;
+  },
+
+  /**
+   * Cancel an application.
+   */
+  cancelApplication: async (applicationId: string): Promise<any> => {
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.CANCEL_APPLICATION(applicationId));
+    return response.data?.application || response.data?.data || response.data;
+  },
+
+  /**
+   * Fetch applications submitted by current user.
+   */
+  getMyApplications: async (): Promise<any[]> => {
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.PROJECTS.MY_APPLICATIONS);
+    const raw = response.data;
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw?.applications)) return raw.applications;
+    if (Array.isArray(raw?.data)) return raw.data;
+    return [];
+  },
 };
 
 export default projectService;
