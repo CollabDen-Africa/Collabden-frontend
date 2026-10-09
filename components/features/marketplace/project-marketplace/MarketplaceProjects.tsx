@@ -17,25 +17,29 @@ export default function MarketplaceProjects() {
   const { useMarketplaceProjects } = useProjects();
   const { data, isLoading, isError } = useMarketplaceProjects({ limit: 100 });
   const projects = useMemo(() => (data?.projects || [])
-    .filter((project) => project.owner?.id !== user?.id && (project as any).ownerId !== user?.id)
-    .map((project) => ({
-      id: project.id,
-      title: project.name,
-      description: project.description || 'No description provided.',
-      genres: project.genre ? [project.genre] : [],
-      roles: project.requiredRoles || [],
-      compensation: project.budget !== null && project.budget !== undefined ? `${project.pricingType === 'hourly' ? '' : 'Budget '}₦${Number(project.budget).toLocaleString()}` : 'Not specified',
-      duration: project.startDate && project.endDate ? `${formatDate(project.startDate)} – ${formatDate(project.endDate)}` : 'Not specified',
-      deadline: formatDate(project.endDate),
-      applicants: project._count?.applications || 0,
-      authorName: project.owner?.displayName || project.owner?.legalName || project.owner?.email?.split('@')[0] || 'Project owner',
-      authorInitials: (project.owner?.displayName || project.owner?.legalName || project.owner?.email || 'PO').slice(0, 2).toUpperCase(),
-      postedAt: formatDate(project.createdAt),
-      openRolesCount: project.requiredRoles?.length || 0,
-      badge: project.genre || 'Project',
-      openRoles: `${project.requiredRoles?.length || 0} position${(project.requiredRoles?.length || 0) === 1 ? '' : 's'}`,
-      image: '',
-    })), [data, user]);
+    .map((project) => {
+      const isCollaborator = Boolean(user?.id && ((project as any).collaborators || []).some((c: any) => c.userId === user.id || c.user?.id === user.id));
+      const isOwner = Boolean(user?.id && (project.owner?.id === user.id || (project as any).ownerId === user.id || isCollaborator));
+      return {
+        id: project.id,
+        title: project.name,
+        description: project.description || 'No description provided.',
+        genres: project.genre ? [project.genre] : [],
+        roles: project.requiredRoles || [],
+        compensation: project.budget !== null && project.budget !== undefined ? `${project.pricingType === 'hourly' ? '' : 'Budget '}₦${Number(project.budget).toLocaleString()}` : 'Not specified',
+        duration: project.startDate && project.endDate ? `${formatDate(project.startDate)} – ${formatDate(project.endDate)}` : 'Not specified',
+        deadline: formatDate(project.endDate),
+        applicants: project._count?.applications || 0,
+        authorName: project.owner?.displayName || project.owner?.legalName || project.owner?.email?.split('@')[0] || 'Project owner',
+        authorInitials: (project.owner?.displayName || project.owner?.legalName || project.owner?.email || 'PO').slice(0, 2).toUpperCase(),
+        postedAt: formatDate(project.createdAt),
+        openRolesCount: project.requiredRoles?.length || 0,
+        badge: project.genre || 'Project',
+        openRoles: `${project.requiredRoles?.length || 0} position${(project.requiredRoles?.length || 0) === 1 ? '' : 's'}`,
+        image: '',
+        isOwner,
+      };
+    }), [data, user]);
 
   return (
     <div className="w-full flex flex-col h-full animate-in fade-in duration-500">

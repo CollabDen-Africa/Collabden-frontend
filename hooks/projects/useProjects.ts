@@ -159,13 +159,49 @@ export const useProjects = () => {
     onError: (error) => handleApiError(error),
   });
 
+  // Fetch applications for a specific project (Project Owner)
+  const useProjectApplications = (projectId: string) => useQuery({
+    queryKey: ["projects", projectId, "applications"],
+    queryFn: () => projectService.getProjectApplications(projectId),
+    enabled: !!projectId,
+  });
+
+  // Review an application (ACCEPT | DECLINE | REJECT)
+  const useReviewApplication = (projectId: string) => useMutation({
+    mutationFn: ({ applicationId, status }: { applicationId: string; status: "ACCEPTED" | "DECLINED" | "REJECTED" | "CANCELLED" }) =>
+      projectService.reviewApplication(projectId, applicationId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", projectId, "applications"] });
+      queryClient.invalidateQueries({ queryKey: ["projects", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+    onError: (error) => handleApiError(error),
+  });
+
+  // Cancel an application (Applicant or Owner)
+  const useCancelApplication = () => useMutation({
+    mutationFn: (applicationId: string) => projectService.cancelApplication(applicationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "my-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+    onError: (error) => handleApiError(error),
+  });
+
+  // Fetch applications submitted by current user
+  const useMyApplications = () => useQuery({
+    queryKey: ["projects", "my-applications"],
+    queryFn: () => projectService.getMyApplications(),
+  });
+
   // Apply to join a project
   const useApplyToProject = () => useMutation({
     mutationFn: ({ projectId, message }: { projectId: string; message?: string }) =>
       projectService.applyToProject(projectId, message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projects", "my-applications"] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -187,5 +223,9 @@ export const useProjects = () => {
     useMyInvites,
     useRespondToInvite,
     useApplyToProject,
+    useProjectApplications,
+    useReviewApplication,
+    useCancelApplication,
+    useMyApplications,
   };
 };

@@ -15,6 +15,7 @@ import Select from "@/components/ui/Select";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { Project } from "@/types/api.types";
 import { useProjects } from "@/hooks/projects/useProjects";
+import { FiFileText, FiCheck, FiX, FiExternalLink } from "react-icons/fi";
 import { useConnections } from "@/hooks/connections/useConnections";
 
 interface MembersSettingsTabProps {
@@ -37,9 +38,22 @@ export default function MembersSettingsTab({
     isPending: boolean;
   } | null>(null);
 
-  const { useInviteCollaborator, useRemoveCollaborator } = useProjects();
+  const { useInviteCollaborator, useRemoveCollaborator, useProjectApplications, useReviewApplication } = useProjects();
   const inviteMutation = useInviteCollaborator(project?.id || "");
   const removeMutation = useRemoveCollaborator(project?.id || "");
+  const { data: applications = [], isLoading: isLoadingApps } = useProjectApplications(project?.id || "");
+  const reviewMutation = useReviewApplication(project?.id || "");
+
+  const handleReviewApp = async (applicationId: string, status: "ACCEPTED" | "DECLINED") => {
+    if (!project?.id) return;
+    try {
+      await reviewMutation.mutateAsync({ applicationId, status });
+      onSuccess?.(status === "ACCEPTED" ? "Application accepted! Collaborator added." : "Application declined.");
+    } catch (err: any) {
+      const errMsg = err?.response?.data?.error || err?.message || "Failed to review application.";
+      onError?.(errMsg);
+    }
+  };
 
   const { useUserConnections } = useConnections();
   const { data: connections = [] } = useUserConnections(
@@ -160,6 +174,109 @@ export default function MembersSettingsTab({
             Manage who has access to this project and view collaborator roles.
           </p>
         </div>
+      </div>
+
+      {/* Received Applications & Pitches Section */}
+      <div className="flex flex-col gap-[16px] w-full bg-black/20 border border-white/5 p-6 rounded-[24px]">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <FiFileText className="text-primary-green" size={18} />
+            <h3 className="font-raleway font-bold text-[16px] text-white">
+              Marketplace Applications ({applications.length})
+            </h3>
+          </div>
+          <p className="font-raleway font-normal text-[13px] text-white/60">
+            Review pitches and portfolios submitted by creators on the marketplace.
+          </p>
+        </div>
+
+        {isLoadingApps ? (
+          <div className="flex justify-center py-6">
+            <div className="w-5 h-5 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="py-6 text-center text-white/40 font-raleway text-sm bg-black/10 rounded-2xl border border-white/5">
+            No marketplace applications received yet.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 mt-2">
+            {applications.map((app: any) => {
+              const applicantName = app.applicant?.displayName || app.applicant?.legalName || [app.applicant?.firstName, app.applicant?.lastName].filter(Boolean).join(" ") || "Applicant";
+              const isPending = app.status === "APPLIED";
+              const portfolioUrl = app.portfolioLink || app.applicant?.portfolioLinks?.[0];
+
+              return (
+                <div
+                  key={app.id}
+                  className="flex flex-col p-4 bg-black/15 border border-white/5 rounded-2xl gap-3"
+                >
+                  <div className="flex items-start justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        name={applicantName}
+                        src={app.applicant?.avatarUrl}
+                        className="w-10 h-10 text-xs border border-white/15"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm text-white">{applicantName}</span>
+                        <span className="text-xs text-white/50">
+                          {app.applicant?.location || "Creator"} • {app.applicant?.yearsOfExperience ? `${app.applicant.yearsOfExperience} yrs exp` : "Creative"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                        app.status === 'ACCEPTED'
+                          ? 'bg-primary-green/15 text-primary-green border-primary-green/30'
+                          : app.status === 'REJECTED' || app.status === 'DECLINED'
+                          ? 'bg-red-500/15 text-red-400 border-red-500/30'
+                          : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                      }`}>
+                        {app.status === 'APPLIED' ? 'Pending Review' : app.status}
+                      </span>
+
+                      {isPending && (
+                        <>
+                          <button
+                            onClick={() => handleReviewApp(app.id, "ACCEPTED")}
+                            disabled={reviewMutation.isPending}
+                            className="flex items-center gap-1 bg-primary-green hover:bg-accent-green-success text-white text-xs font-bold px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
+                          >
+                            <FiCheck size={14} /> Accept
+                          </button>
+                          <button
+                            onClick={() => handleReviewApp(app.id, "DECLINED")}
+                            disabled={reviewMutation.isPending}
+                            className="flex items-center gap-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-bold px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
+                          >
+                            <FiX size={14} /> Decline
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {app.pitch && (
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/5 text-xs text-white/80 leading-relaxed">
+                      <span className="text-white/40 font-semibold block mb-1">Pitch / Motivation:</span>
+                      {app.pitch}
+                    </div>
+                  )}
+
+                  {portfolioUrl && (
+                    <div className="flex items-center gap-1.5 text-xs text-accent-blue">
+                      <FiExternalLink size={13} />
+                      <a href={portfolioUrl} target="_blank" rel="noreferrer" className="hover:underline font-medium">
+                        View Portfolio Link
+                      </a>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Invite Collaborator Section */}

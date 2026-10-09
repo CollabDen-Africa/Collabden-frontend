@@ -1,22 +1,45 @@
 "use client";
 
 import React from 'react';
-import { HiX, HiOutlinePaperClip, HiCheckCircle, HiClock, HiXCircle } from 'react-icons/hi';
+import { HiX, HiOutlinePaperClip, HiCheckCircle, HiClock, HiXCircle, HiBan } from 'react-icons/hi';
+import { useProjects } from '@/hooks/projects/useProjects';
 
-export function ViewApplicationModal({ isOpen, onClose, application }) {
+export function ViewApplicationModal({ isOpen, onClose, application, onCancelled }: any) {
+  const { useCancelApplication } = useProjects();
+  const { mutate: cancelApp, isPending: isCancelling } = useCancelApplication();
+
   if (!isOpen || !application) return null;
 
-  // Dynamic status styling
-  const statusConfig = {
+  const statusConfig: Record<string, { color: string; bg: string; icon: any }> = {
     'Under Review': { color: 'text-accent-yellow', bg: 'bg-[#2A1E08]', icon: HiClock },
+    'APPLIED': { color: 'text-accent-yellow', bg: 'bg-[#2A1E08]', icon: HiClock },
     'Accepted': { color: 'text-primary-green', bg: 'bg-primary-green/20', icon: HiCheckCircle },
+    'ACCEPTED': { color: 'text-primary-green', bg: 'bg-primary-green/20', icon: HiCheckCircle },
     'Declined': { color: 'text-accent-red', bg: 'bg-accent-red/20', icon: HiXCircle },
+    'DECLINED': { color: 'text-accent-red', bg: 'bg-accent-red/20', icon: HiXCircle },
+    'REJECTED': { color: 'text-accent-red', bg: 'bg-accent-red/20', icon: HiXCircle },
+    'Cancelled': { color: 'text-text-muted', bg: 'bg-white/10', icon: HiBan },
+    'CANCELLED': { color: 'text-text-muted', bg: 'bg-white/10', icon: HiBan },
     'Submitted': { color: 'text-accent-blue', bg: 'bg-accent-blue/20', icon: HiCheckCircle },
   };
 
-  const StatusIcon = statusConfig[application.status]?.icon || HiClock;
-  const statusColor = statusConfig[application.status]?.color || 'text-text-muted';
-  const statusBg = statusConfig[application.status]?.bg || 'bg-white/10';
+  const statusLabel = application.status === 'APPLIED' ? 'Under Review' : application.status;
+  const StatusIcon = statusConfig[application.status]?.icon || statusConfig[statusLabel]?.icon || HiClock;
+  const statusColor = statusConfig[application.status]?.color || statusConfig[statusLabel]?.color || 'text-text-muted';
+  const statusBg = statusConfig[application.status]?.bg || statusConfig[statusLabel]?.bg || 'bg-white/10';
+
+  const canCancel = ['APPLIED', 'Under Review'].includes(application.status) || ['APPLIED', 'Under Review'].includes(application.rawStatus);
+
+  const handleCancel = () => {
+    const appId = application.rawId || application.id;
+    if (!appId) return;
+    cancelApp(appId, {
+      onSuccess: () => {
+        onCancelled?.();
+        onClose();
+      },
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4">
@@ -33,7 +56,7 @@ export function ViewApplicationModal({ isOpen, onClose, application }) {
                 <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${statusBg}`}>
                   <StatusIcon className={`w-3.5 h-3.5 ${statusColor}`} />
                   <span className={`text-[11px] font-bold ${statusColor}`}>
-                    {application.status}
+                    {statusLabel}
                   </span>
                 </div>
               </div>
@@ -78,9 +101,14 @@ export function ViewApplicationModal({ isOpen, onClose, application }) {
                 <div className="w-10 h-10 rounded-full bg-white/10 flex justify-center items-center shrink-0">
                   <HiOutlinePaperClip className="text-text-muted w-5 h-5" />
                 </div>
-                <span className="text-[14px] text-white/80 font-medium break-all">
+                <a
+                  href={application.portfolio}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[14px] text-accent-blue hover:underline font-medium break-all"
+                >
                   {application.portfolio}
-                </span>
+                </a>
               </div>
             ) : (
               <span className="text-[14px] text-text-muted">No files or links attached.</span>
@@ -90,7 +118,17 @@ export function ViewApplicationModal({ isOpen, onClose, application }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end items-start px-9.5 pb-9.5 pt-4 w-full border-t-2 border-border-muted/30">
+        <div className="flex justify-between items-center px-9.5 pb-9.5 pt-4 w-full border-t-2 border-border-muted/30">
+          {canCancel ? (
+            <button
+              onClick={handleCancel}
+              disabled={isCancelling}
+              className="py-2.5 px-5 border border-accent-red/40 text-accent-red hover:bg-accent-red/10 transition-colors rounded-full text-xs font-semibold disabled:opacity-50"
+            >
+              {isCancelling ? "Cancelling..." : "Cancel Application"}
+            </button>
+          ) : <div />}
+
           <button 
             onClick={onClose}
             className="flex flex-col justify-center items-center py-3 px-8 border-2 border-border-muted/30 hover:bg-white/30 transition-colors rounded-full"

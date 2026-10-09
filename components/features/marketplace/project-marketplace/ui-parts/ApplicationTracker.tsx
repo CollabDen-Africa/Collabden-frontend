@@ -4,49 +4,46 @@ import React, { useState } from 'react';
 import { ViewApplicationModal } from '../application-modal/ViewApplication'; 
 import { HiOutlineChevronRight } from 'react-icons/hi';
 import Button from '@/components/ui/Button';
-
-// Mock Data
-const MY_APPLICATIONS = [
-  {
-    id: 'app-1',
-    projectTitle: 'Neon Soul — R&B Album Production',
-    role: 'Vocalist',
-    dateApplied: 'Aug 8, 2026',
-    status: 'Under Review',
-    pitch: "I've been a session vocalist for 5 years specializing in neo-soul and R&B. I have my own home studio setup (Shure SM7B, Apollo Twin) and can deliver clean stems within 48 hours. I love the references you posted and think my tone would be a perfect fit.",
-    portfolio: 'vocal_reel_2026.wav'
-  },
-  {
-    id: 'app-2',
-    projectTitle: 'Sci-Fi Short Film Scoring',
-    role: 'Sound Designer',
-    dateApplied: 'Aug 5, 2026',
-    status: 'Submitted',
-    pitch: "Huge fan of Blade Runner and Dune. I specialize in analog synthesis and creating vast, oppressive sci-fi atmospheres using a mix of Prophet-5 and granular synthesis techniques.",
-    portfolio: 'https://soundcloud.com/user/scifi-textures'
-  },
-  {
-    id: 'app-3',
-    projectTitle: 'Lo-Fi Chillhop Compilation',
-    role: 'Beatmaker',
-    dateApplied: 'Jul 28, 2026',
-    status: 'Accepted',
-    pitch: "I have a catalog of unreleased lo-fi beats matching the seasonal vibe you're looking for. SP-404 heavy workflow.",
-    portfolio: 'Attached: 3 Beats (MP3)'
-  }
-];
+import { useProjects } from '@/hooks/projects/useProjects';
 
 export function ApplicationTracker() {
-  const [selectedApp, setSelectedApp] = useState(null);
+  const [selectedApp, setSelectedApp] = useState<any>(null);
+  const { useMyApplications } = useProjects();
+  const { data: myApps = [], isLoading, refetch } = useMyApplications();
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Accepted': return 'text-primary-green bg-primary-green/10 border-primary-green/20';
-      case 'Declined': return 'text-accent-red bg-accent-red/10 border-accent-red/20';
-      case 'Under Review': return 'text-accent-yellow bg-[#2A1E08] border-accent-yellow/20';
-      default: return 'text-accent-blue bg-accent-blue/10 border-accent-blue/20'; // Submitted
+      case 'Accepted':
+      case 'ACCEPTED':
+        return 'text-primary-green bg-primary-green/10 border-primary-green/20';
+      case 'Declined':
+      case 'DECLINED':
+      case 'REJECTED':
+        return 'text-accent-red bg-accent-red/10 border-accent-red/20';
+      case 'Cancelled':
+      case 'CANCELLED':
+        return 'text-text-muted bg-white/10 border-white/20';
+      case 'Under Review':
+      case 'APPLIED':
+        return 'text-accent-yellow bg-[#2A1E08] border-accent-yellow/20';
+      default:
+        return 'text-accent-blue bg-accent-blue/10 border-accent-blue/20';
     }
   };
+
+  const applicationsList = Array.isArray(myApps)
+    ? myApps.map((app: any) => ({
+        id: app.id,
+        rawId: app.id,
+        rawStatus: app.status,
+        projectTitle: app.project?.name || 'Project Application',
+        role: app.project?.genre || 'Collaborator',
+        dateApplied: app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'Recently',
+        status: app.status === 'APPLIED' ? 'Under Review' : app.status === 'ACCEPTED' ? 'Accepted' : app.status === 'REJECTED' ? 'Declined' : app.status === 'CANCELLED' ? 'Cancelled' : app.status,
+        pitch: app.pitch || app.message || '',
+        portfolio: app.portfolioLink || (app.applicant?.portfolioLinks?.[0] || ''),
+      }))
+    : [];
 
   return (
     <div className="flex flex-col w-full">
@@ -59,7 +56,11 @@ export function ApplicationTracker() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {MY_APPLICATIONS.map((app) => (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="w-6 h-6 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
+          </div>
+        ) : applicationsList.map((app: any) => (
           <div 
             key={app.id} 
             className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white/10 border border-border-muted/30 rounded-2xl hover:border-accent-blue/50 transition-colors group cursor-pointer"
@@ -86,7 +87,7 @@ export function ApplicationTracker() {
             {/* Right Action */}
             <div className="hidden md:flex items-center ml-6 shrink-0">
                <Button variant="ghost" size="sm" className="text-text-muted hover:text-white border border-border-muted/30 rounded-full px-4">
-                 View Receipt
+                 View Details
                </Button>
             </div>
 
@@ -100,7 +101,7 @@ export function ApplicationTracker() {
           </div>
         ))}
 
-        {MY_APPLICATIONS.length === 0 && (
+        {!isLoading && applicationsList.length === 0 && (
           <div className="text-center p-12 bg-white/5 border border-border-muted/30 rounded-2xl">
             <p className="text-text-muted text-[14px]">You haven&apos;t submitted any applications yet.</p>
           </div>
@@ -111,7 +112,8 @@ export function ApplicationTracker() {
       <ViewApplicationModal 
         isOpen={!!selectedApp} 
         onClose={() => setSelectedApp(null)} 
-        application={selectedApp} 
+        application={selectedApp}
+        onCancelled={() => refetch()}
       />
 
     </div>

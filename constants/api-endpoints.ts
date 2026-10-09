@@ -337,6 +337,10 @@ export const PROXY_ENDPOINTS = {
     FILES: (id: string) => `/projects/${id}/files`,
     MESSAGES: (id: string) => `/projects/${id}/messages`,
     APPLY: (id: string) => `/projects/${id}/apply`,
+    APPLICATIONS: (projectId: string) => `/projects/${projectId}/applications`,
+    UPDATE_APPLICATION_STATUS: (projectId: string, applicationId: string) => `/projects/${projectId}/applications/${applicationId}/status`,
+    CANCEL_APPLICATION: (applicationId: string) => `/projects/applications/${applicationId}/cancel`,
+    MY_APPLICATIONS: `/projects/applications/my-applications`,
   },
   CONNECTIONS: {
     SEND_REQUEST: '/user/connections/request',
@@ -398,6 +402,7 @@ export const PROXY_ENDPOINTS = {
     RESPOND_REQUEST: (id: string) => `/messaging/requests/${id}`,
     LIST_REQUESTS: '/messaging/requests',
     LIST_CHATS: '/messaging/chats',
+    CREATE_CHAT: "/messaging/chats",
     MESSAGES: (chatId: string) => `/messaging/chats/${chatId}/messages`,
     READ: (chatId: string) => `/messaging/chats/${chatId}/read`,
     REACTION: (messageId: string) => `/messaging/messages/${messageId}/reactions`,

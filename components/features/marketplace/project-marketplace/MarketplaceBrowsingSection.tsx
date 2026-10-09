@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FiFilter, FiChevronDown, FiGrid, FiList } from 'react-icons/fi';
 import Button from '@/components/ui/Button';
 import { FilterSidebar } from './ui-parts/FilterSidebar';
 import { ProjectListCard } from './ui-parts/ProjectListCard';
 import { ProjectGridCard } from './ui-parts/ProjectGridCard';
 import { ApplicationModalManager } from './application-modal/ApplicationModalManager';
+import { ProjectSummaryModal } from './ProjectSummaryModal';
 import { Pagination } from '@/components/ui/Pagination';
 
 interface Project {
@@ -25,7 +27,7 @@ interface Project {
   isUrgent?: boolean;
   openRolesCount: number;
   image: string;
-  
+  isOwner?: boolean;
 }
 
 const FILTER_CATEGORIES = [
@@ -45,6 +47,7 @@ interface BrowsingSectionProps {
 }
 
 export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre, projects }: BrowsingSectionProps) {
+  const router = useRouter();
   // --- State ---
   const [filters, setFilters] = useState<{
     roles: string[];
@@ -69,6 +72,7 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [applyingProject, setApplyingProject] = useState<Project | null>(null);
+  const [viewingSummaryProject, setViewingSummaryProject] = useState<Project | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const ITEMS_PER_PAGE = 6;
 
@@ -131,6 +135,16 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
               isOpen={!!applyingProject} 
               onClose={() => setApplyingProject(null)} 
               project={applyingProject} 
+            />
+
+      <ProjectSummaryModal
+              isOpen={!!viewingSummaryProject}
+              onClose={() => setViewingSummaryProject(null)}
+              onApply={(proj) => {
+                setViewingSummaryProject(null);
+                setApplyingProject(proj);
+              }}
+              project={viewingSummaryProject}
             />
       
       <div className="lg:hidden w-full mb-4 mt-2">
@@ -221,8 +235,8 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
               <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6" : "flex flex-col gap-5"}>
               {paginatedProjects.map((project) => (
                 viewMode === 'grid' 
-                  ? <ProjectGridCard key={project.id} project={project} onApply={() => setApplyingProject(project)} /> 
-                  : <ProjectListCard key={project.id} project={project} onApply={() => setApplyingProject(project)} />
+                  ? <ProjectGridCard key={project.id} project={project} onApply={() => setApplyingProject(project)} onView={() => project.isOwner ? router.push(`/workspace?projectId=${project.id}`) : setViewingSummaryProject(project)} /> 
+                  : <ProjectListCard key={project.id} project={project} onApply={() => setApplyingProject(project)} onView={() => project.isOwner ? router.push(`/workspace?projectId=${project.id}`) : setViewingSummaryProject(project)} />
               ))}
                 </div>
 
