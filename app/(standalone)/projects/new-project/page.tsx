@@ -212,8 +212,12 @@ export default function CreateProjectPage() {
         requiredRoles: data.requiredRoles,
       });
       if (coverFile && newProject?.id) {
+        try{
           await projectService.uploadCoverImage(newProject.id, coverFile); 
+            } catch (imgErr) {
+              console.warn("Project created, but cover image failed to upload.", imgErr);
             }
+          }
       router.push(ROUTES.PROJECTS.SUCCESS);
     } catch (err) {
       console.error("Project creation failed:", err);
@@ -482,7 +486,7 @@ export default function CreateProjectPage() {
                   Required Roles (Marketplace)
               </label>
               <p className="font-sans text-[14px] text-white/60 -mt-2 pl-1">
-                  Press Enter to add roles you are looking for (e.g., &quot;Producer&qout;, &quot;Vocalist&quot;).
+                  Press Enter to add roles you are looking for (e.g., &quot;Producer&quot;, &quot;Vocalist&quot;).
               </p>
                           
               <div className="w-full bg-white/10 border border-white/20 rounded-3xl p-4 flex flex-wrap gap-2 focus-within:border-primary-green transition-colors">
