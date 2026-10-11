@@ -32,7 +32,9 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
     try {
       await applyMutation.mutateAsync({
         projectId: projectData.id,
-        message: rawAppData?.introduction || '',
+        data: {
+          message: rawAppData?.introduction || '',
+      }
       });
       onNext();
     } catch (err) {
@@ -54,7 +56,7 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
                 Applying to
               </span>
               <h3 className="pt-1.5 text-[20.06px] font-bold text-white leading-7.5">
-                {project.title}
+                {project.title || project.name}
               </h3>
             </div>
             
@@ -107,7 +109,15 @@ export function ApplicationModalStep4({ onClose, onNext, onBack, projectData, ap
                 Project
               </span>
               <span className="text-[17.39px] font-semibold text-white leading-6.5 text-right">
-                {project.title}
+                {project.title || project.name}
+              </span>
+            </div>
+
+            {/* Selected Role Row */}
+            <div className="flex justify-between items-start w-full gap-4">
+              <span className="text-[17.39px] font-normal text-text-muted leading-6.5 shrink-0">Role</span>
+              <span className="text-[14px] font-bold text-primary-green bg-primary-green/10 px-3 py-1 rounded-full uppercase tracking-wider text-right">
+                {appData?.role || 'Applicant'}
               </span>
             </div>
 

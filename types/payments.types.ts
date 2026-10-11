@@ -44,6 +44,7 @@ export interface WithdrawalRecord {
 export interface InitializeFundingPayload {
   amount: number;
   paymentMethod: "card" | "banktransfer" | "ussd";
+  redirectUrl: string;
 }
 
 export interface AddBankAccountPayload {

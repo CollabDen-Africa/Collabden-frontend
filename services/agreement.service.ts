@@ -12,6 +12,7 @@ const agreementService = {
     const response = await proxyAxios.get('/user/agreements');
     const raw = response.data;
     if (raw?.data && Array.isArray(raw.data)) return raw.data;
+    if (raw?.agreements && Array.isArray(raw.agreements)) return raw.agreements;
     if (Array.isArray(raw)) return raw;
     return [];
   },

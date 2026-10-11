@@ -10,30 +10,51 @@ import { IoWalletOutline } from "react-icons/io5";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import InfoTooltip from "@/components/ui/InfoTooltip";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
 
 interface FundEscrowSetupProps {
   onFundEscrow?: () => void;
-  walletBalance?: number;
-  projectBudget?: number;
-  escrowBalance?: number;
-  transferAmount?: number;
-  currencySymbol?: string;
 }
 
 export default function FundEscrowSetup({ 
-  onFundEscrow,
-  walletBalance = 5925000,
-  projectBudget = 5075000,
-  escrowBalance = 0,
-  transferAmount = 5075000,
-  currencySymbol = "₦"
+  onFundEscrow
 }: FundEscrowSetupProps) {
+  const { activeProject } = useWorkspace();
+  const projectId = activeProject?.id || "";
+  
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
+  
+  const { useProjectEscrow, useFundEscrow: useFundEscrowMutation } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
+  const fundEscrowMutation = useFundEscrowMutation();
   
   const [isConfirming, setIsConfirming] = useState(false);
   
-  const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
+  const walletBalance = walletData?.balance || 0;
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+    
+  const projectBudget = activeProject?.budget ? Number(activeProject.budget) : (escrowData?.totalAmount || 0);
+  const escrowBalance = escrowData?.fundedAmount || 0;
+    
+  // The transfer amount is strictly the deficit remaining to fully fund the escrow
+  const transferAmount = projectBudget > escrowBalance ? projectBudget - escrowBalance : 0;
+    
   const remainingWalletBalance = walletBalance - transferAmount;
   const newEscrowBalance = escrowBalance + transferAmount;
+  
+  const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
+  
+  const handleFundConfirmation = async () => {
+      try {
+        await fundEscrowMutation.mutateAsync(projectId);
+        onFundEscrow?.();
+      } catch (error) {
+        console.error("Escrow funding failed:", error);
+      }
+    };
 
   // Reusable blocks for mobile injection
   const TransferSummaryBox = () => (
@@ -170,18 +191,22 @@ export default function FundEscrowSetup({
           {isConfirming ? (
             <Button 
               variant="primary"
-              onClick={onFundEscrow}
-              className="w-full rounded-[18px] py-4 md:py-4.5 shadow-btn-primary scale-[1.02] transition-transform mt-auto"
+              onClick={handleFundConfirmation}
+              disabled={fundEscrowMutation.isPending}
+              className="w-full rounded-[18px] py-4 md:py-4.5 shadow-btn-primary scale-[1.02] transition-transform mt-auto disabled:opacity-50"
             >
-              <span className="font-raleway font-black text-[14px] md:text-[15px] text-white">Confirm & Fund Escrow</span>
+              <span className="font-raleway font-black text-[14px] md:text-[15px] text-white"> {fundEscrowMutation.isPending ? "Processing Transfer..." : "Confirm & Fund Escrow"}
+              </span>
             </Button>
           ) : (
             <Button 
               variant="primary"
               onClick={() => setIsConfirming(true)}
-              className="w-full rounded-[18px] py-4 md:py-4.5 shadow-btn-primary mt-auto"
+              disabled={transferAmount <= 0}
+              className="w-full rounded-[18px] py-4 md:py-4.5 shadow-btn-primary mt-auto disabled:opacity-50"
             >
-              <span className="font-raleway font-black text-[14px] md:text-[15px] text-white">Fund Escrow — {formatCurrency(transferAmount)}</span>
+              <span className="font-raleway font-black text-[14px] md:text-[15px] text-white"> {transferAmount <= 0 ? "Escrow Fully Funded" : `Fund Escrow   ${formatCurrency(transferAmount)}`}
+              </span>
             </Button>
           )}
         </div>

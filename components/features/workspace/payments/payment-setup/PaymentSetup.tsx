@@ -7,29 +7,35 @@ import {
   FiFileText 
 } from "react-icons/fi";
 import Button from "@/components/ui/Button";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
 
 interface PaymentSetupProps {
   onBeginSetup?: () => void;
-  // Dynamic data props
-  walletBalance?: number;
-  escrowBalance?: number;
-  requiredAmount?: number;
-  currencySymbol?: string;
-  projectName?: string;
-  agreementDate?: string;
-  collaboratorsCount?: number;
 }
 
-export default function PaymentSetup({ 
-  onBeginSetup,
-  walletBalance = 850000,
-  escrowBalance = 0,
-  requiredAmount = 5075000,
-  currencySymbol = "₦",
-  projectName = "Urban Beats Vol. 2",
-  agreementDate = "June 24, 2026",
-  collaboratorsCount = 6
-}: PaymentSetupProps) {
+export default function PaymentSetup({ onBeginSetup }: PaymentSetupProps) {
+  // Pull live data context
+  const { activeProject } = useWorkspace();
+  const projectId = activeProject?.id || "";
+  
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
+  
+  const { useProjectEscrow } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
+
+  const walletBalance = walletData?.balance || 0;
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+  const escrowBalance = escrowData?.fundedAmount || 0;
+  const requiredAmount = activeProject?.budget ? Number(activeProject.budget) : (escrowData?.totalAmount || 0);
+  
+  const projectName = activeProject?.name || "Untitled Project";
+  const collaboratorsCount = activeProject?.collaborators?.length || 1;
+  const agreementDate = activeProject?.createdAt 
+    ? new Date(activeProject.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) 
+    : "Pending";
   
   // Helper to format currency dynamically
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
@@ -64,8 +70,8 @@ export default function PaymentSetup({
           </div>
 
           {/* Project Escrow Card */}
-          <div className="flex-1 bg-black/20 border border-white/5 rounded-[34px] p-[24px] flex flex-col justify-between h-[195px] backdrop-blur-md">
-            <div className="flex items-center gap-[12px]">
+          <div className="flex-1 bg-black/20 border border-white/5 rounded-[34px] p-6 flex flex-col justify-between h-48.75 backdrop-blur-md">
+            <div className="flex items-center gap-3">
               <FiLock className="text-text-muted" size={20} />
               <span className="font-raleway font-bold text-[14px] text-white">Project Escrow</span>
             </div>

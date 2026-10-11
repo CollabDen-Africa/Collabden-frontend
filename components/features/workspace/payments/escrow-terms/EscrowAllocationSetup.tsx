@@ -1,86 +1,76 @@
+"use client";
+
+import { useMemo } from "react";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Avatar from "@/components/ui/Avatar";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
 
-interface CollaboratorAllocation {
-  id: number;
-  name: string;
-  role: string;
-  schedule: string;
-  amount: string | number;
-  share: string;
-  shareValue: number;
-  colorClass: string;
-  textClass: string;
-}
 
-interface EscrowAllocationsSetupProps {
-  onBack?: () => void;
-  onContinueToReview?: () => void;
-  totalBudget?: number;
-  totalAllocated?: number;
-  unallocated?: number;
-  currencySymbol?: string;
-  collaborators?: CollaboratorAllocation[];
-}
-
-const DEFAULT_COLLABORATORS: CollaboratorAllocation[] = [
-  {
-    id: 1,
-    name: "Oyinda",
-    role: "Lead Vocalist & Arranger",
-    schedule: "Milestones 1 & 2",
-    amount: "800,000",
-    share: "16%",
-    shareValue: 16,
-    colorClass: "from-primary-green to-primary-green/80",
-    textClass: "text-primary-green",
-  },
-  {
-    id: 2,
-    name: "Chinedu Okafor",
-    role: "Beat Producer",
-    schedule: "Milestones 1, 2 & 3",
-    amount: "1,200,000",
-    share: "24%",
-    shareValue: 24,
-    colorClass: "from-primary-blue to-primary-blue/80",
-    textClass: "text-primary-blue",
-  },
-  {
-    id: 3,
-    name: "Amara Nwosu",
-    role: "Session Guitarist",
-    schedule: "Milestone 2",
-    amount: "600,000",
-    share: "12%",
-    shareValue: 12,
-    colorClass: "from-accent-pink to-accent-pink/80",
-    textClass: "text-accent-pink",
-  },
-  {
-    id: 4,
-    name: "Tunde Adeyemi",
-    role: "Mix & Mastering Engineer",
-    schedule: "Milestones 3 & 4",
-    amount: "950,000",
-    share: "19%",
-    shareValue: 19,
-    colorClass: "from-accent-yellow to-accent-yellow/80",
-    textClass: "text-accent-yellow",
-  }
+const COLOR_MAP = [
+  { bg: "from-primary-green to-primary-green/80", text: "text-primary-green" },
+  { bg: "from-primary-blue to-primary-blue/80", text: "text-primary-blue" },
+  { bg: "from-accent-pink to-accent-pink/80", text: "text-accent-pink" },
+  { bg: "from-accent-yellow to-accent-yellow/80", text: "text-accent-yellow" }
 ];
 
-export default function EscrowAllocationsSetup({ 
-  onBack, 
+interface EscrowAllocationsSetupProps {
+  milestones?: any[];
+  onBack?: () => void; 
+  onContinueToReview?: () => void;
+}
+
+export default function EscrowAllocationsSetup({
+  milestones = [],
+  onBack,
   onContinueToReview,
-  totalBudget = 5000000,
-  totalAllocated = 5000000,
-  unallocated = 0,
-  currencySymbol = "₦",
-  collaborators = DEFAULT_COLLABORATORS
 }: EscrowAllocationsSetupProps) {
+
+  const { activeProject } = useWorkspace();
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+
+  const totalBudget = activeProject?.budget ? Number(activeProject.budget) : 0;
+  
+  // Derive allocations from milestones
+  const { totalAllocated, unallocated, activeCollaborators } = useMemo(() => {
+    let allocated = 0;
+    const userTotals = new Map<string, number>();
+    
+    milestones.forEach(m => {
+      const amt = Number(m.amount) || 0;
+      if (m.assignedTo) {
+        allocated += amt;
+        userTotals.set(m.assignedTo, (userTotals.get(m.assignedTo) || 0) + amt);
+      }
+    });
+        
+    // Map collaborators from the workspace
+    const mappedCollabs = activeProject?.collaborators?.map((c, index) => {
+      const colorTheme = COLOR_MAP[index % COLOR_MAP.length];
+      const amountAssigned = userTotals.get(c.userId) || 0;
+      const sharePercentage = totalBudget > 0 ? (amountAssigned / totalBudget) * 100 : 0;
+      return {
+        id: c.userId,
+        name: c.user?.displayName || c.user?.legalName || c.user?.email || "Unknown User",
+        role: c.role || "Collaborator",
+        schedule: "TBD",
+        amount: amountAssigned,
+        share: `${sharePercentage.toFixed(1)}%`,
+        colorClass: colorTheme.bg,
+        textClass: colorTheme.text,
+      };
+    }).sort((a, b) => b.amount - a.amount) || [];
+
+    return {
+      totalAllocated: allocated,
+      unallocated: Math.max(0, totalBudget - allocated),
+      activeCollaborators: mappedCollabs
+    }
+  }, [milestones, totalBudget, activeProject?.collaborators]);
   
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
@@ -131,7 +121,7 @@ export default function EscrowAllocationsSetup({
 
         {/* Collaborators Allocation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-          {collaborators.map((collab) => (
+          {activeCollaborators.map((collab) => (
             <div key={collab.id} className="bg-black/15 border border-white/5 rounded-[30px] p-5 flex flex-col backdrop-blur-md">
               
               {/* User Info & Schedule */}

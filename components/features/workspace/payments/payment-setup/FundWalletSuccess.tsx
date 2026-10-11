@@ -1,32 +1,35 @@
 "use client";
 import { FiCheck, FiArrowRight } from "react-icons/fi";
 import Button from "@/components/ui/Button";
+import { usePayment } from "@/hooks/payment/usePayment";
 
 interface FundWalletSuccessProps {
   onBackToPayments?: () => void;
   onFundEscrow?: () => void;
-  // Dynamic data props
-  amountAdded?: number;
-  updatedBalance?: number;
-  transactionRef?: string;
-  transactionDate?: string;
-  transactionTime?: string;
-  paymentMethod?: string;
-  currencySymbol?: string;
 }
 
 
 export default function FundWalletSuccess({ 
   onBackToPayments, 
-  onFundEscrow,
-  amountAdded = 5075000,
-  updatedBalance = 5925000,
-  transactionRef = "CDDU8S028U",
-  transactionDate = "21 July 2026",
-  transactionTime = "19:20",
-  paymentMethod = "Debit Card · Visa ****8832",
-  currencySymbol = "₦"
+  onFundEscrow
 }: FundWalletSuccessProps) {
+
+  const { useWallet, useTransactions } = usePayment();
+    const { data: walletData } = useWallet();
+    
+    // Pull the most recent completed funding transaction
+    const { data: txData } = useTransactions("FUNDING", "COMPLETED", 1, 1);
+    const latestTx = txData?.transactions?.[0];
+  
+    const updatedBalance = walletData?.balance || 0;
+    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+    
+    const amountAdded = latestTx?.amount || 0;
+    const transactionRef = latestTx?.reference || "Processing...";
+    
+    const txDateObj = latestTx?.createdAt ? new Date(latestTx.createdAt) : new Date();
+    const transactionDate = txDateObj.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+    const transactionTime = txDateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
@@ -96,10 +99,10 @@ export default function FundWalletSuccess({
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Time</span>
                 <span className="font-raleway font-bold text-[14px] text-white">{transactionTime}</span>
               </div>
-              <div className="flex justify-between items-center py-5">
+            {/*<div className="flex justify-between items-center py-5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Method</span>
                 <span className="font-raleway font-bold text-[14px] text-white">{paymentMethod}</span>
-              </div>
+              </div>*/}
             </div>
 
           </div>

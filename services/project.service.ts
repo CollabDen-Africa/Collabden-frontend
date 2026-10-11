@@ -54,6 +54,21 @@ const projectService = {
   },
 
   /**
+   * Upload a project's cover image.
+   */
+  uploadCoverImage: async (projectId: string, file: File): Promise<Project> => {
+    const formData = new FormData();
+    formData.append("coverImage", file);
+      
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.COVER(projectId), formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        
+      const raw = response.data;
+      return raw?.project || raw?.data || (raw as Project);
+  },
+
+  /**
    * Delete a project.
    */
   deleteProject: async (id: string): Promise<void> => {
@@ -73,6 +88,13 @@ const projectService = {
     await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.FILES(projectId), formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+  },
+
+  /**
+      * Delete a file from a project.
+     */
+  deleteFile: async (projectId: string, fileId: string): Promise<void> => {
+    await proxyAxios.delete(`${PROXY_ENDPOINTS.PROJECTS.FILES(projectId)}/${fileId}`);
   },
 
   sendMessage: async (projectId: string, content: string): Promise<ProjectMessage> => {
@@ -132,10 +154,29 @@ const projectService = {
   /**
    * Apply to join a project.
    */
-  applyToProject: async (projectId: string, message?: string): Promise<any> => {
-    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.APPLY(projectId), { message });
+  applyToProject: async (projectId: string, data: any): Promise<any> => {
+  // If a physical file was attached, send as FormData
+    if (data.portfolioFile) {
+      const formData = new FormData();
+        formData.append("message", data.message || "");
+        formData.append("role", data.role || "");
+        formData.append("portfolioFile", data.portfolioFile);
+        
+      const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.APPLY(projectId), formData,
+        {
+            headers: { "Content-Type": "multipart/form-data" }
+              });
+      return response.data?.application || response.data?.data || response.data;
+            }
+        
+  // Otherwise, send as standard JSON (for links and text)
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.APPLY(projectId), {
+      message: data.message,
+      role: data.role,
+      portfolioLink: data.portfolioLink
+            });
     return response.data?.application || response.data?.data || response.data;
-  },
+          },
 
   /**
    * List all applications for a specific project (Project Owner only).

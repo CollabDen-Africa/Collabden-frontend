@@ -11,6 +11,7 @@ import {
   FiChevronRight,
   FiCheck,
   FiAlertCircle,
+  FiInbox 
 } from "react-icons/fi";
 import Modal from "@/components/ui/Modal";
 import GeneralSettingsTab from "./GeneralSettingsTab";
@@ -18,38 +19,15 @@ import MembersSettingsTab from "./MemberSettingsTab";
 import NotificationsSettingsTab from "./NotificationsSettingsTab";
 import PrivacySettingsTab from "./PrivacySettingsTab";
 import OwnershipSettingsTab from "./OwnershipSettingsTab";
+import ApplicationsSettingsTab from "./ApplicationsSettingsTab";
 
 const SETTINGS_OPTIONS = [
-  {
-    id: "gen",
-    title: "General",
-    sub: "Project Information",
-    icon: <FiInfo size={16} />,
-  },
-  {
-    id: "mem",
-    title: "Members & Roles",
-    sub: "Collaborators",
-    icon: <FiUsers size={16} />,
-  },
-  {
-    id: "not",
-    title: "Notifications",
-    sub: "Your preferences",
-    icon: <FiBell size={16} />,
-  },
-  {
-    id: "pri",
-    title: "Privacy & Visibility",
-    sub: "Access control",
-    icon: <FiShield size={16} />,
-  },
-  {
-    id: "own",
-    title: "Ownership",
-    sub: "Transfer project",
-    icon: <FiKey size={16} />,
-  },
+  { id: "gen", title: "General", sub: "Project Information", icon: <FiInfo size={16} /> },
+  { id: "mem", title: "Members & Roles", sub: "Collaborators", icon: <FiUsers size={16} /> },
+  { id: "app", title: "Applications", sub: "Review requests", icon: <FiInbox size={16} /> },
+  { id: "not", title: "Notifications", sub: "Your preferences", icon: <FiBell size={16} /> },
+  { id: "pri", title: "Privacy & Visibility", sub: "Access control", icon: <FiShield size={16} /> },
+  { id: "own", title: "Ownership", sub: "Transfer project", icon: <FiKey size={16} /> },
 ];
 
 import { Project } from "@/types/api.types";
@@ -181,6 +159,15 @@ export default function SettingsPanel({
               project={project}
               onSuccess={(msg) =>
                 handleTabSuccess(msg || "Members updated successfully.")
+              }
+              onError={(errMsg) => showToast(errMsg, "error")}
+            />
+          )}
+          {activeTab === "app" && (
+            <ApplicationsSettingsTab
+              project={project}
+              onSuccess={(msg) =>
+                handleTabSuccess(msg || "Application settings updated.")
               }
               onError={(errMsg) => showToast(errMsg, "error")}
             />

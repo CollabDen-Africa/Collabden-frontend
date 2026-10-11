@@ -1,37 +1,70 @@
 "use client";
-import { FiTrendingUp, FiSettings, FiCreditCard } from "react-icons/fi";
+import { FiTrendingUp, FiSettings, FiCreditCard, FiFileText } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import BudgetSummary from "./BudgetSummary";
 import PayoutProgress from "./PayoutProgress";
 import SessionMilestones from "./SessionMilestones";
 import CrewAllocations from "./CrewAllocations";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
 
 
 interface PaymentOverviewProps {
   onFundEscrow?: () => void;
+  onConfigureTerms?: () => void;
   onViewTransactions?: () => void;
   onRoyaltySettings?: () => void;
 }
 
 export default function PaymentOverview({ 
   onFundEscrow, 
+  onConfigureTerms,
   onViewTransactions, 
   onRoyaltySettings 
 }: PaymentOverviewProps) {
-  // Mock Data
-  const overviewData = {
-    currencySymbol: "₦",
-    walletBalance: 850000,
-    totalBudget: 5000000,
-    securedInEscrow: 4000000,
-    paidOut: 2250000,
-    remainingInEscrow: 1750000,
-    projectName: "Urban Beats Vol. 2",
-    sessionsReleased: 3,
-    awaitingSignoff: 1,
-    inEscrowLock: 1
-  };
 
+  const { activeProject } = useWorkspace();
+    const projectId = activeProject?.id || "";
+  
+    const { useWallet } = usePayment();
+    const { data: walletData } = useWallet();
+  
+    const { useProjectEscrow } = useEscrow();
+    const { data: escrowData } = useProjectEscrow(projectId);
+  
+    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+    const walletBalance = walletData?.balance || 0;
+    
+    // Calculate Escrow Metrics
+    const totalBudget = activeProject?.budget ? Number(activeProject.budget) : (escrowData?.totalAmount || 0);
+    const securedInEscrow = escrowData?.fundedAmount || 0;
+    const paidOut = escrowData?.releasedAmount || 0;
+    const remainingInEscrow = securedInEscrow - paidOut;
+  
+    // Calculate Milestone Stats
+    const milestones = escrowData?.milestones || [];
+    const sessionsReleased = milestones.filter((m: any) => m.status === "PAYMENT_RELEASED").length;
+    const awaitingSignoff = milestones.filter((m: any) => m.status === "AWAITING_REVIEW" || m.status === "SUBMITTED").length;
+    const inEscrowLock = milestones.filter((m: any) => m.status === "PENDING" || m.status === "IN_PROGRESS").length;
+  
+    const overviewData = {
+      currencySymbol,
+      walletBalance,
+      totalBudget,
+      securedInEscrow,
+      paidOut,
+      remainingInEscrow,
+      projectName: activeProject?.name || "Untitled Project",
+      sessionsReleased,
+      awaitingSignoff,
+      inEscrowLock
+    };
+
+    // If funded >= the budget, point them straight to terms
+  const isFullyFunded = totalBudget > 0 && securedInEscrow >= totalBudget;
+
+  
   return (
     <div className="w-full min-h-screen relative overflow-hidden p-2">
       
@@ -45,19 +78,32 @@ export default function PaymentOverview({
           </p>
           
           <div className="flex flex-wrap w-full xl:w-auto items-center gap-3">
-            <Button 
-              variant="primary"
-              onClick={onFundEscrow} 
-              className="py-[10px] px-[20px]"
-              icon={FiCreditCard}
-              iconPosition="left"
-            >
-              Fund Escrow
-            </Button>
+            {isFullyFunded ? (
+              <Button
+                variant="primary"
+                onClick={onConfigureTerms}
+                className="py-2.5 px-5"
+                icon={FiFileText}
+                iconPosition="left"
+              >
+                Configure Terms
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={onFundEscrow}
+                className="py-2.5 px-5"
+                icon={FiCreditCard}
+                iconPosition="left"
+              >
+                Fund Escrow
+              </Button>
+            )}
+            
             <Button 
               variant="ghost"
               onClick={onViewTransactions} 
-              className="border border-white/10 hover:bg-white/10 rounded-full py-[10px] px-[20px]"
+              className="border border-white/10 hover:bg-white/10 rounded-full py-2.5 px-5"
               icon={FiTrendingUp}
               iconPosition="left"
             >
@@ -66,7 +112,7 @@ export default function PaymentOverview({
             <Button 
               variant="ghost"
               onClick={onRoyaltySettings} 
-              className="border border-white/10 py-[10px] px-[20px]"
+              className="border border-white/10 py-2.5 px-5"
               icon={FiSettings}
               iconPosition="left"
             >
@@ -78,8 +124,12 @@ export default function PaymentOverview({
         {/* Modular Sections */}
         <BudgetSummary data={overviewData} />
         <PayoutProgress data={overviewData} />
-        <SessionMilestones currencySymbol={overviewData.currencySymbol} />
-        <CrewAllocations currencySymbol={overviewData.currencySymbol} />
+        <SessionMilestones currencySymbol={currencySymbol} milestones={milestones} />
+        <CrewAllocations 
+          currencySymbol={currencySymbol} 
+          allocations={escrowData?.allocations || []} 
+          collaborators={activeProject?.collaborators || []} 
+        />
 
       </div>
     </div>

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { HiCheck, HiOutlineCloudUpload, HiOutlineDocumentText } from "react-icons/hi";
+import { HiCheck, HiOutlineCloudUpload, HiOutlineDocumentText, HiOutlineTrash, HiOutlineDownload } from "react-icons/hi";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { getErrorMessage } from "@/lib/error-handler";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
 const formatFileSize = (bytes?: number | null) => {
   if (bytes === null || bytes === undefined || bytes < 0) return "—";
@@ -29,37 +30,79 @@ export default function WorkspaceFilesPage() {
   const projectId = projectDetails?.id || activeProject?.id || "";
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [uploadingCount, setUploadingCount] = useState(0);
-  const { useUploadProjectFile } = useProjects();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null);
+  const { useUploadProjectFile, useDeleteProjectFile } = useProjects();
   const uploadFile = useUploadProjectFile(projectId);
+  const deleteFile = useDeleteProjectFile(projectId);
 
   useEffect(() => {
-    if (!uploadSuccess) return;
-    const timeout = window.setTimeout(() => setUploadSuccess(null), 4_000);
+    if (!actionSuccess) return;
+    const timeout = window.setTimeout(() => setActionSuccess(null), 4_000);
     return () => window.clearTimeout(timeout);
-  }, [uploadSuccess]);
+  }, [actionSuccess]);
 
   const uploadFiles = async (fileList: FileList | File[]) => {
     const selectedFiles = Array.from(fileList);
     if (!projectId || selectedFiles.length === 0) return;
 
-    setUploadError(null);
-    setUploadSuccess(null);
+    setActionError(null);
+    setActionSuccess(null);
     setUploadingCount(selectedFiles.length);
     try {
       await Promise.all(selectedFiles.map((file) => uploadFile.mutateAsync(file)));
-      setUploadSuccess(
+      setActionSuccess(
         `${selectedFiles.length} file${selectedFiles.length === 1 ? "" : "s"} uploaded successfully.`,
       );
     } catch (error) {
-      setUploadError(getErrorMessage(error));
+      setActionError(getErrorMessage(error));
     } finally {
       setUploadingCount(0);
       if (inputRef.current) inputRef.current.value = "";
     }
   };
+
+  const confirmDelete = async () => {
+      if (!fileToDelete) return;
+      
+      setActionError(null);
+      setDeletingId(fileToDelete.id);
+      try {
+        await deleteFile.mutateAsync(fileToDelete.id);
+        setActionSuccess("File deleted successfully.");
+      } catch (error) {
+        setActionError(getErrorMessage(error));
+      } finally {
+        setDeletingId(null);
+        setFileToDelete(null);
+      }
+    };
+  
+  const handleDownload = async (url: string, filename: string, fileId: string) => {
+    setDownloadingId(fileId);
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const objectUrl = window.URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        
+        link.remove();
+        window.URL.revokeObjectURL(objectUrl);
+      } catch (error) {
+        setActionError("Failed to download file.");
+      } finally {
+        setDownloadingId(null);
+      }
+    };
 
   return (
     <div className="flex flex-col gap-8 animate-in fade-in duration-300 w-full">
@@ -113,13 +156,13 @@ export default function WorkspaceFilesPage() {
         </div>
       </section>
 
-      {uploadError && (
+      {actionError && (
         <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-          {uploadError}
+          {actionError}
         </p>
       )}
 
-      {uploadSuccess && (
+      {actionSuccess && (
         <div
           role="status"
           className="fixed right-5 top-5 z-100 flex items-center gap-3 rounded-2xl border border-primary-green/40 bg-[#15251e] px-4 py-3 text-sm text-white shadow-xl animate-in fade-in slide-in-from-top-2 duration-200"
@@ -127,7 +170,7 @@ export default function WorkspaceFilesPage() {
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-green text-[#15251e]">
             <HiCheck size={16} />
           </span>
-          <span>{uploadSuccess}</span>
+          <span>{actionSuccess}</span>
         </div>
       )}
 
@@ -136,22 +179,22 @@ export default function WorkspaceFilesPage() {
         
         {/* Table Header */}
         <div className="hidden md:grid grid-cols-12 gap-4 w-full border-b border-white/5 pb-4">
-          <div className="col-span-5 lg:col-span-6">
+          <div className="md:col-span-5">
             <span className="font-sans font-medium text-[18px] text-white">Name</span>
           </div>
-          <div className="col-span-2">
+          <div className="md:col-span-2">
             <span className="font-sans font-medium text-[18px] text-white">Size</span>
           </div>
-          <div className="col-span-3 lg:col-span-2">
+          <div className="md:col-span-2">
             <span className="font-sans font-normal text-[18px] text-white">Date</span>
           </div>
-          <div className="col-span-2 text-right">
+          <div className="md:col-span-3 text-right">
             <span className="font-sans font-normal text-[18px] text-white">Version</span>
           </div>
         </div>
 
         {/* File Rows */}
-        <div className="flex flex-col gap-4 md:gap-6">
+        <div className="flex flex-col gap-4 md:gap-0">
           {isLoading && (
             <div className="py-6 text-center font-sans text-[14px] text-white/60">
               Loading project files…
@@ -167,42 +210,67 @@ export default function WorkspaceFilesPage() {
           {!isLoading && files.map((file) => (
             <div 
               key={file.id}
-              className="flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-4 w-full items-start md:items-center py-2 md:py-0 border-b border-white/5 md:border-0 last:border-0 pb-4 md:pb-0"
+              className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 w-full items-center py-4 border-b border-white/5 md:border-0 last:border-0 pb-4 md:pb-0"
             >
               
               {/* Name & Icon */}
-              <div className="col-span-5 lg:col-span-6 flex items-center gap-3">
+              <div className="col-span-2 md:col-span-5 flex items-center gap-3">
                 <HiOutlineDocumentText className="text-primary-green shrink-0" size={20} />
                 <a
                   href={file.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-sans font-semibold text-[16px] leading-[19px] text-white truncate hover:text-primary-green transition-colors"
+                  className="font-sans font-semibold text-[16px] leading-4.75 text-white truncate hover:text-primary-green transition-colors"
                 >
                   {file.name}
                 </a>
               </div>
 
               {/* Size */}
-              <div className="col-span-2 flex items-center">
+              <div className="col-span-1 md:col-span-2 flex items-center">
                 <span className="font-sans font-semibold text-[14px] text-white/60">
                   {formatFileSize(file.size)}
                 </span>
               </div>
 
               {/* Date */}
-              <div className="col-span-3 lg:col-span-2 flex items-center">
+              <div className="col-span-1 md:col-span-2 flex items-center justify-end md:justify-start">
                 <span className="font-sans font-semibold text-[14px] text-white/60">
                   {formatDate(file.createdAt)}
                 </span>
               </div>
 
-              {/* Version Pill */}
-              <div className="col-span-2 flex items-center md:justify-end mt-2 md:mt-0">
-                <div className="flex items-center justify-center px-4 py-1 bg-white/20 rounded-[20px]">
-                  <span className="font-sans font-semibold text-[14px] text-white/60">
-                    —
+              {/* Version & Actions */}
+              <div className="col-span-2 md:col-span-3 flex items-center justify-between md:justify-end gap-3 md:gap-4 pt-3 mt-1 border-t border-white/5 md:border-none md:pt-0 md:mt-0">
+                {/* Version Button */}
+                <button 
+                  className="flex items-center justify-center px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors"
+                  title="View file versions"
+                >
+                  <span className="font-sans font-semibold text-[12px] text-white/70">
+                                 -
                   </span>
+                </button>
+             
+                {/* Download / Delete Actions */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDownload(file.url, file.name, file.id)}
+                    disabled={downloadingId === file.id}
+                    className="flex items-center justify-center p-2 bg-white/10 hover:bg-white/20 hover:text-primary-green rounded-full transition-colors text-white/60 disabled:opacity-50"
+                    title="Download file"
+                  >
+                    <HiOutlineDownload size={18} />
+                  </button>
+                  <button
+                    onClick={() => setFileToDelete({ id: file.id, name: file.name })}
+                    disabled={deletingId === file.id}
+                    className="flex items-center justify-center p-2 bg-white/10 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors text-white/60 disabled:opacity-50"
+                    title="Delete file"
+                  >
+                    <HiOutlineTrash size={18} />
+                  </button>
+                
                 </div>
               </div>
 
@@ -211,6 +279,22 @@ export default function WorkspaceFilesPage() {
         </div>
 
       </section>
+
+      <ConfirmationModal
+              isOpen={Boolean(fileToDelete)}
+              onClose={() => setFileToDelete(null)}
+              onConfirm={confirmDelete}
+              title="Delete File"
+              description={
+                <>
+                  Are you sure you want to delete <span className="text-white font-semibold">{fileToDelete?.name}</span>? This action cannot be undone and it will be removed from the project workspace.
+                </>
+              }
+              confirmText="Delete File"
+              cancelText="Cancel"
+              variant="danger"
+              isLoading={deletingId !== null}
+            />
 
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiPlus, FiCheckCircle, FiCreditCard } from "react-icons/fi";
+import { FiPlus, FiCreditCard } from "react-icons/fi";
 import EmptyState from "@/components/ui/EmptyState";
 import AddEditBankAccountOverlay from "@/components/features/bank-account/AddEditBankAccount";
 import BankVerificationOverlay from "@/components/features/bank-account/BankVerification";
@@ -9,7 +9,7 @@ import { usePayment } from "@/hooks/payment/usePayment";
 
 export default function BankAccountsPage() {
   const { useBankAccounts, useAddBankAccount, useUpdateBankAccount, useRemoveBankAccount } = usePayment();
-  const { data: bankData, isLoading } = useBankAccounts();
+  const { data: bankData } = useBankAccounts();
   const addBankMutation = useAddBankAccount();
   const updateBankMutation = useUpdateBankAccount();
   const removeBankMutation = useRemoveBankAccount();

@@ -3,11 +3,11 @@
 import React from 'react';
 import { HiX } from 'react-icons/hi';
 
-export function ApplicationModalStep1({ onClose, onNext, projectData }) {
+export function ApplicationModalStep1({ onClose, onNext, projectData, appData, setAppData }) {
   // Safe fallbacks
   const project = projectData || {
     title: 'Neon Soul — R&B Album Production',
-    role: 'Vocalist',
+    requiredRoles: ['Vocalist', 'Producer', 'Mix Engineer'],
     compensation: '$2,400–$3,800',
     duration: '4 months',
     deadline: 'Aug 30, 2026',
@@ -16,6 +16,21 @@ export function ApplicationModalStep1({ onClose, onNext, projectData }) {
 
   const totalSteps = 5;
   const currentStep = 1;
+  const canContinue = !!appData.role;
+  const rawRoles = project.requiredRoles || project.roles;
+   let roles = ['Collaborator'];
+  
+    if (Array.isArray(rawRoles) && rawRoles.length > 0) {
+      roles = rawRoles;
+    } else if (typeof rawRoles === 'string') {
+      try {
+        const parsed = JSON.parse(rawRoles);
+        if (Array.isArray(parsed) && parsed.length > 0) roles = parsed;
+        else roles = [rawRoles];
+      } catch {
+        roles = rawRoles.split(',').map((r: string) => r.trim()).filter(Boolean);
+      }
+    }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg p-4">
@@ -31,7 +46,7 @@ export function ApplicationModalStep1({ onClose, onNext, projectData }) {
                 Applying to
               </span>
               <h3 className="pt-1.5 text-[20.06px] font-bold text-white leading-7.5">
-                {project.title}
+                {project.title || project.name}
               </h3>
             </div>
             
@@ -75,9 +90,24 @@ export function ApplicationModalStep1({ onClose, onNext, projectData }) {
           <div className="flex flex-col items-start p-[21.4px_24.08px] gap-3.25 mt-5.25 w-full bg-black/15 rounded-2xl">
             
             <div className="flex justify-between items-start w-full">
-              <span className="text-[17.39px] font-normal text-text-muted leading-6.5">Role</span>
-              <span className="text-[17.39px] font-semibold text-white leading-6.5">{project.roles}</span>
+              {/* Role Selector */}
+          <div className="flex flex-col gap-3 w-full border-b border-white/5 pb-4">
+            <span className="text-[15px] font-semibold text-white/60 uppercase tracking-wide">Available Roles</span>
+            <div className="flex flex-wrap gap-2">
+              {roles.map((role: string) => (
+              <button
+                key={role}
+                onClick={() => setAppData({ ...appData, role })}
+                className={`px-4 py-2 rounded-full text-[14px] font-semibold transition-all ${
+                appData.role === role ? 'bg-primary-green border border-primary-green text-white shadow-[0_0_10px_rgba(115,191,68,0.3)]' : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {role}
+              </button>
+               ))}
             </div>
+          </div>
+        </div>
 
             <div className="flex justify-between items-start w-full">
               <span className="text-[17.39px] font-normal text-text-muted leading-6.5">Compensation</span>
@@ -106,10 +136,11 @@ export function ApplicationModalStep1({ onClose, onNext, projectData }) {
         <div className="flex flex-col items-start px-9.5 pb-9.5 w-full">
           <button 
             onClick={onNext}
-            className="flex flex-col justify-center items-center py-3.5 w-full bg-primary-green transition-colors rounded-full"
+            disabled={!canContinue}
+            className="flex flex-col justify-center items-center py-3.5 w-full bg-primary-green transition-colors rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="text-[17.39px] font-semibold text-white leading-6.5 text-center">
-              Continue
+              {canContinue ? "Continue" : "Select a role to continue"}
             </span>
           </button>
         </div>

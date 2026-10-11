@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import Avatar from "@/components/ui/Avatar";
 import { HiOutlineLockClosed, HiOutlineGlobeAlt } from "react-icons/hi";
 import { useWorkspace } from "@/context/WorkspaceContext";
+import Image from "next/image";
 
 export default function WorkspaceOverviewPage() {
   const { activeProject, projectDetails, isLoading } = useWorkspace();
@@ -63,11 +64,26 @@ export default function WorkspaceOverviewPage() {
   const formattedDate = project.startDate
     ? new Date(project.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : "Recently";
+  const formattedEndDate = project.endDate
+    ? new Date(project.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
   const statusStr = project.status || "ACTIVE";
   const statusFormatted = statusStr.charAt(0) + statusStr.slice(1).toLowerCase();
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+
+      {/* Cover Image Banner */}
+      {project.coverImageUrl && (
+        <div className="w-full h-50 md:h-80 rounded-[30px] overflow-hidden relative border border-white/10 shadow-lg shrink-0">
+          <Image 
+            src={project.coverImageUrl} 
+            alt={`${project.name} Cover`} 
+            fill 
+            className="object-cover"
+          />
+        </div>
+      )}
       
       {/* Project Summary Card */}
       <section className="w-full bg-black/10 rounded-[30px] p-8 lg:p-[40px_32px] flex flex-col gap-4">
@@ -82,6 +98,13 @@ export default function WorkspaceOverviewPage() {
             <div className="w-2.5 h-2.5 rounded-full bg-white/60" />
             <span className="font-sans font-medium text-[13px] text-white/60">Started {formattedDate}</span>
           </div>
+
+          {formattedEndDate && (
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-primary-green" />
+                <span className="font-sans font-medium text-[13px] text-white/60">Due {formattedEndDate}</span>
+            </div>
+          )}
           
           {/* Visibility Pill */}
           <div className="flex items-center gap-1.5 bg-primary-green/10 border border-primary-green rounded-full px-3 py-1.5">
@@ -114,6 +137,23 @@ export default function WorkspaceOverviewPage() {
           </div>
         </div>
       </section>
+
+      {/* Open Roles Card (For Marketplace) */}
+      {(project.requiredRoles && project.requiredRoles.length > 0) && (
+        <section className="w-full bg-black/10 rounded-[30px] p-8 lg:p-[40px_32px] flex flex-col gap-4 border border-primary-green/20">
+          <h2 className="font-sans font-bold text-[18px] text-white">Open Roles</h2>
+          <p className="font-sans font-medium text-[14px] text-white/60">
+            This project is actively looking for collaborators to fill these positions:
+          </p>
+          <div className="flex flex-wrap gap-3 mt-2">
+            {project.requiredRoles.map((role: string) => (
+              <span key={role} className="px-4 py-2 bg-primary-green/10 border border-primary-green/30 text-primary-green font-medium text-[14px] rounded-full">
+                  {role}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Team Members Card */}
       <section className="w-full bg-black/10 rounded-[30px] p-8 lg:p-[40px_32px] flex flex-col gap-8">
