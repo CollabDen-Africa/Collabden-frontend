@@ -63,9 +63,13 @@ export interface Project {
   description: string | null;
   genre: string;
   startDate: string;
+  endDate: string;
   visibility: ProjectVisibility;
   status: string;
+  budget?: number | null;
+  activeAgreementId?: string | null;
   ownerId: string;
+  coverImageUrl?: string | null;
   owner?: ProjectOwner;
   openToCollaborators?: boolean;
   createdAt: string;
@@ -76,6 +80,8 @@ export interface Project {
   messages?: ProjectMessage[];
   agreements?: any[];
   activities?: any[];
+  requiredRoles?: string[];
+  pricingType?: string;
 }
 
 export interface ProjectCollaborator {
@@ -109,10 +115,14 @@ export interface CreateProjectPayload {
   visibility?: ProjectVisibility;
   openToCollaborators?: boolean;
   collaboratorIds?: string[];
+  requiredRoles?: string[];
+  budget?: number | null;
+  pricingType?: string;
 }
 
 export interface InviteCollaboratorPayload {
   collaboratorId: string;
+  role: string;
 }
 
 export interface CreateProjectTaskPayload {
@@ -183,4 +193,16 @@ export interface MarketplaceProject {
 export interface MarketplaceProjectsResponse {
   projects: MarketplaceProject[];
   meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export interface ProjectApplication {
+  id: string;
+  projectId: string;
+  applicantId: string;
+  role: string;
+  pitch: string;
+  portfolioLink?: string | null;
+  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  createdAt: string;
+  applicant?: ProjectCollaboratorUser;
 }

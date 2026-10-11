@@ -13,68 +13,45 @@ import {
 } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
 
-interface ApprovalCollaborator {
-  id: number;
-  name: string;
-  role: string;
-  status: "approved" | "pending";
-  amount: number;
-}
 
 interface EscrowApprovalsSetupProps {
   onBack?: () => void;
   onContinueToFunding?: () => void;
-  collaborators?: ApprovalCollaborator[];
-  currencySymbol?: string;
+  onExitToOverview?: () => void; 
 }
 
-const DEFAULT_COLLABORATORS: ApprovalCollaborator[] = [
-  {
-    id: 1,
-    name: "Oyinda",
-    role: "Lead Vocalist & Arranger",
-    status: "approved",
-    amount: 800000,
-  },
-  {
-    id: 2,
-    name: "Chinedu Okafor",
-    role: "Beat Producer",
-    status: "approved",
-    amount: 1200000,
-  },
-  {
-    id: 3,
-    name: "Amara Nwosu",
-    role: "Session Guitarist",
-    status: "pending",
-    amount: 600000,
-  },
-  {
-    id: 4,
-    name: "Tunde Adeyemi",
-    role: "Mix & Mastering Engineer",
-    status: "pending",
-    amount: 950000,
-  },
-];
 
 export default function EscrowApprovalsSetup({
   onBack,
   onContinueToFunding,
-  collaborators = DEFAULT_COLLABORATORS,
+  onExitToOverview
 }: EscrowApprovalsSetupProps) {
+  const { activeProject } = useWorkspace();
+  const projectId = activeProject?.id || "";
+  
+  // Fetch real-time escrow allocations to see who has approved
+  const { useProjectEscrow } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
   const [activeDropdownId, setActiveDropdownId] = useState<number | null>(null);
   const [requestChangesId, setRequestChangesId] = useState<number | null>(null);
   const [changeNote, setChangeNote] = useState("");
 
-  const totalCount = collaborators.length;
-  const approvedCount = collaborators.filter(
-    (c) => c.status === "approved",
-  ).length;
-  const progressPercent =
-    totalCount > 0 ? (approvedCount / totalCount) * 100 : 0;
+  
+  const liveCollaborators = escrowData?.allocations?.map((alloc: any) => ({
+  id: alloc.userId,
+  name: activeProject?.collaborators?.find(c => c.userId === alloc.userId)?.user?.displayName || "Unknown",
+  role: activeProject?.collaborators?.find(c => c.userId === alloc.userId)?.role || "Collaborator",
+  status: alloc.approvalStatus === "APPROVED" ? "approved" : "pending",
+  amount: alloc.totalAmount
+    })) || [];
+
+  const totalCount = liveCollaborators.length;
+  const approvedCount = liveCollaborators.filter((c: any) => c.status === "approved").length;
+  const progressPercent = totalCount > 0 ? (approvedCount / totalCount) * 100 : 0;
+  const isFullyApproved = totalCount > 0 && approvedCount === totalCount;
 
   // Handle clicking outside logic or toggling menus
   const toggleDropdown = (id: number) => {
@@ -125,7 +102,7 @@ export default function EscrowApprovalsSetup({
 
       {/* Collaborators Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 w-full items-start">
-        {collaborators.map((collab) => {
+        {liveCollaborators.map((collab) => {
           const isApproved = collab.status === "approved";
           const isRequestingChanges = requestChangesId === collab.id;
           const isDropdownOpen = activeDropdownId === collab.id;
@@ -196,7 +173,7 @@ export default function EscrowApprovalsSetup({
                       </span>
                     </div>
                     <textarea
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[13px] text-white placeholder:text-white/30 outline-none focus:border-white/20 transition-colors resize-none h-[80px]"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-[13px] text-white placeholder:text-white/30 outline-none focus:border-white/20 transition-colors resize-none h-20"
                       placeholder={`Detail your changes here...`}
                       value={changeNote}
                       onChange={(e) => setChangeNote(e.target.value)}
@@ -347,16 +324,30 @@ export default function EscrowApprovalsSetup({
           Back
         </Button>
 
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          {/* Escape Hatch Button: Shows when blocked by pending approvals */}
+          {!isFullyApproved && (
+            <Button
+              variant="ghost"
+              onClick={onExitToOverview}
+              className="w-full sm:w-auto border border-white/10 hover:bg-white/10 rounded-full"
+            >
+              Return to Dashboard
+            </Button>
+          )}
+
         <Button
           variant="primary"
           onClick={onContinueToFunding}
-          className="w-full sm:w-auto rounded-full shadow-btn-primary"
+          disabled={!isFullyApproved}
+          className="w-full sm:w-auto rounded-full shadow-btn-primary disabled:opacity-50"
           icon={FiArrowRight}
           iconPosition="right"
         >
-          Continue
+          {isFullyApproved ? "Continue" : "Awaiting Approvals"}
         </Button>
       </div>
     </div>
+  </div>  
   );
 }

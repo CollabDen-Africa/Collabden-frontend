@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { 
   FiCheck, 
   FiShield, 
@@ -11,14 +10,13 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import DatePicker from "@/components/ui/DatePicker";
 import InfoTooltip from "@/components/ui/InfoTooltip";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
 
 interface EscrowTermsSetupProps {
+  terms?: any;
+  onUpdateTerms?: (terms: any) => void;
   onContinueToMilestones?: () => void;
-  // Dynamic props
-  projectBudget?: number;
-  currencySymbol?: string;
-  collaboratorsCount?: number;
-  estMilestones?: number;
 }
 
 const CURRENCY_OPTIONS = [
@@ -44,21 +42,24 @@ const GRACE_OPTIONS = [
 ];
 
 export default function EscrowTermsSetup({ 
-  onContinueToMilestones,
-  projectBudget = 5000000,
-  currencySymbol = "₦",
-  collaboratorsCount = 4,
-  estMilestones = 4
+  terms = {},
+  onUpdateTerms,
+  onContinueToMilestones
 }: EscrowTermsSetupProps) {
+  const { activeProject } = useWorkspace();
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
   
-  // Controlled form states for custom UI components
-  const [currency, setCurrency] = useState("NGN");
-  const [fundingMethod, setFundingMethod] = useState("full");
-  const [releasePeriod, setReleasePeriod] = useState("7");
-  const [gracePeriod, setGracePeriod] = useState("3");
-  const [deadline, setDeadline] = useState<Date | null>(null);
-
+  // Dynamic context data
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+  const collaboratorsCount = activeProject?.collaborators?.length || 1;
+  const projectBudget = activeProject?.budget ? Number(activeProject.budget) : 0;
+  
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
+
+  const handleChange = (field: string, value: any) => {
+      if (onUpdateTerms) onUpdateTerms({ ...terms, [field]: value });
+    };
 
   return (
     <div>
@@ -93,8 +94,9 @@ export default function EscrowTermsSetup({
                 </label>
                 <Input 
                   defaultValue={projectBudget.toLocaleString()}
+                  readOnly
                   variant="glass"
-                  className="font-normal"
+                  className="font-normal cursor-not-allowed"
                 />
               </div>
 
@@ -104,8 +106,8 @@ export default function EscrowTermsSetup({
                   Currency
                 </label>
                 <Select 
-                  value={currency}
-                  onChange={setCurrency}
+                  value={terms.currency || "NGN"}
+                  onChange={(val) => handleChange("currency", val)}
                   options={CURRENCY_OPTIONS}
                   variant="glass"
                 />
@@ -118,8 +120,8 @@ export default function EscrowTermsSetup({
                   <InfoTooltip text="Choose whether to fund the entire project at once, or milestone-by-milestone." />
                 </label>
                 <Select 
-                  value={fundingMethod}
-                  onChange={setFundingMethod}
+                  value={terms.fundingMethod || "full"}
+                  onChange={(val) => handleChange("fundingMethod", val)}
                   options={FUNDING_OPTIONS}
                   variant="glass"
                 />
@@ -131,8 +133,8 @@ export default function EscrowTermsSetup({
                   Funding Deadline
                 </label>
                 <DatePicker 
-                  selectedDate={deadline}
-                  onSelect={setDeadline}
+                  selectedDate={terms.deadline}
+                  onSelect={(val) => handleChange("releasePeriod", val)}
                   className="bg-white/10 border-2 border-transparent hover:border-primary-green rounded-full px-2 whitespace-nowrap text-white"
                 />
               </div>
@@ -144,8 +146,8 @@ export default function EscrowTermsSetup({
                   <InfoTooltip text="Number of days before funds automatically release if no dispute is raised after completion." />
                 </label>
                 <Select 
-                  value={releasePeriod}
-                  onChange={setReleasePeriod}
+                  value={terms.releasePeriod || "7"}
+                  onChange={(val) => handleChange("gracePeriod", val)}
                   options={RELEASE_OPTIONS}
                   variant="glass"
                 />
@@ -158,8 +160,8 @@ export default function EscrowTermsSetup({
                   <InfoTooltip text="Time granted to collaborators to review and approve submitted deliverables." />
                 </label>
                 <Select 
-                  value={gracePeriod}
-                  onChange={setGracePeriod}
+                  value={terms.gracePeriod}
+                  onChange={(val) => handleChange("gracePeriod", val)}
                   options={GRACE_OPTIONS}
                   variant="glass"
                 />
@@ -192,10 +194,6 @@ export default function EscrowTermsSetup({
                 <div className="flex justify-between items-center py-2 border-b border-white/5">
                   <span className="font-raleway font-normal text-[12px] text-text-muted">Collaborators</span>
                   <span className="font-raleway font-bold text-[14px] text-white">{collaboratorsCount} members</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="font-raleway font-normal text-[12px] text-text-muted">Est. Milestones</span>
-                  <span className="font-raleway font-bold text-[14px] text-white">{estMilestones} stages</span>
                 </div>
               </div>
             </div>

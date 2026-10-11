@@ -12,3 +12,4 @@ export * from "./collaborator.types";
 export * from "./notification-settings.types";
 export * from "./escrow.types";
 export * from "./subscription.types";
+export * from "./royalty.types";

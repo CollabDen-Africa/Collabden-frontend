@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { FiSearch, FiChevronDown, FiCheckCircle, FiClock, FiRefreshCw, FiInbox } from "react-icons/fi";
+import { FiSearch,  FiCheckCircle, FiClock, FiRefreshCw, FiInbox } from "react-icons/fi";
 import EmptyState from "@/components/ui/EmptyState";
 import Select from "@/components/ui/Select";
 import { usePayment } from "@/hooks/payment/usePayment";
@@ -77,7 +77,7 @@ export default function TransactionsPage() {
   
   // Client-side search filtering
     const filteredTransactions = useMemo(() => {
-      return liveTransactions.filter((txn) => {
+      return liveTransactions.filter((txn: any) => {
         if (!searchQuery) return true;
         const searchLower = searchQuery.toLowerCase();
         return (
@@ -86,7 +86,7 @@ export default function TransactionsPage() {
           txn.reference?.toLowerCase().includes(searchLower)
         );
       });
-  }, [searchQuery, typeFilter, statusFilter]);
+  }, [searchQuery, typeFilter, statusFilter, liveTransactions]);
 
   return (
     <div className="flex flex-col w-full px-5 lg:px-0">

@@ -187,10 +187,14 @@ export const API_ENDPOINTS = {
     MY_INVITES: `${API_BASE_URL}/api/v1/projects/invitations/my-invites`,
     RESPOND_INVITE: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/invitations/respond`,
     REMOVE_COLLABORATOR: (projectId: string, collaboratorId: string) => 
-      `${API_BASE_URL}/api/v1/projects/${projectId}/collaborators/${collaboratorId}`,
+    `${API_BASE_URL}/api/v1/projects/${projectId}/collaborators/${collaboratorId}`,
+    COVER: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/cover`,
+    APPLICATIONS: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/applications`,
+    APPLICATION_STATUS: (projectId: string, applicationId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/applications/${applicationId}/status`,
     METADATA: (id: string) => `${API_BASE_URL}/api/v1/projects/${id}/metadata`,
   },
   AGREEMENTS: {
+    USER_LIST: `${API_BASE_URL}/api/v1/user/agreements`,
     UPLOAD: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements`,
     LIST: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements`,
     UPDATE: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}`,
@@ -294,6 +298,9 @@ export const API_ENDPOINTS = {
     MILESTONE_APPROVE: (projectId: string, milestoneId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/escrow/milestones/${milestoneId}/approve`,
     MILESTONE_DISPUTE: (projectId: string, milestoneId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/escrow/milestones/${milestoneId}/dispute`,
   },
+  ROYALTIES: {
+  SPLITS: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/royalties`,
+  },
   ADMIN_SETTINGS: {
     USERS: `${API_BASE_URL}/api/v1/admin/settings/users`,
     USERS_HISTORY: `${API_BASE_URL}/api/v1/admin/settings/users/history`,
@@ -336,6 +343,7 @@ export const PROXY_ENDPOINTS = {
     METADATA: (id: string) => `/projects/${id}/metadata`,
     FILES: (id: string) => `/projects/${id}/files`,
     MESSAGES: (id: string) => `/projects/${id}/messages`,
+    COVER: (id: string) => `/projects/${id}/cover`,
     APPLY: (id: string) => `/projects/${id}/apply`,
     APPLICATIONS: (projectId: string) => `/projects/${projectId}/applications`,
     UPDATE_APPLICATION_STATUS: (projectId: string, applicationId: string) => `/projects/${projectId}/applications/${applicationId}/status`,
@@ -443,6 +451,9 @@ export const PROXY_ENDPOINTS = {
   },
   PERSONA: {
     CREATE_INQUIRY: '/user/persona/create-inquiry',
+  },
+  ROYALTIES: {
+    SPLITS: (projectId: string) => `/projects/${projectId}/royalties`,
   },
   ONBOARDING: '/user/onboarding',
 };

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   FiArrowDownCircle,
   FiCheckCircle,
@@ -22,7 +22,7 @@ export default function WithdrawalsPage() {
 
   // Derived Data
   const AVAILABLE_BALANCE = wallet?.balance || 0;
-  const banks = bankData || [];
+  const banks = useMemo(() => bankData || [], [bankData]);
   const recentWithdrawals = withdrawalsData?.withdrawals || [];
 
   // Format currency dynamically
