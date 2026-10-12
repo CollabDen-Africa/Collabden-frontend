@@ -7,9 +7,16 @@ export const useProjects = () => {
   const queryClient = useQueryClient();
 
   // Fetch all projects
-  const useAllProjects = () => useQuery({
-    queryKey: ['projects'],
-    queryFn: () => projectService.getAll(),
+  const useAllProjects = (params?: { hasMessages?: boolean; limit?: number }) => useQuery({
+    queryKey: ['projects', params],
+    queryFn: () => projectService.getAll(params),
+  });
+
+  // Fetch only projects that have active messages
+  const useProjectsWithMessages = () => useQuery({
+    queryKey: ['projects', 'hasMessages'],
+    queryFn: () => projectService.getAll({ hasMessages: true, limit: 100 }),
+    staleTime: 30 * 1000,
   });
 
   // Fetch single project
@@ -208,6 +215,7 @@ export const useProjects = () => {
 
   return {
     useAllProjects,
+    useProjectsWithMessages,
     useProjectDetail,
     useCreateProject,
     useUpdateProject,

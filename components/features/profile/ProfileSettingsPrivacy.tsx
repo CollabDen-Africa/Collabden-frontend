@@ -80,7 +80,7 @@ export default function ProfileSettingsPrivacy() {
     try {
       await updateProfileMutation.mutateAsync({ displayNameMode: mode });
       showToast(`Display name mode set to ${mode === "legal" ? "Legal Name" : "Stage Name"}.`, "success");
-    } catch (err: any) {
+    } catch {
       showToast("Failed to update display name mode.", "error");
     }
   };
@@ -91,7 +91,7 @@ export default function ProfileSettingsPrivacy() {
     try {
       await updateProfileMutation.mutateAsync({ showLocation: nextValue });
       showToast(`Location display ${nextValue ? "enabled" : "hidden"}.`, "success");
-    } catch (err: any) {
+    } catch {
       setShowLocation(!nextValue);
       showToast("Failed to update location privacy.", "error");
     }
@@ -102,7 +102,7 @@ export default function ProfileSettingsPrivacy() {
     try {
       await updateProfileMutation.mutateAsync({ whoCanMessage: option });
       showToast(`Messaging privacy updated to "${option}".`, "success");
-    } catch (err: any) {
+    } catch {
       showToast("Failed to update messaging privacy.", "error");
     }
   };

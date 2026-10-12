@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiPlus, FiCheckCircle, FiCreditCard } from "react-icons/fi";
+import { FiPlus, FiCreditCard } from "react-icons/fi";
 import EmptyState from "@/components/ui/EmptyState";
 import AddEditBankAccountOverlay from "@/components/features/bank-account/AddEditBankAccount";
 import BankVerificationOverlay from "@/components/features/bank-account/BankVerification";
@@ -81,8 +81,12 @@ export default function BankAccountsPage() {
         </button>
       </div>
 
-      {/* Empty State */}
-      {accounts.length === 0 ? (
+      {/* Bank Accounts List / Loading / Empty State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
+        </div>
+      ) : accounts.length === 0 ? (
         <EmptyState 
           icon={<FiCreditCard size={32} strokeWidth={1.5} />}
           title="No Bank Accounts Linked"

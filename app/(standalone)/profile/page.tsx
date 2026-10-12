@@ -181,8 +181,8 @@ export default function ProfileOverview() {
           </Link>
         ) : (
           <Link
-            href={`/workspace/messages?userId=${profile?.id}`}
-            className="flex items-center gap-2 text-white font-raleway bg-primary-green hover:bg-accent-green-success transition-colors px-4 py-2.5 rounded-full border border-primary-green text-sm font-semibold shadow-lg"
+            href={`/messages?userId=${profile?.id || targetId}&name=${encodeURIComponent(displayName)}&avatar=${encodeURIComponent(profile?.avatarUrl || "")}`}
+            className="flex items-center gap-2 text-white font-raleway bg-primary-green hover:bg-accent-green-success transition-colors px-4 py-2.5 rounded-full border border-primary-green text-sm font-semibold shadow-lg cursor-pointer"
           >
             <FiMessageSquare size={18} />
             <span>Message</span>

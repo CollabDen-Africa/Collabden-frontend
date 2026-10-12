@@ -16,8 +16,8 @@ const projectService = {
   /**
    * List all active projects for the authenticated user.
    */
-  getAll: async (): Promise<Project[]> => {
-    const response = await proxyAxios.get(PROXY_ENDPOINTS.PROJECTS.LIST);
+  getAll: async (params?: { hasMessages?: boolean; limit?: number; page?: number }): Promise<Project[]> => {
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.PROJECTS.LIST, { params });
     const raw = response.data;
     if (raw?.projects && Array.isArray(raw.projects)) return raw.projects;
     if (Array.isArray(raw)) return raw;
