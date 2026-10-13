@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -12,7 +12,8 @@ import {
   HiOutlineGlobeAlt,
   HiCheck,
   HiPaperAirplane,
-  HiX
+  HiX,
+  HiOutlinePhotograph
 } from "react-icons/hi";
 
 import DatePicker from "@/components/ui/DatePicker";
@@ -21,12 +22,15 @@ import Button from "@/components/ui/Button";
 import { DEFAULT_MUSIC_GENRES } from "@/constants/genres";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import InfoTooltip from "@/components/ui/InfoTooltip";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
 import { useProfile } from "@/hooks/profile/useProfile";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
+import projectService from "@/services/project.service";
+import Image from "next/image";
 
 interface ProjectDateFieldProps {
   label: string;
@@ -79,6 +83,9 @@ export default function CreateProjectPage() {
       visibility: "PRIVATE",
       openToCollaborators: false,
       selectedCollabs: [],
+      requiredRoles: [],
+      budget: "",
+      pricingType: "fixed",
     },
   });
 
@@ -88,6 +95,13 @@ export default function CreateProjectPage() {
   const watchedCollabs = watch("selectedCollabs");
   const watchedVisibility = watch("visibility");
   const watchedOpenToCollaborators = watch("openToCollaborators");
+  const watchedRoles = watch("requiredRoles") || [];
+  const watchedPricingType = watch("pricingType");
+
+  const [roleInput, setRoleInput] = useState("");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [collaboratorSearch, setCollaboratorSearch] = useState("");
@@ -97,7 +111,7 @@ export default function CreateProjectPage() {
   >({});
   const debouncedSearch = useDebounce(collaboratorSearch, 300);
 
-  const { useCreateProject } = useProjects();
+  const { useCreateProject, useUploadProjectCover } = useProjects();
   const { useCollaborators, useMarketplaceGenres } = useCollaborator();
   const { useCurrentProfile } = useProfile();
   const { data: currentProfile } = useCurrentProfile();
@@ -160,11 +174,33 @@ export default function CreateProjectPage() {
     setValue("selectedCollabs", next, { shouldValidate: true });
   };
 
+  const handleRoleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && roleInput.trim()) {
+        e.preventDefault();
+        if (!watchedRoles.includes(roleInput.trim())) {
+          setValue("requiredRoles", [...watchedRoles, roleInput.trim()], { shouldValidate: true });
+        }
+        setRoleInput("");
+      }
+    };
+  
+    const removeRole = (roleToRemove: string) => {
+      setValue("requiredRoles", watchedRoles.filter(r => r !== roleToRemove), { shouldValidate: true });
+    };
+  
+    const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && file.type.startsWith("image/")) {
+        setCoverFile(file);
+        setCoverPreview(URL.createObjectURL(file));
+      }
+    };
+
   const onSubmit = async (data: CreateProjectInput) => {
     setSubmissionError(null);
     createProjectMutation.reset();
     try {
-      await createProjectMutation.mutateAsync({
+      const newProject = await createProjectMutation.mutateAsync({
         name: data.projectName.trim(),
         description: data.description?.trim() || undefined,
         genre: data.selectedGenre,
@@ -173,7 +209,15 @@ export default function CreateProjectPage() {
         visibility: data.visibility,
         openToCollaborators: data.openToCollaborators,
         collaboratorIds: data.selectedCollabs,
+        requiredRoles: data.requiredRoles,
       });
+      if (coverFile && newProject?.id) {
+        try{
+          await projectService.uploadCoverImage(newProject.id, coverFile); 
+            } catch (imgErr) {
+              console.warn("Project created, but cover image failed to upload.", imgErr);
+            }
+          }
       router.push(ROUTES.PROJECTS.SUCCESS);
     } catch (err) {
       console.error("Project creation failed:", err);
@@ -202,6 +246,33 @@ export default function CreateProjectPage() {
           </div>
 
           <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
+
+          {/* Cover Image Dropzone */}
+            <div className="flex flex-col gap-4">
+              <label className="font-sans font-semibold text-[18px] pl-1 text-white">Project Cover (optional)</label>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => coverInputRef.current?.click()}
+                  className="relative w-full h-48 md:h-64 rounded-[30px] overflow-hidden border-2 border-dashed border-white/20 hover:border-primary-green bg-white/5 flex flex-col items-center justify-center cursor-pointer transition-all group"
+                >
+                  <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+                    {coverPreview ? (
+                      <>
+                      <Image src={coverPreview} alt="Cover Preview" fill className="object-cover opacity-80 group-hover:opacity-40 transition-opacity" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <HiOutlinePhotograph className="text-white mb-2" size={32} />
+                          <span className="text-white font-medium">Click to replace</span>
+                      </div>
+                    </>
+                      ) : (
+                      <div className="flex flex-col items-center gap-2 text-center z-10">
+                        <HiOutlinePhotograph className="text-white/60 mb-2" size={32} />
+                          <span className="font-sans font-medium text-[16px] text-white/60">Click to browse or drag image here</span>
+                      </div>
+                  )}
+                </div>
+            </div>
 
             {/* Project Name */}
             <Input
@@ -262,6 +333,30 @@ export default function CreateProjectPage() {
               />
             </div>
 
+            {/* NEW: Budget & Compensation Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <Select
+                label="Pricing Type"
+                value={watchedPricingType || "fixed"}
+                onChange={(val) => setValue("pricingType", val, { shouldValidate: true })}
+                options={[
+                    { label: "Fixed Price", value: "fixed" },
+                    { label: "Hourly Rate", value: "hourly" }
+                          ]}
+                placeholder="Select pricing model"
+                variant="glass"
+              />
+                        
+              <Input
+                type="number"
+                label={`Total Budget ${watchedPricingType === "hourly" ? "(per hour)" : ""}`}
+                error={errors.budget?.message as string}
+                variant="glass"
+                placeholder="e.g. 5000"
+                {...register("budget")}
+              />
+            </div>
+
             {/* Collaborators */}
             <div className="flex flex-col gap-4 relative">
               <div className="flex items-center justify-between">
@@ -286,7 +381,7 @@ export default function CreateProjectPage() {
                         key={id}
                         className="flex items-center gap-2 bg-primary-green/20 border border-primary-green/40 hover:border-primary-green/60 rounded-full px-3 py-1.5 transition-all duration-200"
                       >
-                        <Avatar name={displayName} src={details?.avatarUrl} className="w-[20px] h-[20px]" />
+                        <Avatar name={displayName} src={details?.avatarUrl} className="w-5 h-5" />
                         <span className="font-sans font-semibold text-[13px] text-white">
                           {displayName}
                         </span>
@@ -304,7 +399,7 @@ export default function CreateProjectPage() {
                 </div>
               )}
 
-              <div className={`w-full h-[50px] bg-white/10 border rounded-full px-6 flex items-center gap-3 relative z-20 transition-all duration-300 ${isCollabOpen ? "border-primary-green" : "border-white/20 hover:border-primary-green"
+              <div className={`w-full h-12.5 bg-white/10 border rounded-full px-6 flex items-center gap-3 relative z-20 transition-all duration-300 ${isCollabOpen ? "border-primary-green" : "border-white/20 hover:border-primary-green"
                 }`}>
                 <HiOutlineSearch className="text-white/50" size={20} />
                 <input
@@ -320,7 +415,7 @@ export default function CreateProjectPage() {
               {isCollabOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setIsCollabOpen(false)} />
-                  <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#121A1F]/90 backdrop-blur-2xl border border-white/20 rounded-[20px] py-[4px] shadow-[0px_12px_16px_-4px_rgba(10,13,18,0.08),0px_4px_6px_-2px_rgba(10,13,18,0.03)] z-30 max-h-[320px] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
+                  <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#121A1F]/90 backdrop-blur-2xl border border-white/20 rounded-[20px] py-1 shadow-[0px_12px_16px_-4px_rgba(10,13,18,0.08),0px_4px_6px_-2px_rgba(10,13,18,0.03)] z-30 max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
                     <div className="flex flex-col items-center">
                       {collaborators.map((collab) => {
                         const isAdded = watchedCollabs.includes(collab.id);
@@ -330,7 +425,7 @@ export default function CreateProjectPage() {
                           <div
                             key={collab.id}
                             onClick={() => toggleCollaborator(collab.id)}
-                            className={`flex items-center justify-between w-[98%] h-[46px] px-[14px] py-[10px] rounded-[50px] cursor-pointer transition-colors group ${isAdded ? "bg-primary-green" : "hover:bg-primary-green"
+                            className={`flex items-center justify-between w-[98%] h-11.5 px-3.5 py-2.5 rounded-[50px] cursor-pointer transition-colors group ${isAdded ? "bg-primary-green" : "hover:bg-primary-green"
                               }`}
                           >
                             {/* Avatar & Text */}
@@ -338,9 +433,9 @@ export default function CreateProjectPage() {
                               <Avatar
                                 name={name}
                                 src={collab.avatarUrl}
-                                className="w-[24px] h-[24px]"
+                                className="w-6 h-6"
                               />
-                              <span className="font-sans font-bold text-[16px] leading-[19px] text-white">
+                              <span className="font-sans font-bold text-[16px] leading-4.75 text-white">
                                 {name}
                               </span>
                             </div>
@@ -349,7 +444,7 @@ export default function CreateProjectPage() {
                             <Button
                               type="button"
                               variant="ghost"
-                              className={`w-[88px]! h-[26px]! rounded-[30px]! flex items-center justify-center gap-[4px] px-0! py-0! transition-colors ${isAdded
+                              className={`w-22! h-6.5! rounded-[30px]! flex items-center justify-center gap-1 px-0! py-0! transition-colors ${isAdded
                                   ? "bg-white text-primary-green"
                                   : "bg-white/10 text-white hover:bg-white/20"
                                 }`}
@@ -359,7 +454,7 @@ export default function CreateProjectPage() {
                               ) : (
                                 <HiPaperAirplane size={12} />
                               )}
-                              <span className="font-sans font-medium text-[12px] leading-[24px]">
+                              <span className="font-sans font-medium text-[12px] leading-6">
                                 {isAdded ? "Selected" : "Invite"}
                               </span>
                             </Button>
@@ -383,6 +478,35 @@ export default function CreateProjectPage() {
                   </div>
                 </>
               )}
+            </div>
+
+            {/* Open Roles (Marketplace Integration) */}
+            <div className="flex flex-col gap-4">
+              <label className="font-sans font-semibold text-[18px] pl-1 text-white">
+                  Required Roles (Marketplace)
+              </label>
+              <p className="font-sans text-[14px] text-white/60 -mt-2 pl-1">
+                  Press Enter to add roles you are looking for (e.g., &quot;Producer&quot;, &quot;Vocalist&quot;).
+              </p>
+                          
+              <div className="w-full bg-white/10 border border-white/20 rounded-3xl p-4 flex flex-wrap gap-2 focus-within:border-primary-green transition-colors">
+                {watchedRoles.map((role) => (
+                <span key={role} className="flex items-center gap-2 bg-primary-green/20 border border-primary-green/50 text-white px-3 py-1.5 rounded-full text-[14px]">
+                    {role}
+                  <button type="button" onClick={() => removeRole(role)} className="hover:text-red-400">
+                    <HiX size={14} />
+                  </button>
+                </span>
+              ))}
+              <input
+                type="text"
+                value={roleInput}
+                onChange={(e) => setRoleInput(e.target.value)}
+                onKeyDown={handleRoleKeyDown}
+                placeholder="Type a role and press Enter..."
+                className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/40 min-w-50 text-[14px]"
+              />
+              </div>
             </div>
 
             {/* Visibility */}
@@ -463,7 +587,7 @@ export default function CreateProjectPage() {
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-[16px] text-sm font-medium">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-2xl text-sm font-medium">
                 <p>{errorMessage}</p>
                 {requiresProfileSetup && (
                   <p className="mt-2 text-red-200/90">

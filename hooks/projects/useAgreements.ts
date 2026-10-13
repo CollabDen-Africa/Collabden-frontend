@@ -17,6 +17,8 @@ export const useAgreements = (projectId: string) => {
     mutationFn: (formData: FormData) => agreementService.uploadDraft(projectId, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      // Refresh the dashboard agreements
+        queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -36,6 +38,8 @@ export const useAgreements = (projectId: string) => {
       agreementService.updateStatus(projectId, agreementId, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      // Refresh the dashboard agreements
+      queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -45,6 +49,8 @@ export const useAgreements = (projectId: string) => {
     mutationFn: (formData: FormData) => agreementService.uploadSignedCopy(projectId, agreementId, formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      // Refresh the dashboard agreements
+      queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
     onError: (error) => handleApiError(error),
   });
@@ -54,6 +60,8 @@ export const useAgreements = (projectId: string) => {
     mutationFn: (intentToSign: boolean) => agreementService.esign(projectId, agreementId, intentToSign),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      // Refresh the dashboard agreements
+      queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
     onError: (error) => handleApiError(error),
   });

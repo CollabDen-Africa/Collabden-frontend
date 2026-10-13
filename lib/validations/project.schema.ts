@@ -20,6 +20,9 @@ export const createProjectSchema = z.object({
   visibility: z.enum(["PUBLIC", "PRIVATE"]),
   openToCollaborators: z.boolean(),
   selectedCollabs: z.array(z.string()),
+  requiredRoles: z.array(z.string()).optional(),
+  budget: z.union([z.string(), z.number()]).optional(),
+  pricingType: z.string().optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;

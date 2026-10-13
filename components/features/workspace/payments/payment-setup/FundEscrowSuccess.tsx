@@ -1,25 +1,35 @@
 "use client";
 import { FiCheck, FiArrowRight } from "react-icons/fi";
 import Button from "@/components/ui/Button";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
 
 interface FundEscrowSuccessProps {
   onBackToPayments?: () => void;
   onContinueToTerms?: () => void;
-  // Dynamic props
-  amountSecured?: number;
-  walletBalance?: number;
-  escrowReference?: string;
-  currencySymbol?: string;
 }
 
 export default function FundEscrowSuccess({ 
   onBackToPayments, 
   onContinueToTerms,
-  amountSecured = 5075000,
-  walletBalance = 850000,
-  escrowReference = "ESC-MTYMMMER",
-  currencySymbol = "₦"
 }: FundEscrowSuccessProps) {
+
+  const { activeProject } = useWorkspace();
+  const projectId = activeProject?.id || "";
+  
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
+    
+  const { useProjectEscrow } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
+  
+  const walletBalance = walletData?.balance || 0;
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+    
+  const amountSecured = escrowData?.fundedAmount || 0;
+  const escrowReference = escrowData?.id || "Processing...";
+  const isFullyFunded = escrowData?.status === "FUNDED" || escrowData?.status === "LOCKED";
   
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
@@ -66,7 +76,7 @@ export default function FundEscrowSuccess({
             {/* Card 2: Escrow Status */}
             <div className="bg-black/15 border border-white/5 rounded-4xl p-6 flex flex-col justify-center min-h-30 md:min-h-37 gap-[4px]">
               <span className="font-raleway font-bold text-[14px] text-white">Escrow Status</span>
-              <span className="font-raleway font-normal text-[14px] text-primary-green">Active - Awaiting terms</span>
+              <span className="font-raleway font-normal text-[14px] text-primary-green">{isFullyFunded ? "Active - Ready for terms" : "Partially Funded"}</span>
             </div>
 
             {/* Card 3: Remaining Balance */}

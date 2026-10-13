@@ -12,87 +12,80 @@ import {
 } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
+import { usePayment } from "@/hooks/payment/usePayment";
 
-interface EscrowTerms {
-  fundingMethod: string;
-  fundingDeadline: string;
-  autoReleasePeriod: string;
-  gracePeriod: string;
-  currencyName: string;
-}
-
-interface ReviewMilestone {
-  id: number;
-  name: string;
-  amount: number;
-  colorClass: string;
-}
-
-interface ReviewCollaborator {
-  id: number;
-  name: string;
-  amount: number;
-  share: string;
-  colorClass: string;
-}
-
-interface EscrowReviewSetupProps {
-  onBack?: () => void;
-  onContinueToApprovals?: () => void;
-  totalBudget?: number;
-  collaboratorsCount?: number;
-  estCompletion?: string;
-  currencySymbol?: string;
-  terms?: EscrowTerms;
-  milestones?: ReviewMilestone[];
-  collaborators?: ReviewCollaborator[];
-  approvalRules?: string[];
-}
-
-const DEFAULT_TERMS: EscrowTerms = {
-  fundingMethod: "Bank Transfer",
-  fundingDeadline: "Feb 1, 2026",
-  autoReleasePeriod: "14 days after approval",
-  gracePeriod: "72 hours",
-  currencyName: "NGN — Nigerian Naira"
-};
-
-const DEFAULT_MILESTONES: ReviewMilestone[] = [
-  { id: 1, name: "Pre-Production & Planning", amount: 500000, colorClass: "bg-primary-green" },
-  { id: 2, name: "Recording Sessions", amount: 1500000, colorClass: "bg-primary-blue" },
-  { id: 3, name: "Mixing & Mastering", amount: 2000000, colorClass: "bg-accent-pink" },
-  { id: 4, name: "Distribution & Release", amount: 500000, colorClass: "bg-accent-yellow" }
-];
-
-const DEFAULT_COLLABORATORS: ReviewCollaborator[] = [
-  { id: 1, name: "Oyinda", amount: 800000, share: "16%", colorClass: "from-primary-green to-primary-green/80" },
-  { id: 2, name: "Chinedu Okafor", amount: 1200000, share: "24%", colorClass: "from-primary-blue to-primary-blue/80" },
-  { id: 3, name: "Amara Nwosu", amount: 600000, share: "12%", colorClass: "from-accent-pink to-accent-pink/80" },
-  { id: 4, name: "Tunde Adeyemi", amount: 950000, share: "19%", colorClass: "from-accent-yellow to-accent-yellow/80" }
-];
 
 const DEFAULT_RULES = [
-  "All 4 collaborators must approve before activation",
+  "All collaborators must approve before activation",
   "72-hour window to raise disputes after milestone submission",
   "Funds remain locked until all approval conditions are met",
   "Auto-release triggered 14 days after approval if no disputes"
 ];
 
+const BG_COLORS = ["bg-primary-green", "bg-primary-blue", "bg-accent-pink", "bg-accent-yellow"];
+const GRADIENT_COLORS = [
+  "from-primary-green to-primary-green/80", 
+  "from-primary-blue to-primary-blue/80", 
+  "from-accent-pink to-accent-pink/80", 
+  "from-accent-yellow to-accent-yellow/80"
+];
+
 export default function EscrowReviewSetup({ 
   onBack, 
   onContinueToApprovals,
-  totalBudget = 5000000,
-  collaboratorsCount = 4,
-  estCompletion = "Jun 2026",
-  currencySymbol = "₦",
-  terms = DEFAULT_TERMS,
-  milestones = DEFAULT_MILESTONES,
-  collaborators = DEFAULT_COLLABORATORS,
+  terms = {},
+  milestones = {},
+  collaborators = {},
   approvalRules = DEFAULT_RULES
-}: EscrowReviewSetupProps) {
+}: any) {
+
+  const { activeProject } = useWorkspace();
+    const projectId = activeProject?.id || "";
+  
+    const { useWallet } = usePayment();
+    const { data: walletData } = useWallet();
+    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+  
+    const { useConfigureEscrow } = useEscrow();
+    const configureMutation = useConfigureEscrow();
+  
+    const totalBudget = activeProject?.budget || 0;
+    const collaboratorsCount = activeProject?.collaborators?.length || 0;
+    
+    // Computed totals 
+    const totalMilestonesAmount = milestones.reduce((sum: number, m: any) => sum + (Number(m.amount) || 0), 0);
+  
+    // Estimate completion based on the furthest milestone date (if available)
+    const estCompletion = milestones.length > 0 && milestones[milestones.length - 1]?.dueDate 
+      ? new Date(milestones[milestones.length - 1].dueDate).toLocaleDateString("en-US", { month: "short", year: "numeric" }) 
+      : "TBD";
   
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
-  const totalMilestonesAmount = milestones.reduce((sum, m) => sum + m.amount, 0);
+
+  const handleSubmitReview = async () => {
+      try {
+        await configureMutation.mutateAsync({
+          projectId,
+          payload: {
+            totalAmount: totalBudget,
+            agreementId: activeProject?.activeAgreementId || "", 
+            reviewPeriodDays: parseInt(terms.gracePeriod) || 3,
+            milestones: milestones.map((m: any) => ({
+              title: m.name,
+              amount: Number(m.amount),
+              // Map the assignee ID from step 2 to the backend's expected array format
+              collaboratorIds: [m.assignedTo].filter(Boolean) 
+            }))
+          }
+        });
+        onContinueToApprovals?.();
+      } catch (error) {
+        console.error("Submission failed", error);
+      }
+    };
+  
 
   return (
     <div>
@@ -166,23 +159,24 @@ export default function EscrowReviewSetup({
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Funding Method</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.fundingMethod}</span>
+                <span className="font-raleway font-semibold text-[12px] text-white">{terms.fundingMethod || "N/A"}</span>
               </div>
               <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Funding Deadline</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.fundingDeadline}</span>
+              <span className="font-raleway font-semibold text-[12px] text-white">{terms.deadline ? new Date(terms.deadline).toLocaleDateString() : "TBD"}
+              </span>
               </div>
               <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Auto-Release Period</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.autoReleasePeriod}</span>
+                <span className="font-raleway font-semibold text-[12px] text-white">{terms.releasePeriod ? `${terms.releasePeriod} Days` : "N/A"}</span>
               </div>
               <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Grace Period</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.gracePeriod}</span>
+                <span className="font-raleway font-semibold text-[12px] text-white">{terms.gracePeriod ? `${terms.releasePeriod} Days` : "N/A"}</span>
               </div>
               <div className="flex justify-between items-center pt-1.5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Currency</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.currencyName}</span>
+                <span className="font-raleway font-semibold text-[12px] text-white">{terms.currency || "NGN"}</span>
               </div>
             </div>
           </div>
@@ -197,21 +191,28 @@ export default function EscrowReviewSetup({
             </div>
             
             <div className="flex flex-col gap-3">
-              {milestones.map((milestone) => (
-                <div key={milestone.id} className="flex justify-between items-center pb-2.5 border-b border-white/5">
-                  <div className="flex items-center gap-[10px]">
-                    <div className={`w-2 h-2 rounded-full ${milestone.colorClass}`} />
-                    <span className="font-raleway font-normal text-[12px] text-text-muted">{milestone.name}</span>
-                  </div>
-                  <span className="font-raleway font-bold text-[12px] text-white">{formatCurrency(milestone.amount)}</span>
-                </div>
-              ))}
-              <div className="flex justify-between items-center pt-1.5">
-                <span className="font-raleway font-bold text-[12px] text-text-muted">Total</span>
-                <span className="font-raleway font-bold text-[14px] text-primary-green">{formatCurrency(totalMilestonesAmount)}</span>
-              </div>
-            </div>
-          </div>
+                        {milestones.length === 0 ? (
+                          <span className="text-white/50 text-[13px]">No milestones configured.</span>
+                        ) : (
+                          milestones.map((milestone: any, index: number) => {
+                            const colorClass = BG_COLORS[index % BG_COLORS.length];
+                            return (
+                              <div key={milestone.id || index} className="flex justify-between items-center pb-2.5 border-b border-white/5">
+                                <div className="flex items-center gap-[10px]">
+                                  <div className={`w-2 h-2 rounded-full ${colorClass}`} />
+                                  <span className="font-raleway font-normal text-[12px] text-text-muted">{milestone.name || `Milestone ${index + 1}`}</span>
+                                </div>
+                                <span className="font-raleway font-bold text-[12px] text-white">{formatCurrency(milestone.amount)}</span>
+                              </div>
+                            );
+                          })
+                        )}
+                        <div className="flex justify-between items-center pt-1.5">
+                          <span className="font-raleway font-bold text-[12px] text-text-muted">Total</span>
+                          <span className="font-raleway font-bold text-[14px] text-primary-green">{formatCurrency(totalMilestonesAmount)}</span>
+                        </div>
+                      </div>
+                    </div>
 
           {/* Card 3: Collaborator Allocations */}
           <div className="bg-black/15 border border-white/5 rounded-[30px] p-6 flex flex-col backdrop-blur-md">
@@ -223,23 +224,27 @@ export default function EscrowReviewSetup({
             </div>
             
             <div className="flex flex-col gap-4">
-              {collaborators.map((collab) => (
-                <div key={collab.id} className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
+              {collaborators.length === 0 ? (
+                <span className="text-white/50 text-[13px]">No allocations configured.</span>
+              ) : (
+               collaborators.map((collab: any, index: number) => {
+                const gradientClass = GRADIENT_COLORS[index % GRADIENT_COLORS.length];
+                  return (
+                    <div key={collab.id || index} className="flex flex-col gap-1.5">
+                    <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2.5">
                       <Avatar name={collab.name} className="w-6 h-6 text-[10px]" />
-                      <span className="font-raleway font-normal text-[12px] text-white/70">{collab.name}</span>
+                    <span className="font-raleway font-normal text-[12px] text-white/70">{collab.name}</span>
                     </div>
                     <span className="font-raleway font-bold text-[12px] text-white">{formatCurrency(collab.amount)}</span>
-                  </div>
-                  <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full bg-linear-to-r ${collab.colorClass} rounded-full`} 
-                      style={{ width: collab.share }}
-                    />
-                  </div>
-                </div>
-              ))}
+                    </div>
+                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className={`h-full bg-linear-to-r ${gradientClass} rounded-full`} style={{ width: collab.share || "0%" }} />
+                    </div>
+                 </div>
+                );
+               })
+              )}
             </div>
           </div>
 
@@ -301,12 +306,13 @@ export default function EscrowReviewSetup({
 
           <Button 
             variant="primary"
-            onClick={onContinueToApprovals}
-            className="rounded-full shadow-btn-primary"
+            onClick={handleSubmitReview}
+            disabled={configureMutation.isPending}
+            className="rounded-full shadow-btn-primary disabled:opacity-50"
             icon={FiArrowRight}
             iconPosition="right"
           >
-            Continue
+            {configureMutation.isPending ? "Saving..." : "Continue"}
           </Button>
 
         </div>

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import PaymentFlowLayout from "@/components/features/workspace/payments/PaymentFlowLayout";
 
 // Initial Setup & Overview
@@ -40,8 +41,51 @@ export type PaymentFlowStep =
   | "transactions"
   | "royalty_settings";
 
-export default function PaymentsPage() {
-  const [currentStep, setCurrentStep] = useState<PaymentFlowStep>("setup_start");
+  export interface MilestoneData {
+    id: number;
+    colorBg: string;
+    colorText: string;
+    name: string;
+    amount: string | number;
+    condition: string;
+    assignedTo: string;
+    dueDate: Date | null;
+  }
+
+  function PaymentsWizard() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+  
+    // Read initial state from URL to prevent brief flashing of setup_start
+    const statusParam = searchParams.get("status");
+    const isSuccessfulRedirect = statusParam === "successful" || statusParam === "completed";
+    
+    const [currentStep, setCurrentStep] = useState<PaymentFlowStep>(
+      isSuccessfulRedirect ? "fund_wallet_success" : "overview"
+    );
+  
+    // Clean the URL upon successful redirect interception
+    useEffect(() => {
+      if (isSuccessfulRedirect) {
+        setCurrentStep("fund_wallet_success");
+        router.replace(pathname, { scroll: false });
+      }
+    }, [isSuccessfulRedirect, pathname, router]);
+
+    const [escrowTerms, setEscrowTerms] = useState<any>({});
+      const [escrowMilestones, setEscrowMilestones] = useState<MilestoneData[]>([
+        { 
+          id: 1, 
+          colorBg: 'bg-primary-green/15', 
+          colorText: 'text-primary-green', 
+          name: 'Phase 1 Delivery', 
+          amount: '', 
+          condition: '', 
+          assignedTo: '',
+          dueDate: null
+        }
+      ]);
 
   // Centralized Navigation Logic
     const handleBack = () => {
@@ -80,21 +124,40 @@ export default function PaymentsPage() {
           
           // Escrow Configuration Steps
           case "escrow_terms":
-            return <EscrowTermsSetup onContinueToMilestones={() => setCurrentStep("escrow_milestones")} />;
+          return (
+            <EscrowTermsSetup
+              terms={escrowTerms}
+              onUpdateTerms={setEscrowTerms}
+              onContinueToMilestones={() => setCurrentStep("escrow_milestones")} />
+            );
           case "escrow_milestones":
-            return <EscrowMilestonesSetup onBack={handleBack} onContinueToAllocations={() => setCurrentStep("escrow_allocations")} />;
+          return (
+            <EscrowMilestonesSetup
+              milestones={escrowMilestones}
+              onUpdateMilestones={setEscrowMilestones}
+              onBack={handleBack} onContinueToAllocations={() => setCurrentStep("escrow_allocations")} />
+            );
           case "escrow_allocations":
-            return <EscrowAllocationSetup onBack={handleBack} onContinueToReview={() => setCurrentStep("escrow_review")} />;
+          return (
+            <EscrowAllocationSetup
+              milestones={escrowMilestones}
+              onBack={handleBack} onContinueToReview={() => setCurrentStep("escrow_review")} />
+            );
           case "escrow_review":
-            return <EscrowReviewSetup onBack={handleBack} onContinueToApprovals={() => setCurrentStep("escrow_approvals")} />;
+          return (
+            <EscrowReviewSetup
+              terms={escrowTerms}
+              milestones={escrowMilestones}
+              onBack={handleBack} onContinueToApprovals={() => setCurrentStep("escrow_approvals")} />
+            );
           case "escrow_approvals":
-            return <EscrowApprovalsSetup onBack={handleBack} onContinueToFunding={() => setCurrentStep("escrow_funding")} />;
+            return <EscrowApprovalsSetup onBack={handleBack} onContinueToFunding={() => setCurrentStep("escrow_funding")} onExitToOverview={() => setCurrentStep("overview")} />;
           case "escrow_funding":
             return <EscrowFundingSetup onBack={handleBack} onActivateEscrow={() => setCurrentStep("overview")} />;
     
           // Overview 
           case "overview":
-            return <PaymentOverview onFundEscrow={() => setCurrentStep("fund_escrow")} onViewTransactions={() => setCurrentStep("transactions")} onRoyaltySettings={() => setCurrentStep("royalty_settings")} />;
+            return <PaymentOverview onFundEscrow={() => setCurrentStep("setup_start")} onConfigureTerms={() => setCurrentStep("escrow_terms")} onViewTransactions={() => setCurrentStep("transactions")} onRoyaltySettings={() => setCurrentStep("royalty_settings")} />;
           case "transactions":
             return <TransactionsView onBack={() => setCurrentStep("overview")} />;
           case "royalty_settings":
@@ -124,4 +187,13 @@ export default function PaymentsPage() {
             )}
           </div>
         );
-      }
+}
+
+// Wrap in Suspense to safely access URL search params
+export default function PaymentsPage() {
+  return (
+    <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-white/50">Loading Payment Details...</div>}>
+      <PaymentsWizard />
+    </Suspense>
+  );
+}

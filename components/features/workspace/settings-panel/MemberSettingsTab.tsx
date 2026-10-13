@@ -37,6 +37,7 @@ export default function MembersSettingsTab({
     email: string;
     isPending: boolean;
   } | null>(null);
+  const [inviteRole, setInviteRole] = useState("");
 
   const { useInviteCollaborator, useRemoveCollaborator, useProjectApplications, useReviewApplication } = useProjects();
   const inviteMutation = useInviteCollaborator(project?.id || "");
@@ -84,7 +85,7 @@ export default function MembersSettingsTab({
       id: c.userId || c.user?.id || c.id,
       name,
       email,
-      role: isOwner ? "Owner" : isPending ? "Pending Invite" : "Collaborator",
+      role: isOwner ? "Owner" : isPending ? "Pending Invite" : (c.role || "Collaborator"),
       isOwner,
       isPending,
       avatarUrl,
@@ -104,8 +105,10 @@ export default function MembersSettingsTab({
     try {
       await inviteMutation.mutateAsync({
         collaboratorId: selectedConnectionId,
+        role: inviteRole || "Collaborator",
       });
       setSelectedConnectionId("");
+      setInviteRole("");
       onSuccess?.("Invitation sent successfully.");
     } catch (err: any) {
       const errMsg =
@@ -305,6 +308,18 @@ export default function MembersSettingsTab({
               disabled={connectionOptions.length === 0}
             />
           </div>
+
+          {/* New Role Input field inserted cleanly */}
+                    <div className="w-full sm:w-[180px] h-[48px] bg-white/10 border border-transparent focus-within:border-primary-green focus-within:bg-white/15 rounded-full flex items-center px-[20px] transition-all duration-300">
+                      <input 
+                        type="text"
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value)}
+                        placeholder="Assign role..."
+                        className="w-full bg-transparent border-none outline-none font-raleway font-medium text-[14px] text-white placeholder:text-white/50"
+                      />
+          </div>
+          
           <button
             onClick={handleInvite}
             disabled={
@@ -382,7 +397,7 @@ export default function MembersSettingsTab({
                   ) : (
                     <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white/80 text-[12px] font-medium px-[12px] py-[5px] rounded-full">
                       <FiUserCheck size={13} className="text-white/60" />
-                      Collaborator
+                      {member.role}
                     </span>
                   )}
 

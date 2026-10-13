@@ -10,58 +10,54 @@ import { IoWalletOutline } from "react-icons/io5";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
 import Select from "@/components/ui/Select";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
+import { usePayment } from "@/hooks/payment/usePayment";
 
 
-interface FundingCollaborator {
-  id: number;
-  name: string;
-  isApproved: boolean;
-}
 
 interface EscrowFundingSetupProps {
   onBack?: () => void;
   onActivateEscrow?: () => void;
-  // Dynamic props
-  totalFunding?: number;
-  escrowAmount?: number;
-  feeAmount?: number;
-  fundingDeadline?: string;
-  daysRemaining?: number;
-  currencySymbol?: string;
-  collaborators?: FundingCollaborator[];
 }
-
-const DEFAULT_COLLABORATORS: FundingCollaborator[] = [
-  { id: 1, name: "Oyinda Adeyemi", isApproved: true },
-  { id: 2, name: "Tunde Martins", isApproved: true },
-  { id: 3, name: "Amara Okonkwo", isApproved: true },
-  { id: 4, name: "Kemi Babalola", isApproved: true },
-  { id: 5, name: "Seun Ibrahim", isApproved: false },
-  { id: 6, name: "Dayo Rasheed", isApproved: false }
-];
 
 export default function EscrowFundingSetup({ 
   onBack, 
-  onActivateEscrow,
-  totalFunding = 5075000,
-  escrowAmount = 5000000,
-  feeAmount = 75000,
-  fundingDeadline = "July 1, 2026",
-  daysRemaining = 7,
-  currencySymbol = "₦",
-  collaborators = DEFAULT_COLLABORATORS
+  onActivateEscrow
 }: EscrowFundingSetupProps) {
 
+  const { activeProject } = useWorkspace();
+    const projectId = activeProject?.id || "";
+  
+    const { useWallet } = usePayment();
+    const { data: walletData } = useWallet();
+    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+    const walletBalance = walletData?.balance || 0;
+  
+    const { useProjectEscrow, useFundEscrow } = useEscrow();
+    const { data: escrowData } = useProjectEscrow(projectId);
+    const fundMutation = useFundEscrow();
+  
+    const totalFunding = escrowData?.totalAmount || 0;
+    const escrowAmount = totalFunding; // If backend pre-calculates fees into totalAmount
+    const feeAmount = totalFunding * 0.015; // Simulated 1.5% fee
   
   const [paymentOption, setPaymentOption] = useState("wallet");
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
   const PAYMENT_OPTIONS = [
-     { label: `CollabDen Wallet (Bal: ${formatCurrency(850000)})`, value: "wallet" },
-     { label: "Debit Card ending in 8832", value: "card" },
-     { label: "Bank Transfer", value: "bank" }
+     { label: `CollabDen Wallet (Bal: ${formatCurrency(850000)})`, value: "wallet" }
    ];
 
+  const handleActivateEscrow = async () => {
+      try {
+        // Execute the lock/fund action against the backend
+        await fundMutation.mutateAsync(projectId);
+        onActivateEscrow?.();
+      } catch (error) {
+        console.error("Failed to activate escrow", error);
+      }
+    };
   
 
   return (
@@ -112,11 +108,11 @@ export default function EscrowFundingSetup({
                   Payment Method
                 </label>
                 <Select 
-                                 options={PAYMENT_OPTIONS}
-                                 value={paymentOption}
-                                 onChange={setPaymentOption}
-                                 variant="glass"
-                               />
+                   options={PAYMENT_OPTIONS}
+                   value={paymentOption}
+                   onChange={setPaymentOption}
+                   variant="glass"
+                />
 
               </div>
 
@@ -129,8 +125,10 @@ export default function EscrowFundingSetup({
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
                       <FiCalendar className="text-white/60" size={16} />
-                    </div>
+                  </div>
+                  {/* TO BE FIXED
                     <span className="font-raleway font-semibold text-[15px] text-white">{fundingDeadline}</span>
+                    */}
                   </div>
                 </button>
               </div>
@@ -140,13 +138,14 @@ export default function EscrowFundingSetup({
             {/* In-Panel CTA */}
             <Button 
               variant="primary"
-              onClick={onActivateEscrow}
+              onClick={handleActivateEscrow}
+              disabled={fundMutation.isPending || walletBalance < totalFunding}
               className="mt-auto w-full rounded-[20px] py-1.5 shadow-[0_4px_28px_rgba(115,191,68,0.25)] flex items-center justify-center gap-3 transition-all transform hover:scale-[1.01] active:scale-[0.99]"
               icon={FiShield}
               iconPosition="left"
             >
               <span className="font-raleway font-black text-sm sm:text-[18px]">
-                Fund Escrow Now — {formatCurrency(totalFunding)}
+                {fundMutation.isPending ? "Activating..." : `Fund Escrow Now   ${formatCurrency(totalFunding)}`}
               </span>
             </Button>
           </div>
@@ -160,23 +159,29 @@ export default function EscrowFundingSetup({
                 Approval Status
               </span>
               <div className="flex flex-col gap-4">
-                {collaborators.map((collab) => (
-                  <div key={collab.id} className="flex items-center justify-between w-full">
+              {escrowData?.allocations?.map((alloc: any) => {
+                const collabMeta = activeProject?.collaborators?.find((c: any) => c.userId === alloc.userId);
+                const name = collabMeta?.user?.displayName || collabMeta?.user?.legalName || collabMeta?.user?.email || "Unknown";
+                const isApproved = alloc.approvalStatus === "APPROVED";
+
+                return (
+                  <div key={alloc.id} className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
-                      <Avatar name={collab.name} className="w-7.5 h-7.5 text-[10px]" />
+                      <Avatar name={name} className="w-7.5 h-7.5 text-[10px]" />
                       <span className="font-raleway font-normal text-[14px] text-white/80">
-                        {collab.name}
+                        {name}
                       </span>
                     </div>
                     <div className={`px-3 py-1.5 rounded-full border flex items-center justify-center
-                      ${collab.isApproved ? 'bg-primary-green/10 border-primary-green/20' : 'bg-secondary-blue/10 border-white/10'}`}>
+                      ${isApproved ? 'bg-primary-green/10 border-primary-green/20' : 'bg-secondary-blue/10 border-white/10'}`}>
                       <span className={`font-raleway font-bold text-[11px] uppercase tracking-[0.5px]
-                        ${collab.isApproved ? 'text-primary-green' : 'text-text-muted'}`}>
-                        {collab.isApproved ? "Approved" : "Pending"}
+                        ${isApproved ? 'text-primary-green' : 'text-text-muted'}`}>
+                        {isApproved ? "Approved" : "Pending"}
                       </span>
                     </div>
                   </div>
-                ))}
+                )
+              })}
               </div>
             </div>
 
@@ -193,7 +198,7 @@ export default function EscrowFundingSetup({
               </p>
             </div>
 
-            {/* Info Card - Deadline */}
+          {/* Info Card - Deadline - TO BE FIXED
             <div className="bg-black/15 border border-white/5 rounded-3xl p-6 flex flex-col backdrop-blur-md items-center justify-center">
               <span className="font-raleway font-bold text-[11px] text-text-muted tracking-[1px] uppercase mb-4">
                 Funding Deadline
@@ -207,7 +212,7 @@ export default function EscrowFundingSetup({
               <p className="font-raleway font-normal text-[14px] text-text-muted">
                 {daysRemaining} days remaining to fund
               </p>
-            </div>
+            </div> */}
 
           </div>
 
@@ -238,12 +243,13 @@ export default function EscrowFundingSetup({
 
           <Button 
             variant="primary"
-            onClick={onActivateEscrow}
+            onClick={handleActivateEscrow}
+            disabled={fundMutation.isPending || walletBalance < totalFunding}
             className="rounded-[20px] shadow-[0_2px_18px_rgba(115,191,68,0.2)]"
             icon={FiCheck}
             iconPosition="right"
           >
-            <span className="font-raleway font-bold text-[16px] text-white">Activate Escrow</span>
+            <span className="font-raleway font-bold text-[16px] text-white">{fundMutation.isPending ? "Activating..." : `Fund Escrow Now   ${formatCurrency(totalFunding)}`}</span>
           </Button>
 
         </div>

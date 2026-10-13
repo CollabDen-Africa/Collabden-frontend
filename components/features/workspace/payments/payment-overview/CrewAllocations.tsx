@@ -3,61 +3,54 @@ import Avatar from "@/components/ui/Avatar";
 
 interface CrewAllocationsProps {
   currencySymbol?: string;
+  allocations?: any[];
+  collaborators?: any[];
 }
 
-const CREW = [
-  { 
-    id: 1, 
-    name: "Samuel Okeke", 
-    role: "Lead Vocalist & Arranger", 
-    status: "Partial Payout", 
-    allocated: 800000, 
-    paid: 400000, 
-    progress: 50, 
-    statusColorClass: "text-secondary-blue", 
-    bgBadge: "bg-primary-blue/10", 
-    borderBadge: "border-primary-blue/20" 
-  },
-  { 
-    id: 2, 
-    name: "Chinedu Okafor", 
-    role: "Beat Producer", 
-    status: "Fully Paid Out", 
-    allocated: 1200000, 
-    paid: 1200000, 
-    progress: 100, 
-    statusColorClass: "text-primary-green", 
-    bgBadge: "bg-primary-green/10", 
-    borderBadge: "border-primary-green/20" 
-  },
-  { 
-    id: 3, 
-    name: "Amara Nwosu", 
-    role: "Session Guitarist", 
-    status: "Fully Paid Out", 
-    allocated: 600000, 
-    paid: 600000, 
-    progress: 100, 
-    statusColorClass: "text-primary-green", 
-    bgBadge: "bg-primary-green/10", 
-    borderBadge: "border-primary-green/20" 
-  },
-  { 
-    id: 4, 
-    name: "Tunde Adeyemi", 
-    role: "Mix & Mastering Engineer", 
-    status: "Payout Pending", 
-    allocated: 950000, 
-    paid: 0, 
-    progress: 0, 
-    statusColorClass: "text-white/60", 
-    bgBadge: "bg-white/5", 
-    borderBadge: "border-white/10" 
-  },
-];
 
-export default function CrewAllocations({ currencySymbol = "₦" }: CrewAllocationsProps) {
+export default function CrewAllocations({ 
+  currencySymbol = "₦", 
+  allocations = [], 
+  collaborators = [] 
+}: CrewAllocationsProps) {
   const formatAmount = (val: number) => `${currencySymbol}${val.toLocaleString()}`;
+
+  const liveCrew = allocations.map((alloc) => {
+    const collabMeta = collaborators.find(c => c.userId === alloc.userId);
+    const progress = alloc.totalAmount > 0 ? Math.round((alloc.releasedAmount / alloc.totalAmount) * 100) : 0;
+    
+    let status = "Payout Pending";
+    let statusColorClass = "text-white/60";
+    let bgBadge = "bg-white/5";
+    let borderBadge = "border-white/10";
+
+    if (progress === 100) {
+      status = "Fully Paid Out";
+      statusColorClass = "text-primary-green";
+      bgBadge = "bg-primary-green/10";
+      borderBadge = "border-primary-green/20";
+    } else if (progress > 0) {
+      status = "Partial Payout";
+      statusColorClass = "text-secondary-blue";
+      bgBadge = "bg-primary-blue/10";
+      borderBadge = "border-primary-blue/20";
+    }
+
+    return {
+      id: alloc.id,
+      name: collabMeta?.user?.displayName || collabMeta?.legalName || collabMeta?.user?.email || "Unknown User",
+      role: collabMeta?.role || "Collaborator",
+      status,
+      allocated: alloc.totalAmount,
+      paid: alloc.releasedAmount,
+      progress,
+      statusColorClass,
+      bgBadge,
+      borderBadge
+    };
+  });
+
+  if (!liveCrew.length) return null;
 
   return (
     <div className="w-full flex flex-col gap-4 mt-10 mb-15">
@@ -67,7 +60,7 @@ export default function CrewAllocations({ currencySymbol = "₦" }: CrewAllocati
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
-                {CREW.map((member) => (
+                {liveCrew.map((member) => (
                   <div key={member.id} className="bg-black/15 border border-white/5 rounded-6 md:rounded-[30px] p-5 md:p-6 flex flex-col gap-5 backdrop-blur-md">
                     
                     {/* Avatar, Info & Badge */}

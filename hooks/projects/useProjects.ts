@@ -90,6 +90,15 @@ export const useProjects = () => {
     onError: (error) => handleApiError(error),
   });
 
+  const useDeleteProjectFile = (projectId: string) => useMutation({
+    mutationFn: (fileId: string) => projectService.deleteFile(projectId, fileId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['projects'] });
+      },
+      onError: (error) => handleApiError(error),
+    });
+
   const useSendProjectMessage = (projectId: string) => useMutation({
     mutationFn: (content: string) => projectService.sendMessage(projectId, content),
     onSuccess: (message: ProjectMessage) => {
@@ -116,6 +125,16 @@ export const useProjects = () => {
     },
     onError: (error) => handleApiError(error),
   });
+
+  const useUploadProjectCover = (projectId: string) => useMutation({
+      mutationFn: (coverImage: File) => projectService.uploadCoverImage(projectId, coverImage),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+        queryClient.invalidateQueries({ queryKey: ['projects'] });
+        queryClient.invalidateQueries({ queryKey: ['marketplace', 'projects'] });
+      },
+      onError: (error) => handleApiError(error),
+    });
 
   const useUpdateProjectTaskStatus = (projectId: string) => useMutation({
     mutationFn: ({ taskId, status }: { taskId: string; status: ProjectTask["status"] }) =>
@@ -203,8 +222,8 @@ export const useProjects = () => {
 
   // Apply to join a project
   const useApplyToProject = () => useMutation({
-    mutationFn: ({ projectId, message }: { projectId: string; message?: string }) =>
-      projectService.applyToProject(projectId, message),
+    mutationFn: ({ projectId, data }: { projectId: string; data: { message?: string; role?: string; portfolioLink?: string } }) =>
+      projectService.applyToProject(projectId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["marketplace"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -218,12 +237,14 @@ export const useProjects = () => {
     useProjectsWithMessages,
     useProjectDetail,
     useCreateProject,
+    useUploadProjectCover,
     useUpdateProject,
     useDeleteProject,
     useProjectMetadata,
     useMarketplaceProjects,
     useInviteCollaborator,
     useUploadProjectFile,
+    useDeleteProjectFile,
     useSendProjectMessage,
     useCreateProjectTask,
     useUpdateProjectTaskStatus,

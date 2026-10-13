@@ -11,8 +11,10 @@ import { ViewApplicationModal } from './ViewApplication';
 export function ApplicationModalManager({ isOpen, onClose, project }) {
   const [step, setStep] = useState(1);
   const [appData, setAppData] = useState({
+    role: '',
     introduction: '',
-    portfolio: ''
+    portfolio: '',
+    portfolioFile: null as File | null
   });
   const [showApplication, setShowApplication] = useState(false);
 
@@ -24,7 +26,7 @@ export function ApplicationModalManager({ isOpen, onClose, project }) {
   
   const handleResetAndClose = () => {
     setStep(1);
-    setAppData({ introduction: '', portfolio: '' });
+    setAppData({ role: '', introduction: '', portfolio: '', portfolioFile: null });
     setShowApplication(false);
     onClose();
   };
@@ -32,7 +34,7 @@ export function ApplicationModalManager({ isOpen, onClose, project }) {
   // Create the data payload for the ViewApplicationModal based on what is typed
     const completedApplication = {
       projectTitle: project.title,
-      role: project.roles || 'Applicant', 
+      role: appData.role || 'Applicant', 
       status: 'Submitted',
       dateApplied: 'Just now',
       pitch: appData.introduction,
@@ -52,13 +54,14 @@ export function ApplicationModalManager({ isOpen, onClose, project }) {
 
   // Format the data for Step 4's review screen based on what the user entered
   const reviewData = {
+    role: appData.role,
     introduction: appData.introduction.trim() !== '' ? 'Written' : 'Not written',
-    portfolio: appData.portfolio !== '' ? 'Attached' : 'Skipped'
+    portfolio: appData.portfolio !== '' ? (appData.portfolioFile ? 'File Attached' : 'Link Attached') : 'Skipped'
   };
 
   switch (step) {
     case 1:
-      return <ApplicationModalStep1 onClose={handleResetAndClose} onNext={handleNext} projectData={project} />;
+      return <ApplicationModalStep1 onClose={handleResetAndClose} onNext={handleNext} projectData={project} appData={appData} setAppData={setAppData} />;
     case 2:
       return <ApplicationModalStep2 onClose={handleResetAndClose} onNext={handleNext} onBack={handleBack} projectData={project} appData={appData} setAppData={setAppData} />;
     case 3:

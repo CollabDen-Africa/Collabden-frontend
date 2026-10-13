@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   FiAlertTriangle, 
   FiCreditCard, 
@@ -15,13 +15,12 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import InfoTooltip from "@/components/ui/InfoTooltip";
+import { useWorkspace } from "@/context/WorkspaceContext";
+import { usePayment } from "@/hooks/payment/usePayment";
+import { useEscrow } from "@/hooks/escrow/useEscrow";
 
 interface FundWalletSetupProps {
   onContinue?: () => void;
-  currentBalance?: number;
-  requiredTotal?: number;
-  recommendedAdd?: number;
-  currencySymbol?: string;
 }
 
 const BANK_OPTIONS = [
@@ -32,21 +31,67 @@ const BANK_OPTIONS = [
   { label: "UBA", value: "uba" }
 ];
 
-export default function FundWalletSetup({
-  onContinue,
-  currentBalance = 850000,
-  requiredTotal = 5075000,
-  recommendedAdd = 5075000,
-  currencySymbol = "₦"
-}: FundWalletSetupProps) {
+export default function FundWalletSetup({ onContinue }: FundWalletSetupProps) {
+  const { activeProject } = useWorkspace();
+  const projectId = activeProject?.id || "";
+
+  const { useWallet, useInitializeFunding } = usePayment();
+  const { data: walletData } = useWallet();
+  const fundingMutation = useInitializeFunding();
+
+  const { useProjectEscrow } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
   
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank" | "ussd">("card");
   const [selectedBank, setSelectedBank] = useState("");
   const [selectedUssdBank, setSelectedUssdBank] = useState("");
+  const [fundingAmount, setFundingAmount] = useState<string>("");
   
-  const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
-  const deficit = requiredTotal > currentBalance ? requiredTotal - currentBalance : 0;
-  const newBalance = currentBalance + recommendedAdd;
+    const currentBalance = walletData?.balance || 0;
+    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+    const requiredTotal = activeProject?.budget ? Number(activeProject.budget) : (escrowData?.totalAmount || 0);
+    
+    const deficit = requiredTotal > currentBalance ? requiredTotal - currentBalance : 0;
+    
+    // Initialize the recommended amount once data is loaded
+    useEffect(() => {
+      if (deficit > 0 && !fundingAmount) {
+        setFundingAmount(deficit.toString());
+      }
+    }, [deficit, fundingAmount]);
+  
+    const numFundingAmount = Number(fundingAmount) || 0;
+    const newBalance = currentBalance + numFundingAmount;
+    const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
+  
+    const handleFundWallet = async () => {
+      if (numFundingAmount <= 0) return;
+      try {
+        const payloadMethod = paymentMethod === "card" ? "card" : paymentMethod === "ussd" ? "ussd" : "banktransfer";
+
+        const targetRoute = `/workspace/${projectId}/payments`; 
+        const explicitRedirect = typeof window !== "undefined" 
+            ? `${window.location.origin}${targetRoute}?status=successful` 
+            : "";
+        
+        const res = await fundingMutation.mutateAsync({ 
+          amount: numFundingAmount, 
+          paymentMethod: payloadMethod,
+          redirectUrl: explicitRedirect 
+        });
+        
+        // If the backend returns a Flutterwave link, redirect the user. 
+        // Otherwise, proceed to the success screen.
+        if (res?.paymentLink) {
+          window.location.href = res.paymentLink;
+        } else {
+          onContinue?.();
+        }
+      } catch (error) {
+        console.error("Funding failed:", error);
+      }
+    };
+  
 
   // Summary Box for mobile/desktop placement
   const PaymentSummaryBox = () => (
@@ -60,7 +105,7 @@ export default function FundWalletSetup({
         </div>
         <div className="flex justify-between items-center py-3.5 border-b border-white/5">
           <span className="font-raleway font-normal text-[13px] text-white/60">Adding</span>
-          <span className="font-raleway font-bold text-[14px] md:text-[15px] text-white">{formatCurrency(recommendedAdd)}</span>
+          <span className="font-raleway font-bold text-[14px] md:text-[15px] text-white">{formatCurrency(numFundingAmount)}</span>
         </div>
         <div className="flex justify-between items-center py-3.5">
           <span className="font-raleway font-normal text-[13px] text-text-muted">New Balance</span>
@@ -99,7 +144,7 @@ export default function FundWalletSetup({
               
               {/* Warning Banner */}
               {deficit > 0 && (
-                <div className="w-full bg-accent-yellow/10 border border-accent-yellow/20 rounded-full py-[12px] px-[16px] flex items-center gap-[10px]">
+                <div className="w-full bg-accent-yellow/10 border border-accent-yellow/20 rounded-full py-3 px-4 flex items-center gap-2.5">
                   <FiAlertTriangle className="text-accent-yellow shrink-0" size={16} />
                   <span className="font-raleway font-normal text-[12px] md:text-[13px] text-accent-yellow">
                     You need an additional {formatCurrency(deficit)} to fund this project.
@@ -112,15 +157,16 @@ export default function FundWalletSetup({
             <div className="bg-black/15 border border-white/5 rounded-[30px] p-6 md:p-7 flex flex-col gap-5 backdrop-blur-md">
               <span className="font-raleway font-bold text-[10px] text-text-muted uppercase tracking-[1px]">Amount to Add</span>
               
-              <div className="flex flex-col gap-[8px]">
-                <div className="flex items-center gap-[6px]">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-1.5">
                   <span className="font-raleway font-bold text-[11px] text-text-muted uppercase tracking-[0.5px]">Funding Amount</span>
                   <InfoTooltip text="Funding amount includes the base project budget plus a 1.5% escrow processing fee." />
                 </div>
                 
                 <Input 
                   variant="glass" 
-                  defaultValue={recommendedAdd.toLocaleString()}
+                  defaultValue={fundingAmount.toLocaleString()}
+                  onChange={(e) => setFundingAmount(e.target.value)}
                   className="pl-9 font-bold text-[16px]"
                 >
                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-raleway font-semibold text-[16px] text-text-muted">
@@ -128,7 +174,7 @@ export default function FundWalletSetup({
                    </span>
                 </Input>
                 <span className="font-raleway font-normal text-[12px] md:text-[13px] text-text-muted/80">
-                  Recommended: {formatCurrency(recommendedAdd)} (escrow + 1.5% fee)
+                  Recommended: {formatCurrency(deficit)} (escrow + 1.5% fee)
                 </span>
               </div>
             </div>
@@ -189,7 +235,7 @@ export default function FundWalletSetup({
                       <span className="font-raleway font-semibold text-[12px] md:text-[13px] text-text-muted/80">Transfer from any Nigerian bank</span>
                     </div>
                   </div>
-                  <div className={`w-[18px] h-[18px] rounded-full border flex items-center justify-center ${paymentMethod === "bank" ? "border-primary-blue bg-primary-blue" : "border-white/15"}`}>
+                  <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center ${paymentMethod === "bank" ? "border-primary-blue bg-primary-blue" : "border-white/15"}`}>
                     {paymentMethod === "bank" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 </div>
@@ -206,7 +252,7 @@ export default function FundWalletSetup({
                     />
                     {selectedBank && (
                       <div className="bg-white/5 border border-white/10 rounded-4 p-4 flex flex-col gap-1 animate-fade-in">
-                         <span className="font-raleway text-text-muted text-[12px]">Please transfer {formatCurrency(recommendedAdd)} to:</span>
+                         <span className="font-raleway text-text-muted text-[12px]">Please transfer {formatCurrency(numFundingAmount)} to:</span>
                          <span className="font-raleway text-white font-bold text-[24px] tracking-widest">0123456789</span>
                          <span className="font-raleway text-white/80 text-[14px]">CollabDen Escrow ({BANK_OPTIONS.find(b => b.value === selectedBank)?.label})</span>
                       </div>
@@ -248,7 +294,7 @@ export default function FundWalletSetup({
                     {selectedUssdBank && (
                       <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 animate-fade-in text-center">
                          <span className="font-raleway text-white/50 text-[12px]">Dial this code to complete payment:</span>
-                         <span className="font-raleway text-primary-green font-black text-[22px] tracking-widest">*737*1*5075000#</span>
+                         <span className="font-raleway text-primary-green font-black text-[22px] tracking-widest">*737*1*(numFundingAmount)#</span>
                       </div>
                     )}
                   </div>
@@ -265,11 +311,13 @@ export default function FundWalletSetup({
             {/* Submit Button */}
             <Button 
               variant="primary" 
-              onClick={onContinue}
-              className="w-full rounded-[18px] py-4 md:py-4.5 flex items-center justify-center gap-3 shadow-btn-primary"
+              onClick={handleFundWallet}
+              disabled={fundingMutation.isPending || numFundingAmount <= 0}
+              className="w-full rounded-[18px] py-4 md:py-4.5 flex items-center justify-center gap-3 shadow-btn-primary disabled:opacity-50"
             >
               <FiCheckCircle size={18} className="text-white" />
-              <span className="font-raleway font-black text-[15px] text-white">Continue to Payment {formatCurrency(recommendedAdd)}</span>
+              <span className="font-raleway font-black text-[15px] text-white"> {fundingMutation.isPending ? "Processing..." : `Continue to Payment ${formatCurrency(numFundingAmount)}`}
+              </span>
             </Button>
 
           </div>
@@ -308,7 +356,7 @@ export default function FundWalletSetup({
                 <FiClock className="text-primary-green" size={18} />
                 <span className="font-raleway font-bold text-[14px] md:text-[15px] text-white">Instant</span>
               </div>
-              <p className="font-raleway font-normal text-[12px] text-text-muted/90 leading-[17px]">
+              <p className="font-raleway font-normal text-[12px] text-text-muted/90 leading-4.25">
                 Card payments reflect immediately. Bank transfers might take a few minutes.
               </p>
             </div>
