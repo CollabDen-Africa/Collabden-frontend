@@ -30,12 +30,11 @@ export default function TransactionsPage() {
 
   const apiTypeMap: Record<string, string | undefined> = {
     "All types": undefined,
-    "Payment": "FUNDING",
-    "Withdrawal": "WITHDRAWAL",
-    "Escrow": undefined, // Backend may not accept "ESCROW" wildcard; client filter handles ESCROW_CREDIT & ESCROW_DEBIT
+    Payment: "FUNDING",
+    Withdrawal: "WITHDRAWAL",
+    Escrow: undefined,
   };
 
-  // Fetch live data (fetching page 1, 50 limits for client-side filtering and searching)
   const { data: txData, isLoading } = useTransactions(
     apiTypeMap[typeFilter],
     apiStatusMap[statusFilter],
@@ -218,7 +217,13 @@ export default function TransactionsPage() {
             <Select
               value={statusFilter}
               onChange={setStatusFilter}
-              options={["All status", "Successful", "Processing", "Pending", "Failed"]}
+              options={[
+                "All status",
+                "Successful",
+                "Processing",
+                "Pending",
+                "Failed",
+              ]}
               variant="glass"
               placeholder="All status"
             />
@@ -238,7 +243,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Data Table */}
-      {/* CONDITIONAL RENDERING: Loading vs Empty State vs Data Table */}
+
       {isLoading ? (
         <div className="w-full bg-black/10 border border-white/20 rounded-[30px] lg:rounded-[40px] overflow-hidden backdrop-blur-xl shadow-xl shadow-primary-green/5 relative z-10">
           <div className="w-full overflow-x-auto custom-scrollbar">
@@ -318,7 +323,8 @@ export default function TransactionsPage() {
               </thead>
               <tbody>
                 {filteredTransactions.map((txn, index) => {
-                  const isValidDate = txn.createdAt && !isNaN(new Date(txn.createdAt).getTime());
+                  const isValidDate =
+                    txn.createdAt && !isNaN(new Date(txn.createdAt).getTime());
                   const dateObj = isValidDate ? new Date(txn.createdAt) : null;
                   const formattedDate = dateObj
                     ? dateObj.toLocaleDateString("en-US", {
@@ -339,12 +345,16 @@ export default function TransactionsPage() {
                     <tr
                       key={txn.id || index}
                       className={`border-accent-green-bright/10 hover:bg-white/10 transition-colors ${
-                        index !== filteredTransactions.length - 1 ? "border-b" : ""
+                        index !== filteredTransactions.length - 1
+                          ? "border-b"
+                          : ""
                       }`}
                     >
                       <td className="py-5 px-5 lg:px-8.25">
                         <div className="flex flex-col gap-1">
-                          <span className="font-medium text-[16px] text-white">{formattedDate}</span>
+                          <span className="font-medium text-[16px] text-white">
+                            {formattedDate}
+                          </span>
                           {formattedTime && (
                             <span className="font-normal text-[14px] text-white/60">
                               {formattedTime}
@@ -366,11 +376,15 @@ export default function TransactionsPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-5 px-5 lg:px-8.25">{renderStatusBadge(txn.status)}</td>
+                      <td className="py-5 px-5 lg:px-8.25">
+                        {renderStatusBadge(txn.status)}
+                      </td>
                       <td className="py-5 px-5 lg:px-8.25 text-right">
                         <span
                           className={`font-semibold text-[16px] ${
-                            outflow ? "text-accent-red-alt" : "text-primary-green"
+                            outflow
+                              ? "text-accent-red-alt"
+                              : "text-primary-green"
                           }`}
                         >
                           {formatCurrency(txn.amount, txn.type)}
