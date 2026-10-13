@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect} from "react";
 import Link from "next/link";
 import { FiArrowLeft, FiChevronDown, FiSettings, FiUsers, FiCreditCard, FiBell } from "react-icons/fi";
-import Image from "next/image";
 
 interface SettingsSidebarProps {
   activeTab: string;

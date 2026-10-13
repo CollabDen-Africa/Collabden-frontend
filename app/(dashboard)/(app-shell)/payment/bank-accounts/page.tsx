@@ -9,7 +9,7 @@ import { usePayment } from "@/hooks/payment/usePayment";
 
 export default function BankAccountsPage() {
   const { useBankAccounts, useAddBankAccount, useUpdateBankAccount, useRemoveBankAccount } = usePayment();
-  const { data: bankData } = useBankAccounts();
+  const { data: bankData, isLoading } = useBankAccounts();
   const addBankMutation = useAddBankAccount();
   const updateBankMutation = useUpdateBankAccount();
   const removeBankMutation = useRemoveBankAccount();
@@ -81,8 +81,12 @@ export default function BankAccountsPage() {
         </button>
       </div>
 
-      {/* Empty State */}
-      {accounts.length === 0 ? (
+      {/* Bank Accounts List / Loading / Empty State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
+        </div>
+      ) : accounts.length === 0 ? (
         <EmptyState 
           icon={<FiCreditCard size={32} strokeWidth={1.5} />}
           title="No Bank Accounts Linked"
