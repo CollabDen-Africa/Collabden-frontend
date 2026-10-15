@@ -11,9 +11,9 @@ export const ProjectGridCard = ({ project, onApply, onView }: { project: any, on
     >
       {/* Card Header Image */}
       <div className="relative h-40 w-full bg-black/15 shrink-0">
-              {project.image && (
+              {project.coverImageUrl && (
                 <Image 
-                  src={project.image} 
+                  src={project.coverImageUrl} 
                   alt={project.title} 
                   fill 
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

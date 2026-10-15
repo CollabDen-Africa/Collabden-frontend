@@ -6,6 +6,7 @@ import { useWorkspace } from "@/context/WorkspaceContext";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { getErrorMessage } from "@/lib/error-handler";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
+import { set } from "react-hook-form";
 
 const formatFileSize = (bytes?: number | null) => {
   if (bytes === null || bytes === undefined || bytes < 0) return "—";
@@ -41,10 +42,13 @@ export default function WorkspaceFilesPage() {
   const deleteFile = useDeleteProjectFile(projectId);
 
   useEffect(() => {
-    if (!actionSuccess) return;
-    const timeout = window.setTimeout(() => setActionSuccess(null), 4_000);
+    if (!actionSuccess && !actionError) return;
+    const timeout = window.setTimeout(() => {
+      setActionSuccess(null);
+      setActionError(null);
+    }, 4_000);
     return () => window.clearTimeout(timeout);
-  }, [actionSuccess]);
+  }, [actionSuccess, actionError]);
 
   const uploadFiles = async (fileList: FileList | File[]) => {
     const selectedFiles = Array.from(fileList);
@@ -52,11 +56,24 @@ export default function WorkspaceFilesPage() {
 
     setActionError(null);
     setActionSuccess(null);
-    setUploadingCount(selectedFiles.length);
+
+    // Client-side file size validation (Limit: 50MB)
+      const MAX_FILE_SIZE = 50 * 1024 * 1024; 
+      const validFiles = selectedFiles.filter((file) => file.size <= MAX_FILE_SIZE);
+    
+      if (validFiles.length < selectedFiles.length) {
+        setActionError("Cannot upload: One or more files exceed the 50MB limit.");
+          if (validFiles.length === 0) {
+            if (inputRef.current) inputRef.current.value = "";
+            return; // Halt if no files passed the size check
+          }
+    }
+    
+    setUploadingCount(validFiles.length);
     try {
-      await Promise.all(selectedFiles.map((file) => uploadFile.mutateAsync(file)));
+      await Promise.all(validFiles.map((file) => uploadFile.mutateAsync(file)));
       setActionSuccess(
-        `${selectedFiles.length} file${selectedFiles.length === 1 ? "" : "s"} uploaded successfully.`,
+        `${validFiles.length} file${validFiles.length === 1 ? "" : "s"} uploaded successfully.`,
       );
     } catch (error) {
       setActionError(getErrorMessage(error));
@@ -157,10 +174,16 @@ export default function WorkspaceFilesPage() {
       </section>
 
       {actionError && (
-        <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-          {actionError}
-        </p>
-      )}
+        <div
+          role="alert"
+          className="fixed right-5 top-5 lg:top-20 z-100 flex items-center gap-3 rounded-2xl border border-red-400/40 bg-[#251515] px-4 py-3 text-sm text-red-200 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200"
+        >
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20 text-red-400 font-bold">
+            !
+          </span>
+          <span>{actionError}</span>
+        </div>
+       )}
 
       {actionSuccess && (
         <div

@@ -37,6 +37,7 @@ export default function MarketplaceProjects() {
         badge: project.genre || 'Project',
         openRoles: `${project.requiredRoles?.length || 0} position${(project.requiredRoles?.length || 0) === 1 ? '' : 's'}`,
         image: '',
+        coverImageUrl: project.coverImageUrl || null,
         isOwner,
       };
     }), [data, user]);
@@ -59,7 +60,6 @@ export default function MarketplaceProjects() {
       </header>
 
       <section className="w-full">
-        {/* The new carousel replaces the static FeaturedProjectCard here */}
         <FeaturedCarousel featuredProjects={projects.slice(0, 5)} />
       </section>
 

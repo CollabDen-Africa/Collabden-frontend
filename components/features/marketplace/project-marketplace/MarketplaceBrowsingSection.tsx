@@ -27,6 +27,7 @@ interface Project {
   isUrgent?: boolean;
   openRolesCount: number;
   image: string;
+  coverImageUrl?: string | null;
   isOwner?: boolean;
 }
 

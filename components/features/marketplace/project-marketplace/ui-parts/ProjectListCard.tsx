@@ -12,9 +12,9 @@ export const ProjectListCard = ({ project, onApply, onView }: { project: any, on
       
       {/* Thumbnail */}
       <div className="relative w-27.5 sm:w-48 md:w-70 shrink-0 bg-black/15">
-        {project.image && (
+        {project.coverImageUrl && (
                   <Image 
-                    src={project.image} 
+                    src={project.coverImageUrl} 
                     alt={project.title} 
                     fill 
                     sizes="(max-width: 640px) 110px, (max-width: 768px) 192px, 280px"

@@ -71,7 +71,7 @@ export default function FundWalletSetup({ onContinue }: FundWalletSetupProps) {
 
         const targetRoute = `/workspace/payments`; 
         const explicitRedirect = typeof window !== "undefined" 
-            ? `${window.location.origin}${targetRoute}?status=successful` 
+            ? `${window.location.origin}${targetRoute}` 
             : "";
         
         const res = await fundingMutation.mutateAsync({ 
@@ -294,7 +294,7 @@ export default function FundWalletSetup({ onContinue }: FundWalletSetupProps) {
                     {selectedUssdBank && (
                       <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 animate-fade-in text-center">
                          <span className="font-raleway text-white/50 text-[12px]">Dial this code to complete payment:</span>
-                         <span className="font-raleway text-primary-green font-black text-[22px] tracking-widest">*737*1*(numFundingAmount)#</span>
+                         <span className="font-raleway text-primary-green font-black text-[22px] tracking-widest">*737*1*{numFundingAmount}#</span>
                       </div>
                     )}
                   </div>

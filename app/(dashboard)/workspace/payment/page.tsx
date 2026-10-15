@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import paymentService from "@/services/payment.service";
 import PaymentFlowLayout from "@/components/features/workspace/payments/PaymentFlowLayout";
 
 // Initial Setup & Overview
@@ -59,7 +60,8 @@ export type PaymentFlowStep =
   
     // Read initial state from URL to prevent brief flashing of setup_start
     const statusParam = searchParams.get("status");
-    const isSuccessfulRedirect = statusParam === "successful" || statusParam === "completed";
+    const transactionId = searchParams.get("transaction_id");
+    const isSuccessfulRedirect = (statusParam === "successful" || statusParam === "completed") && transactionId;
     
     const [currentStep, setCurrentStep] = useState<PaymentFlowStep>(
       isSuccessfulRedirect ? "fund_wallet_success" : "overview"
@@ -69,9 +71,18 @@ export type PaymentFlowStep =
     useEffect(() => {
       if (isSuccessfulRedirect) {
         setCurrentStep("fund_wallet_success");
-        router.replace(pathname, { scroll: false });
+
+        paymentService.verifyFunding(transactionId)
+          .then((res) => {
+            console.log("Payment verified. Wallet funded", res);
+      })
+      .catch((err) => {
+      console.error("Verification failed on backend", err);
+    });
+    
+    router.replace(pathname, { scroll: false });
       }
-    }, [isSuccessfulRedirect, pathname, router]);
+    }, [isSuccessfulRedirect, transactionId, pathname, router]);
 
     const [escrowTerms, setEscrowTerms] = useState<any>({});
       const [escrowMilestones, setEscrowMilestones] = useState<MilestoneData[]>([
