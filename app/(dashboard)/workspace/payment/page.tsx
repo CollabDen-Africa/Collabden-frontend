@@ -1,6 +1,7 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import paymentService from "@/services/payment.service";
 import PaymentFlowLayout from "@/components/features/workspace/payments/PaymentFlowLayout";
 
@@ -57,11 +58,14 @@ export type PaymentFlowStep =
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const queryClient = useQueryClient();
   
     // Read initial state from URL to prevent brief flashing of setup_start
     const statusParam = searchParams.get("status");
     const transactionId = searchParams.get("transaction_id");
     const isSuccessfulRedirect = (statusParam === "successful" || statusParam === "completed") && transactionId;
+
+    const verificationLock = useRef(false);
     
     const [currentStep, setCurrentStep] = useState<PaymentFlowStep>(
       isSuccessfulRedirect ? "fund_wallet_success" : "overview"
@@ -69,20 +73,28 @@ export type PaymentFlowStep =
   
     // Clean the URL upon successful redirect interception
     useEffect(() => {
-      if (isSuccessfulRedirect) {
-        setCurrentStep("fund_wallet_success");
-
-        paymentService.verifyFunding(transactionId)
-          .then((res) => {
-            console.log("Payment verified. Wallet funded", res);
-      })
-      .catch((err) => {
-      console.error("Verification failed on backend", err);
-    });
-    
-    router.replace(pathname, { scroll: false });
-      }
-    }, [isSuccessfulRedirect, transactionId, pathname, router]);
+      if (isSuccessfulRedirect && !verificationLock.current) {
+        verificationLock.current = true; // Lock it instantly
+            
+      // Move UI to the success screen
+      setCurrentStep("fund_wallet_success");
+            
+      paymentService.verifyFunding(transactionId)
+        .then((res) => {
+          console.log("Workspace Payment verified!", res);
+      // Purge the cache so the workspace balance updates
+        queryClient.invalidateQueries({ queryKey: ["payments", "wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["payments", "transactions"] });
+        })
+        .catch((err) => {
+          console.error("Workspace payment verification failed:", err);
+        })
+         .finally(() => {
+        // Clean the URL so it doesn't try to re-verify on page refresh
+          router.replace(pathname, { scroll: false });
+              });
+          }
+        }, [isSuccessfulRedirect, transactionId, pathname, router, queryClient]);
 
     const [escrowTerms, setEscrowTerms] = useState<any>({});
       const [escrowMilestones, setEscrowMilestones] = useState<MilestoneData[]>([

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState} from "react";
+import React, { useState, useEffect, useRef} from "react";
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useQueryClient } from "@tanstack/react-query";
 import { 
   FiCreditCard, 
   FiPlus, 
@@ -52,31 +53,45 @@ export default function WalletPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const verificationLock = useRef(false);
   
   const { useWallet, useInitializeFunding } = usePayment();
-  const { data: walletData, refetch: refetchWallet } = useWallet();
+  const { data: walletData } = useWallet();
   const WALLET_BALANCE = walletData?.balance || 0; 
 
   const initializeFundingMutation = useInitializeFunding();
   
     // Intercept the flutterwave redirect and verify funds
-    React.useEffect(() => {
-      const transactionId = searchParams.get("transaction_id");
-      const status = searchParams.get("status");
+  useEffect(() => {
+    const transactionId = searchParams.get("transaction_id");
+    const status = searchParams.get("status");
   
-      if (transactionId && status === "successful") {
-        setIsVerifying(true);
-        paymentService.verifyFunding(transactionId)
-          .then(() => {
-            refetchWallet(); // Update the UI balance instantly
-            router.replace(pathname, { scroll: false }); // Clean the URL
+    if (transactionId && status === "successful" && !verificationLock.current) {
+      verificationLock.current = true;
+      setIsVerifying(true);
+        
+      paymentService.verifyFunding(transactionId)
+        .then(() => {
+        // Globally purge the old cache so the Wallet AND Transactions tabs update
+          queryClient.invalidateQueries({ queryKey: ["payments", "wallet"] });
+          queryClient.invalidateQueries({ queryKey: ["payments", "transactions"] });
+                  
+        // Clean the URL
+          router.replace(pathname, { scroll: false }); 
           })
-          .catch(console.error)
-          .finally(() => setIsVerifying(false));
-      }
-    }, [searchParams, pathname, router, refetchWallet]);
+          .catch((err) => {
+            console.error("Verification error:", err);
+          // Even if it throws an error (e.g., already verified), clean the URL
+          router.replace(pathname, { scroll: false });
+          })
+          .finally(() => {
+            setIsVerifying(false);
+          });
+            }
+    }, [searchParams, pathname, router, queryClient]);
   
     // Add Funds handler
     const handleAddFunds = async (amount: number) => {
