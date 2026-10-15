@@ -10,7 +10,16 @@ export default function EscrowPaymentsPage() {
   const { data: escrowData, isLoading } = usePersonalEscrowPayments();
   
   // Extract data safely 
-  const escrowProjects = escrowData?.data || escrowData || [];
+  const extractEscrowArray = () => {
+      if (!escrowData) return [];
+      if (Array.isArray(escrowData)) return escrowData;
+      if (Array.isArray(escrowData.data)) return escrowData.data;
+      if (Array.isArray(escrowData.projects)) return escrowData.projects;
+      if (Array.isArray(escrowData.escrows)) return escrowData.escrows;
+      return [];
+    };
+    
+  const escrowProjects = extractEscrowArray();
 
   // Format currency dynamically
   const formatCurrency = (amount: number) => {
@@ -119,7 +128,7 @@ export default function EscrowPaymentsPage() {
                   </h3>
 
                   <div className="flex flex-col gap-3 w-full">
-                    {project.milestones?.map((milestone: any) => (
+                    {Array.isArray(project.milestones) && project.milestones?.map((milestone: any) => (
                       <div
                         key={milestone.id}
                         className="flex items-center justify-between w-full bg-black/10 backdrop-blur-md border border-white/30 rounded-[20px] lg:rounded-[30px] p-4 lg:p-5 hover:bg-white/10 transition-colors"

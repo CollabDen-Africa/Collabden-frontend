@@ -176,6 +176,7 @@ export interface MarketplaceProject {
   id: string;
   ownerId?: string;
   name: string;
+  coverImageUrl?: string | null;
   description: string | null;
   genre: string;
   requiredRoles: string[];

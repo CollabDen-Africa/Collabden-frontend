@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState} from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { 
   FiCreditCard, 
   FiPlus, 
@@ -18,6 +18,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { useSubscription } from "@/hooks/subscription/useSubscription";
 import Button from "@/components/ui/Button";
 import { usePayment } from "@/hooks/payment/usePayment";
+import paymentService from "@/services/payment.service";
 
 // --- TIER DATA ---
 const TIERS = {
@@ -49,10 +50,54 @@ const TIERS = {
 
 export default function WalletPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
-  const { useWallet } = usePayment();
-  const { data: walletData } = useWallet();
+  const [isVerifying, setIsVerifying] = useState(false);
+  
+  const { useWallet, useInitializeFunding } = usePayment();
+  const { data: walletData, refetch: refetchWallet } = useWallet();
   const WALLET_BALANCE = walletData?.balance || 0; 
+
+  const initializeFundingMutation = useInitializeFunding();
+  
+    // Intercept the flutterwave redirect and verify funds
+    React.useEffect(() => {
+      const transactionId = searchParams.get("transaction_id");
+      const status = searchParams.get("status");
+  
+      if (transactionId && status === "successful") {
+        setIsVerifying(true);
+        paymentService.verifyFunding(transactionId)
+          .then(() => {
+            refetchWallet(); // Update the UI balance instantly
+            router.replace(pathname, { scroll: false }); // Clean the URL
+          })
+          .catch(console.error)
+          .finally(() => setIsVerifying(false));
+      }
+    }, [searchParams, pathname, router, refetchWallet]);
+  
+    // Add Funds handler
+    const handleAddFunds = async (amount: number) => {
+      try {
+        const explicitRedirect = typeof window !== "undefined" 
+            ? `${window.location.origin}/payment/wallet` 
+            : "";
+            
+        const res = await initializeFundingMutation.mutateAsync({
+          amount,
+          paymentMethod: "card", // Defaulting to card
+          redirectUrl: explicitRedirect 
+        } as any); 
+        
+        if (res?.paymentLink) {
+          window.location.href = res.paymentLink;
+        }
+      } catch (err) {
+        console.error("Failed to initialize funding", err);
+      }
+    };
   
     // Subscription State & Mutations
   const { useMySubscription, useSubscribe, useCancelSubscription, useReactivateSubscription } = useSubscription();
@@ -354,9 +399,8 @@ export default function WalletPage() {
               <AddFundsOverlay 
                 isOpen={isAddFundsOpen} 
                 onClose={() => setIsAddFundsOpen(false)} 
-                onAdd={(amount) => {
-                  console.log(`Added: ${amount}`);
-                }} 
+                onAdd={handleAddFunds}
+                isPending={initializeFundingMutation.isPending}
               />
             </div>
           );

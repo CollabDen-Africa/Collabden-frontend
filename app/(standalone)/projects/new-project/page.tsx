@@ -106,6 +106,7 @@ export default function CreateProjectPage() {
   const [isCollabOpen, setIsCollabOpen] = useState(false);
   const [collaboratorSearch, setCollaboratorSearch] = useState("");
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedCollabMap, setSelectedCollabMap] = useState<
     Record<string, { id: string; name: string; avatarUrl?: string }>
   >({});
@@ -198,6 +199,7 @@ export default function CreateProjectPage() {
 
   const onSubmit = async (data: CreateProjectInput) => {
     setSubmissionError(null);
+    setIsProcessing(true);
     createProjectMutation.reset();
     try {
       const newProject = await createProjectMutation.mutateAsync({
@@ -222,6 +224,7 @@ export default function CreateProjectPage() {
     } catch (err) {
       console.error("Project creation failed:", err);
       setSubmissionError(getErrorMessage(err));
+      setIsProcessing(false);
     }
   };
 
@@ -333,7 +336,7 @@ export default function CreateProjectPage() {
               />
             </div>
 
-            {/* NEW: Budget & Compensation Section */}
+            {/* Budget & Compensation Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <Select
                 label="Pricing Type"
@@ -604,13 +607,14 @@ export default function CreateProjectPage() {
                 variant="ghost"
                 className="bg-white/10 hover:bg-white/20 px-6! py-2! h-auto! text-[14px] font-medium"
                 onClick={() => router.back()}
+                disabled={isProcessing}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 variant="primary"
-                disabled={createProjectMutation.isPending}
+                disabled={isProcessing}
                 className="border border-accent-soft-green px-6! py-2! h-auto! text-[14px] font-medium"
               >
                 {createProjectMutation.isPending ? (

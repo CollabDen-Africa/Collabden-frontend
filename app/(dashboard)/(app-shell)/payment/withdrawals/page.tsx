@@ -84,11 +84,19 @@ export default function WithdrawalsPage() {
 
   // Handle Form Submission
   const handleWithdrawal = () => {
-    if (!amount || !selectedBank || Number(amount) <= 0) return;
+    const numAmount = Number(amount);
+    
+    if (!amount || !selectedBank || numAmount <= 0) return;
+
+    // Block overdrafts
+        if (numAmount > AVAILABLE_BALANCE) {
+          alert("You cannot withdraw more than your available balance."); 
+          return;
+        }
     
     withdrawMutation.mutate(
       {
-        amount: Number(amount),
+        amount: numAmount,
         bankAccountId: selectedBank,
       },
       {

@@ -75,7 +75,7 @@ export const FeaturedCarousel = ({ featuredProjects = [] }: { featuredProjects?:
           <div className="relative w-full lg:max-w-80 h-full shrink-0 isolate">
             <div 
               className="w-full h-[218.14px] lg:h-full bg-white/20 bg-cover bg-center"
-              style={{ backgroundImage: project.image ? `url(${project.image})` : 'none' }}
+              style={{ backgroundImage: project.coverImageUrl ? `url(${project.coverImageUrl})` : 'none' }}
             />
             {/* Gradient Overlay */}
             <div className="absolute top-0 left-0 w-full h-full bg-linear-to-r from-black/20 to-transparent via-black/10 z-1" />
