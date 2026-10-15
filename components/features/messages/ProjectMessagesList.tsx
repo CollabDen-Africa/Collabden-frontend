@@ -4,89 +4,143 @@ import React from "react";
 import Avatar from "@/components/ui/Avatar";
 import { FiHeadphones } from "react-icons/fi";
 import { useRouter } from "next/navigation";
-import { useProjects } from "@/hooks/projects/useProjects";
 
-export default function ProjectMessagesList() {
+export interface ProjectMessageItem {
+  id: string;
+  name: string;
+  genre: string;
+  trackCount: number;
+  collaborators: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  }[];
+  unreadCount: number;
+}
+
+interface ProjectMessagesListProps {
+  projects: ProjectMessageItem[];
+  isLoading?: boolean;
+  onSelectProject?: (projectId: string) => void;
+  className?: string;
+}
+
+export default function ProjectMessagesList({
+  projects,
+  isLoading = false,
+  onSelectProject,
+  className = "",
+}: ProjectMessagesListProps) {
   const router = useRouter();
-  const { useAllProjects } = useProjects();
-  const { data: myProjects = [], isLoading } = useAllProjects();
+
+  const handleProjectClick = (projectId: string) => {
+    if (onSelectProject) {
+      onSelectProject(projectId);
+    } else {
+      router.push(`/workspace/messages?projectId=${projectId}`);
+    }
+  };
 
   return (
-    <div className="hidden lg:flex flex-col bg-white/10 rounded-[30px] transition-all duration-500 relative shadow-2xl h-full flex-1 w-full max-w-153 overflow-hidden border border-white/5">
-      
-      <div className="absolute top-18.25 left-3 flex flex-row justify-center items-center p-2.5 gap-2.5 w-46.75 h-10.75">
-         <span className="font-raleway font-semibold text-[20px] leading-5.75 text-white/85">
-           Project Messages
-         </span>
+    <div
+      className={`flex flex-col bg-[#1A2328]/90 border border-white/10 rounded-[32px] p-5 sm:p-6 shadow-2xl backdrop-blur-md overflow-hidden ${className}`}
+    >
+      {/* Title Header */}
+      <div className="flex items-center justify-between pb-4 mb-2 shrink-0">
+        <h2 className="font-raleway font-semibold text-lg sm:text-xl text-white/90 tracking-tight">
+          Project Messages
+        </h2>
+        {projects.length > 0 && (
+          <span className="text-xs text-white/40 font-medium">
+            {projects.length} {projects.length === 1 ? "project" : "projects"}
+          </span>
+        )}
       </div>
 
-      <div className="flex flex-col flex-1 overflow-y-auto custom-scrollbar w-full mt-33.5 px-5.5 pb-5 gap-4">
+      {/* Projects List */}
+      <div className="flex flex-col flex-1 overflow-y-auto custom-scrollbar gap-3.5 pr-1 pb-2 min-h-0">
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center py-12">
-            <div className="w-5 h-5 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
+          <div className="flex-1 flex flex-col items-center justify-center py-16 gap-3">
+            <div className="w-6 h-6 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
+            <span className="text-xs text-white/40">
+              Loading project messages...
+            </span>
           </div>
-        ) : myProjects.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <FiHeadphones className="text-white/30 mb-3" size={36} />
-            <p className="text-sm font-semibold text-white/80">No active project conversations</p>
-            <p className="text-xs text-white/40 mt-1">Join or create a project to start messaging collaborators.</p>
+        ) : projects.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-4">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/30 mb-3">
+              <FiHeadphones size={24} />
+            </div>
+            <p className="text-sm font-semibold text-white/80">
+              No active project conversations
+            </p>
+            <p className="text-xs text-white/40 mt-1 max-w-xs">
+              Projects with messages will appear here.
+            </p>
           </div>
         ) : (
-          myProjects.map((project: any) => {
-            const collaborators = project.collaborators || [];
-            const genre = project.genre || project.category || "General";
-            const trackCount = project.files?.length || 0;
+          projects.map((project) => (
+            <button
+              key={project.id}
+              onClick={() => handleProjectClick(project.id)}
+              className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/15 rounded-[24px] p-4 sm:p-4.5 flex flex-col gap-3 transition-all duration-200 text-left relative cursor-pointer shadow-md hover:shadow-xl active:scale-[0.99] w-full shrink-0"
+            >
+              <div className="flex items-start justify-between gap-3 w-full">
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 bg-primary-green rounded-[12px] flex items-center justify-center shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                    <FiHeadphones className="text-white" size={20} />
+                  </div>
 
-            return (
-              <button 
-                key={project.id}
-                onClick={() => router.push("/workspace/messages?projectId=" + project.id)} 
-                className="flex flex-col items-start p-[20px_16px_10px] w-full shrink-0 bg-white/10 rounded-[30px] hover:bg-white/15 transition-colors border border-transparent hover:border-white/10 text-left relative group"
-              >
-                 <div className="flex flex-col gap-4.75 w-full h-full">
-                    
-                    <div className="flex flex-row items-start gap-6 w-full">
-                      <div className="w-[39.33px] h-[39.33px] bg-primary-green rounded-[6.55px] rotate-[-1.49deg] flex items-center justify-center shrink-0 shadow-md mt-1">
-                         <FiHeadphones className="text-white rotate-[1.49deg]" size={20} />
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="font-raleway font-bold text-sm sm:text-base text-white truncate group-hover:text-primary-green transition-colors">
+                      {project.name}
+                    </span>
+                    <span className="font-raleway text-xs text-white/60 mt-0.5 truncate">
+                      {project.genre} • {project.trackCount}{" "}
+                      {project.trackCount === 1 ? "track" : "tracks"} in
+                      progress
+                    </span>
+                  </div>
+                </div>
+
+                {project.unreadCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-primary-green text-black font-bold text-[11px] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                    {project.unreadCount}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 pl-[52px] sm:pl-[58px]">
+                <div className="flex items-center">
+                  {project.collaborators.length > 0 ? (
+                    project.collaborators.slice(0, 4).map((c, i) => (
+                      <div
+                        key={c.id || i}
+                        className="w-5.5 h-5.5 rounded-full border-[1.5px] border-[#1A2328] overflow-hidden relative -ml-2 first:ml-0 shadow-sm"
+                        style={{ zIndex: 10 - i }}
+                      >
+                        <Avatar
+                          name={c.displayName}
+                          src={c.avatarUrl}
+                          className="w-full h-full object-cover text-[9px] font-bold"
+                        />
                       </div>
-                      
-                      <div className="flex flex-col gap-1.5 mt-1">
-                         <span className="font-raleway font-semibold text-[18px] leading-5.75 text-white truncate">
-                           {project.title || project.name}
-                         </span>
-                         <div className="flex flex-row items-center gap-2.5">
-                           <span className="font-raleway font-medium text-[14px] text-white/60">
-                             {genre}
-                           </span>
-                           <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
-                           <span className="font-raleway font-medium text-[14px] text-white/60">
-                             {trackCount} tracks
-                           </span>
-                         </div>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="w-5.5 h-5.5 rounded-full border border-white/20 bg-white/10 flex items-center justify-center text-[10px] text-white/50">
+                      —
                     </div>
-
-                    <div className="flex flex-row items-center gap-1.5 pl-15.75">
-                       <div className="flex flex-row items-center">
-                          {collaborators.slice(0, 4).map((c: any, i: number) => (
-                            <div 
-                              key={c.id || i} 
-                              className="w-5.75 h-5.75 rounded-full border-[1.15px] border-primary-green overflow-hidden relative" 
-                              style={{ marginLeft: i > 0 ? '-8px' : '0', zIndex: collaborators.length - i }}
-                            >
-                              <Avatar name={c.user?.displayName || "Member"} src={c.user?.avatarUrl} className="w-full h-full object-cover" />
-                            </div>
-                          ))}
-                       </div>
-                       <span className="font-raleway font-medium text-[14px] text-white/60 ml-1.5">
-                         {collaborators.length} collaborators
-                       </span>
-                    </div>
-
-                 </div>
-              </button>
-            );
-          })
+                  )}
+                </div>
+                <span className="font-raleway font-medium text-xs text-white/60 ml-1">
+                  {project.collaborators.length}{" "}
+                  {project.collaborators.length === 1
+                    ? "collaborator"
+                    : "collaborators"}
+                </span>
+              </div>
+            </button>
+          ))
         )}
       </div>
     </div>
