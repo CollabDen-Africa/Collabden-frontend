@@ -71,7 +71,7 @@ export default function FundWalletSetup({ onContinue }: FundWalletSetupProps) {
 
         const targetRoute = `/workspace/payments`; 
         const explicitRedirect = typeof window !== "undefined" 
-            ? `${window.location.origin}${targetRoute}` 
+            ? window.location.href.split('?')[0] 
             : "";
         
         const res = await fundingMutation.mutateAsync({ 

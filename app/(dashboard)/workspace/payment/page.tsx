@@ -82,14 +82,12 @@ export type PaymentFlowStep =
       paymentService.verifyFunding(transactionId)
         .then((res) => {
           console.log("Workspace Payment verified!", res);
-      // Purge the cache so the workspace balance updates
-        queryClient.invalidateQueries({ queryKey: ["payments", "wallet"] });
-        queryClient.invalidateQueries({ queryKey: ["payments", "transactions"] });
         })
         .catch((err) => {
           console.error("Workspace payment verification failed:", err);
         })
-         .finally(() => {
+        .finally(() => {
+           queryClient.invalidateQueries({ queryKey: ["payments"] });
         // Clean the URL so it doesn't try to re-verify on page refresh
           router.replace(pathname, { scroll: false });
               });
