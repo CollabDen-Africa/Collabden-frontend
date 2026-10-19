@@ -189,6 +189,7 @@ export interface MarketplaceProject {
   createdAt: string;
   owner?: ProjectOwner;
   _count?: { collaborators: number; applications: number };
+  collaborators?: ProjectCollaborator[];
 }
 
 export interface MarketplaceProjectsResponse {

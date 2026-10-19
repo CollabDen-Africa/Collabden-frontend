@@ -84,11 +84,5 @@ export const INSIGHTS: any[] = [];
 export const SOCIAL_LINKS: any[] = [];
 export const TESTIMONIALS: any[] = [];
 
-export const SETTINGS_SIDEBAR_LINKS = [
-  { id: "general", label: "General Settings", icon: "FiSettings" },
-  { id: "members", label: "Members & Permissions", icon: "FiUsers" },
-  { id: "billing", label: "Billing & Escrow", icon: "FiCreditCard" },
-  { id: "notifications", label: "Notifications", icon: "FiBell" },
-];
 
 export const PROFILE_FORM_FIELDS: any[] = [];

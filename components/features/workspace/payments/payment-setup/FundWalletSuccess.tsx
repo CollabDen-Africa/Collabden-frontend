@@ -5,13 +5,13 @@ import { usePayment } from "@/hooks/payment/usePayment";
 
 interface FundWalletSuccessProps {
   onBackToPayments?: () => void;
-  onFundEscrow?: () => void;
+  onContinueToEscrowConfig?: () => void;
 }
 
 
 export default function FundWalletSuccess({ 
   onBackToPayments, 
-  onFundEscrow
+  onContinueToEscrowConfig
 }: FundWalletSuccessProps) {
 
   const { useWallet, useTransactions } = usePayment();
@@ -118,7 +118,7 @@ export default function FundWalletSuccess({
                      </Button>
                      <Button 
                        variant="primary"
-                       onClick={onFundEscrow}
+                       onClick={onContinueToEscrowConfig}
                        className="w-full sm:flex-[1.8] rounded-[30px] py-3.5 md:py-3 flex items-center justify-center gap-2"
                        icon={FiArrowRight}
                        iconPosition="right"

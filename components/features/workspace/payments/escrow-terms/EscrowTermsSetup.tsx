@@ -35,11 +35,6 @@ const RELEASE_OPTIONS = [
   { label: "30 Days", value: "30" }
 ];
 
-const GRACE_OPTIONS = [
-  { label: "3 Days (Default)", value: "3" },
-  { label: "5 Days", value: "5" },
-  { label: "7 Days", value: "7" }
-];
 
 export default function EscrowTermsSetup({ 
   terms = {},
@@ -133,39 +128,25 @@ export default function EscrowTermsSetup({
                   Funding Deadline
                 </label>
                 <DatePicker 
-                  selectedDate={terms.deadline}
-                  onSelect={(val) => handleChange("releasePeriod", val)}
+                  selectedDate={terms.fundingDeadline}
+                  onSelect={(val) => handleChange("fundingDeadline", val)}
                   className="bg-white/10 border-2 border-transparent hover:border-primary-green rounded-full px-2 whitespace-nowrap text-white"
                 />
               </div>
 
-              {/* Automatic Release Period */}
-              <div className="flex flex-col gap-[6px]">
-                <label className="flex items-center gap-1.5 font-raleway font-semibold text-[14px] text-white/70">
-                  Automatic Release Period 
-                  <InfoTooltip text="Number of days before funds automatically release if no dispute is raised after completion." />
-                </label>
-                <Select 
-                  value={terms.releasePeriod || "7"}
-                  onChange={(val) => handleChange("gracePeriod", val)}
-                  options={RELEASE_OPTIONS}
-                  variant="glass"
-                />
-              </div>
-
-              {/* Approval Grace Period */}
+              {/* Automatic Release Period (Review Period Days) */}
               <div className="flex flex-col gap-1.5">
                 <label className="flex items-center gap-1.5 font-raleway font-semibold text-[14px] text-white/70">
                   Approval Grace Period 
-                  <InfoTooltip text="Time granted to collaborators to review and approve submitted deliverables." />
+                  <InfoTooltip text="Number of days before funds automatically release if no dispute is raised after milestone submission." />
                 </label>
                 <Select 
-                  value={terms.gracePeriod}
-                  onChange={(val) => handleChange("gracePeriod", val)}
-                  options={GRACE_OPTIONS}
+                  value={terms.reviewPeriodDays || "7"}
+                  onChange={(val) => handleChange("reviewPeriodDays", val)} 
+                  options={RELEASE_OPTIONS}
                   variant="glass"
                 />
-              </div>
+              </div> 
 
             </div>
 

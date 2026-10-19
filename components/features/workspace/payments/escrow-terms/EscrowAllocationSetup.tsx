@@ -1,11 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Avatar from "@/components/ui/Avatar";
-import { useWorkspace } from "@/context/WorkspaceContext";
 import { usePayment } from "@/hooks/payment/usePayment";
 
 
@@ -17,60 +15,26 @@ const COLOR_MAP = [
 ];
 
 interface EscrowAllocationsSetupProps {
-  milestones?: any[];
+  allocations: {
+    list: any[];
+    totalAllocated: number;
+    unallocated: number;
+  };
+  totalBudget: number;
   onBack?: () => void; 
   onContinueToReview?: () => void;
 }
 
 export default function EscrowAllocationsSetup({
-  milestones = [],
+  allocations,
+  totalBudget,
   onBack,
   onContinueToReview,
 }: EscrowAllocationsSetupProps) {
 
-  const { activeProject } = useWorkspace();
   const { useWallet } = usePayment();
   const { data: walletData } = useWallet();
   const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
-
-  const totalBudget = activeProject?.budget ? Number(activeProject.budget) : 0;
-  
-  // Derive allocations from milestones
-  const { totalAllocated, unallocated, activeCollaborators } = useMemo(() => {
-    let allocated = 0;
-    const userTotals = new Map<string, number>();
-    
-    milestones.forEach(m => {
-      const amt = Number(m.amount) || 0;
-      if (m.assignedTo) {
-        allocated += amt;
-        userTotals.set(m.assignedTo, (userTotals.get(m.assignedTo) || 0) + amt);
-      }
-    });
-        
-    // Map collaborators from the workspace
-    const mappedCollabs = activeProject?.collaborators?.map((c, index) => {
-      const colorTheme = COLOR_MAP[index % COLOR_MAP.length];
-      const amountAssigned = userTotals.get(c.userId) || 0;
-      const sharePercentage = totalBudget > 0 ? (amountAssigned / totalBudget) * 100 : 0;
-      return {
-        id: c.userId,
-        name: c.user?.displayName || c.user?.legalName || c.user?.email || "Unknown User",
-        role: c.role || "Collaborator",
-        schedule: "TBD",
-        amount: amountAssigned,
-        share: `${sharePercentage.toFixed(1)}%`,
-        colorClass: colorTheme.bg,
-        textClass: colorTheme.text,
-      };
-    }).sort((a, b) => b.amount - a.amount) || [];
-
-    return {
-      totalAllocated: allocated,
-      unallocated: Math.max(0, totalBudget - allocated),
-      activeCollaborators: mappedCollabs
-    }
-  }, [milestones, totalBudget, activeProject?.collaborators]);
   
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
@@ -104,7 +68,7 @@ export default function EscrowAllocationsSetup({
               Total Allocated
             </span>
             <h3 className="font-raleway font-bold text-[22px] text-primary-green">
-              {formatCurrency(totalAllocated)}
+              {formatCurrency(allocations.totalAllocated)}
             </h3>
           </div>
 
@@ -114,14 +78,14 @@ export default function EscrowAllocationsSetup({
               Unallocated
             </span>
             <h3 className="font-raleway font-bold text-[22px] text-text-muted">
-              {formatCurrency(unallocated)}
+              {formatCurrency(allocations.unallocated)}
             </h3>
           </div>
         </div>
 
         {/* Collaborators Allocation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-          {activeCollaborators.map((collab) => (
+          {allocations.list.map((collab) => (
             <div key={collab.id} className="bg-black/15 border border-white/5 rounded-[30px] p-5 flex flex-col backdrop-blur-md">
               
               {/* User Info & Schedule */}

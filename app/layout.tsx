@@ -18,10 +18,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+    <head>
+    {/* Anti-Flicker Theme */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+                  (function() {
+                    try {
+                      var theme = localStorage.getItem('app-theme') || 'default';
+                      if (theme === 'system') {
+                        var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                      } else {
+                        document.documentElement.setAttribute('data-theme', theme);
+                      }
+                    } catch (e) {}
+                  })();
+                `,
+              }}
+        />
+    </head>
       <body
-        className="antialiased relative overflow-x-hidden"
-        suppressHydrationWarning
+        className="antialiased relative overflow-x-hidden" 
       >
         <QueryProvider>
           <AuthProvider>

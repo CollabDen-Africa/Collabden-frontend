@@ -136,10 +136,17 @@ export default function DashboardPage() {
   }, [apiData?.notifications]);
 
   const suggestedProjects = useMemo(() => {
+    if (!user?.id) return [];
+    
     return (marketplaceProjects?.projects ?? [])
       .filter((project) => {
         const ownerId = project.owner?.id || project.ownerId;
-        return Boolean(ownerId) && ownerId !== user?.id;
+        const isOwner = ownerId === user.id;
+        
+        const isCollaborator = (project.collaborators || []).some( (c: any) => c.userId === user.id || c.user?.id === user.id
+        );
+  
+        return !isOwner && !isCollaborator;
       })
       .slice(0, 3)
       .map((p) => ({

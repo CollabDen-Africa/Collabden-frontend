@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiFilter, FiChevronDown, FiGrid, FiList } from 'react-icons/fi';
@@ -74,12 +75,26 @@ export default function MarketplaceBrowsingSection({ selectedGenre, onClearGenre
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [applyingProject, setApplyingProject] = useState<Project | null>(null);
   const [viewingSummaryProject, setViewingSummaryProject] = useState<Project | null>(null);
+  const searchParams = useSearchParams();
+  const urlProjectId = searchParams.get("projectId");
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const ITEMS_PER_PAGE = 6;
 
   React.useEffect(() => {
     setCurrentPage(1);
   }, [selectedGenre, filters]);
+
+  // Auto-open the Project Summary Modal if the URL contains a projectId
+  React.useEffect(() => {
+    if (urlProjectId && projects.length > 0 && !hasAutoOpened) {
+      const projectToOpen = projects.find((p) => p.id === urlProjectId);
+        if (projectToOpen) {
+          setViewingSummaryProject(projectToOpen);
+          setHasAutoOpened(true); // Ensure it only auto-opens once per page load
+        }
+      }
+    }, [urlProjectId, projects, hasAutoOpened]);
 
   // --- Handlers ---
   const handleCheckboxToggle = (

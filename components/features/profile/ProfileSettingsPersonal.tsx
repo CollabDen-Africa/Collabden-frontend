@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import { FiSun, FiMoon, FiMonitor, FiLoader } from "react-icons/fi";
+import {FiLoader } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar";
 import VerificationPanel from "@/components/features/profile/VerificationPanel";
+import ThemePreference from "@/components/features/profile/ThemePreference";
 import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/hooks/profile/useProfile";
 import profileService from "@/services/profile.service";
@@ -95,6 +96,19 @@ export default function ProfileSettingsContent() {
       },
     });
   };
+
+  // --- Theme Handler ---
+  const handleBackendThemeSync = async (newTheme: string) => {
+      try {
+        await updateProfileMutation.mutateAsync({
+          themePreference: newTheme,
+        });
+        showToast("Theme preference saved.", "success");
+      } catch (error) {
+        showToast("Failed to save theme to profile.", "error");
+        throw error; // Rethrow to inform the ThemePreference component that saving failed
+      }
+    };
 
   if (isLoading) {
     return (
@@ -229,47 +243,10 @@ export default function ProfileSettingsContent() {
       </div>
 
       {/* Theme Preference Card */}
-      <div className="w-full bg-white/5 border-[1.6px] border-white/10 rounded-[35px] p-8.75 flex flex-col gap-5.75 backdrop-blur-md">
-        <span className="font-inter font-medium text-[20.5px] text-accent-soft-blue">Theme Preference</span>
-
-        <div className="flex flex-row flex-wrap gap-4.25">
-          <button
-            onClick={() => setActiveTheme("light")}
-            className={`flex items-center gap-3 px-5.75 py-3 rounded-[23.5px] border-[1.6px] transition-all ${
-              activeTheme === "light"
-                ? "bg-primary-green border-primary-green text-white"
-                : "bg-white/5 border-white/10 text-white/50 hover:border-white/30"
-            }`}
-          >
-            <FiSun size={20} className={activeTheme === "light" ? "text-white" : "text-white/50"} />
-            <span className="font-inter font-medium text-[20.5px]">Light</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTheme("dark")}
-            className={`flex items-center gap-3 px-5.75 py-3 rounded-[23.5px] border-[1.6px] transition-all ${
-              activeTheme === "dark"
-                ? "bg-primary-green border-primary-green text-white"
-                : "bg-white/5 border-white/10 text-white/50 hover:border-white/30"
-            }`}
-          >
-            <FiMoon size={20} className={activeTheme === "dark" ? "text-white" : "text-white/50"} />
-            <span className="font-inter font-medium text-[20.5px]">Dark</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTheme("system")}
-            className={`flex items-center gap-3 px-5.75 py-3 rounded-[23.5px] border-[1.6px] transition-all ${
-              activeTheme === "system"
-                ? "bg-primary-green border-primary-green text-white"
-                : "bg-white/5 border-white/10 text-white/50 hover:border-white/30"
-            }`}
-          >
-            <FiMonitor size={20} className={activeTheme === "system" ? "text-white" : "text-white/50"} />
-            <span className="font-inter font-medium text-[20.5px]">System</span>
-          </button>
-        </div>
-      </div>
+      <ThemePreference 
+        initialTheme={profile?.themePreference} 
+        onThemeChange={handleBackendThemeSync} 
+        />
 
       {/* Toast Notification */}
       {toast && (

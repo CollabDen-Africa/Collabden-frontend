@@ -6,6 +6,7 @@ export interface Escrow {
   fundedAmount: number;
   releasedAmount: number;
   status: "PENDING_FUNDING" | "FUNDED" | "LOCKED" | "COMPLETED";
+  fundingDeadline?: string;
   reviewPeriodDays: number;
   createdAt: string;
 }
@@ -44,6 +45,7 @@ export interface ConfigureEscrowPayload {
   totalAmount: number;
   agreementId: string;
   reviewPeriodDays?: number;
+  fundingDeadline?: string;
   milestones: {
     title: string;
     amount: number;

@@ -8,15 +8,18 @@ export interface SuggestedProjectItemProps {
   needs: string;
   members: number;
   tags: string[];
+  onClick?: () => void;
 }
 
-export default function SuggestedProjectItem({ title, needs, members, tags }: SuggestedProjectItemProps) {
+export default function SuggestedProjectItem({ title, needs, members, tags, onClick }: SuggestedProjectItemProps) {
   return (
-    <div className="flex flex-row items-start gap-[16px] w-full p-2 -mx-2 rounded-[16px] hover:bg-white/5 transition-colors cursor-pointer">
+    <div
+      onClick={onClick}
+      className="flex flex-row items-start gap-4 w-full p-2 -mx-2 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer">
       
       {/* Icon Box */}
-      <div className="w-[48px] h-[48px] bg-black/50 rounded-[8px] flex items-center justify-center shrink-0 shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
-         <LuHeadphones className="text-primary-blue w-[24px] h-[24px] drop-shadow-md" />
+      <div className="w-12 h-12 bg-black/50 rounded-lg flex items-center justify-center shrink-0 shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+         <LuHeadphones className="text-primary-blue w-6 h-6 drop-shadow-md" />
       </div>
 
       {/* Content Column */}

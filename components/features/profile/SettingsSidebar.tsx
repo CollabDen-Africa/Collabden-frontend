@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect} from "react";
 import Link from "next/link";
-import { FiArrowLeft, FiChevronDown, FiSettings, FiUsers, FiCreditCard, FiBell } from "react-icons/fi";
+import { FiArrowLeft, FiChevronDown, FiSettings, FiUsers, FiCreditCard, FiBell, FiShield, FiEye, FiActivity } from "react-icons/fi";
+import { FaHandHoldingHand } from "react-icons/fa6";
 
 interface SettingsSidebarProps {
   activeTab: string;
@@ -11,9 +12,13 @@ interface SettingsSidebarProps {
 
 const SETTINGS_SIDEBAR_LINKS = [
   { id: "general", label: "General Settings", icon: FiSettings },
-  { id: "members", label: "Members & Permissions", icon: FiUsers },
-  { id: "billing", label: "Billing & Escrow", icon: FiCreditCard },
+  { id: "linked-accounts", label: "Linked Accounts", icon: FiUsers },
+  { id: "subscriptions", label: "Subscriptions", icon: FiCreditCard },
   { id: "notifications", label: "Notifications", icon: FiBell },
+  { id: "security", label: "Security", icon: FiShield },
+  { id: "privacy", label: "Privacy", icon: FiEye },
+  { id: "activity", label: "Activity", icon: FiActivity },
+  { id: "support", label: "Support", icon: FaHandHoldingHand },
 ];
 
 export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {

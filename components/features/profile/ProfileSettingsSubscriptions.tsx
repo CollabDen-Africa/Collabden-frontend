@@ -173,7 +173,7 @@ export default function ProfileSettingsSubscriptions() {
             </span>
             {subscription && (
               <span className="font-raleway font-normal text-[17.6px] text-white/50">
-                Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()} · {subscription.billingCycle.toLowerCase()} billing
+                Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString()} {subscription.billingCycle ? `· ${subscription.billingCycle.toLowerCase()} billing` : ""}
               </span>
              )}
           </div>

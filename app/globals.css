@@ -8,6 +8,31 @@
   --primary-white: #FFFFFF;
   --primary-black: #000000;
 
+  /* Glassmorphism Default */
+    --background: #000000;
+    --foreground: #FFFFFF;
+    --glass-bg: rgba(255, 255, 255, 0.05);       
+    --glass-border: rgba(255, 255, 255, 0.1);    
+    --text-muted-theme: rgba(255, 255, 255, 0.5);
+  
+  /* Dark Theme */
+  [data-theme="dark"] {
+    --background: #0A0A0A;
+    --foreground: #E8EDF0;
+    --glass-bg: #141414;
+    --glass-border: #262626;
+    --text-muted-theme: #9CA3AF;
+  }
+  
+  /* Light Theme */
+  [data-theme="light"] {
+    --background: #F9FAFB;
+    --foreground: #111827;
+    --glass-bg: #FFFFFF;
+    --glass-border: #E5E7EB;
+    --text-muted-theme: #6B7280;
+  }
+
   /* Secondary colours */
   --secondary-blue: #6495ED;
 
@@ -52,6 +77,9 @@
   --color-text-muted: var(--text-muted);
   --color-border-muted: var(--border-muted);
   --color-border-light: var(--border-light);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-text-muted-theme: var(--text-muted-theme);
   
    --color-accent-green-bright: var(--accent-green-bright);
     --color-accent-green-success: var(--accent-green-success);
@@ -87,6 +115,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-raleway), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Content wrapper to sit above background */
