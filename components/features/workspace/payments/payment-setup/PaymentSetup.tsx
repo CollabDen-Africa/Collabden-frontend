@@ -12,10 +12,11 @@ import { usePayment } from "@/hooks/payment/usePayment";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
 
 interface PaymentSetupProps {
-  onBeginSetup?: () => void;
+  onContinueToWallet?: () => void;
+  onContinueToEscrowConfig?: () => void;
 }
 
-export default function PaymentSetup({ onBeginSetup }: PaymentSetupProps) {
+export default function PaymentSetup({ onContinueToWallet, onContinueToEscrowConfig }: PaymentSetupProps) {
   // Pull live data context
   const { activeProject } = useWorkspace();
   const projectId = activeProject?.id || "";
@@ -58,7 +59,7 @@ export default function PaymentSetup({ onBeginSetup }: PaymentSetupProps) {
               <h2 className="font-raleway font-black text-[28px] text-white">
                 {formatCurrency(walletBalance)}
               </h2>
-              <span className="font-raleway font-normal text-[14px] text-text-muted">Current balance · Needs top-up</span>
+              <span className="font-raleway font-normal text-[14px] text-text-muted">Current balance</span>
             </div>
 
             <div className="flex items-center gap-2 mt-auto pt-4">
@@ -139,12 +140,12 @@ export default function PaymentSetup({ onBeginSetup }: PaymentSetupProps) {
         {/* CTA Button */}
         <div className="mt-auto pt-10 mb-2">
           <Button 
-            onClick={onBeginSetup}
+            onClick={isWalletSufficient ? onContinueToEscrowConfig : onContinueToWallet}
             variant="primary"
             className="w-full rounded-full py-4.5 flex justify-center items-center gap-3 group"
           >
             <span className="font-raleway font-black text-[16px] text-white">
-              Begin Payment Setup
+              {isWalletSufficient ? "Configure Escrow Terms" : "Begin Payment Setup"}
             </span>
             <div className="w-5 h-5 rounded-full border-[1.5px] border-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
                <FiArrowRight size={12} className="text-white" />

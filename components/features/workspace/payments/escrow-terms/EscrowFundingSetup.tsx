@@ -27,20 +27,26 @@ export default function EscrowFundingSetup({
 }: EscrowFundingSetupProps) {
 
   const { activeProject } = useWorkspace();
-    const projectId = activeProject?.id || "";
+  const projectId = activeProject?.id || "";
   
-    const { useWallet } = usePayment();
-    const { data: walletData } = useWallet();
-    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
-    const walletBalance = walletData?.balance || 0;
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+  const walletBalance = walletData?.balance || 0;
   
-    const { useProjectEscrow, useFundEscrow } = useEscrow();
-    const { data: escrowData } = useProjectEscrow(projectId);
-    const fundMutation = useFundEscrow();
+  const { useProjectEscrow, useFundEscrow } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
+  const fundMutation = useFundEscrow();
   
-    const totalFunding = escrowData?.totalAmount || 0;
-    const escrowAmount = totalFunding; // If backend pre-calculates fees into totalAmount
-    const feeAmount = totalFunding * 0.015; // Simulated 1.5% fee
+  const totalFunding = escrowData?.totalAmount || 0;
+  const escrowAmount = totalFunding; // If backend pre-calculates fees into totalAmount
+  const feeAmount = totalFunding * 0.015; // Simulated 1.5% fee
+
+  const deadlineDate = escrowData?.fundingDeadline ? new Date(escrowData.fundingDeadline) : null;
+  const daysRemaining = deadlineDate 
+    ? Math.max(0, Math.ceil((deadlineDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+        : null;
+  const fundingDeadlineStr = deadlineDate ? deadlineDate.toLocaleDateString() : "No deadline set";
   
   const [paymentOption, setPaymentOption] = useState("wallet");
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
@@ -67,7 +73,7 @@ export default function EscrowFundingSetup({
           <h2 className="font-raleway font-extrabold text-[24px] text-white tracking-[-0.6px]">
             Collaborator Approvals
           </h2>
-          <p className="font-raleway font-normal text-[14px] text-text-muted/90">
+          <p className="font-raleway font-normal text-[14px] text-text-muted-theme/90">
             All collaborators must approve the terms before escrow activation.
           </p>
         </div>
@@ -77,20 +83,20 @@ export default function EscrowFundingSetup({
           
           {/* Left Column - Funding Setup */}
           <div className="flex-1 bg-black/15 border border-white/5 rounded-3xl p-5 flex flex-col relative backdrop-blur-md">
-            <span className="font-raleway font-bold text-[11px] text-text-muted tracking-[1px] uppercase mb-6">
+            <span className="font-raleway font-bold text-[11px] text-text-muted-theme tracking-[1px] uppercase mb-6">
               Fund Escrow
             </span>
 
             {/* Total Block */}
             <div className="w-full bg-black/15 rounded-[20px] p-5 flex flex-col sm:flex-row sm:justify-between items-center gap-5 sm:gap-0 mb-8 border border-white/5">
               <div className="flex flex-col">
-                <span className="font-raleway font-normal text-[11px] text-text-muted tracking-[1px] uppercase mb-3">
+                <span className="font-raleway font-normal text-[11px] text-text-muted-theme tracking-[1px] uppercase mb-3">
                   Total Funding Required
                 </span>
                 <span className="font-raleway font-black text-[40px] text-white leading-none mb-3">
                   {formatCurrency(totalFunding)}
                 </span>
-                <span className="font-raleway font-normal text-[14px] text-text-muted">
+                <span className="font-raleway font-normal text-[14px] text-text-muted-theme">
                   {formatCurrency(escrowAmount)} escrow + {formatCurrency(feeAmount)} fee (1.5%)
                 </span>
               </div>
@@ -104,7 +110,7 @@ export default function EscrowFundingSetup({
               
               {/* Payment Method */}
               <div className="flex flex-col gap-3 mb-1">
-                <label className="font-raleway font-semibold text-[13px] text-text-muted tracking-[0.5px] uppercase">
+                <label className="font-raleway font-semibold text-[13px] text-text-muted-theme tracking-[0.5px] uppercase">
                   Payment Method
                 </label>
                 <Select 
@@ -118,7 +124,7 @@ export default function EscrowFundingSetup({
 
               {/* Funding Deadline */}
               <div className="flex flex-col gap-3 mt-3">
-                <label className="font-raleway font-semibold text-[13px] text-text-muted tracking-[0.5px] uppercase">
+                <label className="font-raleway font-semibold text-[13px] text-text-muted-theme tracking-[0.5px] uppercase">
                   Funding Deadline
                 </label>
                 <button className="w-full bg-black/15 border border-white/10 hover:border-white/20 transition-colors rounded-2xl p-4 flex items-center justify-between opacity-60">
@@ -126,10 +132,13 @@ export default function EscrowFundingSetup({
                     <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
                       <FiCalendar className="text-white/60" size={16} />
                   </div>
-                  {/* TO BE FIXED
-                    <span className="font-raleway font-semibold text-[15px] text-white">{fundingDeadline}</span>
-                    */}
-                  </div>
+                    <span className="font-raleway font-semibold text-[15px] text-white">{fundingDeadlineStr}</span>
+                </div>
+                {daysRemaining !== null && (
+                  <span className={`font-raleway font-bold text-[13px] ${daysRemaining < 3 ? 'text-accent-pink' : 'text-accent-yellow'}`}>
+                    {daysRemaining} days left
+                  </span>
+                )}
                 </button>
               </div>
 
@@ -155,7 +164,7 @@ export default function EscrowFundingSetup({
             
             {/* Approvals Summary Card */}
             <div className="bg-black/15 border border-white/5 rounded-3xl p-6 flex flex-col backdrop-blur-md">
-              <span className="font-raleway font-bold text-[11px] text-text-muted tracking-[1px] uppercase mb-5">
+              <span className="font-raleway font-bold text-[11px] text-text-muted-theme tracking-[1px] uppercase mb-5">
                 Approval Status
               </span>
               <div className="flex flex-col gap-4">
@@ -175,7 +184,7 @@ export default function EscrowFundingSetup({
                     <div className={`px-3 py-1.5 rounded-full border flex items-center justify-center
                       ${isApproved ? 'bg-primary-green/10 border-primary-green/20' : 'bg-secondary-blue/10 border-white/10'}`}>
                       <span className={`font-raleway font-bold text-[11px] uppercase tracking-[0.5px]
-                        ${isApproved ? 'text-primary-green' : 'text-text-muted'}`}>
+                        ${isApproved ? 'text-primary-green' : 'text-text-muted-theme'}`}>
                         {isApproved ? "Approved" : "Pending"}
                       </span>
                     </div>
@@ -198,21 +207,21 @@ export default function EscrowFundingSetup({
               </p>
             </div>
 
-          {/* Info Card - Deadline - TO BE FIXED
+          {/* Info Card - Deadline */}
             <div className="bg-black/15 border border-white/5 rounded-3xl p-6 flex flex-col backdrop-blur-md items-center justify-center">
-              <span className="font-raleway font-bold text-[11px] text-text-muted tracking-[1px] uppercase mb-4">
+              <span className="font-raleway font-bold text-[11px] text-text-muted-theme tracking-[1px] uppercase mb-4">
                 Funding Deadline
               </span>
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-2 h-2 rounded-full bg-accent-yellow opacity-80" />
                 <span className="font-raleway font-semibold text-[16px] text-white">
-                  {fundingDeadline}
+                  {fundingDeadlineStr}
                 </span>
               </div>
-              <p className="font-raleway font-normal text-[14px] text-text-muted">
-                {daysRemaining} days remaining to fund
+              <p className="font-raleway font-normal text-[14px] text-text-muted-theme">
+                {daysRemaining !== null ? `${daysRemaining} days remaining to fund` : 'No deadline set'}
               </p>
-            </div> */}
+            </div> 
 
           </div>
 

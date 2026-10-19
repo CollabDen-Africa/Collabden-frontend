@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import paymentService from "@/services/payment.service";
 import PaymentFlowLayout from "@/components/features/workspace/payments/PaymentFlowLayout";
+import { useWorkspace } from "@/context/WorkspaceContext";
 
 // Initial Setup & Overview
 import PaymentSetup from "@/components/features/workspace/payments/payment-setup/PaymentSetup";
@@ -17,7 +18,6 @@ import RoyaltySettingsView from "@/components/features/workspace/payments/paymen
 import FundWalletSetup from "@/components/features/workspace/payments/payment-setup/FundWalletSetup";
 import FundWalletSuccess from "@/components/features/workspace/payments/payment-setup/FundWalletSuccess";
 import FundEscrowSetup from "@/components/features/workspace/payments/payment-setup/FundEscrowSetup";
-import FundEscrowSuccess from "@/components/features/workspace/payments/payment-setup/FundEscrowSuccess";
 
 // Escrow Terms & Configuration Flow
 import EscrowTermsSetup from "@/components/features/workspace/payments/escrow-terms/EscrowTermsSetup";
@@ -32,7 +32,6 @@ export type PaymentFlowStep =
   | "fund_wallet"
   | "fund_wallet_success"
   | "fund_escrow"
-  | "fund_escrow_success"
   | "escrow_terms"
   | "escrow_milestones"
   | "escrow_allocations"
@@ -59,6 +58,8 @@ export type PaymentFlowStep =
     const router = useRouter();
     const pathname = usePathname();
     const queryClient = useQueryClient();
+    const { activeProject } = useWorkspace();
+    const projectBudget = activeProject?.budget ? Number(activeProject.budget) : 0;
   
     // Read initial state from URL to prevent brief flashing of setup_start
     const statusParam = searchParams.get("status");
@@ -108,14 +109,47 @@ export type PaymentFlowStep =
         }
       ]);
 
+      // THE SINGLE SOURCE OF TRUTH: Calculate allocations once for all steps
+      const computedAllocations = useMemo(() => {
+        if (!activeProject?.collaborators) return { list: [], totalAllocated: 0, unallocated: projectBudget };
+            
+      const totals = new Map<string, number>();
+        let allocated = 0;
+            
+        escrowMilestones.forEach(m => {
+      const amt = Number(m.amount) || 0;
+        if (m.assignedTo) {
+          allocated += amt;
+          totals.set(m.assignedTo, (totals.get(m.assignedTo) || 0) + amt);
+          }
+        });
+      
+      const list = activeProject.collaborators.map(c => {
+      const amount = totals.get(c.userId) || 0;
+      const share = projectBudget > 0 ? (amount / projectBudget) * 100 : 0;
+        return {
+          id: c.userId,
+          name: c.user?.displayName || c.user?.legalName || c.user?.email || "Unknown User",
+          role: c.role || "Collaborator",
+          amount,
+          share: `${share.toFixed(1)}%`
+        };
+      }).sort((a, b) => b.amount - a.amount);
+      
+        return {
+              list,
+              totalAllocated: allocated,
+              unallocated: Math.max(0, projectBudget - allocated)
+            };
+          }, [escrowMilestones, activeProject, projectBudget]);
+
   // Centralized Navigation Logic
     const handleBack = () => {
       switch (currentStep) {
         case "fund_wallet": setCurrentStep("setup_start"); break;
         case "fund_wallet_success": setCurrentStep("fund_wallet"); break;
-        case "fund_escrow": setCurrentStep("fund_wallet_success"); break;
-        case "fund_escrow_success": setCurrentStep("fund_escrow"); break;
-        case "escrow_terms": setCurrentStep("fund_escrow_success"); break;
+        case "fund_escrow": setCurrentStep("setup_start"); break;
+        case "escrow_terms": setCurrentStep("fund_escrow"); break;
         case "escrow_milestones": setCurrentStep("escrow_terms"); break;
         case "escrow_allocations": setCurrentStep("escrow_milestones"); break;
         case "escrow_review": setCurrentStep("escrow_allocations"); break;
@@ -129,19 +163,21 @@ export type PaymentFlowStep =
       switch (currentStep) {
           //Initial Steps
           case "setup_start":
-            return <PaymentSetup onBeginSetup={() => setCurrentStep("fund_wallet")} />;
+          return <PaymentSetup
+            onContinueToWallet={() => setCurrentStep("fund_wallet")} 
+            onContinueToEscrowConfig={() => setCurrentStep("fund_escrow")} />;
 
           //Fund Wallet Steps
           case "fund_wallet":
             return <FundWalletSetup onContinue={() => setCurrentStep("fund_wallet_success")} />;
           case "fund_wallet_success":
-            return <FundWalletSuccess onBackToPayments={handleBack} onFundEscrow={() => setCurrentStep("fund_escrow")} />;
+          return <FundWalletSuccess
+            onBackToPayments={handleBack}
+            onContinueToEscrowConfig={() => setCurrentStep("fund_escrow")} />;
 
           //Fund Escrow Steps
           case "fund_escrow":
-            return <FundEscrowSetup onFundEscrow={() => setCurrentStep("fund_escrow_success")} />;
-          case "fund_escrow_success":
-            return <FundEscrowSuccess onBackToPayments={handleBack} onContinueToTerms={() => setCurrentStep("escrow_terms")} />;
+            return <FundEscrowSetup onContinueToTerms={() => setCurrentStep("escrow_terms")} />;
           
           // Escrow Configuration Steps
           case "escrow_terms":
@@ -161,7 +197,8 @@ export type PaymentFlowStep =
           case "escrow_allocations":
           return (
             <EscrowAllocationSetup
-              milestones={escrowMilestones}
+              allocations={computedAllocations} 
+              totalBudget={projectBudget}
               onBack={handleBack} onContinueToReview={() => setCurrentStep("escrow_review")} />
             );
           case "escrow_review":
@@ -169,6 +206,7 @@ export type PaymentFlowStep =
             <EscrowReviewSetup
               terms={escrowTerms}
               milestones={escrowMilestones}
+              allocations={computedAllocations.list}
               onBack={handleBack} onContinueToApprovals={() => setCurrentStep("escrow_approvals")} />
             );
           case "escrow_approvals":
@@ -184,7 +222,8 @@ export type PaymentFlowStep =
           case "royalty_settings":
             return <RoyaltySettingsView onBack={() => setCurrentStep("overview")} />;
           default:
-            return <PaymentSetup onBeginSetup={() => setCurrentStep("fund_wallet")} />;
+            return <PaymentSetup
+              onContinueToWallet={() => setCurrentStep("fund_wallet")} />;
         }
       };
     

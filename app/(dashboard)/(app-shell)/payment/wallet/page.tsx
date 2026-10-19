@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef} from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -49,13 +49,18 @@ const TIERS = {
   }
 };
 
-export default function WalletPage() {
+function WalletContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const queryClient = useQueryClient();
+
+  const transactionId = searchParams.get("transaction_id");
+  const statusParam = searchParams.get("status");
+  const isSuccessfulRedirect = transactionId && (statusParam === "successful" || statusParam === "completed");
+
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(!!isSuccessfulRedirect);
   const verificationLock = useRef(false);
   
   const { useWallet, useInitializeFunding } = usePayment();
@@ -64,57 +69,57 @@ export default function WalletPage() {
 
   const initializeFundingMutation = useInitializeFunding();
   
-    // Intercept the flutterwave redirect and verify funds
+  // Intercept the flutterwave redirect and verify funds
   useEffect(() => {
-    const transactionId = searchParams.get("transaction_id");
-    const status = searchParams.get("status");
-  
-    if (transactionId && status === "successful" && !verificationLock.current) {
+    if (isSuccessfulRedirect && !verificationLock.current) {
       verificationLock.current = true;
       setIsVerifying(true);
-        
-      paymentService.verifyFunding(transactionId)
-        .then(() => {
-        // Globally purge the old cache so the Wallet AND Transactions tabs update
-          queryClient.invalidateQueries({ queryKey: ["payments", "wallet"] });
-          queryClient.invalidateQueries({ queryKey: ["payments", "transactions"] });
-                  
-        // Clean the URL
-          router.replace(pathname, { scroll: false }); 
-          })
-          .catch((err) => {
-            console.error("Verification error:", err);
-          // Even if it throws an error (e.g., already verified), clean the URL
-          router.replace(pathname, { scroll: false });
-          })
-          .finally(() => {
-            setIsVerifying(false);
-          });
-            }
-    }, [searchParams, pathname, router, queryClient]);
-  
-    // Add Funds handler
-    const handleAddFunds = async (amount: number) => {
-      try {
-        const explicitRedirect = typeof window !== "undefined" 
-            ? `${window.location.origin}/payment/wallet` 
-            : "";
-            
-        const res = await initializeFundingMutation.mutateAsync({
-          amount,
-          paymentMethod: "card", // Defaulting to card
-          redirectUrl: explicitRedirect 
-        } as any); 
-        
-        if (res?.paymentLink) {
-          window.location.href = res.paymentLink;
+      
+      const verifyPayment = async () => {
+        try {  
+          await paymentService.verifyFunding(transactionId);
+          console.log("Payment verified via frontend check!"); 
         }
-      } catch (err) {
-        console.error("Failed to initialize funding", err);
-      }
-    };
+        catch(err) {
+          console.error("Verification error:", err);
+        }
+        finally {
+          // Hard flush specifically targeted query keys so React Query immediately pulls the new balance
+          await queryClient.invalidateQueries({ queryKey: ["payments"] });
+          await queryClient.invalidateQueries({ queryKey: ["wallet"] });
+          await queryClient.invalidateQueries(); // Fallback broad flush
+
+          // Clean the URL so it doesn't trigger again, without pushing to history stack
+          router.replace(pathname, { scroll: false });
+          setIsVerifying(false);
+        }
+      };
+      verifyPayment();
+    }
+  }, [isSuccessfulRedirect, transactionId, pathname, router, queryClient]);
   
-    // Subscription State & Mutations
+  // Add Funds handler
+  const handleAddFunds = async (amount: number) => {
+    try {
+      const explicitRedirect = typeof window !== "undefined" 
+          ? `${window.location.origin}/payment/wallet` 
+          : "";
+          
+      const res = await initializeFundingMutation.mutateAsync({
+        amount,
+        paymentMethod: "card", // Defaulting to card
+        redirectUrl: explicitRedirect 
+      } as any); 
+      
+      if (res?.paymentLink) {
+        window.location.href = res.paymentLink;
+      }
+    } catch (err) {
+      console.error("Failed to initialize funding", err);
+    }
+  };
+  
+  // Subscription State & Mutations
   const { useMySubscription, useSubscribe, useCancelSubscription, useReactivateSubscription } = useSubscription();
   const { data: subscription, isLoading: isSubLoading } = useMySubscription();
     
@@ -156,7 +161,14 @@ export default function WalletPage() {
         {/* WALLET BALANCE CARD */}
         <div className="lg:col-span-1 flex flex-col w-full bg-black/10 backdrop-blur-xl border border-white/30 rounded-[30px] lg:rounded-[40px] p-8 shadow-xl shadow-primary-blue/5 h-fit">
 
-          {WALLET_BALANCE === 0 ? (
+        {isVerifying ? (
+         /* VERIFYING LOADING STATE */
+          <div className="flex flex-col items-center justify-center py-12 h-full gap-4">
+          <FiLoader className="animate-spin text-primary-green" size={36} />
+            <span className="font-raleway font-medium text-white/60 text-[15px]">Verifying payment...</span>
+          </div>
+
+        ) : WALLET_BALANCE === 0 ? (
             /* EMPTY STATE */
             <div className="py-6">
               <EmptyState
@@ -186,7 +198,7 @@ export default function WalletPage() {
                 <span className="font-raleway font-medium text-[15px] text-white/60 mb-2">
                   Available Balance
                 </span>
-                <span className="font-raleway font-bold text-[36px] lg:text-[42px] leading-[1.1] text-white tracking-tight">
+                <span className="font-raleway font-bold text-lg lg:text-3xl leading-[1.1] text-white tracking-tight">
                   {formatCurrency(WALLET_BALANCE)}
                 </span>
               </div>
@@ -420,3 +432,16 @@ export default function WalletPage() {
             </div>
           );
         }
+
+// Next.js Suspense wrapper required for useSearchParams in Client Components
+export default function WalletPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full min-h-[50vh] items-center justify-center">
+        <FiLoader className="animate-spin text-primary-green" size={36} />
+      </div>
+    }>
+      <WalletContent />
+    </Suspense>
+  );
+}

@@ -38,6 +38,7 @@ export default function EscrowReviewSetup({
   terms = {},
   milestones = {},
   collaborators = {},
+  allocations = [],
   approvalRules = DEFAULT_RULES
 }: any) {
 
@@ -69,13 +70,13 @@ export default function EscrowReviewSetup({
         await configureMutation.mutateAsync({
           projectId,
           payload: {
-            totalAmount: totalBudget,
-            agreementId: activeProject?.activeAgreementId || "", 
-            reviewPeriodDays: parseInt(terms.gracePeriod) || 3,
+            totalAmount: Number(totalMilestonesAmount),
+            agreementId: activeProject?.activeAgreementId || activeProject?.id, 
+            reviewPeriodDays: parseInt(terms.reviewPeriodDays) || 7,
+            fundingDeadline: terms.fundingDeadline ? new Date(terms.fundingDeadline).toISOString() : undefined,
             milestones: milestones.map((m: any) => ({
               title: m.name,
               amount: Number(m.amount),
-              // Map the assignee ID from step 2 to the backend's expected array format
               collaboratorIds: [m.assignedTo].filter(Boolean) 
             }))
           }
@@ -163,16 +164,12 @@ export default function EscrowReviewSetup({
               </div>
               <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Funding Deadline</span>
-              <span className="font-raleway font-semibold text-[12px] text-white">{terms.deadline ? new Date(terms.deadline).toLocaleDateString() : "TBD"}
+              <span className="font-raleway font-semibold text-[12px] text-white">{terms.fundingDeadline ? new Date(terms.fundingDeadline).toLocaleDateString() : "TBD"}
               </span>
               </div>
               <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Auto-Release Period</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.releasePeriod ? `${terms.releasePeriod} Days` : "N/A"}</span>
-              </div>
-              <div className="flex justify-between items-center pb-2.5 border-b border-white/5">
-                <span className="font-raleway font-normal text-[12px] text-text-muted">Grace Period</span>
-                <span className="font-raleway font-semibold text-[12px] text-white">{terms.gracePeriod ? `${terms.releasePeriod} Days` : "N/A"}</span>
+                <span className="font-raleway font-semibold text-[12px] text-white">{terms.reviewPeriodDays || "7"}</span>
               </div>
               <div className="flex justify-between items-center pt-1.5">
                 <span className="font-raleway font-normal text-[12px] text-text-muted">Currency</span>
@@ -191,18 +188,18 @@ export default function EscrowReviewSetup({
             </div>
             
             <div className="flex flex-col gap-3">
-                        {milestones.length === 0 ? (
-                          <span className="text-white/50 text-[13px]">No milestones configured.</span>
-                        ) : (
-                          milestones.map((milestone: any, index: number) => {
-                            const colorClass = BG_COLORS[index % BG_COLORS.length];
-                            return (
-                              <div key={milestone.id || index} className="flex justify-between items-center pb-2.5 border-b border-white/5">
-                                <div className="flex items-center gap-[10px]">
-                                  <div className={`w-2 h-2 rounded-full ${colorClass}`} />
-                                  <span className="font-raleway font-normal text-[12px] text-text-muted">{milestone.name || `Milestone ${index + 1}`}</span>
-                                </div>
-                                <span className="font-raleway font-bold text-[12px] text-white">{formatCurrency(milestone.amount)}</span>
+              {milestones.length === 0 ? (
+                <span className="text-white/50 text-[13px]">No milestones configured.</span>
+                  ) : (
+                milestones.map((milestone: any, index: number) => {
+                const colorClass = BG_COLORS[index % BG_COLORS.length];
+                  return (
+                    <div key={milestone.id || index} className="flex justify-between items-center pb-2.5 border-b border-white/5">
+                    <div className="flex items-center gap-2.5">
+                    <div className={`w-2 h-2 rounded-full ${colorClass}`} />
+                    <span className="font-raleway font-normal text-[12px] text-text-muted">{milestone.name || `Milestone ${index + 1}`}</span>
+                    </div>
+                    <span className="font-raleway font-bold text-[12px] text-white">{formatCurrency(milestone.amount)}</span>
                               </div>
                             );
                           })
@@ -224,10 +221,10 @@ export default function EscrowReviewSetup({
             </div>
             
             <div className="flex flex-col gap-4">
-              {collaborators.length === 0 ? (
+              {allocations.length === 0 ? (
                 <span className="text-white/50 text-[13px]">No allocations configured.</span>
               ) : (
-               collaborators.map((collab: any, index: number) => {
+               allocations.map((collab: any, index: number) => {
                 const gradientClass = GRADIENT_COLORS[index % GRADIENT_COLORS.length];
                   return (
                     <div key={collab.id || index} className="flex flex-col gap-1.5">

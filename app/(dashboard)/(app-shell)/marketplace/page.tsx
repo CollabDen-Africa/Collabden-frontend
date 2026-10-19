@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { HiUserGroup } from "react-icons/hi";
 import { ROUTES } from "@/constants/routes";
@@ -11,7 +12,9 @@ import FeaturedCreators from "@/components/features/marketplace/overview/Feature
 import MarketplaceProjects from "@/components/features/marketplace/project-marketplace/MarketplaceProjects";
 import CollaboratorSearch from "@/components/features/marketplace/collab-search/CollaboratorSearch";
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
+  const searchParams = useSearchParams();
+  const urlTab = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<"collaborators" | "projects">(
     "collaborators"
   );
@@ -24,6 +27,15 @@ export default function MarketplacePage() {
   // Filter states to pass into CollaboratorSearch
   const [searchQuery, setSearchQuery] = useState("");
   const [activeRole, setActiveRole] = useState("All Genres");
+
+  // Sync tab state with the URL parameter instantly
+  useEffect(() => {
+    if (urlTab === "projects") {
+      setActiveTab("projects");
+    } else if (urlTab === "collaborators") {
+      setActiveTab("collaborators");
+    }
+  }, [urlTab]);
 
   // Fired when searching via MarketplaceHero text input
   const handleOpenSearch = (query: string = "") => {
@@ -127,5 +139,13 @@ export default function MarketplacePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={<div className="w-full min-h-screen flex items-center justify-center text-white/50">Loading Marketplace...</div>}>
+      <MarketplaceContent />
+    </Suspense>
   );
 }
