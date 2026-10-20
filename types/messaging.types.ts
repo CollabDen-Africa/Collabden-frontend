@@ -28,6 +28,23 @@ export interface DirectChat {
   };
 }
 
+export interface DirectMessageAttachment {
+  id: string;
+  messageId: string;
+  url: string;
+  name?: string | null;
+  mimeType?: string | null;
+  size?: number | null;
+  createdAt?: string;
+}
+
+export interface AttachmentInput {
+  url: string;
+  name?: string | null;
+  mimeType?: string | null;
+  size?: number | null;
+}
+
 export interface DirectMessage {
   id: string;
   chatId: string;
@@ -39,13 +56,33 @@ export interface DirectMessage {
   createdAt: string;
   updatedAt: string;
   reactions?: MessageReaction[];
+  attachments?: DirectMessageAttachment[];
 }
+
+export interface AttachmentUploadResponse {
+  path: string;
+  signedUrl: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  expiresInSeconds: number;
+}
+
+export const MAX_DM_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+export const MAX_ATTACHMENTS_PER_MESSAGE = 10;
 
 export interface MessageReaction {
   id: string;
   messageId: string;
   userId: string;
   emoji: string;
+  user?: {
+    id: string;
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    avatarUrl?: string | null;
+  };
 }
 
 export interface SendMessagePayload {
@@ -53,4 +90,16 @@ export interface SendMessagePayload {
   parentId?: string;
   voiceUrl?: string;
   voiceDuration?: number;
+  attachments?: AttachmentInput[];
 }
+
+export interface VoiceUploadResponse {
+  path: string;
+  signedUrl: string;
+  mimeType: string;
+  size: number;
+  durationSeconds: number;
+  expiresInSeconds: number;
+}
+
+export const MAX_VOICE_DURATION_SECONDS = 180;

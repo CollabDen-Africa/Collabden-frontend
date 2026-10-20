@@ -137,8 +137,6 @@ function DashboardMessagesContent() {
       time: pendingSent ? "Pending" : "Draft",
       unread: 0,
       isArchived: false,
-      isOnline: true,
-      isTyping: false,
       isRequestDraft: true,
       pendingRequest: pendingSent || null,
     };
@@ -237,8 +235,6 @@ function DashboardMessagesContent() {
               : "",
             unread: isRead ? 0 : c.unreadCount || 0,
             isArchived: c.isArchived || false,
-            isOnline: true,
-            isTyping: false,
           });
         }
       });
@@ -362,8 +358,6 @@ function DashboardMessagesContent() {
           time: "Now",
           unread: 0,
           isArchived: false,
-          isOnline: true,
-          isTyping: false,
         };
         setDraftChats((prev) => [
           newDraft,
@@ -391,9 +385,9 @@ function DashboardMessagesContent() {
   const isChatOpen = selectedChatId !== null;
 
   return (
-    <div className="w-full flex flex-col items-center lg:-mt-[42px] pb-6 font-sans text-white animate-in fade-in duration-300">
+    <div className="w-full flex flex-col items-center lg:-mt-[42px] pb-6 lg:-mb-[100px] font-sans text-white animate-in fade-in duration-300">
       {/* Centered Page Title & Circular Back Button matching design */}
-      <div className="w-full max-w-[1240px] relative flex items-center justify-center mb-4 sm:mb-5">
+      <div className="w-full max-w-[1240px] relative flex items-center justify-center mb-3 lg:mb-2">
         {isChatOpen && (
           <button
             onClick={() => setSelectedChatId(null)}
@@ -414,9 +408,9 @@ function DashboardMessagesContent() {
         {!isChatOpen ? (
           hasProjectMessages ? (
             /* User has Direct Messages AND Project Messages (Side-by-Side) */
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full h-[680px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-1 gap-6 w-full h-[calc(100vh-92px)] max-h-[780px]">
               {/* Left Column: Direct Messages */}
-              <div className="lg:col-span-7 h-full">
+              <div className="lg:col-span-7 h-full min-h-0">
                 <DirectMessagesList
                   isFullWidth={false}
                   selectedChatId={selectedChatId}
@@ -439,7 +433,7 @@ function DashboardMessagesContent() {
               </div>
 
               {/* Right Column: Project Messages */}
-              <div className="lg:col-span-5 h-full">
+              <div className="lg:col-span-5 h-full min-h-0">
                 <ProjectMessagesList
                   projects={projectConversations}
                   isLoading={isLoadingProjects}
@@ -450,7 +444,7 @@ function DashboardMessagesContent() {
             </div>
           ) : (
             /* User has JUST Direct Messages (Full-Width) */
-            <div className="w-full h-[680px]">
+            <div className="w-full h-[calc(100vh-92px)] max-h-[780px]">
               <DirectMessagesList
                 isFullWidth={true}
                 selectedChatId={selectedChatId}
@@ -474,9 +468,9 @@ function DashboardMessagesContent() {
           )
         ) : (
           /* VIEW 3: Active Chat Conversation Thread Opened */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full h-[680px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-1 gap-6 w-full h-[calc(100vh-92px)] max-h-[780px]">
             {/* Left Panel: Direct Messages Directory */}
-            <div className="hidden lg:flex lg:col-span-4 h-full">
+            <div className="hidden lg:flex lg:col-span-4 h-full min-h-0">
               <DirectMessagesList
                 isFullWidth={false}
                 isChatOpen={true}
@@ -500,7 +494,7 @@ function DashboardMessagesContent() {
             </div>
 
             {/* Right Panel: Active Chat Thread Window */}
-            <div className="col-span-1 lg:col-span-8 h-full">
+            <div className="col-span-1 lg:col-span-8 h-full min-h-0">
               <ChatWindow
                 chatId={selectedChatId}
                 chatInfo={activeChat}
@@ -600,7 +594,7 @@ export default function DashboardMessagesPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full h-[680px] flex items-center justify-center">
+        <div className="w-full h-[calc(100vh-92px)] max-h-[780px] flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-white/20 border-t-primary-green rounded-full animate-spin" />
         </div>
       }

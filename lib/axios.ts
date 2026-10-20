@@ -28,7 +28,10 @@ proxyAxios.interceptors.response.use(
         console.warn(
           "[proxyAxios] 401 – session expired. Redirecting to login."
         );
-        window.location.href = "/auth/login";
+        // Admin paths go to admin login, regular paths go to user login
+        window.location.href = currentPath.startsWith("/admin")
+          ? "/admin"
+          : "/auth/login";
       }
     }
     return Promise.reject(error);

@@ -3,6 +3,7 @@
 import React from "react";
 import Avatar from "@/components/ui/Avatar";
 import { FiSearch, FiPlus } from "react-icons/fi";
+import { useTypingStatus } from "@/context/RealtimeContext";
 
 // Double checkmark SVG for sent messages
 export const DoubleCheckIcon = ({ className }: { className?: string }) => (
@@ -29,8 +30,6 @@ export interface DirectMessageItem {
   time: string;
   unread: number;
   isArchived: boolean;
-  isOnline: boolean;
-  isTyping: boolean;
   isPinned?: boolean;
   isRequestDraft?: boolean;
   pendingRequest?: any;
@@ -209,89 +208,106 @@ export default function DirectMessagesList({
             </p>
           </div>
         ) : (
-          chats.map((chat) => {
-            const isSelected = selectedChatId === chat.id;
-            const isPinned = pinnedChats.includes(chat.id) || !!chat.isPinned;
-
-            return (
-              <button
-                key={chat.id}
-                onClick={() => onSelectChat(chat.id)}
-                className={`group flex items-center justify-between p-3 sm:p-3.5 rounded-[20px] transition-all border text-left cursor-pointer w-full shrink-0 ${
-                  isSelected
-                    ? "bg-[#283238] border-white/15 shadow-md"
-                    : "bg-[#20272B] hover:bg-[#252E34] border-transparent hover:border-white/10"
-                }`}
-              >
-            
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-               
-                  <div className="relative shrink-0">
-                    <Avatar
-                      name={chat.name}
-                      src={chat.avatarUrl}
-                      className={`w-10 h-10 rounded-full object-cover text-xs font-bold ${
-                        isSelected || chat.isTyping
-                          ? "border-2 border-primary-green"
-                          : "border border-white/10"
-                      }`}
-                    />
-                  </div>
-
-               
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="font-raleway font-bold text-xs sm:text-sm text-white truncate">
-                      {chat.name}
-                    </span>
-
-                    {chat.isTyping ? (
-                      <span className="text-[11px] sm:text-xs text-primary-green font-medium mt-0.5 truncate animate-pulse">
-                        ••• typing
-                      </span>
-                    ) : chat.isFromMe ? (
-                      <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[11px] sm:text-xs text-white/60">
-                        <DoubleCheckIcon className="text-primary-green shrink-0" />
-                        <span className="truncate">You: {chat.lastMsg}</span>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] sm:text-xs text-white/60 mt-0.5 truncate">
-                        {chat.lastMsg}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-          
-                <div className="flex flex-col items-end justify-between ml-3 shrink-0 self-stretch py-0.5">
-             
-                  <div className="flex items-center gap-1.5 h-3">
-                    {(chat.unread > 0 || chat.isOnline) && (
-                      <span className="w-2 h-2 rounded-full bg-primary-green shadow-sm" />
-                    )}
-                  </div>
-
-             
-                  <div className="flex items-center gap-1.5 mt-auto">
-                    {isPinned ? (
-                      <div
-                        onClick={(e) => togglePinChat(e, chat.id)}
-                        className="p-0.5 text-white/50 hover:text-white transition-colors cursor-pointer"
-                        title="Unpin conversation"
-                      >
-                        <PinIcon className="w-2.5 h-2.5 text-white/50" />
-                      </div>
-                    ) : chat.time ? (
-                      <span className="text-[10px] sm:text-[11px] text-white/40 font-medium">
-                        {chat.time}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              </button>
-            );
-          })
+          chats.map((chat) => (
+            <DirectMessageRow
+              key={chat.id}
+              chat={chat}
+              isSelected={selectedChatId === chat.id}
+              isPinned={pinnedChats.includes(chat.id) || !!chat.isPinned}
+              onSelectChat={onSelectChat}
+              togglePinChat={togglePinChat}
+            />
+          ))
         )}
       </div>
     </div>
+  );
+}
+
+interface DirectMessageRowProps {
+  chat: DirectMessageItem;
+  isSelected: boolean;
+  isPinned: boolean;
+  onSelectChat: (id: string) => void;
+  togglePinChat: (e: React.MouseEvent, chatId: string) => void;
+}
+
+function DirectMessageRow({
+  chat,
+  isSelected,
+  isPinned,
+  onSelectChat,
+  togglePinChat,
+}: DirectMessageRowProps) {
+  const isTyping = useTypingStatus(chat.id);
+
+  return (
+    <button
+      onClick={() => onSelectChat(chat.id)}
+      className={`group flex items-center justify-between p-3 sm:p-3.5 rounded-[20px] transition-all border text-left cursor-pointer w-full shrink-0 ${
+        isSelected
+          ? "bg-[#283238] border-white/15 shadow-md"
+          : "bg-[#20272B] hover:bg-[#252E34] border-transparent hover:border-white/10"
+      }`}
+    >
+      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        <div className="relative shrink-0">
+          <Avatar
+            name={chat.name}
+            src={chat.avatarUrl}
+            className={`w-10 h-10 rounded-full object-cover text-xs font-bold ${
+              isSelected || isTyping
+                ? "border-2 border-primary-green"
+                : "border border-white/10"
+            }`}
+          />
+        </div>
+
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="font-raleway font-bold text-xs sm:text-sm text-white truncate">
+            {chat.name}
+          </span>
+
+          {isTyping ? (
+            <span className="text-[11px] sm:text-xs text-primary-green font-medium mt-0.5 truncate animate-pulse">
+              ••• typing
+            </span>
+          ) : chat.isFromMe ? (
+            <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[11px] sm:text-xs text-white/60">
+              <DoubleCheckIcon className="text-primary-green shrink-0" />
+              <span className="truncate">You: {chat.lastMsg}</span>
+            </div>
+          ) : (
+            <span className="text-[11px] sm:text-xs text-white/60 mt-0.5 truncate">
+              {chat.lastMsg}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-end justify-between ml-3 shrink-0 self-stretch py-0.5">
+        <div className="flex items-center gap-1.5 h-3">
+          {chat.unread > 0 && (
+            <span className="w-2 h-2 rounded-full bg-primary-green shadow-sm" />
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 mt-auto">
+          {isPinned ? (
+            <div
+              onClick={(e) => togglePinChat(e, chat.id)}
+              className="p-0.5 text-white/50 hover:text-white transition-colors cursor-pointer"
+              title="Unpin conversation"
+            >
+              <PinIcon className="w-2.5 h-2.5 text-white/50" />
+            </div>
+          ) : chat.time ? (
+            <span className="text-[10px] sm:text-[11px] text-white/40 font-medium">
+              {chat.time}
+            </span>
+          ) : null}
+        </div>
+      </div>
+    </button>
   );
 }

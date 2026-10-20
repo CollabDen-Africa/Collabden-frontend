@@ -11,8 +11,16 @@ import type { CreateProjectTaskPayload, ProjectTask, ProjectTaskStatus } from "@
 const COLUMNS: Array<{ id: ProjectTaskStatus; title: string; subtitle: string; indicatorColor: string }> = [
   { id: "TODO", title: "To Do", subtitle: "Not started", indicatorColor: "bg-primary-blue" },
   { id: "IN_PROGRESS", title: "In Progress", subtitle: "Currently being worked on", indicatorColor: "bg-accent-yellow" },
-  { id: "COMPLETED", title: "Completed", subtitle: "Finished tasks", indicatorColor: "bg-primary-green" },
+  { id: "IN_REVIEW", title: "In Review", subtitle: "Awaiting approval", indicatorColor: "bg-primary-blue/80" },
+  { id: "DONE", title: "Done", subtitle: "Finished tasks", indicatorColor: "bg-primary-green" },
 ];
+
+const STATUS_LABEL: Record<ProjectTaskStatus, string> = {
+  TODO: "To Do",
+  IN_PROGRESS: "In Progress",
+  IN_REVIEW: "In Review",
+  DONE: "Done",
+};
 
 function formatDueDate(value?: string | null) {
   if (!value) return null;
@@ -51,7 +59,7 @@ export default function TasksPage() {
     setDropTarget(null);
     if (!taskId || !task || task.status === status || updateTaskStatus.isPending) return;
     void updateTaskStatus.mutateAsync({ taskId, status })
-      .then(() => setSuccessMessage(`Task moved to ${status === "IN_PROGRESS" ? "In Progress" : status === "COMPLETED" ? "Completed" : "To Do"}.`))
+      .then(() => setSuccessMessage(`Task moved to ${STATUS_LABEL[status]}.`))
       .catch(() => undefined);
   };
 

@@ -44,7 +44,23 @@ export interface ProjectMessage {
   sender?: ProjectMessageSender | null;
 }
 
-export type ProjectTaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED";
+export type ProjectTaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
+
+export type ProjectTaskPriority = "LOW" | "MEDIUM" | "HIGH";
+
+export interface ProjectTaskAssignee {
+  taskId: string;
+  userId: string;
+  assignedAt?: string;
+  user?: {
+    id: string;
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string;
+    avatarUrl?: string | null;
+  };
+}
 
 export interface ProjectTask {
   id: string;
@@ -52,7 +68,18 @@ export interface ProjectTask {
   title: string;
   description?: string | null;
   status: ProjectTaskStatus;
+  priority?: ProjectTaskPriority;
   dueDate?: string | null;
+  createdById?: string | null;
+  createdBy?: {
+    id: string;
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    avatarUrl?: string | null;
+  } | null;
+  assignees?: ProjectTaskAssignee[];
+  _count?: { comments?: number };
   createdAt: string;
   updatedAt: string;
 }
@@ -130,6 +157,8 @@ export interface CreateProjectTaskPayload {
   description?: string;
   dueDate?: string;
   status?: ProjectTaskStatus;
+  priority?: ProjectTaskPriority;
+  assigneeIds?: string[];
 }
 
 export interface ProjectMetadata {

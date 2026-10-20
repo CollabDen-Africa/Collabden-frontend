@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { 
-  FiSearch, 
-  FiDownload, 
-  FiUsers, 
-  FiCalendar 
+import {
+  FiSearch,
+  FiDownload,
+  FiUsers,
+  FiCalendar,
 } from "react-icons/fi";
 import { WaitlistTable, WaitlistEntry } from "./WaitlistTable";
+import { waitlistService } from "@/services/admin/waitlist.service";
 
 export const AdminWaitlistView: React.FC = () => {
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
@@ -20,15 +21,11 @@ export const AdminWaitlistView: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/proxy/waitlist");
-      if (!response.ok) {
-        throw new Error("Failed to fetch waitlist entries");
-      }
-      const data = await response.json();
-      setWaitlist(Array.isArray(data) ? data : data.data || []);
+      const entries = await waitlistService.getAll();
+      setWaitlist(entries);
     } catch (err: any) {
       console.error("Error fetching waitlist:", err);
-      setError(err.message || "Failed to load waitlist entries.");
+      setError(err.response?.data?.message || err.message || "Failed to load waitlist entries.");
       setWaitlist([]);
     } finally {
       setIsLoading(false);
@@ -66,11 +63,7 @@ export const AdminWaitlistView: React.FC = () => {
   const handleExportExcel = async () => {
     setIsExporting(true);
     try {
-      const response = await fetch("/api/proxy/waitlist/download");
-      if (!response.ok) {
-        throw new Error("Failed to download waitlist");
-      }
-      const blob = await response.blob();
+      const blob = await waitlistService.downloadExcel();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -78,8 +71,9 @@ export const AdminWaitlistView: React.FC = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error exporting Excel:", error);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error exporting Excel:", err);
     } finally {
       setIsExporting(false);
     }

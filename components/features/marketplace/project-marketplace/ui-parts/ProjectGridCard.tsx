@@ -102,6 +102,13 @@ export const ProjectGridCard = ({ project, onApply, onView }: { project: any, on
                 className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-full px-8 py-2 border border-white/20 transition-colors">
                 View
               </Button>
+            ) : project.hasPendingApplication ? (
+              <Button
+                size="sm"
+                disabled
+                className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold rounded-full px-8 py-2 cursor-default opacity-100">
+                Applied
+              </Button>
             ) : (
               <Button
                 onClick={(e) => { e.stopPropagation(); onApply(); }}

@@ -5,6 +5,8 @@ import type {
   DirectChat,
   DirectMessage,
   SendMessagePayload,
+  VoiceUploadResponse,
+  AttachmentUploadResponse,
 } from "@/types/api.types";
 
 const messagingService = {
@@ -112,6 +114,38 @@ const messagingService = {
    */
   deleteChat: async (chatId: string): Promise<any> => {
     const response = await proxyAxios.delete(PROXY_ENDPOINTS.MESSAGING.DELETE_CHAT(chatId));
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Upload a recorded voice note. Returns the Supabase storage path to submit as voiceUrl
+   * on sendDirectMessage, plus a short-lived signed URL for immediate preview.
+   */
+  uploadVoiceNote: async (
+    file: Blob,
+    durationSeconds: number,
+    filename = "voice-note.webm"
+  ): Promise<VoiceUploadResponse> => {
+    const formData = new FormData();
+    formData.append("voice", file, filename);
+    formData.append("durationSeconds", String(Math.max(1, Math.round(durationSeconds))));
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.MESSAGING.VOICE, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Upload a file attachment for a direct message. Returns the storage path and a
+   * short-lived signed URL. Submit the returned path, name, mimeType, and size inside
+   * the attachments array when calling sendDirectMessage.
+   */
+  uploadAttachment: async (file: File): Promise<AttachmentUploadResponse> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.MESSAGING.ATTACHMENTS, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data?.data || response.data;
   },
 };

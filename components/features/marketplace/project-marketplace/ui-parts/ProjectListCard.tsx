@@ -125,6 +125,13 @@ export const ProjectListCard = ({ project, onApply, onView }: { project: any, on
                   className="bg-white/10 hover:bg-white/20 text-white text-[10px] sm:text-xs font-bold rounded-full px-4 sm:px-6 py-1.5 transition-colors border border-white/20">
                   View
                 </Button>
+              ) : project.hasPendingApplication ? (
+                <Button
+                  size="sm"
+                  disabled
+                  className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] sm:text-xs font-bold rounded-full px-4 sm:px-6 py-1.5 cursor-default opacity-100">
+                  Applied
+                </Button>
               ) : (
                 <Button
                   onClick={(e) => { e.stopPropagation(); onApply(); }}

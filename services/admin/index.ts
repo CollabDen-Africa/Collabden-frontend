@@ -11,4 +11,6 @@ export { disputesService } from "./disputes.service";
 export type { DisputesParams, DisputeDecisionPayload } from "./disputes.service";
 export * from "./subscriptions.service";
 export * from "./settings.service";
+export { waitlistService } from "./waitlist.service";
+export type { WaitlistEntryData, WaitlistListResponse } from "./waitlist.service";
 
