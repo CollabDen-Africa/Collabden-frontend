@@ -1,10 +1,11 @@
 import React from 'react';
-import { 
-  FaHandshake, 
-  FaCheck, 
-  FaUserPlus, 
-  FaMessage, 
-  FaBell 
+import { useRouter } from 'next/navigation';
+import {
+  FaHandshake,
+  FaCheck,
+  FaUserPlus,
+  FaMessage,
+  FaBell
 } from 'react-icons/fa6';
 import type { NotificationType } from '@/types/api.types';
 
@@ -19,6 +20,15 @@ export interface NotificationItemProps {
   createdAt: string;
   onMarkRead?: (id: string) => void;
 }
+
+// Map notification types to safe, known frontend routes
+const TYPE_ROUTES: Record<NotificationType, string> = {
+  'MESSAGE': '/messages',
+  'INVITE': '/connections',
+  'PROJECT_CREATED': '/projects',
+  'TASK_ASSIGNED': '/workspace/tasks',
+  'SYSTEM': '/dashboard',
+};
 
 // Map backend notification types to icons
 const TYPE_ICONS: Record<NotificationType, React.ElementType> = {
@@ -45,17 +55,19 @@ const formatRelativeTime = (isoDate: string): string => {
   return date.toLocaleDateString();
 };
 
-export default function NotificationItem({ 
-  id, title, message, type, isRead, link, createdAt, onMarkRead 
+export default function NotificationItem({
+  id, title, message, type, isRead, link, createdAt, onMarkRead
 }: NotificationItemProps) {
+  const router = useRouter();
   const IconComponent = TYPE_ICONS[type] || FaBell;
 
   const handleClick = () => {
     if (!isRead && onMarkRead) {
       onMarkRead(id);
     }
-    if (link) {
-      window.location.href = link;
+    const destination = TYPE_ROUTES[type] ?? (link || null);
+    if (destination) {
+      router.push(destination);
     }
   };
 

@@ -416,6 +416,8 @@ export const PROXY_ENDPOINTS = {
     REACTION: (messageId: string) => `/messaging/messages/${messageId}/reactions`,
     ARCHIVE: (chatId: string) => `/messaging/chats/${chatId}/archive`,
     DELETE_CHAT: (chatId: string) => `/messaging/chats/${chatId}`,
+    VOICE: '/messaging/voice',
+    ATTACHMENTS: '/messaging/attachments',
   },
   PAYMENTS: {
     WALLET: '/payments/wallet',

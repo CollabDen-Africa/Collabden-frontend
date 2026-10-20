@@ -78,7 +78,7 @@ export default function NotificationBell({
       </button>
 
       {isOpen && (
-        <div className="max-lg:fixed max-lg:top-25 max-lg:left-4.5 max-lg:right-4.5 max-lg:w-auto max-lg:max-w-125 max-lg:mx-auto lg:absolute lg:top-[calc(100%+24px)] lg:right-0 lg:w-103.25 bg-black/10 border border-white/10 shadow-[0_25px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md rounded-[30px] p-5 sm:p-7 z-100 flex flex-col gap-8 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="max-lg:fixed max-lg:top-25 max-lg:left-4.5 max-lg:right-4.5 max-lg:w-auto max-lg:max-w-125 max-lg:mx-auto lg:absolute lg:top-[calc(100%+24px)] lg:right-0 lg:w-103.25 bg-black/10 border border-white/10 shadow-[0_25px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md rounded-[30px] p-5 sm:p-7 z-100 flex flex-col gap-8 max-h-[80vh] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
 
           <div className="flex justify-between items-center w-full">
             <h2 className="font-semibold text-[18px] leading-5.25 text-foreground">
@@ -93,7 +93,7 @@ export default function NotificationBell({
             )}
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 overflow-y-auto min-h-0 flex-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {isLoading ? (
               <div className="flex items-center justify-center py-6">
                 <div className="w-5 h-5 border-2 border-foreground/20 border-t-primary-green rounded-full animate-spin" />

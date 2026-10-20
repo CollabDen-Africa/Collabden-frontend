@@ -69,6 +69,8 @@ export const useProjects = () => {
   const useMarketplaceProjects = (filters?: { page?: number; limit?: number; genre?: string; role?: string; search?: string; sortBy?: string; sortOrder?: "asc" | "desc" }) => useQuery({
     queryKey: ['marketplace', 'projects', filters],
     queryFn: () => projectService.getMarketplace(filters),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   // Invite collaborator
@@ -162,6 +164,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['connections'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace', 'projects'] });
     },
     onError: (error) => handleApiError(error),
   });

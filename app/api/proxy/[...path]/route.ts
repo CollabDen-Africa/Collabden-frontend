@@ -40,18 +40,16 @@ async function handleRequest(request: NextRequest, { params }: { params: Promise
   }
 
   try {
-    const fetchOptions: RequestInit & { duplex?: string } = {
+    const fetchOptions: RequestInit = {
       method: request.method,
       headers,
-      cache: 'no-store',
+      cache: "no-store",
     };
 
     // Forward the request body for non-GET/HEAD methods
     if (!['GET', 'HEAD'].includes(request.method)) {
       if (incomingContentType?.includes('multipart/form-data')) {
-        // Stream the body stream directly to keep multipart boundary parameters intact
-        fetchOptions.body = request.body || undefined;
-        fetchOptions.duplex = 'half';
+        fetchOptions.body = await request.arrayBuffer();
       } else {
         const body = await request.text();
         if (body) {
