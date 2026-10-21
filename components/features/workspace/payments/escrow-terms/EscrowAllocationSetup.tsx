@@ -7,13 +7,6 @@ import Avatar from "@/components/ui/Avatar";
 import { usePayment } from "@/hooks/payment/usePayment";
 
 
-const COLOR_MAP = [
-  { bg: "from-primary-green to-primary-green/80", text: "text-primary-green" },
-  { bg: "from-primary-blue to-primary-blue/80", text: "text-primary-blue" },
-  { bg: "from-accent-pink to-accent-pink/80", text: "text-accent-pink" },
-  { bg: "from-accent-yellow to-accent-yellow/80", text: "text-accent-yellow" }
-];
-
 interface EscrowAllocationsSetupProps {
   allocations: {
     list: any[];

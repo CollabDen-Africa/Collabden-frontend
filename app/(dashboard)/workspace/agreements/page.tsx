@@ -161,6 +161,7 @@ const AgreementCard = ({
 export default function AgreementsOverviewPage() {
   const { activeProject } = useWorkspace();
   const { user } = useAuth();
+  const isOwner = Boolean(user?.id && (activeProject?.owner?.id === user.id || activeProject?.ownerId === user.id));
   const isUserVerified = user?.identityVerified || false;
 
   const projectId = activeProject?.id || "";
@@ -259,9 +260,9 @@ export default function AgreementsOverviewPage() {
           <EmptyState 
             icon={<FiFileText size={32} strokeWidth={1.5} />}
             title="No Agreements Found"
-            description="Create, send, and manage your contracts all in one place."
-            actionLabel="New Agreement"
-            onAction={() => setIsCreateOpen(true)}
+            description={isOwner ? "Create, send, and manage your contracts all in one place." : "There are currently no agreements to sign."}
+            actionLabel={isOwner ? "New Agreement" : undefined}
+            onAction={isOwner ? () => setIsCreateOpen(true) : undefined}
           />
         ) : (
           <div className="flex flex-col gap-10 w-full">

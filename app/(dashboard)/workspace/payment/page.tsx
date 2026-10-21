@@ -109,9 +109,23 @@ export type PaymentFlowStep =
         }
       ]);
 
-      // THE SINGLE SOURCE OF TRUTH: Calculate allocations once for all steps
+      const COLOR_MAP = [
+        { bg: "from-primary-green to-primary-green/80", text: "text-primary-green" },
+        { bg: "from-primary-blue to-primary-blue/80", text: "text-primary-blue" },
+        { bg: "from-accent-pink to-accent-pink/80", text: "text-accent-pink" },
+        { bg: "from-accent-yellow to-accent-yellow/80", text: "text-accent-yellow" }
+      ];
+
+      // Calculate allocations once for all steps
       const computedAllocations = useMemo(() => {
         if (!activeProject?.collaborators) return { list: [], totalAllocated: 0, unallocated: projectBudget };
+
+        const ownerId = activeProject.owner?.id || (activeProject as any).ownerId;
+
+        const eligibleCollaborators = activeProject.collaborators.filter(c => {
+          const cUserId = c.user?.id || c.userId;
+          return cUserId !== ownerId && c.role !== "OWNER";
+            });
             
       const totals = new Map<string, number>();
         let allocated = 0;
@@ -124,15 +138,18 @@ export type PaymentFlowStep =
           }
         });
       
-      const list = activeProject.collaborators.map(c => {
-      const amount = totals.get(c.userId) || 0;
-      const share = projectBudget > 0 ? (amount / projectBudget) * 100 : 0;
+      const list = eligibleCollaborators.map((c, index) => {
+        const amount = totals.get(c.userId) || 0;
+        const share = projectBudget > 0 ? (amount / projectBudget) * 100 : 0;
+        const colorStyle = COLOR_MAP[index % COLOR_MAP.length];
         return {
           id: c.userId,
-          name: c.user?.displayName || c.user?.legalName || c.user?.email || "Unknown User",
+          name: c.user?.displayName || c.user?.legalName || c.user?.email?.split('@')[0] || "Unknown User",
           role: c.role || "Collaborator",
           amount,
-          share: `${share.toFixed(1)}%`
+          share: `${share.toFixed(1)}%`,
+          colorClass: colorStyle.bg,
+          textClass: colorStyle.text
         };
       }).sort((a, b) => b.amount - a.amount);
       

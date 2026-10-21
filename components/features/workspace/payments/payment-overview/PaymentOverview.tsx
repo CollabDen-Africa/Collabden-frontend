@@ -5,6 +5,7 @@ import BudgetSummary from "./BudgetSummary";
 import PayoutProgress from "./PayoutProgress";
 import SessionMilestones from "./SessionMilestones";
 import CrewAllocations from "./CrewAllocations";
+import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { usePayment } from "@/hooks/payment/usePayment";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
@@ -25,16 +26,18 @@ export default function PaymentOverview({
 }: PaymentOverviewProps) {
 
   const { activeProject } = useWorkspace();
-    const projectId = activeProject?.id || "";
+  const projectId = activeProject?.id || "";
+  const { user } = useAuth();
+  const isOwner = Boolean(user?.id && (activeProject?.owner?.id === user.id || activeProject?.ownerId === user.id));
   
-    const { useWallet } = usePayment();
-    const { data: walletData } = useWallet();
+  const { useWallet } = usePayment();
+  const { data: walletData } = useWallet();
   
-    const { useProjectEscrow } = useEscrow();
-    const { data: escrowData } = useProjectEscrow(projectId);
+  const { useProjectEscrow } = useEscrow();
+  const { data: escrowData } = useProjectEscrow(projectId);
   
-    const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
-    const walletBalance = walletData?.balance || 0;
+  const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+  const walletBalance = walletData?.balance || 0;
     
     // Calculate Escrow Metrics
     const totalBudget = activeProject?.budget ? Number(activeProject.budget) : (escrowData?.totalAmount || 0);
@@ -78,7 +81,8 @@ export default function PaymentOverview({
           </p>
           
           <div className="flex flex-wrap w-full xl:w-auto items-center gap-3">
-            {isFullyFunded ? (
+            {isOwner && (
+            isFullyFunded ? (
               <Button
                 variant="primary"
                 onClick={onConfigureTerms}
@@ -97,7 +101,8 @@ export default function PaymentOverview({
                 iconPosition="left"
               >
                 Fund Escrow
-              </Button>
+          </Button>
+          )
             )}
             
             <Button 
@@ -108,7 +113,8 @@ export default function PaymentOverview({
               iconPosition="left"
             >
               Transactions
-            </Button>
+          </Button>
+          {isOwner && (
             <Button 
               variant="ghost"
               onClick={onRoyaltySettings} 
@@ -117,7 +123,8 @@ export default function PaymentOverview({
               iconPosition="left"
             >
               Royalty Settings
-            </Button>
+          </Button>
+          )}
           </div>
         </div>
 
