@@ -4,6 +4,7 @@ import { type DragEvent, useEffect, useState } from "react";
 import { HiCheck } from "react-icons/hi";
 import { FiCalendar, FiPlus } from "react-icons/fi";
 import CreateTaskModal from "@/components/features/workspace/CreateNewTask";
+import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useProjects } from "@/hooks/projects/useProjects";
 import type { CreateProjectTaskPayload, ProjectTask, ProjectTaskStatus } from "@/types/api.types";
@@ -31,6 +32,8 @@ function formatDueDate(value?: string | null) {
 export default function TasksPage() {
   const { projectDetails, isLoading } = useWorkspace();
   const projectId = projectDetails?.id || "";
+  const { user } = useAuth();
+  const isOwner = Boolean(user?.id && (projectDetails?.owner?.id === user.id || projectDetails?.ownerId === user.id));
   const { useCreateProjectTask, useUpdateProjectTaskStatus } = useProjects();
   const createTask = useCreateProjectTask(projectId);
   const updateTaskStatus = useUpdateProjectTaskStatus(projectId);
@@ -68,11 +71,26 @@ export default function TasksPage() {
 
   return (
     <div className="flex h-full w-full flex-col pb-4">
-      <div className="mb-6 flex items-center justify-between px-2"><div><h1 className="font-sans text-xl font-bold text-white">Tasks</h1><p className="mt-1 text-sm text-white/60">{projectDetails.name}</p></div><button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 rounded-full bg-primary-green px-4 py-2 text-sm font-bold text-white hover:brightness-110"><FiPlus size={16} /> Create task</button></div>
+      <div className="mb-6 flex items-center justify-between px-2"><div><h1 className="font-sans text-xl font-bold text-white">Tasks</h1><p className="mt-1 text-sm text-white/60">{projectDetails.name}</p></div>
+        
+        {isOwner && (
+          <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 rounded-full bg-primary-green px-4 py-2 text-sm font-bold text-white hover:brightness-110"><FiPlus size={16} />
+            Create task
+          </button>
+        )}
+        </div>
       <div className="custom-scrollbar flex flex-1 items-start gap-6 overflow-x-auto pb-6">
         {COLUMNS.map((column) => {
           const columnTasks = tasks.filter((task) => task.status === column.id);
-          return <section key={column.id} onDragOver={(event) => { event.preventDefault(); setDropTarget(column.id); }} onDragLeave={() => setDropTarget((current) => current === column.id ? null : current)} onDrop={(event) => moveTask(event, column.id)} className={`flex max-h-full w-[337px] shrink-0 flex-col rounded-[20px] border bg-black/20 transition-colors ${dropTarget === column.id ? "border-primary-green bg-primary-green/10" : "border-white/5"}`}><div className="flex shrink-0 items-center justify-between border-b border-white/20 p-[14px_19px]"><div className="flex items-center gap-3"><span className={`h-[10px] w-[10px] rounded-full ${column.indicatorColor}`} /><div><h2 className="text-sm font-bold text-white">{column.title}</h2><p className="mt-1 text-xs text-white/70">{column.subtitle}</p></div></div><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] text-white">{columnTasks.length}</span></div><div className="custom-scrollbar flex min-h-[150px] flex-1 flex-col gap-4 overflow-y-auto p-[14px]">{columnTasks.length === 0 ? <div className="flex h-[120px] items-center justify-center rounded-[20px] border border-dashed border-white/30 bg-black/10 px-4 text-center text-xs text-white/50">Drop a task here</div> : columnTasks.map((task: ProjectTask) => <TaskCard key={task.id} task={task} onDragStart={(event) => { event.dataTransfer.setData("text/project-task", task.id); event.dataTransfer.effectAllowed = "move"; setDraggedTaskId(task.id); }} onDragEnd={() => { setDraggedTaskId(null); setDropTarget(null); }} />)}</div>{column.id === "TODO" && <button onClick={() => setIsCreateModalOpen(true)} className="m-[14px] flex items-center justify-center gap-2 rounded-lg p-[10px] text-xs font-medium text-white/60 hover:bg-white/5"><FiPlus size={14} /> Add task</button>}</section>;
+          return <section key={column.id} onDragOver={(event) => { event.preventDefault(); setDropTarget(column.id); }} onDragLeave={() => setDropTarget((current) => current === column.id ? null : current)} onDrop={(event) => moveTask(event, column.id)} className={`flex max-h-full w-[337px] shrink-0 flex-col rounded-[20px] border bg-black/20 transition-colors ${dropTarget === column.id ? "border-primary-green bg-primary-green/10" : "border-white/5"}`}><div className="flex shrink-0 items-center justify-between border-b border-white/20 p-[14px_19px]"><div className="flex items-center gap-3"><span className={`h-[10px] w-[10px] rounded-full ${column.indicatorColor}`} /><div><h2 className="text-sm font-bold text-white">{column.title}</h2><p className="mt-1 text-xs text-white/70">{column.subtitle}</p></div></div><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px] text-white">{columnTasks.length}</span></div><div className="custom-scrollbar flex min-h-[150px] flex-1 flex-col gap-4 overflow-y-auto p-[14px]">{columnTasks.length === 0 ? <div className="flex h-[120px] items-center justify-center rounded-[20px] border border-dashed border-white/30 bg-black/10 px-4 text-center text-xs text-white/50">Drop a task here
+          </div> : columnTasks.map((task: ProjectTask) => <TaskCard key={task.id} task={task} onDragStart={(event) => { event.dataTransfer.setData("text/project-task", task.id); event.dataTransfer.effectAllowed = "move"; setDraggedTaskId(task.id); }} onDragEnd={() => { setDraggedTaskId(null); setDropTarget(null); }} />)}
+          </div>
+            {column.id === "TODO" && isOwner && (<button
+              onClick={() => setIsCreateModalOpen(true)} className="m-[14px] flex items-center justify-center gap-2 rounded-lg p-[10px] text-xs font-medium text-white/60 hover:bg-white/5"><FiPlus size={14} />
+              Add task
+            </button>
+            )}
+          </section>;
         })}
       </div>
       <CreateTaskModal isOpen={isCreateModalOpen} isSubmitting={createTask.isPending} onClose={() => setIsCreateModalOpen(false)} onSubmit={submitTask} />

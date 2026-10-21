@@ -12,6 +12,7 @@ import UpdatesPanel from "@/components/features/workspace/UpdatesPanel";
 import SettingsPanel from "@/components/features/workspace/settings-panel/SettingsPanel";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { handleApiError } from "@/lib/error-handler";
+import { useAuth } from "@/context/AuthContext";
 
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
 
@@ -31,6 +32,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   const [isActivityOpen, setIsActivityOpen] = useState(false);
   const [isUpdatesOpen, setIsUpdatesOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { user } = useAuth();
 
   const { useAllProjects, useProjectDetail } = useProjects();
   const { data: apiProjects, error, isLoading } = useAllProjects();
@@ -84,6 +86,11 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
   // Query for the full details (includes collaborators, etc.)
   const { data: projectDetails } = useProjectDetail(selectedProject?.id || "");
+
+  // Check if the logged-in user is the project owner
+  const isOwner = Boolean(
+   user?.id && (projectDetails?.owner?.id === user.id || projectDetails?.ownerId === user.id)
+    );
 
   // Dynamic collaborators list for header stack
   const headerCollaborators = useMemo(() => {
@@ -267,7 +274,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
           <span className="font-sans font-semibold text-[10px] xl:text-[12px] text-white">Activity</span>
         </button>
 
-        {/* Settings Button */}
+          {/* Settings Button */}
+          {isOwner && (
         <button 
           onClick={() => {
             setIsSettingsOpen(!isSettingsOpen);
@@ -280,7 +288,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
             <FiSettings size={20} className="text-white" />
           </div>
           <span className="font-sans font-semibold text-[10px] xl:text-[12px] text-white">Settings</span>
-        </button>
+            </button>
+          )}
 
       </aside>
     </div>

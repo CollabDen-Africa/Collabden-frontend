@@ -34,8 +34,13 @@ export default function EscrowMilestonesSetup({
   const { data: walletData } = useWallet();
   const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
 
-  const collaboratorOptions = activeProject?.collaborators?.map((c) => ({
-      label: c.user?.displayName || c.user?.legalName || c.user?.email || "Unknown User",
+  const ownerId = activeProject?.owner?.id || (activeProject as any)?.ownerId;
+
+  const collaboratorOptions = activeProject?.collaborators?.filter(c => {
+        const cUserId = c.user?.id || c.userId;
+        return cUserId !== ownerId && c.role !== "OWNER";
+      }).map((c) => ({
+      label: c.user?.displayName || c.user?.legalName || c.user?.email?.split('0')[0] || "Unknown User",
       value: c.userId,
     })) || [];
   
