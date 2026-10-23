@@ -128,10 +128,12 @@ export const useProjects = () => {
     onError: (error) => handleApiError(error),
   });
 
-  const useUploadProjectCover = (projectId: string) => useMutation({
-      mutationFn: (coverImage: File) => projectService.uploadCoverImage(projectId, coverImage),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
+  const useUploadProjectCover = (projectId?: string) => useMutation({
+      mutationFn: ({ coverImage, id }: { coverImage: File; id?: string }) =>
+        projectService.uploadCoverImage((id ?? projectId)!, coverImage),
+      onSuccess: (_data, { id }) => {
+        const resolvedId = id ?? projectId;
+        queryClient.invalidateQueries({ queryKey: ['projects', resolvedId] });
         queryClient.invalidateQueries({ queryKey: ['projects'] });
         queryClient.invalidateQueries({ queryKey: ['marketplace', 'projects'] });
       },

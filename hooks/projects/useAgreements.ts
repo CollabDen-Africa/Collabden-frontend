@@ -55,9 +55,19 @@ export const useAgreements = (projectId: string) => {
     onError: (error) => handleApiError(error),
   });
 
+  // Delete a draft/pending agreement (owner only)
+  const useDeleteAgreement = (agreementId: string) => useMutation({
+    mutationFn: () => agreementService.deleteAgreement(projectId, agreementId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
+    },
+    onError: (error) => handleApiError(error),
+  });
+
   // Electronically sign inside platform
-  const useEsignAgreement = (agreementId: string) => useMutation({
-    mutationFn: (intentToSign: boolean) => agreementService.esign(projectId, agreementId, intentToSign),
+  const useEsignAgreement = (agreementId: string, legalName?: string) => useMutation({
+    mutationFn: (intentToSign: boolean) => agreementService.esign(projectId, agreementId, intentToSign, legalName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
       // Refresh the dashboard agreements
@@ -72,6 +82,7 @@ export const useAgreements = (projectId: string) => {
     useUpdateAgreement,
     useUpdateAgreementStatus,
     useUploadSignedCopy,
+    useDeleteAgreement,
     useEsignAgreement,
   };
 };

@@ -30,7 +30,7 @@ export function ProjectCoverUpload({ projectId, currentCoverUrl }: ProjectCoverU
 
     setError(null);
     try {
-      await uploadCover.mutateAsync(file);
+      await uploadCover.mutateAsync({ coverImage: file });
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
