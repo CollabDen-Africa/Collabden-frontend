@@ -6,7 +6,6 @@ import { useWorkspace } from "@/context/WorkspaceContext";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { getErrorMessage } from "@/lib/error-handler";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
-import { set } from "react-hook-form";
 
 const formatFileSize = (bytes?: number | null) => {
   if (bytes === null || bytes === undefined || bytes < 0) return "—";
@@ -114,7 +113,7 @@ export default function WorkspaceFilesPage() {
         
         link.remove();
         window.URL.revokeObjectURL(objectUrl);
-      } catch (error) {
+      } catch {
         setActionError("Failed to download file.");
       } finally {
         setDownloadingId(null);

@@ -17,7 +17,6 @@ export default function ProfileSettingsContent() {
   const updateProfileMutation = useUpdateProfile(user?.id || "");
   const updateAvatarMutation = useUpdateAvatar(user?.id || "");
 
-  const [activeTheme, setActiveTheme] = useState("dark");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);

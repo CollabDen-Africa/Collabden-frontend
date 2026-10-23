@@ -53,7 +53,14 @@ export type PaymentFlowStep =
     dueDate: Date | null;
   }
 
-  function PaymentsWizard() {
+const COLOR_MAP = [
+  { bg: "from-primary-green to-primary-green/80", text: "text-primary-green" },
+  { bg: "from-primary-blue to-primary-blue/80", text: "text-primary-blue" },
+  { bg: "from-accent-pink to-accent-pink/80", text: "text-accent-pink" },
+  { bg: "from-accent-yellow to-accent-yellow/80", text: "text-accent-yellow" }
+];
+
+function PaymentsWizard() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
@@ -108,13 +115,6 @@ export type PaymentFlowStep =
           dueDate: null
         }
       ]);
-
-      const COLOR_MAP = [
-        { bg: "from-primary-green to-primary-green/80", text: "text-primary-green" },
-        { bg: "from-primary-blue to-primary-blue/80", text: "text-primary-blue" },
-        { bg: "from-accent-pink to-accent-pink/80", text: "text-accent-pink" },
-        { bg: "from-accent-yellow to-accent-yellow/80", text: "text-accent-yellow" }
-      ];
 
       // Calculate allocations once for all steps
       const computedAllocations = useMemo(() => {

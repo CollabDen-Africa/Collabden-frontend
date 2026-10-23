@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiInbox, FiCheck, FiX, FiPaperclip, FiMapPin, FiBriefcase, FiMusic } from "react-icons/fi";
+import { FiInbox, FiCheck, FiX, FiPaperclip, FiMapPin, FiBriefcase } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar";
 import { Project } from "@/types/api.types";
 import { useProjects } from "@/hooks/projects/useProjects";
