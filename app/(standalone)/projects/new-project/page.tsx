@@ -22,15 +22,17 @@ import Button from "@/components/ui/Button";
 import { DEFAULT_MUSIC_GENRES } from "@/constants/genres";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import InfoTooltip from "@/components/ui/InfoTooltip";
+//import InfoTooltip from "@/components/ui/InfoTooltip";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { useCollaborator } from "@/hooks/collaborator/useCollaborator";
 import { useProfile } from "@/hooks/profile/useProfile";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
-import projectService from "@/services/project.service";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import VerificationModal from "@/components/features/profile/VerificationModal";
+import { FiShield } from "react-icons/fi";
 
 interface ProjectDateFieldProps {
   label: string;
@@ -112,6 +114,9 @@ export default function CreateProjectPage() {
   >({});
   const debouncedSearch = useDebounce(collaboratorSearch, 300);
 
+  const { user, refreshUser } = useAuth();
+  const [showKYCModal, setShowKYCModal] = useState(false);
+
   const { useCreateProject, useUploadProjectCover } = useProjects();
   const { useCollaborators, useMarketplaceGenres } = useCollaborator();
   const { useCurrentProfile } = useProfile();
@@ -119,6 +124,7 @@ export default function CreateProjectPage() {
   const currentUserId = currentProfile?.id;
 
   const createProjectMutation = useCreateProject();
+  const uploadCoverMutation = useUploadProjectCover();
   const {
     data: rawCollaborators = [],
     isLoading: isLoadingCollaborators,
@@ -198,6 +204,10 @@ export default function CreateProjectPage() {
     };
 
   const onSubmit = async (data: CreateProjectInput) => {
+    if (!user?.identityVerified) {
+      setShowKYCModal(true);
+      return;
+    }
     setSubmissionError(null);
     setIsProcessing(true);
     createProjectMutation.reset();
@@ -214,12 +224,12 @@ export default function CreateProjectPage() {
         requiredRoles: data.requiredRoles,
       });
       if (coverFile && newProject?.id) {
-        try{
-          await projectService.uploadCoverImage(newProject.id, coverFile); 
-            } catch (imgErr) {
-              console.warn("Project created, but cover image failed to upload.", imgErr);
-            }
-          }
+        try {
+          await uploadCoverMutation.mutateAsync({ coverImage: coverFile, id: newProject.id });
+        } catch (imgErr) {
+          console.warn("Project created, but cover image failed to upload.", imgErr);
+        }
+      }
       router.push(ROUTES.PROJECTS.SUCCESS);
     } catch (err) {
       console.error("Project creation failed:", err);
@@ -232,6 +242,7 @@ export default function CreateProjectPage() {
   const requiresProfileSetup = Boolean(errorMessage && /identity verification|legal name/i.test(errorMessage));
 
   return (
+    <>
     <div className="w-full min-h-screen flex items-start justify-center pb-20 pt-4 px-4 sm:px-6 lg:px-8">
 
       {/* Main Form Container */}
@@ -600,6 +611,24 @@ export default function CreateProjectPage() {
               </div>
             )}
 
+            {/* Verification notice */}
+            {!user?.identityVerified && (
+              <div className="flex items-start gap-3 bg-accent-yellow/10 border border-accent-yellow/30 text-accent-yellow px-4 py-3 rounded-2xl text-sm font-medium">
+                <FiShield size={16} className="shrink-0 mt-0.5" />
+                <span>
+                  You must{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowKYCModal(true)}
+                    className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                  >
+                    verify your identity
+                  </button>{" "}
+                  before creating a project.
+                </span>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex items-center justify-end gap-4 mt-4 pt-8 border-t border-white/10">
               <Button
@@ -632,5 +661,14 @@ export default function CreateProjectPage() {
         </div>
       </div>
     </div>
+
+    <VerificationModal
+      isOpen={showKYCModal}
+      onClose={() => setShowKYCModal(false)}
+      onSuccess={() => { setShowKYCModal(false); refreshUser(); }}
+      defaultFirstName={(user as any)?.firstName ?? ""}
+      defaultLastName={(user as any)?.lastName ?? ""}
+    />
+    </>
   );
 }

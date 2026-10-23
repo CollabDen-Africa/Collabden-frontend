@@ -37,7 +37,7 @@ export default function EscrowReviewSetup({
   onContinueToApprovals,
   terms = {},
   milestones = {},
-  collaborators = {},
+  collaborators: _collaborators = {},
   allocations = [],
   approvalRules = DEFAULT_RULES
 }: any) {

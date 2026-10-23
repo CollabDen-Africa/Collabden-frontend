@@ -71,7 +71,7 @@ export default function MarketplaceBrowsingSection({
   projects,
   meta,
   isLoading,
-  selectedGenre,
+  selectedGenre: _selectedGenre,
   onClearGenre,
   selectedRoles,
   onRoleToggle,

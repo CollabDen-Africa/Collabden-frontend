@@ -13,9 +13,6 @@ export const API_ENDPOINTS = {
     GOOGLE_CALLBACK: `${API_BASE_URL}/api/v1/user/auth/google/callback`,
     ONBOARDING: `${API_BASE_URL}/api/v1/user/onboarding`,
   },
-  PERSONA: {
-    CREATE_INQUIRY: `${API_BASE_URL}/api/v1/user/persona/create-inquiry`,
-  },
   ADMIN_AUTH: {
     LOGIN: `${API_BASE_URL}/api/v1/admin/auth/login`,
     VERIFY_2FA: `${API_BASE_URL}/api/v1/admin/auth/verify-2fa`,
@@ -198,6 +195,7 @@ export const API_ENDPOINTS = {
     UPLOAD: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements`,
     LIST: (projectId: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements`,
     UPDATE: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}`,
+    DELETE: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}`,
     STATUS: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}/status`,
     SIGN: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}/sign`,
     ESIGN: (projectId: string, id: string) => `${API_BASE_URL}/api/v1/projects/${projectId}/agreements/${id}/esign`,
@@ -447,12 +445,13 @@ export const PROXY_ENDPOINTS = {
     UPLOAD: (projectId: string) => `/projects/${projectId}/agreements`,
     LIST: (projectId: string) => `/projects/${projectId}/agreements`,
     UPDATE: (projectId: string, id: string) => `/projects/${projectId}/agreements/${id}`,
+    DELETE: (projectId: string, id: string) => `/projects/${projectId}/agreements/${id}`,
     STATUS: (projectId: string, id: string) => `/projects/${projectId}/agreements/${id}/status`,
     SIGN: (projectId: string, id: string) => `/projects/${projectId}/agreements/${id}/sign`,
     ESIGN: (projectId: string, id: string) => `/projects/${projectId}/agreements/${id}/esign`,
   },
-  PERSONA: {
-    CREATE_INQUIRY: '/user/persona/create-inquiry',
+  NINJA_KYC: {
+    IDENTIFY: '/user/kyc/identify',
   },
   ROYALTIES: {
     SPLITS: (projectId: string) => `/projects/${projectId}/royalties`,

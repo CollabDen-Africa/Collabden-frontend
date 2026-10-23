@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import {FiLoader } from "react-icons/fi";
+import { FiLoader, FiLock } from "react-icons/fi";
 import Avatar from "@/components/ui/Avatar";
 import VerificationPanel from "@/components/features/profile/VerificationPanel";
 import ThemePreference from "@/components/features/profile/ThemePreference";
@@ -17,12 +17,13 @@ export default function ProfileSettingsContent() {
   const updateProfileMutation = useUpdateProfile(user?.id || "");
   const updateAvatarMutation = useUpdateAvatar(user?.id || "");
 
-  const [activeTheme, setActiveTheme] = useState("dark");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+
+  const isVerified = Boolean(user?.identityVerified);
 
   const showToast = (message: string, tone: "success" | "error") => {
     setToast({ message, tone });
@@ -35,14 +36,16 @@ export default function ProfileSettingsContent() {
   const formFields = useMemo(() => {
     if (!profile) return [];
     return [
-      { id: "email", label: "Email Address", value: profile.email, readonly: true },
-      { id: "phoneNumber", label: "Phone Number", value: profile.phoneNumber || "Not set", readonly: false },
-      { id: "legalName", label: "Legal Name", value: profile.legalName || "Not set", readonly: false },
-      { id: "displayName", label: "Stage / Display Name", value: profile.displayName || "Not set", readonly: false },
-      { id: "role", label: "Role", value: profile.role || "Not set", readonly: false },
-      { id: "bio", label: "Bio", value: profile.bio || "Not set", readonly: false },
+      { id: "email", label: "Email Address", value: profile.email, readonly: true, locked: false },
+      { id: "firstName", label: "First Name", value: profile.firstName || "Not set", readonly: isVerified, locked: isVerified },
+      { id: "lastName", label: "Last Name", value: profile.lastName || "Not set", readonly: isVerified, locked: isVerified },
+      { id: "phoneNumber", label: "Phone Number", value: profile.phoneNumber || "Not set", readonly: false, locked: false },
+      { id: "legalName", label: "Legal Name", value: profile.legalName || "Not set", readonly: false, locked: false },
+      { id: "displayName", label: "Stage / Display Name", value: profile.displayName || "Not set", readonly: false, locked: false },
+      { id: "role", label: "Role", value: profile.role || "Not set", readonly: false, locked: false },
+      { id: "bio", label: "Bio", value: profile.bio || "Not set", readonly: false, locked: false },
     ];
-  }, [profile]);
+  }, [profile, isVerified]);
 
   const handleEditClick = (fieldId: string, currentValue: string) => {
     setEditingField(fieldId);
@@ -117,8 +120,6 @@ export default function ProfileSettingsContent() {
       </div>
     );
   }
-
-  const isVerified = Boolean(profile?.isVerified || user?.identityVerified);
 
   return (
     <div className="flex flex-col w-full flex-1 gap-8.75 relative">
@@ -210,7 +211,12 @@ export default function ProfileSettingsContent() {
                   </span>
                 )}
               </div>
-              {!field.readonly && (
+              {field.locked ? (
+                <div className="flex items-center gap-1.5 shrink-0 ml-4 mt-1 text-white/30">
+                  <FiLock size={14} />
+                  <span className="font-raleway text-[13px]">Locked</span>
+                </div>
+              ) : !field.readonly && (
                 <div className="flex gap-2 shrink-0 ml-4">
                   {isEditing ? (
                     <>

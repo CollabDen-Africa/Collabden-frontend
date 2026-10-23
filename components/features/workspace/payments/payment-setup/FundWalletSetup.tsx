@@ -69,8 +69,7 @@ export default function FundWalletSetup({ onContinue }: FundWalletSetupProps) {
       try {
         const payloadMethod = paymentMethod === "card" ? "card" : paymentMethod === "ussd" ? "ussd" : "banktransfer";
 
-        const targetRoute = `/workspace/payments`; 
-        const explicitRedirect = typeof window !== "undefined" 
+        const explicitRedirect = typeof window !== "undefined"
             ? window.location.href.split('?')[0] 
             : "";
         

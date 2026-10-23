@@ -93,12 +93,20 @@ const agreementService = {
   },
 
   /**
-   * Electronically sign an agreement directly on the platform.
+   * Delete a draft or pending agreement (owner only, not applicable to SIGNED agreements).
    */
-  esign: async (projectId: string, agreementId: string, intentToSign: boolean): Promise<LegalAgreement> => {
+  deleteAgreement: async (projectId: string, agreementId: string): Promise<void> => {
+    await proxyAxios.delete(PROXY_ENDPOINTS.AGREEMENTS.DELETE(projectId, agreementId));
+  },
+
+  /**
+   * Electronically sign an agreement directly on the platform.
+   * legalName is the signer's verified legal name (from KYC or profile).
+   */
+  esign: async (projectId: string, agreementId: string, intentToSign: boolean, legalName?: string): Promise<LegalAgreement> => {
     const response = await proxyAxios.post(
       PROXY_ENDPOINTS.AGREEMENTS.ESIGN(projectId, agreementId),
-      { intentToSign }
+      { intentToSign, ...(legalName ? { legalName } : {}) }
     );
     const raw = response.data;
     return raw?.agreement || raw?.data || (raw as LegalAgreement);
