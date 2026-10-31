@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { HiCheck, HiOutlineCloudUpload, HiOutlineDocumentText, HiOutlineTrash, HiOutlineDownload } from "react-icons/hi";
+import { HiCheck, HiOutlineCloudUpload, HiOutlineDocumentText, HiOutlineTrash, HiOutlineDownload, HiOutlineBookmark } from "react-icons/hi";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useProjects } from "@/hooks/projects/useProjects";
+import { useSaveFileToSpace } from "@/hooks/user/useUserSpace";
 import { getErrorMessage } from "@/lib/error-handler";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 
@@ -35,10 +36,25 @@ export default function WorkspaceFilesPage() {
   const [uploadingCount, setUploadingCount] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
   const [fileToDelete, setFileToDelete] = useState<{ id: string; name: string } | null>(null);
   const { useUploadProjectFile, useDeleteProjectFile } = useProjects();
   const uploadFile = useUploadProjectFile(projectId);
   const deleteFile = useDeleteProjectFile(projectId);
+  const saveToSpace = useSaveFileToSpace();
+
+  const handleSaveToSpace = async (fileId: string, name: string) => {
+    setActionError(null);
+    setSavingId(fileId);
+    try {
+      await saveToSpace.mutateAsync({ projectId, fileId });
+      setActionSuccess(`"${name}" saved to My Space.`);
+    } catch (error) {
+      setActionError(getErrorMessage(error));
+    } finally {
+      setSavingId(null);
+    }
+  };
 
   useEffect(() => {
     if (!actionSuccess && !actionError) return;
@@ -283,6 +299,14 @@ export default function WorkspaceFilesPage() {
                     title="Download file"
                   >
                     <HiOutlineDownload size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleSaveToSpace(file.id, file.name)}
+                    disabled={savingId === file.id}
+                    className="flex items-center justify-center p-2 bg-white/10 hover:bg-white/20 hover:text-primary-green rounded-full transition-colors text-white/60 disabled:opacity-50"
+                    title="Save to My Space"
+                  >
+                    <HiOutlineBookmark size={18} />
                   </button>
                   <button
                     onClick={() => setFileToDelete({ id: file.id, name: file.name })}
