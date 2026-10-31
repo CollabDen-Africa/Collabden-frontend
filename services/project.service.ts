@@ -97,6 +97,10 @@ const projectService = {
     await proxyAxios.delete(`${PROXY_ENDPOINTS.PROJECTS.FILES(projectId)}/${fileId}`);
   },
 
+  saveFileToSpace: async (projectId: string, fileId: string): Promise<void> => {
+    await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.SAVE_FILE_TO_SPACE(projectId, fileId));
+  },
+
   sendMessage: async (projectId: string, content: string): Promise<ProjectMessage> => {
     const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.MESSAGES(projectId), { content });
     return response.data?.message || response.data?.data || response.data;

@@ -464,8 +464,12 @@ export default function AgreementsOverviewPage() {
       collaborators:
         activeProject?.collaborators?.map((c) => ({
           id: c.userId,
-          name: c.user?.email.split("@")[0] || "User",
-          image: undefined,
+          name:
+            c.user?.displayName ||
+            c.user?.legalName ||
+            c.user?.email?.split("@")[0] ||
+            "User",
+          image: c.user?.avatarUrl || undefined,
         })) || [],
       signatories: {
         completed: completedSignatories,
