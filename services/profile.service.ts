@@ -26,6 +26,30 @@ const profileService = {
   },
 
   /**
+   * Add a backup email. Sends a verification token to the backup address.
+   */
+  addBackupEmail: async (backupEmail: string): Promise<any> => {
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROFILE.BACKUP_EMAIL, { backupEmail });
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Verify the backup email with the token sent to that address.
+   */
+  verifyBackupEmail: async (token: string): Promise<any> => {
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROFILE.BACKUP_EMAIL_VERIFY, { token });
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Remove the backup email.
+   */
+  removeBackupEmail: async (): Promise<any> => {
+    const response = await proxyAxios.delete(PROXY_ENDPOINTS.PROFILE.BACKUP_EMAIL);
+    return response.data?.data || response.data;
+  },
+
+  /**
    * Update or remove phone number.
    */
   updatePhone: async (phoneNumber: string | null): Promise<any> => {

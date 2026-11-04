@@ -214,6 +214,8 @@ export const API_ENDPOINTS = {
   PROFILE: {
     UPDATE: `${API_BASE_URL}/api/v1/user/profile`,
     EMAIL: `${API_BASE_URL}/api/v1/user/profile/email`,
+    BACKUP_EMAIL: `${API_BASE_URL}/api/v1/user/profile/backup-email`,
+    BACKUP_EMAIL_VERIFY: `${API_BASE_URL}/api/v1/user/profile/backup-email/verify`,
     PHONE: `${API_BASE_URL}/api/v1/user/profile/phone`,
     PASSWORD: `${API_BASE_URL}/api/v1/user/profile/password`,
     AVATAR: `${API_BASE_URL}/api/v1/user/profile/avatar`,
@@ -340,6 +342,8 @@ export const PROXY_ENDPOINTS = {
       `/projects/${projectId}/collaborators/${collaboratorId}`,
     METADATA: (id: string) => `/projects/${id}/metadata`,
     FILES: (id: string) => `/projects/${id}/files`,
+    SAVE_FILE_TO_SPACE: (id: string, fileId: string) =>
+      `/projects/${id}/files/${fileId}/save-to-space`,
     MESSAGES: (id: string) => `/projects/${id}/messages`,
     COVER: (id: string) => `/projects/${id}/cover`,
     APPLY: (id: string) => `/projects/${id}/apply`,
@@ -347,6 +351,11 @@ export const PROXY_ENDPOINTS = {
     UPDATE_APPLICATION_STATUS: (projectId: string, applicationId: string) => `/projects/${projectId}/applications/${applicationId}/status`,
     CANCEL_APPLICATION: (applicationId: string) => `/projects/applications/${applicationId}/cancel`,
     MY_APPLICATIONS: `/projects/applications/my-applications`,
+  },
+  USER_SPACE: {
+    LIST: '/user/space',
+    REMOVE_SAVED_FILE: (projectFileId: string) =>
+      `/user/space/saved-files/${projectFileId}`,
   },
   CONNECTIONS: {
     SEND_REQUEST: '/user/connections/request',
@@ -365,6 +374,8 @@ export const PROXY_ENDPOINTS = {
   PROFILE: {
     UPDATE: '/user/profile',
     EMAIL: '/user/profile/email',
+    BACKUP_EMAIL: '/user/profile/backup-email',
+    BACKUP_EMAIL_VERIFY: '/user/profile/backup-email/verify',
     PHONE: '/user/profile/phone',
     PASSWORD: '/user/profile/password',
     AVATAR: '/user/profile/avatar',

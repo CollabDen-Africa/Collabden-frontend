@@ -3,14 +3,32 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
-import { FiSmartphone, FiLock, FiKey, FiLoader } from "react-icons/fi";
+import { FiSmartphone, FiLock, FiKey, FiLoader, FiMail } from "react-icons/fi";
 import { useSecurity } from "@/hooks/security/useSecurity";
+import { useProfile } from "@/hooks/profile/useProfile";
 import profileService from "@/services/profile.service";
 
 export default function ProfileSettingsSecurity() {
   const { useSetup2FA, useVerify2FA } = useSecurity();
   const setup2FAMutation = useSetup2FA();
   const verify2FAMutation = useVerify2FA();
+
+  const { useCurrentProfile, useAddBackupEmail, useVerifyBackupEmail, useRemoveBackupEmail } = useProfile();
+  const { data: currentProfile } = useCurrentProfile();
+  const addBackupEmailMutation = useAddBackupEmail();
+  const verifyBackupEmailMutation = useVerifyBackupEmail();
+  const removeBackupEmailMutation = useRemoveBackupEmail();
+
+  // Backup email state
+  const [showBackupEmailForm, setShowBackupEmailForm] = useState(false);
+  const [backupEmailInput, setBackupEmailInput] = useState("");
+  const [backupEmailToken, setBackupEmailToken] = useState("");
+  const [backupEmailStatus, setBackupEmailStatus] = useState<string | null>(null);
+  const [awaitingBackupEmailVerification, setAwaitingBackupEmailVerification] = useState(false);
+
+  const existingBackupEmail: string | null = currentProfile?.backupEmail ?? null;
+  const backupEmailVerified: boolean = Boolean(currentProfile?.backupEmailVerified);
+  const hasPendingBackupEmail = Boolean(existingBackupEmail) && !backupEmailVerified;
 
   const [show2FAModal, setShow2FAModal] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<{ secret: string; qrCodeUrl: string } | null>(null);
@@ -51,6 +69,58 @@ export default function ProfileSettingsSecurity() {
       setTokenInput("");
     } catch (err) {
       console.error("Verification failed:", err);
+    }
+  };
+
+  const handleAddBackupEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!backupEmailInput.trim()) return;
+    try {
+      await addBackupEmailMutation.mutateAsync(backupEmailInput.trim());
+      setBackupEmailStatus("Verification code sent — check that inbox.");
+      setAwaitingBackupEmailVerification(true);
+    } catch (err: any) {
+      setBackupEmailStatus(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to add backup email"
+      );
+    }
+  };
+
+  const handleVerifyBackupEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!backupEmailToken.trim()) return;
+    try {
+      await verifyBackupEmailMutation.mutateAsync(backupEmailToken.trim());
+      setBackupEmailStatus("Backup email verified!");
+      setAwaitingBackupEmailVerification(false);
+      setBackupEmailInput("");
+      setBackupEmailToken("");
+      setTimeout(() => {
+        setShowBackupEmailForm(false);
+        setBackupEmailStatus(null);
+      }, 1500);
+    } catch (err: any) {
+      setBackupEmailStatus(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message ||
+          "Verification failed"
+      );
+    }
+  };
+
+  const handleRemoveBackupEmail = async () => {
+    try {
+      await removeBackupEmailMutation.mutateAsync();
+      setBackupEmailStatus("Backup email removed.");
+      setAwaitingBackupEmailVerification(false);
+      setBackupEmailInput("");
+      setBackupEmailToken("");
+    } catch (err: any) {
+      setBackupEmailStatus(err.response?.data?.message || "Failed to remove backup email");
     }
   };
 
@@ -287,6 +357,122 @@ export default function ProfileSettingsSecurity() {
               Update Password
             </Button>
           </form>
+        )}
+      </div>
+
+      {/* Backup Email Card */}
+      <div className="w-full bg-white/10 border border-white/10 rounded-[35px] px-7.25 py-7.25 flex flex-col gap-6 backdrop-blur-md">
+        <div className="flex flex-row items-center gap-6 w-full">
+          <div className="w-[58.6px] h-[58.6px] bg-[#1E2E3A] border-2 border-border-muted/25 rounded-[23.4px] flex items-center justify-center shrink-0">
+            <FiMail size={24} className="text-accent-soft-blue/60" />
+          </div>
+
+          <div className="flex flex-col flex-1 min-w-0">
+            <span className="font-raleway font-medium text-[20.5px] text-white/90">Backup Email</span>
+            <span className="font-raleway font-normal text-[17.6px] text-accent-soft-blue/70 truncate">
+              {existingBackupEmail
+                ? `${existingBackupEmail} · ${backupEmailVerified ? "Verified" : "Pending verification"}`
+                : "Recover your account if you lose access to your primary email"}
+            </span>
+          </div>
+
+          {existingBackupEmail && backupEmailVerified ? (
+            <Button
+              variant="outline"
+              onClick={handleRemoveBackupEmail}
+              disabled={removeBackupEmailMutation.isPending}
+              className="px-5! py-2! text-[17.6px] text-text-muted! border-white/10 hover:text-white! hover:bg-card-bg!"
+            >
+              {removeBackupEmailMutation.isPending ? <FiLoader className="animate-spin" /> : "Remove"}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowBackupEmailForm(!showBackupEmailForm);
+                setBackupEmailStatus(null);
+                if (hasPendingBackupEmail) setAwaitingBackupEmailVerification(true);
+              }}
+              className="px-5! py-2! text-[17.6px] text-text-muted! border-white/10 hover:text-white! hover:bg-card-bg!"
+            >
+              {showBackupEmailForm ? "Close" : hasPendingBackupEmail ? "Verify" : "Add"}
+            </Button>
+          )}
+        </div>
+
+        {showBackupEmailForm && !(existingBackupEmail && backupEmailVerified) && (
+          <div className="w-full flex flex-col gap-4 mt-2 border-t border-white/5 pt-4 animate-in slide-in-from-top-4 duration-300">
+            {!awaitingBackupEmailVerification && !hasPendingBackupEmail && (
+              <form onSubmit={handleAddBackupEmail} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[14px] text-white/70">Backup email address</label>
+                  <input
+                    type="email"
+                    required
+                    value={backupEmailInput}
+                    onChange={(e) => setBackupEmailInput(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full h-[45px] rounded-xl bg-black/20 border border-white/10 px-4 text-white outline-none focus:border-primary-green"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={addBackupEmailMutation.isPending}
+                  className="bg-primary-green text-white self-start px-6"
+                >
+                  {addBackupEmailMutation.isPending ? <FiLoader className="animate-spin" /> : "Send verification code"}
+                </Button>
+              </form>
+            )}
+
+            {(awaitingBackupEmailVerification || hasPendingBackupEmail) && (
+              <form onSubmit={handleVerifyBackupEmail} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[14px] text-white/70">
+                    Enter the 6-digit code sent to {existingBackupEmail || backupEmailInput}
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    required
+                    value={backupEmailToken}
+                    onChange={(e) => setBackupEmailToken(e.target.value)}
+                    placeholder="000000"
+                    className="w-full h-[50px] rounded-xl bg-black/30 border border-white/10 px-4 text-center text-white text-[20px] tracking-widest outline-none focus:border-primary-green"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    disabled={verifyBackupEmailMutation.isPending}
+                    className="bg-primary-green text-white px-6"
+                  >
+                    {verifyBackupEmailMutation.isPending ? <FiLoader className="animate-spin" /> : "Verify"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleRemoveBackupEmail}
+                    disabled={removeBackupEmailMutation.isPending}
+                    className="text-text-muted! border-white/10 hover:text-white! hover:bg-card-bg!"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {backupEmailStatus && (
+              <span
+                className={`text-[14px] ${
+                  backupEmailStatus.toLowerCase().includes("fail") || backupEmailStatus.toLowerCase().includes("failed")
+                    ? "text-red-400"
+                    : "text-primary-green"
+                }`}
+              >
+                {backupEmailStatus}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>

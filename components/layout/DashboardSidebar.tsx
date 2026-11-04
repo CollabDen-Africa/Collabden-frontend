@@ -38,7 +38,7 @@ export default function DashboardSidebar({
     { name: "Messages", icon: IoIosChatbubbles, path: "/messages" },
     { name: "Projects", icon: FaFolderOpen, path: "/projects" },
     { name: "Marketplace", icon: FaStore, path: "/marketplace" },
-    { name: "Agreements", icon: FaHandshake, path: "/agreements" },
+    { name: "My Space", icon: FaHandshake, path: "/my-space" },
     { name: "Payment", icon: FaCreditCard, path: "/payment" },
   ];
 

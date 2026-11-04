@@ -38,6 +38,36 @@ export const useProfile = () => {
       onError: (error) => handleApiError(error),
     });
 
+  // Add backup email (sends verification token)
+  const useAddBackupEmail = () =>
+    useMutation({
+      mutationFn: (backupEmail: string) => profileService.addBackupEmail(backupEmail),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
+      },
+      onError: (error) => handleApiError(error),
+    });
+
+  // Verify backup email with token
+  const useVerifyBackupEmail = () =>
+    useMutation({
+      mutationFn: (token: string) => profileService.verifyBackupEmail(token),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
+      },
+      onError: (error) => handleApiError(error),
+    });
+
+  // Remove backup email
+  const useRemoveBackupEmail = () =>
+    useMutation({
+      mutationFn: () => profileService.removeBackupEmail(),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
+      },
+      onError: (error) => handleApiError(error),
+    });
+
   // Update avatar URL or file upload
   const useUpdateAvatar = (userId: string) =>
     useMutation({
@@ -102,6 +132,9 @@ export const useProfile = () => {
     useUserProfile,
     useUpdateProfile,
     useUpdateEmail,
+    useAddBackupEmail,
+    useVerifyBackupEmail,
+    useRemoveBackupEmail,
     useUpdateAvatar,
     useCompleteness,
     useBrowseCollaborators,
