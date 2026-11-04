@@ -15,6 +15,7 @@ import Avatar from "@/components/ui/Avatar";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
 import { usePayment } from "@/hooks/payment/usePayment";
+import { useAgreements } from "@/hooks/projects/useAgreements";
 
 
 const DEFAULT_RULES = [
@@ -50,7 +51,11 @@ export default function EscrowReviewSetup({
     const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
   
     const { useConfigureEscrow } = useEscrow();
-    const configureMutation = useConfigureEscrow();
+  const configureMutation = useConfigureEscrow();
+
+  const { useProjectAgreements } = useAgreements(projectId);
+  const { data: apiAgreements = [] } = useProjectAgreements();
+  const latestAgreementId = apiAgreements[0]?.id || "";
   
     const totalBudget = activeProject?.budget || 0;
     const collaboratorsCount = activeProject?.collaborators?.length || 0;
@@ -66,12 +71,16 @@ export default function EscrowReviewSetup({
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
   const handleSubmitReview = async () => {
+    if (!latestAgreementId) {
+      console.error("No agreement found for this project.");
+      return; 
+        }
       try {
         await configureMutation.mutateAsync({
           projectId,
           payload: {
             totalAmount: Number(totalMilestonesAmount),
-            agreementId: activeProject?.activeAgreementId || activeProject?.id, 
+            agreementId: latestAgreementId, 
             reviewPeriodDays: parseInt(terms.reviewPeriodDays) || 7,
             fundingDeadline: terms.fundingDeadline ? new Date(terms.fundingDeadline).toISOString() : undefined,
             milestones: milestones.map((m: any) => ({

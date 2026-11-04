@@ -33,10 +33,11 @@ export default function DashboardPage() {
 
   const { useDashboardData } = useDashboard();
   const { useCollaborators } = useCollaborator();
-  const { useMarketplaceProjects } = useProjects();
+  const { useMarketplaceProjects, useAllProjects } = useProjects();
   const { data: apiData, isLoading, error } = useDashboardData();
   const { data: marketplaceCollaborators = [] } = useCollaborators({ openToCollaborate: 'true' });
   const { data: marketplaceProjects } = useMarketplaceProjects({ page: 1, limit: 10 });
+  const { data: allProjects = [] } = useAllProjects();
 
   if (error) {
     handleApiError(error);
@@ -122,6 +123,27 @@ export default function DashboardPage() {
         };
       });
   }, [apiData?.activeProjects]);
+
+  const sharedProjects = useMemo(() => {
+      if (!user?.id || !Array.isArray(allProjects)) return [];
+      
+      return allProjects
+        .filter((p) => {
+        const ownerId = p.owner?.id || p.ownerId;
+        const isCollaborator = (p.collaborators || []).some(
+                (c: any) => c.userId === user.id || c.user?.id === user.id
+              );
+              // Strict check: Not the owner, but IS a collaborator
+              return ownerId !== user.id && isCollaborator;
+            })
+            .map((p) => ({
+              id: p.id,
+              title: p.name,
+              needs: p.requiredRoles?.length ? `Looking for ${p.requiredRoles.join(', ')}` : p.description || 'No roles specified',
+              members: p.collaborators?.length || 1,
+              tags: p.genre ? [p.genre] : [],
+            }));
+        }, [allProjects, user?.id]);
 
   const recentActivity = useMemo(() => {
     return (apiData?.notifications ?? [])
@@ -210,6 +232,7 @@ export default function DashboardPage() {
               onSkip={onSkip}
             />
           </div>
+          
         </div>
         
         {/* Right Column */}

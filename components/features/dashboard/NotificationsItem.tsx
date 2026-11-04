@@ -25,7 +25,7 @@ export interface NotificationItemProps {
 const TYPE_ROUTES: Record<NotificationType, string> = {
   'MESSAGE': '/messages',
   'INVITE': '/connections',
-  'PROJECT_CREATED': '/projects',
+  'PROJECT_CREATED': '/workspace',
   'TASK_ASSIGNED': '/workspace/tasks',
   'SYSTEM': '/dashboard',
 };
@@ -37,6 +37,50 @@ const TYPE_ICONS: Record<NotificationType, React.ElementType> = {
   'PROJECT_CREATED': FaCheck,
   'TASK_ASSIGNED': FaHandshake,
   'SYSTEM': FaBell,
+};
+
+// Map legacy or unnested backend paths to accurate frontend routes
+const ROUTE_REMAPS: Record<string, string> = {
+  '/wallet': '/payment/wallet',
+  '/payments': '/workspace/payment',
+  '/escrow': '/workspace/payment',
+  '/tasks': '/workspace/tasks',
+  'projects/agreements': '/agreements',
+};
+
+/**
+ * Resolves raw backend links or notification types into precise frontend routes.
+ */
+const resolveNotificationRoute = (link?: string | null, type?: NotificationType): string => {
+  const rawPath = link?.trim();
+
+  // Fall back to TYPE_ROUTES or /dashboard if link is null/empty
+  if (!rawPath) {
+    return (type && TYPE_ROUTES[type]) || '/dashboard';
+  }
+
+  // Allow absolute external URLs (e.g. http://...)
+  if (rawPath.startsWith('http://') || rawPath.startsWith('https://')) {
+    return rawPath;
+  }
+
+  // Ensure leading slash for internal paths
+  const formattedPath = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+
+  // Exact route remapping check
+  if (ROUTE_REMAPS[formattedPath]) {
+    return ROUTE_REMAPS[formattedPath];
+  }
+
+  // Prefix remapping check for dynamic nested paths
+  if (formattedPath.startsWith('/wallet')) {
+    return formattedPath.replace('/wallet', '/payment/wallet');
+  }
+  if (formattedPath.startsWith('/escrow')) {
+    return formattedPath.replace('/escrow', '/workspace/payment');
+  }
+
+  return formattedPath;
 };
 
 // Format ISO timestamp to relative time (e.g. "2 hours ago")
@@ -65,11 +109,17 @@ export default function NotificationItem({
     if (!isRead && onMarkRead) {
       onMarkRead(id);
     }
-    const destination = TYPE_ROUTES[type] ?? (link || null);
-    if (destination) {
-      router.push(destination);
-    }
-  };
+    
+    // Resolve the exact route safely
+    const targetRoute = resolveNotificationRoute(link, type);
+    
+      if (targetRoute.startsWith('http://') || targetRoute.startsWith('https://')) {
+          window.location.href = targetRoute;
+      } else {
+        router.push(targetRoute);
+        }
+  }
+    
 
   return (
     <div 

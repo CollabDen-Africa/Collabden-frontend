@@ -49,7 +49,7 @@ const escrowService = {
    * Approve, request changes, or reject escrow proposal as a collaborator.
    */
   approveEscrowProposal: async (projectId: string, status: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED", comment?: string): Promise<EscrowAllocation> => {
-    const response = await proxyAxios.post(PROXY_ENDPOINTS.ESCROW.APPROVE_PROPOSAL(projectId), {
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.ESCROW.APPROVE_PROPOSAL(projectId), {
       status,
       comment,
     });

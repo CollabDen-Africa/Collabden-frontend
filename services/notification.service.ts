@@ -20,7 +20,7 @@ const notificationService = {
    * Mark all notifications as read for the authenticated user.
    */
   markAllRead: async (): Promise<void> => {
-    await proxyAxios.put(PROXY_ENDPOINTS.NOTIFICATIONS.READ_ALL);
+    await proxyAxios.patch(PROXY_ENDPOINTS.NOTIFICATIONS.READ_ALL);
   },
 
   /**
