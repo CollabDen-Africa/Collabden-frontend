@@ -335,14 +335,16 @@ const AgreementCard = ({
 };
 
 export default function AgreementsOverviewPage() {
-  const { activeProject } = useWorkspace();
+  const { activeProject, fundingStatus } = useWorkspace();
   const { user } = useAuth();
   const isOwner = Boolean(
     user?.id &&
       (activeProject?.owner?.id === user.id ||
         activeProject?.ownerId === user.id)
   );
-  const isUserVerified = user?.identityVerified || false;
+  // Volunteer / unfunded projects don't require KYC to sign — no money at stake.
+  const isUserVerified =
+    fundingStatus === "unfunded" ? true : user?.identityVerified || false;
 
   // Use KYC-verified legalName when available; fall back to profile first + last name
   const verifiedLegalName =
@@ -543,13 +545,14 @@ export default function AgreementsOverviewPage() {
           </div>
         )}
 
-        {/* Identity Verification */}
+        {/* Identity Verification — only surface it on funded projects, where it actually matters */}
+        {fundingStatus === "funded" && (
         <div className="flex flex-col w-full bg-black/20 border border-white/10 rounded-[30px] p-8 backdrop-blur-md">
           <h3 className="font-raleway font-semibold text-[20px] text-white mb-6">
             Identity Verification
           </h3>
 
-          {isUserVerified ? (
+          {user?.identityVerified ? (
             <div className="flex flex-col sm:flex-row items-start gap-4 w-full bg-primary-green/10 border border-primary-green/30 rounded-[30px] p-6">
               <div className="mt-0.5 shrink-0">
                 <FiCheckCircle className="text-primary-green" size={24} />
@@ -595,6 +598,7 @@ export default function AgreementsOverviewPage() {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {/* Overlay components */}

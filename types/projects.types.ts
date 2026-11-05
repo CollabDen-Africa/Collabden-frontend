@@ -6,6 +6,8 @@ export interface ProjectOwner {
   displayName?: string | null;
   legalName?: string | null;
   avatarUrl?: string | null;
+  identityVerified?: boolean;
+  isVerified?: boolean;
 }
 
 export interface ProjectCollaboratorUser {

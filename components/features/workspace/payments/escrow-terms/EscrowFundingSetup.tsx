@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
-import { 
-  FiCheck, 
-  FiArrowLeft, 
+import { useRef, useState } from "react";
+import {
+  FiCheck,
+  FiArrowLeft,
   FiShield,
   FiCalendar
 } from "react-icons/fi";
@@ -10,9 +10,11 @@ import { IoWalletOutline } from "react-icons/io5";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
 import Select from "@/components/ui/Select";
+import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
 import { usePayment } from "@/hooks/payment/usePayment";
+import VerificationModal from "@/components/features/profile/VerificationModal";
 
 
 
@@ -28,12 +30,17 @@ export default function EscrowFundingSetup({
 
   const { activeProject } = useWorkspace();
   const projectId = activeProject?.id || "";
-  
+
+  const { user, refreshUser } = useAuth();
+  const isVerified = Boolean(user?.identityVerified);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const resumeAfterVerifyRef = useRef(false);
+
   const { useWallet } = usePayment();
   const { data: walletData } = useWallet();
   const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
   const walletBalance = walletData?.balance || 0;
-  
+
   const { useProjectEscrow, useFundEscrow } = useEscrow();
   const { data: escrowData } = useProjectEscrow(projectId);
   const fundMutation = useFundEscrow();
@@ -55,19 +62,47 @@ export default function EscrowFundingSetup({
      { label: `CollabDen Wallet (Bal: ${formatCurrency(850000)})`, value: "wallet" }
    ];
 
+  const runFundEscrow = async () => {
+    try {
+      await fundMutation.mutateAsync(projectId);
+      onActivateEscrow?.();
+    } catch (error) {
+      console.error("Failed to activate escrow", error);
+    }
+  };
+
   const handleActivateEscrow = async () => {
-      try {
-        // Execute the lock/fund action against the backend
-        await fundMutation.mutateAsync(projectId);
-        onActivateEscrow?.();
-      } catch (error) {
-        console.error("Failed to activate escrow", error);
-      }
-    };
+    if (!isVerified) {
+      resumeAfterVerifyRef.current = true;
+      setIsVerifyModalOpen(true);
+      return;
+    }
+    await runFundEscrow();
+  };
+
+  const handleVerifySuccess = async () => {
+    setIsVerifyModalOpen(false);
+    await refreshUser();
+    if (resumeAfterVerifyRef.current) {
+      resumeAfterVerifyRef.current = false;
+      await runFundEscrow();
+    }
+  };
   
 
   return (
     <div>
+        <VerificationModal
+          isOpen={isVerifyModalOpen}
+          onClose={() => {
+            resumeAfterVerifyRef.current = false;
+            setIsVerifyModalOpen(false);
+          }}
+          onSuccess={handleVerifySuccess}
+          defaultFirstName={(user as any)?.firstName ?? ""}
+          defaultLastName={(user as any)?.lastName ?? ""}
+        />
+
         {/* Section Header */}
         <div className="flex flex-col gap-2 mb-8">
           <h2 className="font-raleway font-extrabold text-[24px] text-white tracking-[-0.6px]">
