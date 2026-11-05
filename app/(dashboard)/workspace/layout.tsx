@@ -10,6 +10,7 @@ import { FiBell, FiSettings, FiClock } from "react-icons/fi";
 import ActivityPanel from "@/components/features/workspace/ActivityPanel";
 import UpdatesPanel from "@/components/features/workspace/UpdatesPanel";
 import SettingsPanel from "@/components/features/workspace/settings-panel/SettingsPanel";
+import WorkspaceVerificationBanner from "@/components/features/workspace/WorkspaceVerificationBanner";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { handleApiError } from "@/lib/error-handler";
 import { useAuth } from "@/context/AuthContext";
@@ -195,6 +196,9 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
           </div>
         </header>
+
+        {/* Verification prompt — only shows on funded projects when caller needs KYC */}
+        <WorkspaceVerificationBanner />
 
         {/* Navigation Tabs */}
         <div className="w-full overflow-x-auto custom-scrollbar border-b border-white/10 mb-6 sm:mb-8">

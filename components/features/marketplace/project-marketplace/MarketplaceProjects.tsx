@@ -93,8 +93,12 @@ export default function MarketplaceProjects() {
       description: project.description || 'No description provided.',
       genres: project.genre ? [project.genre] : [],
       roles: project.requiredRoles || [],
+      pricingType: project.pricingType || null,
+      isVolunteer: (project.pricingType || '').toUpperCase() === 'VOLUNTEER',
       compensation:
-        project.budget !== null && project.budget !== undefined
+        (project.pricingType || '').toUpperCase() === 'VOLUNTEER'
+          ? 'Volunteer'
+          : project.budget !== null && project.budget !== undefined
           ? `${project.pricingType === 'hourly' ? '' : 'Budget '}₦${Number(project.budget).toLocaleString()}`
           : 'Not specified',
       duration:
@@ -108,6 +112,7 @@ export default function MarketplaceProjects() {
         project.owner?.legalName ||
         project.owner?.email?.split('@')[0] ||
         'Project owner',
+      authorVerified: Boolean((project.owner as any)?.identityVerified),
       authorInitials: (
         project.owner?.displayName ||
         project.owner?.legalName ||

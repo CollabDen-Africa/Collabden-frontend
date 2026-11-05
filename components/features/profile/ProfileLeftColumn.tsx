@@ -1,6 +1,5 @@
 "use client";
 import { FiMapPin, FiCheckCircle } from "react-icons/fi";
-import VerificationBanner from "../../layout/VerificationBanner";
 
 
 interface UserProfile {
@@ -13,6 +12,7 @@ interface UserProfile {
   skills?: string[];
   specializations?: string[];
   primaryRoles?: string[];
+  identityVerified?: boolean;
 }
 
 interface ProfileLeftColumnProps {
@@ -54,11 +54,12 @@ export default function ProfileLeftColumn({
               <h1 className="font-raleway font-bold text-[22px] md:text-[26px] text-white leading-tight">
                 {displayName}
               </h1>
-              {/* Verification Badge */}
-              <FiCheckCircle
-                className="text-primary-green shrink-0"
-                size={18}
-              />
+              {user?.identityVerified && (
+                <FiCheckCircle
+                  className="text-primary-green shrink-0"
+                  size={18}
+                />
+              )}
             </div>
             <span className="font-raleway font-normal text-[14px] md:text-[16px] text-white/80">
               {user?.role || "Member"}
@@ -82,8 +83,6 @@ export default function ProfileLeftColumn({
           </div>
         </div>
       </div>
-
-      {isOwnProfile && <VerificationBanner />}
 
       <div className="w-full bg-white/5 border border-white/10 rounded-[35px] p-5 md:p-6 flex flex-col gap-4 backdrop-blur-md">
         <div className="flex flex-col">

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import { HiShare, HiShieldCheck, HiLightningBolt, HiOutlineBookmark } from 'react-icons/hi';
+import { FiCheckCircle } from 'react-icons/fi';
 
 export const ProjectListCard = ({ project, onApply, onView }: { project: any, onApply: () => void, onView?: () => void }) => {
   return (
@@ -69,6 +70,9 @@ export const ProjectListCard = ({ project, onApply, onView }: { project: any, on
               className="w-5 h-5 sm:w-6 sm:h-6 bg-accent-blue text-[8px] sm:text-[9px] font-bold" 
             />
             <span className="text-[11px] sm:text-[12px] font-medium text-text-muted truncate max-w-25 sm:max-w-none">{project.authorName}</span>
+            {project.authorVerified && (
+              <FiCheckCircle className="text-primary-green shrink-0" size={12} />
+            )}
           </div>
           <span className="text-[9px] sm:text-[10px] font-medium text-white/30 whitespace-nowrap">{project.postedAt}</span>
         </div>
