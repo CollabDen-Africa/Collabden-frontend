@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { 
   FiCheck, 
   FiArrowLeft, 
@@ -17,9 +17,11 @@ import { IoWalletOutline } from "react-icons/io5";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
 import Select from "@/components/ui/Select";
+import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
 import { usePayment } from "@/hooks/payment/usePayment";
+import VerificationModal from "@/components/features/profile/VerificationModal";
 
 interface EscrowFundingSetupProps {
   onBack?: () => void;
@@ -36,14 +38,24 @@ export default function EscrowFundingSetup({
   const { activeProject } = useWorkspace();
   const projectId = activeProject?.id || "";
 
+  const { user, refreshUser } = useAuth();
+  const isVerified = Boolean(user?.identityVerified);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const resumeAfterVerifyRef = useRef(false);
+
   const { useWallet } = usePayment();
   const { data: walletData } = useWallet();
   const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
   const walletBalance = walletData?.balance || 0;
 
-  const { useProjectEscrow, useFundEscrow } = useEscrow();
+  const { useProjectEscrow, useFundEscrow, useRemindCollaborator, useRemoveCollaborator } = useEscrow();
   const { data: escrowData } = useProjectEscrow(projectId);
   const fundMutation = useFundEscrow();
+  const remindMutation = useRemindCollaborator();
+  const removeMutation = useRemoveEscrowCollaborator();
+
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const [paymentOption, setPaymentOption] = useState("wallet");
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -70,7 +82,7 @@ export default function EscrowFundingSetup({
     { label: `CollabDen Wallet (Bal: ${formatCurrency(walletBalance)})`, value: "wallet" }
   ];
 
-  const handleActivateEscrow = async () => {
+  const runFundEscrow = async () => {
     try {
       await fundMutation.mutateAsync(projectId);
       onActivateEscrow?.();
@@ -79,34 +91,87 @@ export default function EscrowFundingSetup({
     }
   };
 
+  const handleActivateEscrow = async () => {
+    if (!isVerified) {
+      resumeAfterVerifyRef.current = true;
+      setIsVerifyModalOpen(true);
+      return;
+    }
+    await runFundEscrow();
+  };
+
+  const handleVerifySuccess = async () => {
+    setIsVerifyModalOpen(false);
+    await refreshUser();
+    if (resumeAfterVerifyRef.current) {
+      resumeAfterVerifyRef.current = false;
+      await runFundEscrow();
+    }
+  };
+
   const toggleDropdown = (id: string) => {
     setActiveDropdownId(activeDropdownId === id ? null : id);
   };
 
   // Mock handlers for management actions
-  const handleSendReminder = (collabId: string) => {
-    console.log("Sending reminder to:", collabId);
-    setActiveDropdownId(null);
-    // Wire up backend reminder logic here
-  };
+  const handleSendReminder = async (collabId: string) => {
+      setActiveDropdownId(null);
+      setActionError(null);
+      setActionSuccess(null);
+    try {
+        await remindMutation.mutateAsync({ projectId, userId: collabId });
+        setActionSuccess("Reminder sent successfully.");
+      } catch (error: any) {
+        // Catch the 429 Too Many Requests from the backend
+        if (error?.response?.status === 429 || error?.message?.includes("429")) {
+          setActionError("You can only send one reminder every 24 hours.");
+        } else {
+          setActionError(error.message || "Failed to send reminder.");
+        }
+      }
+    };
+  
+  const handleRemoveCollaborator = async (collabId: string) => {
+      setActiveDropdownId(null);
+      setActionError(null);
+      setActionSuccess(null);
+      try {
+        await removeMutation.mutateAsync({ projectId, userId: collabId });
+        setActionSuccess("Collaborator removed from escrow successfully.");
+        
+        // If removal was successful, immediately trigger the reconfigure callback
+        // because removing someone alters the total budget/allocations
+        if (onReconfigure) onReconfigure();
+      } catch (error: any) {
+        setActionError(error.message || "Failed to remove collaborator.");
+      }
+    };
 
-  const handleRemoveCollaborator = (collabId: string) => {
-    console.log("Removing collaborator:", collabId);
-    setActiveDropdownId(null);
-    // Wire up backend remove logic here, which will also require a reconfigure
-  };
+
+  
 
   return (
-    <div className="relative">
-      {/* Section Header */}
-      <div className="flex flex-col gap-2 mb-8">
-        <h2 className="font-raleway font-extrabold text-[24px] text-white tracking-[-0.6px]">
-          Fund & Activate Escrow
-        </h2>
-        <p className="font-raleway font-normal text-[14px] text-text-muted/90">
-          Monitor collaborator approvals and deposit funds to securely lock the project terms.
-        </p>
-      </div>
+    <div>
+        <VerificationModal
+          isOpen={isVerifyModalOpen}
+          onClose={() => {
+            resumeAfterVerifyRef.current = false;
+            setIsVerifyModalOpen(false);
+          }}
+          onSuccess={handleVerifySuccess}
+          defaultFirstName={(user as any)?.firstName ?? ""}
+          defaultLastName={(user as any)?.lastName ?? ""}
+        />
+
+        {/* Section Header */}
+        <div className="flex flex-col gap-2 mb-8">
+          <h2 className="font-raleway font-extrabold text-[24px] text-white tracking-[-0.6px]">
+            Collaborator Approvals
+          </h2>
+          <p className="font-raleway font-normal text-[14px] text-text-muted-theme/90">
+            All collaborators must approve the terms before escrow activation.
+          </p>
+        </div>
 
       {/* Main Content Layout */}
       <div className="flex flex-col-reverse lg:flex-row gap-6 w-full">

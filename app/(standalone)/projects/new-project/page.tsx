@@ -31,8 +31,6 @@ import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import VerificationModal from "@/components/features/profile/VerificationModal";
-import { FiShield } from "react-icons/fi";
 
 interface ProjectDateFieldProps {
   label: string;
@@ -114,8 +112,7 @@ export default function CreateProjectPage() {
   >({});
   const debouncedSearch = useDebounce(collaboratorSearch, 300);
 
-  const { user, refreshUser } = useAuth();
-  const [showKYCModal, setShowKYCModal] = useState(false);
+  const { user } = useAuth();
 
   const { useCreateProject, useUploadProjectCover } = useProjects();
   const { useCollaborators, useMarketplaceGenres } = useCollaborator();
@@ -204,14 +201,17 @@ export default function CreateProjectPage() {
     };
 
   const onSubmit = async (data: CreateProjectInput) => {
-    if (!user?.identityVerified) {
-      setShowKYCModal(true);
-      return;
-    }
+    const isVolunteer = (data.pricingType || "").toLowerCase() === "volunteer";
+
     setSubmissionError(null);
     setIsProcessing(true);
     createProjectMutation.reset();
     try {
+      const parsedBudget =
+        !isVolunteer && data.budget !== "" && data.budget !== undefined
+          ? Number(data.budget)
+          : null;
+
       const newProject = await createProjectMutation.mutateAsync({
         name: data.projectName.trim(),
         description: data.description?.trim() || undefined,
@@ -222,6 +222,8 @@ export default function CreateProjectPage() {
         openToCollaborators: data.openToCollaborators,
         collaboratorIds: data.selectedCollabs,
         requiredRoles: data.requiredRoles,
+        pricingType: isVolunteer ? "VOLUNTEER" : data.pricingType,
+        budget: parsedBudget,
       });
       if (coverFile && newProject?.id) {
         try {
@@ -352,23 +354,37 @@ export default function CreateProjectPage() {
               <Select
                 label="Pricing Type"
                 value={watchedPricingType || "fixed"}
-                onChange={(val) => setValue("pricingType", val, { shouldValidate: true })}
+                onChange={(val) => {
+                  setValue("pricingType", val, { shouldValidate: true });
+                  if (val === "volunteer") {
+                    setValue("budget", "", { shouldValidate: true });
+                  }
+                }}
                 options={[
                     { label: "Fixed Price", value: "fixed" },
-                    { label: "Hourly Rate", value: "hourly" }
+                    { label: "Hourly Rate", value: "hourly" },
+                    { label: "Volunteer / Unpaid", value: "volunteer" }
                           ]}
                 placeholder="Select pricing model"
                 variant="glass"
               />
-                        
-              <Input
-                type="number"
-                label={`Total Budget ${watchedPricingType === "hourly" ? "(per hour)" : ""}`}
-                error={errors.budget?.message as string}
-                variant="glass"
-                placeholder="e.g. 5000"
-                {...register("budget")}
-              />
+
+              {watchedPricingType === "volunteer" ? (
+                <div className="flex items-end">
+                  <p className="font-sans text-[13px] text-white/60 leading-snug pb-2">
+                    Volunteer projects skip wallet funding and identity verification. Collaborators are prompted to verify only if you fund this project later.
+                  </p>
+                </div>
+              ) : (
+                <Input
+                  type="number"
+                  label={`Total Budget ${watchedPricingType === "hourly" ? "(per hour)" : ""}`}
+                  error={errors.budget?.message as string}
+                  variant="glass"
+                  placeholder="e.g. 5000"
+                  {...register("budget")}
+                />
+              )}
             </div>
 
             {/* Collaborators */}
@@ -611,24 +627,6 @@ export default function CreateProjectPage() {
               </div>
             )}
 
-            {/* Verification notice */}
-            {!user?.identityVerified && (
-              <div className="flex items-start gap-3 bg-accent-yellow/10 border border-accent-yellow/30 text-accent-yellow px-4 py-3 rounded-2xl text-sm font-medium">
-                <FiShield size={16} className="shrink-0 mt-0.5" />
-                <span>
-                  You must{" "}
-                  <button
-                    type="button"
-                    onClick={() => setShowKYCModal(true)}
-                    className="underline underline-offset-2 hover:opacity-80 transition-opacity"
-                  >
-                    verify your identity
-                  </button>{" "}
-                  before creating a project.
-                </span>
-              </div>
-            )}
-
             {/* Actions */}
             <div className="flex items-center justify-end gap-4 mt-4 pt-8 border-t border-white/10">
               <Button
@@ -662,13 +660,6 @@ export default function CreateProjectPage() {
       </div>
     </div>
 
-    <VerificationModal
-      isOpen={showKYCModal}
-      onClose={() => setShowKYCModal(false)}
-      onSuccess={() => { setShowKYCModal(false); refreshUser(); }}
-      defaultFirstName={(user as any)?.firstName ?? ""}
-      defaultLastName={(user as any)?.lastName ?? ""}
-    />
     </>
   );
 }

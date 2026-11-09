@@ -22,6 +22,8 @@ import UpdatesPanel from "@/components/features/workspace/UpdatesPanel";
 
 import SettingsPanel from "@/components/features/workspace/settings-panel/SettingsPanel";
 
+import WorkspaceVerificationBanner from "@/components/features/workspace/WorkspaceVerificationBanner";
+
 import { useProjects } from "@/hooks/projects/useProjects";
 
 import { handleApiError } from "@/lib/error-handler";
@@ -393,6 +395,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
         </header>
 
 
+        {/* Verification prompt — only shows on funded projects when caller needs KYC */}
+        <WorkspaceVerificationBanner />
 
         {/* Navigation Tabs */}
 

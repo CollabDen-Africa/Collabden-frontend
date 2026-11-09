@@ -126,8 +126,21 @@ export function ApplicationModalStep1({ onClose, onNext, projectData, appData, s
 
             <div className="flex justify-between items-start w-full">
               <span className="text-[17.39px] font-normal text-text-muted leading-6.5">Payment</span>
-              <span className="text-[17.39px] font-semibold text-primary-green leading-6.5">{project.paymentStatus}</span>
+              <span className={`text-[17.39px] font-semibold leading-6.5 ${project.isVolunteer ? 'text-white/70' : 'text-primary-green'}`}>
+                {project.isVolunteer
+                  ? 'Volunteer — no payment'
+                  : project.paymentStatus || 'Escrow Protected'}
+              </span>
             </div>
+
+            {!project.isVolunteer && (
+              <div className="flex justify-between items-start w-full">
+                <span className="text-[14px] font-normal text-text-muted leading-6">Note</span>
+                <span className="text-[14px] font-normal text-white/60 leading-6 text-right max-w-[60%]">
+                  Identity verification is required before you can receive payouts.
+                </span>
+              </div>
+            )}
 
           </div>
         </div>

@@ -214,6 +214,7 @@ export default function ProfileOverview() {
               skills,
               specializations: toList(profile?.specializations),
               primaryRoles: toList(profile?.primaryRoles),
+              identityVerified: Boolean((profile as any)?.identityVerified),
             }}
           />
         </div>

@@ -1,7 +1,8 @@
 "use client";
-import { 
-  FiCheck, 
-  FiArrowLeft, 
+import { useRef, useState } from "react";
+import {
+  FiCheck,
+  FiArrowLeft,
   FiArrowRight,
   FiFileText,
   FiUsers,
@@ -12,10 +13,12 @@ import {
 } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
+import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
 import { usePayment } from "@/hooks/payment/usePayment";
 import { useAgreements } from "@/hooks/projects/useAgreements";
+import VerificationModal from "@/components/features/profile/VerificationModal";
 
 
 const DEFAULT_RULES = [
@@ -45,11 +48,16 @@ export default function EscrowReviewSetup({
 
   const { activeProject } = useWorkspace();
     const projectId = activeProject?.id || "";
-  
+
+    const { user, refreshUser } = useAuth();
+    const isVerified = Boolean(user?.identityVerified);
+    const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+    const resumeAfterVerifyRef = useRef(false);
+
     const { useWallet } = usePayment();
     const { data: walletData } = useWallet();
     const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
-  
+
     const { useConfigureEscrow } = useEscrow();
   const configureMutation = useConfigureEscrow();
 
@@ -70,35 +78,73 @@ export default function EscrowReviewSetup({
   
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
-  const handleSubmitReview = async () => {
+  const runConfigureEscrow = async () => {
     if (!latestAgreementId) {
       console.error("No agreement found for this project.");
       return; 
+    }
+    try {
+      await configureMutation.mutateAsync({
+        projectId,
+        payload: {
+          totalAmount: Number(totalMilestonesAmount),
+          agreementId: latestAgreementId,
+          fundingMethod: terms.fundingMethod || "Funding Per Milestone",
+          reviewPeriodDays: parseInt(terms.reviewPeriodDays) || 7,
+          fundingDeadline: terms.fundingDeadline ? new Date(terms.fundingDeadline).toISOString() : undefined,
+          milestones: milestones.map((m: any) => ({
+            title: m.name,
+            description: m.description || m.condition || undefined,
+            amount: Number(m.amount),
+            dueDate: m.dueDate || m.deadline 
+                ? new Date(m.dueDate || m.deadline).toISOString() 
+                : undefined,
+            collaboratorIds: [m.assignedTo].filter(Boolean)
+          }))
         }
-      try {
-        await configureMutation.mutateAsync({
-          projectId,
-          payload: {
-            totalAmount: Number(totalMilestonesAmount),
-            agreementId: latestAgreementId, 
-            reviewPeriodDays: parseInt(terms.reviewPeriodDays) || 7,
-            fundingDeadline: terms.fundingDeadline ? new Date(terms.fundingDeadline).toISOString() : undefined,
-            milestones: milestones.map((m: any) => ({
-              title: m.name,
-              amount: Number(m.amount),
-              collaboratorIds: [m.assignedTo].filter(Boolean) 
-            }))
-          }
-        });
-        onContinueToApprovals?.();
-      } catch (error) {
-        console.error("Submission failed", error);
-      }
-    };
+
+        // Uses PUT (update) if editing, or POST (configure) if new
+        await activeMutation.mutateAsync({ projectId, payload });
+        
+      });
+      onContinueToApprovals?.();
+    } catch (error) {
+      console.error("Submission failed", error);
+    }
+  };
+
+   const handleSubmitReview = async () => {
+    if (!isVerified) {
+      resumeAfterVerifyRef.current = true;
+      setIsVerifyModalOpen(true);
+      return;
+    }
+    await runConfigureEscrow();
+  };
+
+  const handleVerifySuccess = async () => {
+    setIsVerifyModalOpen(false);
+    await refreshUser();
+    if (resumeAfterVerifyRef.current) {
+      resumeAfterVerifyRef.current = false;
+      await runConfigureEscrow();
+    }
+  };
   
 
   return (
     <div>
+        <VerificationModal
+          isOpen={isVerifyModalOpen}
+          onClose={() => {
+            resumeAfterVerifyRef.current = false;
+            setIsVerifyModalOpen(false);
+          }}
+          onSuccess={handleVerifySuccess}
+          defaultFirstName={(user as any)?.firstName ?? ""}
+          defaultLastName={(user as any)?.lastName ?? ""}
+        />
+
         {/* Section Header */}
         <div className="flex flex-col gap-2 mb-8">
           <h2 className="font-raleway font-extrabold text-[24px] text-white tracking-[-0.6px]">
