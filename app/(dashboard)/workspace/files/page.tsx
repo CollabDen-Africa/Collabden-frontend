@@ -85,20 +85,30 @@ export default function WorkspaceFilesPage() {
     }
     
     setUploadingCount(validFiles.length);
-    try {
-      await Promise.all(validFiles.map((file) => uploadFile.mutateAsync(file)));
-      setActionSuccess(
-        `${validFiles.length} file${validFiles.length === 1 ? "" : "s"} uploaded successfully.`,
-      );
-    } catch (error) {
-      setActionError(getErrorMessage(error));
-    } finally {
-      setUploadingCount(0);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  };
 
-  const confirmDelete = async () => {
+    let successCount = 0;
+    
+    for (const file of validFiles) {
+      try {
+        await uploadFile.mutateAsync(file);
+          successCount++;
+            } catch (error) {
+              setActionError(`Failed to upload ${file.name}: ${getErrorMessage(error)}`);
+              break; // Stop processing further files if the server rejects one
+            }
+          }
+      
+          if (successCount > 0) {
+            setActionSuccess(
+              `${successCount} file${successCount === 1 ? "" : "s"} uploaded successfully.`
+            );
+          }
+          
+          setUploadingCount(0);
+          if (inputRef.current) inputRef.current.value = "";
+        };
+
+const confirmDelete = async () => {
       if (!fileToDelete) return;
       
       setActionError(null);

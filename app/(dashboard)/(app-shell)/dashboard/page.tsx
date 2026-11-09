@@ -33,7 +33,7 @@ export default function DashboardPage() {
 
   const { useDashboardData } = useDashboard();
   const { useCollaborators } = useCollaborator();
-  const { useMarketplaceProjects } = useProjects();
+  const { useMarketplaceProjects, useAllProjects } = useProjects();
   const { data: apiData, isLoading, error } = useDashboardData();
   const { data: marketplaceCollaborators = [] } = useCollaborators({ openToCollaborate: 'true' });
   const { data: marketplaceProjects } = useMarketplaceProjects({ page: 1, limit: 10 });
@@ -85,6 +85,11 @@ export default function DashboardPage() {
       .slice(0, 3)
       .map((p) => {
         const collabsMap = new Map<string, { name: string; avatarUrl?: string }>();
+
+        const ownerId = p.owner?.id || p.ownerId;
+                // Determine the role for the logged-in user
+        const userRole = user?.id === ownerId ? "Project Owner" : "Collaborator";
+        
         if (p.owner) {
           const ownerName =
             p.owner.displayName ||
@@ -119,9 +124,10 @@ export default function DashboardPage() {
           progress: undefined,
           updated: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "Recently",
           status: (p.status || "ACTIVE").charAt(0) + (p.status || "ACTIVE").slice(1).toLowerCase(),
+          role: userRole
         };
       });
-  }, [apiData?.activeProjects]);
+  }, [apiData?.activeProjects, user?.id]);
 
   const recentActivity = useMemo(() => {
     return (apiData?.notifications ?? [])
@@ -210,6 +216,7 @@ export default function DashboardPage() {
               onSkip={onSkip}
             />
           </div>
+          
         </div>
         
         {/* Right Column */}

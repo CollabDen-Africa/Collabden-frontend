@@ -11,9 +11,13 @@ export const useRoyalties = () => {
       queryKey: ["project-royalties", projectId],
       queryFn: async () => {
         try {
-          return await royaltyService.getProjectSplits(projectId);
+          const data = await royaltyService.getProjectSplits(projectId);
+          return data || { splits: [] };
         } catch (error) {
-          throw new Error(handleApiError(error));
+          // If the API fails (e.g., 404 Not Found because no splits exist yet),
+          // gracefully return an empty splits array instead of crashing the app.
+          console.warn("No royalty splits found, defaulting to empty state.");
+          return { splits: [] };
         }
       },
       enabled: !!projectId,

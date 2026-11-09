@@ -46,6 +46,7 @@ export interface ConfigureEscrowPayload {
   agreementId: string;
   reviewPeriodDays?: number;
   fundingDeadline?: string;
+  fundingMethod?: string;
   milestones: {
     title: string;
     amount: number;

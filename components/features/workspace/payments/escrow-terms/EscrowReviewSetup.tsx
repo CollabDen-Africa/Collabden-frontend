@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
 import { usePayment } from "@/hooks/payment/usePayment";
+import { useAgreements } from "@/hooks/projects/useAgreements";
 import VerificationModal from "@/components/features/profile/VerificationModal";
 
 
@@ -56,9 +57,21 @@ export default function EscrowReviewSetup({
     const { useWallet } = usePayment();
     const { data: walletData } = useWallet();
     const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
+  
+  const { useConfigureEscrow, useUpdateEscrowTerms, useProjectEscrow } = useEscrow();
+  // Check if an escrow already exists to determine if we are Creating or Editing
+  const { data: existingEscrow } = useProjectEscrow(projectId);
+  const isEditing = !!existingEscrow?.id;
+  const configureMutation = useConfigureEscrow();
 
-    const { useConfigureEscrow } = useEscrow();
-    const configureMutation = useConfigureEscrow();
+  const updateMutation = useUpdateEscrowTerms();
+    
+  // Select the correct mutation
+  const activeMutation = isEditing ? updateMutation : configureMutation;
+
+  const { useProjectAgreements } = useAgreements(projectId);
+  const { data: apiAgreements = [] } = useProjectAgreements();
+  const latestAgreementId = apiAgreements[0]?.id || "";
   
     const totalBudget = activeProject?.budget || 0;
     const collaboratorsCount = activeProject?.collaborators?.length || 0;
@@ -74,28 +87,38 @@ export default function EscrowReviewSetup({
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
   const runConfigureEscrow = async () => {
+    if (!latestAgreementId) {
+      console.error("No agreement found for this project.");
+      return; 
+    }
     try {
-      await configureMutation.mutateAsync({
-        projectId,
-        payload: {
+      const payload = {
           totalAmount: Number(totalMilestonesAmount),
-          agreementId: activeProject?.activeAgreementId || activeProject?.id,
+          agreementId: latestAgreementId,
+          fundingMethod: terms.fundingMethod || "Funding Per Milestone",
           reviewPeriodDays: parseInt(terms.reviewPeriodDays) || 7,
           fundingDeadline: terms.fundingDeadline ? new Date(terms.fundingDeadline).toISOString() : undefined,
           milestones: milestones.map((m: any) => ({
             title: m.name,
+            description: m.description || m.condition || undefined,
             amount: Number(m.amount),
+            dueDate: m.dueDate || m.deadline
+              ? new Date(m.dueDate || m.deadline).toISOString()
+              : undefined,
             collaboratorIds: [m.assignedTo].filter(Boolean)
           }))
         }
-      });
+
+        // Uses PUT (update) if editing, or POST (configure) if new
+        await activeMutation.mutateAsync({ projectId, payload });
+     
       onContinueToApprovals?.();
     } catch (error) {
       console.error("Submission failed", error);
     }
   };
 
-  const handleSubmitReview = async () => {
+   const handleSubmitReview = async () => {
     if (!isVerified) {
       resumeAfterVerifyRef.current = true;
       setIsVerifyModalOpen(true);
@@ -341,12 +364,12 @@ export default function EscrowReviewSetup({
           <Button 
             variant="primary"
             onClick={handleSubmitReview}
-            disabled={configureMutation.isPending}
+            disabled={activeMutation.isPending}
             className="rounded-full shadow-btn-primary disabled:opacity-50"
             icon={FiArrowRight}
             iconPosition="right"
           >
-            {configureMutation.isPending ? "Saving..." : "Continue"}
+            {activeMutation.isPending ? "Saving..." : "Continue"}
           </Button>
 
         </div>

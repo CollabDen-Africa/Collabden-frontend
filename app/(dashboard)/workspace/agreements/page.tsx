@@ -23,6 +23,7 @@ import ConfirmSignatureOverlay from "@/components/features/agreements/ConfirmSig
 import SuccessSignatureOverlay from "@/components/features/agreements/SuccessSignature";
 import CreateAgreementOverlay from "@/components/features/agreements/CreateAgreementOverlay";
 import EditAgreementOverlay from "@/components/features/agreements/EditAgreementOverlay";
+import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useAgreements } from "@/hooks/projects/useAgreements";
 import { useAuth } from "@/context/AuthContext";
@@ -39,6 +40,14 @@ const STATUS_CONFIG = {
   SIGNED: {
     label: "Signed",
     pill: "bg-primary-green/20 border border-primary-green/50 text-primary-green",
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    pill: "bg-accent-red/10 border border-accent-red/30 text-accent-red"
+  },
+  EXPIRED: {
+    label: "Expired",
+    pill: "bg-white/5 border border-white/10 text-white/40"
   },
 } as const;
 
@@ -99,6 +108,9 @@ const AgreementCard = ({
   onEdit,
   onDelete,
   isDeleting,
+  onRequestCancel,
+  onRespondCancel,
+  isRespondingCancel
 }: {
   agreement: any;
   isOwner: boolean;
@@ -108,8 +120,16 @@ const AgreementCard = ({
   onEdit: (agreement: any) => void;
   onDelete: (agreementId: string) => void;
   isDeleting: boolean;
+  onRequestCancel: (agreementId: string) => void;
+  onRespondCancel: (agreementId: string, decision: "APPROVE" | "DECLINE") => void;
+  isRespondingCancel: boolean;  
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { activeProject } = useWorkspace();
+  const { useRequestCancellation, useRespondToCancellation } = useAgreements(activeProject?.id || "");
+    
+  const requestCancelMutation = useRequestCancellation();
+  const respondCancelMutation = useRespondToCancellation();
 
   const progressPercent =
     agreement.signatories.total === 0
@@ -122,11 +142,25 @@ const AgreementCard = ({
     STATUS_CONFIG[agreement.status as keyof typeof STATUS_CONFIG] ??
     STATUS_CONFIG.DRAFT;
   const isSigned = agreement.status === "SIGNED";
+  const isCancelled = agreement.status === "CANCELLED";
   const alreadySigned = agreement.rawSignatures?.some(
     (s: any) => s.userId === currentUserId
   );
 
+  const isParty = isOwner || alreadySigned;
+  const hasSignatures = agreement.rawSignatures?.length > 0;
+    
+  const cancellation = agreement.cancellation;
+  const isCancellationPending = !!cancellation && cancellation.pendingFrom?.length > 0;
+  const isPendingFromMe = cancellation?.pendingFrom?.includes(currentUserId);
+  const requestedByMe = cancellation?.requestedById === currentUserId;
+  
+  const handleRespondCancellation = async (decision: "APPROVE" | "DECLINE") => {
+    await respondCancelMutation.mutateAsync({ agreementId: agreement.id, decision });
+    };
+
   const renderSignButton = () => {
+    if (isCancelled) return null;
     if (isSigned || alreadySigned) {
       return (
         <div className="flex items-center gap-2 px-5 py-2 rounded-full bg-primary-green/10 border border-primary-green/30">
@@ -166,6 +200,48 @@ const AgreementCard = ({
 
   return (
     <div className="flex flex-col w-full bg-black/10 border border-white/10 rounded-[30px] p-8 lg:p-10 backdrop-blur-md transition-all duration-300">
+
+      {/* Pending Cancellation Banner */}
+      {isCancellationPending && (
+      <div className="mb-6 w-full bg-accent-yellow/10 border border-accent-yellow/30 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <FiAlertCircle className="text-accent-yellow shrink-0" size={20} />
+          <div className="flex flex-col">
+            <span className="font-raleway font-bold text-[14px] text-accent-yellow">Cancellation Requested</span>
+              <span className="font-raleway text-[13px] text-white/70">
+                {requestedByMe ? "Waiting for other parties to approve your request." : "Another party has requested to cancel this agreement."}
+              </span>
+          </div>
+        </div>
+        {isPendingFromMe && !requestedByMe && (
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => handleRespondCancellation("DECLINE")}
+              disabled={respondCancelMutation.isPending}
+              className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 text-[13px] font-semibold hover:bg-white/10 transition-colors"
+            >
+              Decline
+            </button>
+            <button 
+              onClick={() => handleRespondCancellation("APPROVE")}
+              disabled={respondCancelMutation.isPending}
+              className="px-4 py-2 rounded-full bg-accent-red/20 border border-accent-red/40 text-accent-red-alt text-[13px] font-semibold hover:bg-accent-red/30 transition-colors"
+            >
+              Approve Cancel
+            </button>
+          </div>
+        )}
+        {requestedByMe && (
+          <button 
+            onClick={() => handleRespondCancellation("DECLINE")} // Declining own request acts as withdrawal
+            disabled={respondCancelMutation.isPending}
+            className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 text-[13px] font-semibold hover:bg-white/10 transition-colors"
+          >
+            Withdraw Request
+          </button>
+        )}
+      </div>
+    )}
   
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center w-full gap-6 mb-8">
   
@@ -210,7 +286,7 @@ const AgreementCard = ({
           </div>
         </div>
 
-        {/* Right: Status pill */}
+        {/* Right: Status pill and actions */}
         <div className="flex flex-col items-end gap-3 lg:-mt-12.75">
           <div
             className={`flex items-center justify-center px-9 py-4 rounded-full shrink-0 ${statusCfg.pill}`}
@@ -221,8 +297,9 @@ const AgreementCard = ({
           </div>
 
           {/* Owner actions — only for non-signed agreements */}
-          {isOwner && !isSigned && (
-            <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1">
+            {/* Edit is only for Owner before anyone signs */}
+            {isOwner && !hasSignatures && !isCancelled && (
               <button
                 onClick={() => onEdit(agreement)}
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/15 text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
@@ -235,12 +312,28 @@ const AgreementCard = ({
                   Edit
                 </span>
               </button>
+            )}
+
+            {/* If unsigned, owner can Delete directly. If signed, parties must Request Cancellation */}
+            {isOwner && !hasSignatures && !isCancelled && (
               <DeleteButton
                 onDelete={() => onDelete(agreement.id)}
                 isPending={isDeleting}
               />
+            )}
+
+            {isParty && hasSignatures && !isCancelled && !isCancellationPending && (
+              <button
+                onClick={() => onRequestCancel(agreement.id)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-red/10 border border-accent-red/20 text-accent-red-alt hover:bg-accent-red/20 transition-colors group"
+              >
+                <FiTrash2 size={14} className="group-hover:scale-110 transition-transform" />
+                <span className="font-raleway font-medium text-[13px]">
+                  {requestCancelMutation.isPending ? "Requesting..." : "Cancel Agreement"}
+                </span>
+              </button>
+            )}
             </div>
-          )}
         </div>
       </div>
 
@@ -360,6 +453,8 @@ export default function AgreementsOverviewPage() {
     useUploadAgreement,
     useUpdateAgreement,
     useDeleteAgreement,
+    useRequestCancellation,     
+    useRespondToCancellation,
   } = useAgreements(projectId);
   const uploadMutation = useUploadAgreement();
   const { data: apiAgreements = [], isLoading } = useProjectAgreements();
@@ -375,6 +470,9 @@ export default function AgreementsOverviewPage() {
     date: string;
     time: string;
   } | null>(null);
+
+  const requestCancelMutation = useRequestCancellation();   
+  const respondCancelMutation = useRespondToCancellation();
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const deleteMutation = useDeleteAgreement(deletingId || "");
@@ -421,6 +519,22 @@ export default function AgreementsOverviewPage() {
       setFlowState("success");
     } catch (err) {
       console.error("Failed to sign agreement:", err);
+    }
+  };
+
+  const [cancelModalState, setCancelModalState] = useState<{ isOpen: boolean; agreementId: string | null }>({
+    isOpen: false,
+    agreementId: null,
+  });
+  
+  // The handler
+  const handleConfirmCancelRequest = async () => {
+    if (!cancelModalState.agreementId) return;
+    try {
+      await requestCancelMutation.mutateAsync({ agreementId: cancelModalState.agreementId });
+      setCancelModalState({ isOpen: false, agreementId: null });
+    } catch (error) {
+      console.error("Failed to request cancellation:", error);
     }
   };
 
@@ -484,6 +598,8 @@ export default function AgreementsOverviewPage() {
       fileUrl: agreement.fileUrl || null,
       status: agreement.status,
       rawSignatures: agreement.signatures || [],
+      ownerId: activeProject?.ownerId || activeProject?.owner?.id, 
+      cancellation: agreement.cancellation || null,
     };
   });
 
@@ -540,6 +656,9 @@ export default function AgreementsOverviewPage() {
                 isDeleting={
                   deletingId === agreement.id && deleteMutation.isPending
                 }
+                onRequestCancel={(id) => setCancelModalState({ isOpen: true, agreementId: id })}
+                onRespondCancel={(id, decision) => respondCancelMutation.mutate({ agreementId: id, decision })}
+                isRespondingCancel={respondCancelMutation.isPending}
               />
             ))}
           </div>
@@ -641,6 +760,18 @@ export default function AgreementsOverviewPage() {
         onUpdate={handleUpdateAgreement}
         isPending={updateMutation.isPending}
         agreementTitle={editingAgreement?.title}
+      />
+
+      <ConfirmationModal
+        isOpen={cancelModalState.isOpen}
+        onClose={() => setCancelModalState({ isOpen: false, agreementId: null })}
+        onConfirm={handleConfirmCancelRequest}
+        isLoading={requestCancelMutation.isPending}
+        title="Cancel Agreement?"
+        description="Because this agreement has already been signed, cancelling it requires the consent of all parties. Are you sure you want to send a cancellation request?"
+        confirmText="Yes, Request"
+        cancelText="Go Back"
+        variant="warning"
       />
     </div>
   );

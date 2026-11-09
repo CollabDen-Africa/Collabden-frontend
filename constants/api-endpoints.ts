@@ -451,6 +451,9 @@ export const PROXY_ENDPOINTS = {
     MILESTONE_SUBMIT: (projectId: string, milestoneId: string) => `/projects/${projectId}/escrow/milestones/${milestoneId}/submit`,
     MILESTONE_APPROVE: (projectId: string, milestoneId: string) => `/projects/${projectId}/escrow/milestones/${milestoneId}/approve`,
     MILESTONE_DISPUTE: (projectId: string, milestoneId: string) => `/projects/${projectId}/escrow/milestones/${milestoneId}/dispute`,
+    REMIND_COLLABORATOR: (projectId: string, userId: string) => '/projects/${projectId}/escrow/collaborators/${userId}/remind',
+    REMOVE_COLLABORATOR: (projectId: string, userId: string) => `/projects/${projectId}/escrow/collaborators/${userId}`,
+    UPDATE_TERMS: (projectId: string) => `/projects/${projectId}/escrow`, 
   },
   AGREEMENTS: {
     UPLOAD: (projectId: string) => `/projects/${projectId}/agreements`,
