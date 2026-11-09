@@ -103,6 +103,35 @@ export const useEscrow = () => {
       onError: (error) => handleApiError(error),
     });
 
+  const useRemindCollaborator = () => {
+    return useMutation({
+      mutationFn: ({ projectId, userId }: { projectId: string; userId: string }) =>
+        escrowService.remindCollaborator(projectId, userId),
+    });
+  };
+  
+  const useRemoveEscrowCollaborator = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: ({ projectId, userId }: { projectId: string; userId: string }) =>
+        escrowService.removeCollaborator(projectId, userId),
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: ["escrow", variables.projectId] });
+      },
+    });
+  };
+  
+  const useUpdateEscrowTerms = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: ({ projectId, payload }: { projectId: string; payload: any }) =>
+        escrowService.updateEscrowTerms(projectId, payload),
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: ["escrow", variables.projectId] });
+      },
+    });
+  };
+
   return {
     usePersonalEscrowPayments,
     useConfigureEscrow,
@@ -114,5 +143,8 @@ export const useEscrow = () => {
     useSubmitMilestoneEvidence,
     useApproveMilestone,
     useRaiseMilestoneDispute,
+    useRemindCollaborator,
+    useRemoveEscrowCollaborator,
+    useUpdateEscrowTerms
   };
 };

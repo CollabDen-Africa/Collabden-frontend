@@ -266,7 +266,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
     >
 
-      <div className="relative z-10 w-full max-w-[1512px] mx-auto flex flex-col md:flex-row gap-6 p-4 sm:p-6 lg:p-8 text-white font-sans">
+      <div className="relative z-10 w-full max-w-378 mx-auto flex flex-col md:flex-row gap-6 p-4 sm:p-6 lg:p-8 text-white font-sans">
 
       {/* Desktop Sidebar (Hidden on Mobile) */}
 
@@ -488,9 +488,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
        {/* Right Toolbar */}
 
-      <aside className="fixed bottom-0 left-0 w-full h-[80px] bg-[#121A1F]/95 backdrop-blur-md border-t border-white/10 flex flex-row items-center justify-around pb-safe z-80
-
-                        xl:relative xl:bottom-auto xl:left-auto xl:w-[60px] xl:h-auto xl:bg-transparent xl:border-none xl:flex-col xl:justify-start xl:gap-8 xl:pt-[220px] xl:shrink-0 xl:z-auto">
+      <aside className="fixed bottom-0 left-0 w-full h-20 bg-[#121A1F]/95 backdrop-blur-md border-t border-white/10 flex flex-row items-center justify-around pb-safe z-80 xl:relative xl:bottom-auto xl:left-auto xl:w-15 xl:h-auto xl:bg-transparent xl:border-none xl:flex-col xl:justify-start xl:gap-8 xl:pt-55 xl:shrink-0 xl:z-auto">
 
 
 

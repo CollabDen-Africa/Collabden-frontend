@@ -65,6 +65,26 @@ export const useAgreements = (projectId: string) => {
     onError: (error) => handleApiError(error),
   });
 
+  // Request mutual cancellation
+  const useRequestCancellation = () => useMutation({
+    mutationFn: ({ agreementId, reason }: { agreementId: string; reason?: string }) => 
+      agreementService.requestCancellation(projectId, agreementId, reason),
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      },
+    onError: (error) => handleApiError(error),
+  });
+  
+  // Respond to a cancellation request
+  const useRespondToCancellation = () => useMutation({
+    mutationFn: ({ agreementId, decision }: { agreementId: string; decision: "APPROVE" | "DECLINE" }) => 
+      agreementService.respondToCancellation(projectId, agreementId, decision),
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
+      },
+    onError: (error) => handleApiError(error),
+  });
+
   // Electronically sign inside platform
   const useEsignAgreement = (agreementId: string, legalName?: string) => useMutation({
     mutationFn: (intentToSign: boolean) => agreementService.esign(projectId, agreementId, intentToSign, legalName),
@@ -84,6 +104,8 @@ export const useAgreements = (projectId: string) => {
     useUploadSignedCopy,
     useDeleteAgreement,
     useEsignAgreement,
+    useRequestCancellation,
+    useRespondToCancellation,
   };
 };
 

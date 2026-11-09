@@ -17,7 +17,7 @@ export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps
   const { activeProject } = useWorkspace();
   const projectId = activeProject?.id || ""; 
   const { useProjectRoyalties, useUpdateRoyaltySplits } = useRoyalties();
-  const { data: royaltyData, isLoading: isFetching } = useProjectRoyalties(projectId);
+  const { data: royaltyData = { splits: [] }, isLoading: isFetching } = useProjectRoyalties(projectId);
   const updateMutation = useUpdateRoyaltySplits();
   const [splits, setSplits] = useState<any[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null); 
@@ -25,7 +25,7 @@ export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps
   // Initialize splits from activeProject collaborators
   useEffect(() => {
     const collaborators = activeProject?.collaborators || [];
-    const existingSplits = royaltyData.splits || [];
+    const existingSplits = royaltyData?.splits || [];
     
     const mappedSplits = collaborators.map((c: any) => {
       const savedSplit = existingSplits.find((s: any) => s.userId === c.userId);

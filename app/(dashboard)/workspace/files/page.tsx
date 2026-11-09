@@ -107,9 +107,8 @@ export default function WorkspaceFilesPage() {
           setUploadingCount(0);
           if (inputRef.current) inputRef.current.value = "";
         };
-  };
 
-{/*const confirmDelete = async () => {
+const confirmDelete = async () => {
       if (!fileToDelete) return;
       
       setActionError(null);
@@ -123,7 +122,7 @@ export default function WorkspaceFilesPage() {
         setDeletingId(null);
         setFileToDelete(null);
       }
-    };*/}
+    };
   
   const handleDownload = async (url: string, filename: string, fileId: string) => {
     setDownloadingId(fileId);

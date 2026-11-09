@@ -48,12 +48,11 @@ export default function EscrowFundingSetup({
   const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
   const walletBalance = walletData?.balance || 0;
 
-  const { useProjectEscrow, useFundEscrow, useRemindCollaborator, useRemoveCollaborator } = useEscrow();
+  const { useProjectEscrow, useFundEscrow, useRemindCollaborator, useRemoveEscrowCollaborator } = useEscrow();
   const { data: escrowData } = useProjectEscrow(projectId);
   const fundMutation = useFundEscrow();
   const remindMutation = useRemindCollaborator();
   const removeMutation = useRemoveEscrowCollaborator();
-
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
@@ -253,6 +252,17 @@ export default function EscrowFundingSetup({
 
         {/* Right Column - Status & Info Sidebar */}
         <div className="w-full lg:w-85 shrink-0 flex flex-col gap-5">
+
+          {actionError && (
+                  <div className="mb-4 w-full bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center gap-3">
+                    <span className="font-raleway font-medium text-[13px] text-red-400">{actionError}</span>
+                  </div>
+                )}
+                {actionSuccess && (
+                  <div className="mb-4 w-full bg-primary-green/10 border border-primary-green/30 rounded-2xl p-4 flex items-center gap-3">
+                    <span className="font-raleway font-medium text-[13px] text-primary-green">{actionSuccess}</span>
+                  </div>
+                )}
           
           {/* Approvals Summary Card */}
           <div className="bg-black/15 border border-white/5 rounded-3xl p-6 flex flex-col backdrop-blur-md relative z-20">

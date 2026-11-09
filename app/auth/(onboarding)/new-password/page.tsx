@@ -7,6 +7,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { SquareLock02Icon } from '@hugeicons/core-free-icons';
 import { useResetPassword } from '@/hooks/auth/useResetPassword';
 import { ROUTES } from '@/constants/routes';
+import { getErrorMessage } from '@/lib/error-handler';
 
 function NewPasswordForm() {
     const [password, setPassword] = useState('');
@@ -82,7 +83,7 @@ function NewPasswordForm() {
 
                     {(error || resetPasswordMutation.error) && (
                         <div className="bg-red-500/20 border border-red-500/50 text-white px-4 py-3 rounded-xl text-sm font-medium text-center">
-                            {error || (resetPasswordMutation.error instanceof Error ? resetPasswordMutation.error.message : "Failed to update password. Link may have expired.")}
+                            {error || getErrorMessage(resetPasswordMutation.error)}
                         </div>
                     )}
 

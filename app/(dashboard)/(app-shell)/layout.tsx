@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import { HiMenu } from "react-icons/hi";
@@ -36,8 +37,8 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       )}
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-[227px] shrink-0">
-        <div className={`fixed left-[18px] top-[52px] h-[calc(100vh-84px)] max-h-[788px] w-[209px] transition-all ${isTourActive && [2, 3].includes(currentStep) ? "z-50" : "z-10"
+      <div className="hidden lg:block w-56.75 shrink-0">
+        <div className={`fixed left-4.5 top-13 h-[calc(100vh-84px)] max-h-197 w-52.25 transition-all ${isTourActive && [2, 3].includes(currentStep) ? "z-50" : "z-10"
           }`}>
           <DashboardSidebar
             currentStep={currentStep}
@@ -54,7 +55,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
-      <div className={`fixed top-0 left-0 h-full w-[250px] z-70 p-[18px] transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+      <div className={`fixed top-0 left-0 h-full w-62.5 z-70 p-4.5 transform transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}>
         <DashboardSidebar
           onClose={() => setIsMobileMenuOpen(false)}
@@ -65,12 +66,18 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       </div>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col relative min-h-screen px-4.5 lg:pl-8.5 lg:pr-8.5 xl:pr-[60px] w-full">
+      <main className="flex-1 flex flex-col relative min-h-screen px-4.5 lg:pl-8.5 lg:pr-8.5 xl:pr-15 w-full">
 
-        <div className="lg:hidden flex items-center justify-between pt-[20px] pb-[10px] w-full max-w-300 mx-auto">
-          <div className="flex items-center gap-[6px]">
-            <div className="w-[36px] h-[36px] bg-primary-green rounded-[9.47px] flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-xl leading-none">C</span>
+        <div className="lg:hidden flex items-center justify-between pt-5 pb-2.5 w-full max-w-300 mx-auto">
+          <div className="flex items-center gap-1.5">
+            <div className="w-9 h-9 flex items-center justify-center shrink-0">
+              <Image 
+                src="/Green-logo.png" 
+                alt="CollabDen Logo" 
+                width={36} 
+                height={36} 
+                className="object-contain"
+              />
             </div>
             <span className="text-white font-bold text-[20px] leading-tight">CollabDen</span>
           </div>
@@ -82,7 +89,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           </button>
         </div>
 
-        <div className="w-full lg:max-w-230 xl:max-w-300 mx-auto pb-[100px]">
+        <div className="w-full lg:max-w-230 xl:max-w-300 mx-auto pb-25">
 
           {/* HEADER WRAPPER */}
           <div className={`w-full transition-all duration-300 ${isTourActive && currentStep === 1 ? 'relative z-50' : ''}`}>

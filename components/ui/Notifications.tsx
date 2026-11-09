@@ -126,31 +126,32 @@ export default function NotificationBell({
           )}
 
           {/* Link to the full page */}
-                    <div className="pt-2 mt-2 border-t border-white/10 w-full">
-                      <Link 
-                        href="/notifications" 
-                        onClick={() => setIsOpen(false)} // Close the dropdown when they navigate away
-                        className="block w-full text-center font-medium text-[14px] leading-4.75 text-text-muted hover:text-white transition-colors"
-                      >
-                        View all notifications
-                      </Link>
-                    </div>
-
-          {/* STEP 5 ANCHOR */}
-          {currentStep === 5 && (
-            <OnboardingTooltip
-              step={5}
-              title="Stay in the loop"
-              description="Get updates on activity, messages, and project changes"
-              onNext={() => setStep?.(6)}
-              onSkip={() => onSkip?.()}
-              direction="left-of"
-              arrowOffset="40px"
-            />
-          )}
+          <div className="pt-2 mt-2 border-t border-white/10 w-full">
+            <Link 
+              href="/notifications" 
+              onClick={() => setIsOpen(false)} // Close the dropdown when they navigate away
+              className="block w-full text-center font-medium text-[14px] leading-4.75 text-text-muted hover:text-white transition-colors"
+            >
+              View all notifications
+            </Link>
+          </div>
 
         </div>
       )}
+
+      {/* STEP 5 ANCHOR */}
+      {currentStep === 5 && (
+        <OnboardingTooltip
+          step={5}
+          title="Stay in the loop"
+          description="Get updates on activity, messages, and project changes"
+          onNext={() => setStep?.(6)}
+          onSkip={() => onSkip?.()}
+          direction="left-of"
+          arrowOffset="40px"
+        />
+      )}
+      
     </div>
   );
 }

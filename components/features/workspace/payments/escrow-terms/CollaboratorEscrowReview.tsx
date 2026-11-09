@@ -8,7 +8,8 @@ import {
   FiDollarSign,
   FiCalendar,
   FiMic,
-  FiEdit3
+  FiEdit3,
+  FiX
 } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import { useWorkspace } from "@/context/WorkspaceContext";
@@ -42,6 +43,7 @@ export default function CollaboratorEscrowReview({
 
   const [isRequestingChanges, setIsRequestingChanges] = useState(false);
   const [changeNote, setChangeNote] = useState("");
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const formatCurrency = (amount: number) => `${currencySymbol}${amount.toLocaleString()}`;
 
@@ -83,6 +85,21 @@ export default function CollaboratorEscrowReview({
       // Optionally trigger a success state or redirect
     } catch (error) {
       console.error("Failed to request changes:", error);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setIsRejecting(true);
+      await approveMutation.mutateAsync({
+        projectId,
+        status: "REJECTED"
+      });
+      onBack?.(); 
+      } catch (error) {
+        console.error("Failed to reject escrow:", error);
+      } finally {
+        setIsRejecting(false);
     }
   };
 
@@ -271,16 +288,27 @@ export default function CollaboratorEscrowReview({
                 <FiEdit3 size={14} className="text-white/50" />
                 <span className="font-raleway font-bold text-[13px] text-white/70">Request Changes</span>
               </button>
+
+              <button
+                onClick={handleReject}
+                disabled={approveMutation.isPending || isRejecting}
+                className="flex items-center justify-center gap-2 h-11 px-6 rounded-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors w-full sm:w-auto disabled:opacity-50"
+              >
+              <FiX size={14} className="text-red-400" />
+                <span className="font-raleway font-bold text-[13px] text-red-400">
+                  {isRejecting ? "Rejecting..." : "Reject"}
+                </span>
+              </button>
               
               <Button
                 variant="primary"
                 onClick={handleApprove}
-                disabled={approveMutation.isPending}
+                disabled={approveMutation.isPending || isRejecting}
                 className="h-11 px-8 rounded-full shadow-btn-primary w-full sm:w-auto flex items-center justify-center gap-2"
               >
                 <FiCheck size={16} />
                 <span className="font-raleway font-bold text-[14px]">
-                  {approveMutation.isPending ? "Approving..." : "Approve Terms"}
+                  {approveMutation.isPending && !isRejecting ? "Approving..." : "Approve Terms"}
                 </span>
               </Button>
             </div>

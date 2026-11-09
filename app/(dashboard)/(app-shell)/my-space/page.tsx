@@ -94,9 +94,9 @@ export default function MySpacePage() {
   const handleGoToProject = (item: UserSpaceItem) => {
     if (!item.project) return;
     if (item.type === "agreement") {
-      router.push(`/projects/${item.project.id}/agreements`);
+      router.push(`/workspace/agreements?projectId=${item.project.id}`);
     } else {
-      router.push(`/projects/${item.project.id}`);
+      router.push(`/workspace?projectId=${item.project.id}`);
     }
   };
 

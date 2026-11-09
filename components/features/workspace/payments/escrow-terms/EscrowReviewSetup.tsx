@@ -57,9 +57,17 @@ export default function EscrowReviewSetup({
     const { useWallet } = usePayment();
     const { data: walletData } = useWallet();
     const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
-
-    const { useConfigureEscrow } = useEscrow();
+  
+  const { useConfigureEscrow, useUpdateEscrowTerms, useProjectEscrow } = useEscrow();
+  // Check if an escrow already exists to determine if we are Creating or Editing
+  const { data: existingEscrow } = useProjectEscrow(projectId);
+  const isEditing = !!existingEscrow?.id;
   const configureMutation = useConfigureEscrow();
+
+  const updateMutation = useUpdateEscrowTerms();
+    
+  // Select the correct mutation
+  const activeMutation = isEditing ? updateMutation : configureMutation;
 
   const { useProjectAgreements } = useAgreements(projectId);
   const { data: apiAgreements = [] } = useProjectAgreements();
@@ -84,9 +92,7 @@ export default function EscrowReviewSetup({
       return; 
     }
     try {
-      await configureMutation.mutateAsync({
-        projectId,
-        payload: {
+      const payload = {
           totalAmount: Number(totalMilestonesAmount),
           agreementId: latestAgreementId,
           fundingMethod: terms.fundingMethod || "Funding Per Milestone",
@@ -96,17 +102,16 @@ export default function EscrowReviewSetup({
             title: m.name,
             description: m.description || m.condition || undefined,
             amount: Number(m.amount),
-            dueDate: m.dueDate || m.deadline 
-                ? new Date(m.dueDate || m.deadline).toISOString() 
-                : undefined,
+            dueDate: m.dueDate || m.deadline
+              ? new Date(m.dueDate || m.deadline).toISOString()
+              : undefined,
             collaboratorIds: [m.assignedTo].filter(Boolean)
           }))
         }
 
         // Uses PUT (update) if editing, or POST (configure) if new
         await activeMutation.mutateAsync({ projectId, payload });
-        
-      });
+     
       onContinueToApprovals?.();
     } catch (error) {
       console.error("Submission failed", error);
@@ -359,12 +364,12 @@ export default function EscrowReviewSetup({
           <Button 
             variant="primary"
             onClick={handleSubmitReview}
-            disabled={configureMutation.isPending}
+            disabled={activeMutation.isPending}
             className="rounded-full shadow-btn-primary disabled:opacity-50"
             icon={FiArrowRight}
             iconPosition="right"
           >
-            {configureMutation.isPending ? "Saving..." : "Continue"}
+            {activeMutation.isPending ? "Saving..." : "Continue"}
           </Button>
 
         </div>
