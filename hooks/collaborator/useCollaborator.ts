@@ -45,7 +45,7 @@ export const useCollaborator = () => {
         queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
         queryClient.invalidateQueries({ queryKey: ["collaborators"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "collaborators.updateAvailability" },
     });
 
   return {

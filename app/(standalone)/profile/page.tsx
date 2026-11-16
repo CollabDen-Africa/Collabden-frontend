@@ -113,18 +113,8 @@ export default function ProfileOverview() {
 
   const handleSaveProfile = async (data: Record<string, unknown>) => {
     if (!isOwnProfile) return;
-    try {
       await updateProfile.mutateAsync(data);
       showToast("Profile updated successfully.", "success");
-    } catch (error: any) {
-      const msg =
-        error?.response?.data?.error ||
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to update profile.";
-      showToast(msg, "error");
-      throw error;
-    }
   };
 
   const rawPortfolio = Array.isArray(portfolioData)

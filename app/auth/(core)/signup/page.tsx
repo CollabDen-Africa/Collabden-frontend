@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -15,7 +15,7 @@ import PasswordInput from "@/components/ui/PasswordInput";
 import Checkbox from "@/components/ui/Checkbox";
 
 export default function SignupPage() {
-  const { signup, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const { signup, isLoading: authLoading, error: authError, friendlyError, clearError } = useAuth();
   const router = useRouter();
   const resendMutation = useResendVerification();
   const [resendMessage, setResendMessage] = useState("");
@@ -40,14 +40,8 @@ export default function SignupPage() {
 
   const watchedAgreedToTerms = watch("agreedToTerms");
 
-  const isAlreadyExistsError = useMemo(() => {
-    if (!authError) return false;
-    const lowerError = authError.toLowerCase();
-    return lowerError.includes("exist") ||
-      lowerError.includes("already") ||
-      lowerError.includes("registered") ||
-      lowerError.includes("conflict");
-  }, [authError]);
+  // Branch on the error's kind, not on its (now friendly) wording
+  const isAlreadyExistsError = friendlyError?.kind === "alreadyExists";
 
   const handleGoogleSignup = () => {
     window.location.href = "/api/auth/google?mode=signup";

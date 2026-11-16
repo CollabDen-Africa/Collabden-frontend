@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import securityService from "@/services/security.service";
-import { handleApiError } from "@/lib/error-handler";
+
 
 export const useSecurity = () => {
   const queryClient = useQueryClient();
@@ -8,7 +8,7 @@ export const useSecurity = () => {
   const useSetup2FA = () =>
     useMutation({
       mutationFn: () => securityService.setup2FA(),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "security.setup2FA" },
     });
 
   const useVerify2FA = () =>
@@ -17,38 +17,38 @@ export const useSecurity = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "security.verify2FA" },
     });
 
   const useLogoutAllDevices = () =>
     useMutation({
       mutationFn: () => securityService.logoutAllDevices(),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "security.logoutAll" },
     });
 
   const useDeactivateAccount = () =>
     useMutation({
       mutationFn: () => securityService.deactivateAccount(),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "security.deactivate" },
     });
 
   const useDeleteAccount = () =>
     useMutation({
       mutationFn: () => securityService.deleteAccount(),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "security.delete" },
     });
 
   const useDataExport = () =>
     useMutation({
       mutationFn: () => securityService.requestDataExport(),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "security.dataExport" },
     });
 
   const useCreateSupportTicket = () =>
     useMutation({
       mutationFn: ({ subject, message }: { subject: string; message: string }) =>
         securityService.createSupportTicket(subject, message),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "support.ticket", toast: false },
     });
 
   return {

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import notificationSettingsService from "@/services/notification-settings.service";
 import { UpdateNotificationSettingsPayload } from "@/types/api.types";
-import { handleApiError } from "@/lib/error-handler";
 
 export const useNotificationSettingsHook = () => {
   const queryClient = useQueryClient();
@@ -19,7 +18,7 @@ export const useNotificationSettingsHook = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["user", "notification-settings"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "settings.save" },
     });
 
   return {

@@ -1,5 +1,5 @@
-import axiosInstance from "@/lib/axios";
-import { API_ENDPOINTS } from "@/constants/api-endpoints";
+import { proxyAxios } from "@/lib/axios";
+import { PROXY_ENDPOINTS } from "@/constants/api-endpoints";
 import type { RoyaltySettingsResponse, UpdateRoyaltySplitInput } from "@/types/royalty.types";
 
 const royaltyService = {
@@ -7,7 +7,7 @@ const royaltyService = {
    * Get royalty splits for a project.
    */
   getProjectSplits: async (projectId: string): Promise<RoyaltySettingsResponse> => {
-    const response = await axiosInstance.get(API_ENDPOINTS.ROYALTIES.SPLITS(projectId));
+    const response = await proxyAxios.get(PROXY_ENDPOINTS.ROYALTIES.SPLITS(projectId));
     return response.data?.data || response.data;
   },
 
@@ -18,8 +18,8 @@ const royaltyService = {
     projectId: string, 
     splitsData: UpdateRoyaltySplitInput[]
   ): Promise<RoyaltySettingsResponse> => {
-    const response = await axiosInstance.put(API_ENDPOINTS.ROYALTIES.SPLITS(projectId), { 
-      splitsData 
+    const response = await proxyAxios.put(PROXY_ENDPOINTS.ROYALTIES.SPLITS(projectId), { 
+      splits: splitsData 
     });
     return response.data?.data || response.data;
   }

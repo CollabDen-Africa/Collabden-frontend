@@ -12,6 +12,7 @@ import {
 import { LuLightbulb } from "react-icons/lu";
 import Button from "@/components/ui/Button";
 import { useSecurity } from "@/hooks/security/useSecurity";
+import { getFriendlyMessage } from "@/lib/error-messages";
 
 const SUPPORT_CARDS = [
   { 
@@ -78,8 +79,8 @@ export default function ProfileSettingsSupport() {
         setShowForm(false);
         setStatus(null);
       }, 3000);
-    } catch {
-      setStatus("Failed to submit ticket. Please try again.");
+    } catch (err) {
+      setStatus(getFriendlyMessage(err, "support.ticket"));
     }
   };
 

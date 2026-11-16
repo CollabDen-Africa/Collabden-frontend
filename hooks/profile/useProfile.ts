@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import profileService from "@/services/profile.service";
-import { handleApiError } from "@/lib/error-handler";
+
 
 export const useProfile = () => {
   const queryClient = useQueryClient();
@@ -27,7 +27,7 @@ export const useProfile = () => {
         queryClient.invalidateQueries({ queryKey: ["profile", userId] });
         queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.update" },
     });
 
   // Update email
@@ -35,7 +35,7 @@ export const useProfile = () => {
     useMutation({
       mutationFn: (data: { newEmail: string; currentPassword: string }) =>
         profileService.updateEmail(data),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.updateEmail" },
     });
 
   // Add backup email (sends verification token)
@@ -45,7 +45,7 @@ export const useProfile = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.backupEmail", toast: false },
     });
 
   // Verify backup email with token
@@ -55,7 +55,7 @@ export const useProfile = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.backupEmail", toast: false },
     });
 
   // Remove backup email
@@ -65,7 +65,7 @@ export const useProfile = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.backupEmail", toast: false },
     });
 
   // Update avatar URL or file upload
@@ -82,7 +82,7 @@ export const useProfile = () => {
         queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "me"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.avatar" },
     });
 
   // Fetch completeness metrics
@@ -106,7 +106,7 @@ export const useProfile = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["profile", userId] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.endorse" },
     });
 
   // Get portfolio
@@ -124,7 +124,7 @@ export const useProfile = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["profile", "portfolio", userId] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "profile.portfolio" },
     });
 
   return {
