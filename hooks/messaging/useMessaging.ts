@@ -3,7 +3,6 @@ import { DirectMessage, DirectChat } from "@/types/api.types";
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import messagingService from "@/services/messaging.service";
 import { SendMessagePayload } from "@/types/api.types";
-import { handleApiError } from "@/lib/error-handler";
 
 export const useMessaging = () => {
   const queryClient = useQueryClient();
@@ -15,6 +14,7 @@ export const useMessaging = () => {
       queryKey: ["messaging", "chats"],
       queryFn: () => messagingService.getChats(),
       staleTime: 30 * 1000,
+      meta: { errorContext: "messages.load" },
     });
 
   // Fetch messages in a specific chat (cached with staleTime for 0ms chat switching delay)
@@ -101,13 +101,13 @@ export const useMessaging = () => {
         if (context?.previousChats) {
           queryClient.setQueryData(["messaging", "chats"], context.previousChats);
         }
-        handleApiError(err);
       },
 
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats", chatId, "messages"] });
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
+      meta: { errorContext: "messages.send" },
     });
 
   // Fetch message requests
@@ -126,7 +126,7 @@ export const useMessaging = () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "requests"] });
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "messages.respondRequest" },
     });
 
   // Toggle emoji reaction
@@ -137,7 +137,7 @@ export const useMessaging = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats", chatId, "messages"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "messages.react" },
     });
 
   // Archive chat session
@@ -148,7 +148,7 @@ export const useMessaging = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "messages.archive" },
     });
 
   // Delete chat history
@@ -158,7 +158,7 @@ export const useMessaging = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "messages.deleteChat" },
     });
 
   // Send a message request
@@ -170,7 +170,7 @@ export const useMessaging = () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "requests"] });
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "messages.sendRequest" },
     });
 
 
@@ -181,7 +181,7 @@ export const useMessaging = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
-      onError: (error) => handleApiError(error),
+     meta: { errorContext: "messages.startChat", toast: false },
     });
 
   return {

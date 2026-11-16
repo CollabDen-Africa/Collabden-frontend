@@ -28,9 +28,6 @@ export default function ProfileSettingsNotifications() {
         onSuccess: () => {
           showToast("Notification settings updated successfully.", "success");
         },
-        onError: (err: any) => {
-          showToast(err?.response?.data?.error || "Failed to update notification settings.", "error");
-        },
       }
     );
   };
@@ -41,9 +38,6 @@ export default function ProfileSettingsNotifications() {
       {
         onSuccess: () => {
           showToast(`Email summary frequency set to ${frequency.toLowerCase()}.`, "success");
-        },
-        onError: (err: any) => {
-          showToast(err?.response?.data?.error || "Failed to update frequency.", "error");
         },
       }
     );

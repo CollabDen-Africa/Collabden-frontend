@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import authService, { LoginPayload, SignupPayload, VerifyPayload } from '@/services/auth.service';
 import { ROUTES } from '@/constants/routes';
@@ -10,7 +10,7 @@ import { useAdminVerify2FA } from "@/hooks/auth/useAdminVerify2FA";
 import { useAdminResend2FA } from "@/hooks/auth/useAdminResend2FA";
 import { useSignup } from '@/hooks/auth/useSignup';
 import { useLogout } from '@/hooks/auth/useLogout';
-import { getErrorMessage } from '@/lib/error-handler';
+import { getFriendlyError, type FriendlyError } from '@/lib/error-messages';
 
 interface User {
   id: string;
@@ -39,7 +39,10 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** Friendly, user-facing message (same shape as before: a string). */
   error: string | null;
+  /** Same error with its `kind` (notFound, unverified, alreadyExists, ...) for conditional UI. */
+  friendlyError: FriendlyError | null;
   login: (data: LoginPayload) => Promise<void>;
   adminLogin: (data: LoginPayload) => Promise<any>;
   adminVerify2FA: (data: AdminVerify2FAPayload) => Promise<any>;
@@ -294,20 +297,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signupMutation.isPending ||
     logoutMutation.isPending;
 
-  const error =
-    manualError ||
-    (loginMutation.error ? getErrorMessage(loginMutation.error) : null) ||
-    (adminLoginMutation.error
-      ? getErrorMessage(adminLoginMutation.error)
-      : null) ||
-    (adminVerify2FAMutation.error
-      ? getErrorMessage(adminVerify2FAMutation.error)
-      : null) ||
-    (adminResend2FAMutation.error
-      ? getErrorMessage(adminResend2FAMutation.error)
-      : null) ||
-    (signupMutation.error ? getErrorMessage(signupMutation.error) : null) ||
-    null;
+  // Translate once, here, while we still have the raw error (and its HTTP status).
+  // Pages then branch on friendlyError.kind instead of string-matching the message,
+  // which breaks as soon as the message is rewritten to be friendly.
+  const friendlyError = useMemo<FriendlyError | null>(() => {
+    if (manualError) return { message: manualError, kind: 'unknown' };
+    if (loginMutation.error) return getFriendlyError(loginMutation.error, 'auth.login');
+    if (adminLoginMutation.error) return getFriendlyError(adminLoginMutation.error, 'auth.login');
+    if (adminVerify2FAMutation.error) {
+      return getFriendlyError(adminVerify2FAMutation.error, 'auth.adminVerify2FA');
+    }
+    if (adminResend2FAMutation.error) {
+      return getFriendlyError(adminResend2FAMutation.error, 'auth.adminResend2FA');
+    }
+    if (signupMutation.error) return getFriendlyError(signupMutation.error, 'auth.signup');
+    return null;
+  }, [
+    manualError,
+    loginMutation.error,
+    adminLoginMutation.error,
+    adminVerify2FAMutation.error,
+    adminResend2FAMutation.error,
+    signupMutation.error,
+  ]);
+
+  const error = friendlyError?.message ?? null;
 
   return (
     <AuthContext.Provider
@@ -316,6 +330,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         isLoading,
         error,
+        friendlyError,
         login,
         adminLogin,
         adminVerify2FA,

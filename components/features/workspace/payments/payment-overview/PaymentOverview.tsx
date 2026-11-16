@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { usePayment } from "@/hooks/payment/usePayment";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
+import { useRoyalties } from "@/hooks/escrow/useRoyalties";
 
 
 interface PaymentOverviewProps {
@@ -35,6 +36,9 @@ export default function PaymentOverview({
   
   const { useProjectEscrow } = useEscrow();
   const { data: escrowData } = useProjectEscrow(projectId);
+
+  const { useProjectRoyalties } = useRoyalties();
+  const { data: royaltyData } = useProjectRoyalties(projectId);
   
   const currencySymbol = walletData?.currency === "USD" ? "$" : "₦";
   const walletBalance = walletData?.balance || 0;
@@ -136,6 +140,7 @@ export default function PaymentOverview({
           currencySymbol={currencySymbol} 
           allocations={escrowData?.allocations || []} 
           collaborators={activeProject?.collaborators || []} 
+          royaltySplits={royaltyData?.splits || []}
         />
 
       </div>

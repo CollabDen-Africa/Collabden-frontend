@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import connectionService from '@/services/connection.service';
-import { handleApiError } from '@/lib/error-handler';
 import type {
   ConnectionRequestPayload,
   RespondConnectionPayload,
@@ -14,6 +13,7 @@ export const useConnections = () => {
   const useUserConnections = (params?: GetConnectionsParams) => useQuery({
     queryKey: ['connections', 'list', params],
     queryFn: () => connectionService.getConnections(params),
+    meta: { errorContext: 'connections.load' },
   });
 
   // 2. Query to fetch all pending connection requests
@@ -30,7 +30,7 @@ export const useConnections = () => {
       queryClient.invalidateQueries({ queryKey: ['connections', 'pending'] });
       queryClient.invalidateQueries({ queryKey: ['connections', 'list'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'connections.send' },
   });
 
   // 4. Mutation to respond (Accept/Reject) to a connection request
@@ -43,7 +43,7 @@ export const useConnections = () => {
       queryClient.invalidateQueries({ queryKey: ['connections', 'pending'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'connections.respond' },
   });
 
   return {

@@ -3,12 +3,12 @@ import userSpaceService, {
   type UserSpaceQuery,
 } from "@/services/userSpace.service";
 import projectService from "@/services/project.service";
-import { handleApiError } from "@/lib/error-handler";
 
 export const useUserSpace = (query: UserSpaceQuery = {}) =>
   useQuery({
     queryKey: ["user", "space", query],
     queryFn: () => userSpaceService.getSpace(query),
+    meta: { errorContext: "mySpace.load" },
   });
 
 export const useRemoveSavedFile = () => {
@@ -18,7 +18,7 @@ export const useRemoveSavedFile = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "space"] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: "mySpace.remove" },
   });
 };
 
@@ -30,6 +30,6 @@ export const useSaveFileToSpace = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "space"] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: "files.saveToSpace" },
   });
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -14,7 +14,7 @@ import Input from "@/components/ui/Input";
 import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function LoginPage() {
-  const { login, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const { login, isLoading: authLoading, error: authError, friendlyError, clearError } = useAuth();
   const router = useRouter();
   const resendMutation = useResendVerification();
   const [resendMessage, setResendMessage] = useState("");
@@ -35,20 +35,9 @@ export default function LoginPage() {
 
   const watchedEmail = watch("email");
 
-  const isUnverifiedError = useMemo(() => {
-    if (!authError) return false;
-    const lowerError = authError.toLowerCase();
-    return lowerError.includes("verify") || lowerError.includes("verified");
-  }, [authError]);
-
-  const isNotFoundError = useMemo(() => {
-    if (!authError) return false;
-    const lowerError = authError.toLowerCase();
-    return lowerError.includes("not found") || 
-           lowerError.includes("exist") || 
-           lowerError.includes("no account") ||
-           lowerError.includes("not register");
-  }, [authError]);
+  // Branch on the error's kind, not on its (now friendly) wording
+  const isUnverifiedError = friendlyError?.kind === "unverified";
+  const isNotFoundError = friendlyError?.kind === "notFound";
 
   const handleGoogleLogin = () => {
     window.location.href = "/api/auth/google";

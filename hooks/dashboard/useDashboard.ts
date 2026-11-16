@@ -6,6 +6,7 @@ export const useDashboard = () => {
     queryKey: ['dashboard'],
     queryFn: () => dashboardService.getDashboard(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    meta: { errorContext: 'dashboard.load' },
   });
 
   return {

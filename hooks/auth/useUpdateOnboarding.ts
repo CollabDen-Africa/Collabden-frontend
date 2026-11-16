@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import authService from '@/services/auth.service';
-import { handleApiError } from '@/lib/error-handler';
 
 export const useUpdateOnboarding = () => {
   const queryClient = useQueryClient();
@@ -11,6 +10,6 @@ export const useUpdateOnboarding = () => {
       // Invalidate profile to reflect onboarding completion
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'onboarding.update' },
   });
 };

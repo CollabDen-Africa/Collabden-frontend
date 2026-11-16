@@ -74,7 +74,7 @@ export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps
         
         onBack?.();
   } catch (error: any) {
-        // Safely capture the standardized error message thrown by our handleApiError wrapper
+        // Safely capture the standardized error message thrown by the handleApiError wrapper
         setSaveError(error.message || "An unexpected error occurred while saving royalties.");
       }
     };

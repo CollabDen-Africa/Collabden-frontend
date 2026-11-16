@@ -8,6 +8,7 @@ import ThemePreference from "@/components/features/profile/ThemePreference";
 import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/hooks/profile/useProfile";
 import profileService from "@/services/profile.service";
+import { getFriendlyMessage } from "@/lib/error-messages";
 
 export default function ProfileSettingsContent() {
   const { user } = useAuth();
@@ -66,7 +67,9 @@ export default function ProfileSettingsContent() {
       setEditingField(null);
     } catch (err: any) {
       console.error("Failed to update profile field:", err);
-      showToast(err?.response?.data?.error || err?.message || "Failed to update profile field.", "error");
+      if (fieldId === "phoneNumber") {
+             showToast(getFriendlyMessage(err, "profile.updatePhone"), "error");
+        }
     }
   };
 
@@ -76,9 +79,6 @@ export default function ProfileSettingsContent() {
       updateAvatarMutation.mutate(file, {
         onSuccess: () => {
           showToast("Profile picture updated successfully.", "success");
-        },
-        onError: (err: any) => {
-          showToast(err?.response?.data?.error || err?.message || "Failed to update profile picture.", "error");
         },
         onSettled: () => {
           if (fileInputRef.current) {
@@ -94,23 +94,15 @@ export default function ProfileSettingsContent() {
       onSuccess: () => {
         showToast("Profile picture removed successfully.", "success");
       },
-      onError: (err: any) => {
-        showToast(err?.response?.data?.error || err?.message || "Failed to remove profile picture.", "error");
-      },
     });
   };
 
   // --- Theme Handler ---
   const handleBackendThemeSync = async (newTheme: string) => {
-      try {
         await updateProfileMutation.mutateAsync({
           themePreference: newTheme,
         });
         showToast("Theme preference saved.", "success");
-      } catch (error) {
-        showToast("Failed to save theme to profile.", "error");
-        throw error; // Rethrow to inform the ThemePreference component that saving failed
-      }
     };
 
   if (isLoading) {

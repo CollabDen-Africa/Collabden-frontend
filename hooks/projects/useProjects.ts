@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import projectService from '@/services/project.service';
 import { CreateProjectPayload, CreateProjectTaskPayload, InviteCollaboratorPayload, Project, ProjectMessage, ProjectTask } from '@/types/api.types';
-import { handleApiError } from '@/lib/error-handler';
 
 export const useProjects = () => {
   const queryClient = useQueryClient();
@@ -10,6 +9,7 @@ export const useProjects = () => {
   const useAllProjects = (params?: { hasMessages?: boolean; limit?: number }) => useQuery({
     queryKey: ['projects', params],
     queryFn: () => projectService.getAll(params),
+    meta: { errorContext: "projects.load" },
   });
 
   // Fetch only projects that have active messages
@@ -17,6 +17,7 @@ export const useProjects = () => {
     queryKey: ['projects', 'hasMessages'],
     queryFn: () => projectService.getAll({ hasMessages: true, limit: 100 }),
     staleTime: 30 * 1000,
+    meta: { errorContext: "projects.load" },
   });
 
   // Fetch single project
@@ -33,7 +34,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'projects.create', toast: false },
   });
 
   // Update project
@@ -43,7 +44,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects', id] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'projects.update' },
   });
 
   // Delete project
@@ -56,7 +57,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-    onError: (error) => handleApiError(error),
+     meta: { errorContext: 'projects.delete' },
   });
 
   // Fetch project metadata/stats
@@ -71,6 +72,7 @@ export const useProjects = () => {
     queryFn: () => projectService.getMarketplace(filters),
     staleTime: 0,
     refetchOnWindowFocus: true,
+    meta: { errorContext: 'marketplace.load' },
   });
 
   // Invite collaborator
@@ -80,7 +82,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
       queryClient.invalidateQueries({ queryKey: ['connections'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'projects.invite' },
   });
 
   const useUploadProjectFile = (projectId: string) => useMutation({
@@ -89,7 +91,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'files.upload', toast: false },
   });
 
   const useDeleteProjectFile = (projectId: string) => useMutation({
@@ -98,7 +100,7 @@ export const useProjects = () => {
         queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
         queryClient.invalidateQueries({ queryKey: ['projects'] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: 'files.delete', toast: false },
     });
 
   const useSendProjectMessage = (projectId: string) => useMutation({
@@ -113,7 +115,7 @@ export const useProjects = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
     },
-    onError: (error) => handleApiError(error),
+     meta: { errorContext: 'projectMessages.send', toast: false },
   });
 
   const useCreateProjectTask = (projectId: string) => useMutation({
@@ -125,7 +127,7 @@ export const useProjects = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['projects', projectId] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'tasks.create' },
   });
 
   const useUploadProjectCover = (projectId?: string) => useMutation({
@@ -137,7 +139,7 @@ export const useProjects = () => {
         queryClient.invalidateQueries({ queryKey: ['projects'] });
         queryClient.invalidateQueries({ queryKey: ['marketplace', 'projects'] });
       },
-      onError: (error) => handleApiError(error),
+     meta: { errorContext: 'projects.coverUpload' },
     });
 
   const useUpdateProjectTaskStatus = (projectId: string) => useMutation({
@@ -154,9 +156,9 @@ export const useProjects = () => {
     },
     onError: (error, _variables, context) => {
       if (context?.previousProject) queryClient.setQueryData(['projects', projectId], context.previousProject);
-      handleApiError(error);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['projects', projectId] }),
+    meta: { errorContext: 'tasks.move' },
   });
 
   // Remove collaborator / Cancel invitation
@@ -168,7 +170,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace', 'projects'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'projects.removeCollaborator' },
   });
 
 
@@ -176,6 +178,7 @@ export const useProjects = () => {
   const useMyInvites = () => useQuery({
     queryKey: ['projects', 'my-invites'],
     queryFn: () => projectService.getMyInvites(),
+    meta: { errorContext: 'invites.load' },
   });
 
   // Respond to invitation (ACCEPT | DECLINE)
@@ -187,7 +190,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects', 'my-invites'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'invites.respond' },
   });
 
   // Fetch applications for a specific project (Project Owner)
@@ -195,6 +198,7 @@ export const useProjects = () => {
     queryKey: ["projects", projectId, "applications"],
     queryFn: () => projectService.getProjectApplications(projectId),
     enabled: !!projectId,
+    meta: { errorContext: 'applications.load' },
   });
 
   // Review an application (ACCEPT | DECLINE | REJECT)
@@ -206,7 +210,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ["projects", projectId] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'applications.review' },
   });
 
   // Cancel an application (Applicant or Owner)
@@ -216,13 +220,14 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ["projects", "my-applications"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'applications.cancel' },
   });
 
   // Fetch applications submitted by current user
   const useMyApplications = () => useQuery({
     queryKey: ["projects", "my-applications"],
     queryFn: () => projectService.getMyApplications(),
+    meta: { errorContext: 'applications.load' },
   });
 
   // Apply to join a project
@@ -234,7 +239,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["projects", "my-applications"] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'applications.apply' },
   });
 
   return {

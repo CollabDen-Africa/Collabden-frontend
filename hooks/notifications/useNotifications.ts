@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import notificationService from '@/services/notification.service';
-import { handleApiError } from '@/lib/error-handler';
 
 export const useNotifications = () => {
   const queryClient = useQueryClient();
@@ -18,7 +17,7 @@ export const useNotifications = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'notifications.markRead' },
   });
 
   // Mark single as read
@@ -27,7 +26,7 @@ export const useNotifications = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'notifications.markRead', toast: false },
   });
 
   return {

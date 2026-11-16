@@ -68,20 +68,18 @@ export default function ProfileSettingsPrivacy() {
     setOpenToCollaborate(nextValue);
     updateAvailability.mutate(nextValue, {
       onSuccess: () => showToast("Collaboration availability updated.", "success"),
-      onError: () => {
-        setOpenToCollaborate(!nextValue);
-        showToast("Failed to update availability.", "error");
-      },
+      onError: () => setOpenToCollaborate(!nextValue),
     });
   };
 
   const handleDisplayNameModeChange = async (mode: "legal" | "stage") => {
+    const previous = displayNameMode;
     setDisplayNameMode(mode);
     try {
       await updateProfileMutation.mutateAsync({ displayNameMode: mode });
       showToast(`Display name mode set to ${mode === "legal" ? "Legal Name" : "Stage Name"}.`, "success");
     } catch {
-      showToast("Failed to update display name mode.", "error");
+      setDisplayNameMode(previous);
     }
   };
 
@@ -93,24 +91,23 @@ export default function ProfileSettingsPrivacy() {
       showToast(`Location display ${nextValue ? "enabled" : "hidden"}.`, "success");
     } catch {
       setShowLocation(!nextValue);
-      showToast("Failed to update location privacy.", "error");
     }
   };
 
   const handleMessageOptionChange = async (option: string) => {
+    const previous = whoCanMessage;
     setWhoCanMessage(option);
     try {
       await updateProfileMutation.mutateAsync({ whoCanMessage: option });
       showToast(`Messaging privacy updated to "${option}".`, "success");
     } catch {
-      showToast("Failed to update messaging privacy.", "error");
+      setWhoCanMessage(previous);
     }
   };
 
   const handleDataExport = () => {
     dataExportMutation.mutate(undefined, {
       onSuccess: () => showToast("Your data export has been requested. Check your email for the download link.", "success"),
-      onError: (err: any) => showToast(err?.response?.data?.error || "Failed to request data export.", "error"),
     });
   };
 
@@ -120,7 +117,6 @@ export default function ProfileSettingsPrivacy() {
         showToast("Account deactivated successfully.", "success");
         window.location.href = "/login";
       },
-      onError: (err: any) => showToast(err?.response?.data?.error || "Failed to deactivate account.", "error"),
     });
   };
 
@@ -130,7 +126,6 @@ export default function ProfileSettingsPrivacy() {
         showToast("Account scheduled for deletion.", "success");
         window.location.href = "/login";
       },
-      onError: (err: any) => showToast(err?.response?.data?.error || "Failed to delete account.", "error"),
     });
   };
 

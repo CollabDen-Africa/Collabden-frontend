@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import agreementService from '@/services/agreement.service';
-import { handleApiError } from '@/lib/error-handler';
 
 export const useAgreements = (projectId: string) => {
   const queryClient = useQueryClient();
@@ -10,6 +9,7 @@ export const useAgreements = (projectId: string) => {
     queryKey: ['projects', projectId, 'agreements'],
     queryFn: () => agreementService.getAgreements(projectId),
     enabled: !!projectId,
+    meta: { errorContext: 'agreements.load' },
   });
 
   // Upload draft agreement (PDF)
@@ -20,7 +20,7 @@ export const useAgreements = (projectId: string) => {
       // Refresh the dashboard agreements
         queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.upload' },
   });
 
   // Edit or replace draft agreement (PDF/fields)
@@ -29,7 +29,7 @@ export const useAgreements = (projectId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.update' },
   });
 
   // Update status manually (e.g. DRAFT to PENDING_SIGNATURE)
@@ -41,7 +41,10 @@ export const useAgreements = (projectId: string) => {
       // Refresh the dashboard agreements
       queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: {
+          errorContext: (status: "PENDING_SIGNATURE" | "SIGNED") =>
+            status === 'SIGNED' ? 'agreements.sign' : 'agreements.update',
+        },
   });
 
   // Upload signed copy manually
@@ -52,7 +55,7 @@ export const useAgreements = (projectId: string) => {
       // Refresh the dashboard agreements
       queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.uploadSigned' },
   });
 
   // Delete a draft/pending agreement (owner only)
@@ -62,7 +65,7 @@ export const useAgreements = (projectId: string) => {
       queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
       queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.delete' },
   });
 
   // Request mutual cancellation
@@ -72,7 +75,7 @@ export const useAgreements = (projectId: string) => {
     onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
       },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.requestCancel' },
   });
   
   // Respond to a cancellation request
@@ -82,7 +85,7 @@ export const useAgreements = (projectId: string) => {
     onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'agreements'] });
       },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.respondCancel' },
   });
 
   // Electronically sign inside platform
@@ -93,7 +96,7 @@ export const useAgreements = (projectId: string) => {
       // Refresh the dashboard agreements
       queryClient.invalidateQueries({ queryKey: ['user', 'agreements'] });
     },
-    onError: (error) => handleApiError(error),
+    meta: { errorContext: 'agreements.sign' },
   });
 
   return {
@@ -114,5 +117,6 @@ export const useUserAgreements = () => {
   return useQuery({
     queryKey: ['user', 'agreements'],
     queryFn: () => agreementService.getUserAgreements(),
+    meta: { errorContext: 'agreements.loadAll' },
   });
 };
