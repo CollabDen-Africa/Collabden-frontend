@@ -138,7 +138,7 @@ export const ERROR_CONTEXTS = {
     default: "We couldn't create your account right now. Please try again.",
     kinds: {
       alreadyExists: "An account with this email already exists. Try logging in instead.",
-      validation: "Please check your details. Passwords need at least 8 characters and a number.",
+      validation: "Please check your details. Passwords need at least 8 characters, an uppercase letter, and a number.",
     },
   },
   "auth.verifyEmail": {

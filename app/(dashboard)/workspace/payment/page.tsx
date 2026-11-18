@@ -7,6 +7,8 @@ import PaymentFlowLayout from "@/components/features/workspace/payments/PaymentF
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useAuth } from "@/context/AuthContext";
 import { useEscrow } from "@/hooks/escrow/useEscrow";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+
 
 // Initial Setup & Overview
 import PaymentSetup from "@/components/features/workspace/payments/payment-setup/PaymentSetup";
@@ -331,10 +333,18 @@ function PaymentsWizard() {
             return <PaymentSetup
               onContinueToWallet={() => setCurrentStep("fund_wallet")} />;
         }
-      };
+  };
+
+    const stepContent = (
+      <ErrorBoundary
+        key={currentStep}
+        onBack={() => setCurrentStep("overview")}
+        backLabel="Back to payments overview"
+      >
+        {renderStepContent()}
+      </ErrorBoundary>
+    );
     
-      
-      
       // Show lop-level Back button in layout only for initial funding steps
   const showTopBack = isSetupFlow && !isEscrowFlow && currentStep !== "setup_start" && !currentStep.includes("success");
 
@@ -347,10 +357,10 @@ function PaymentsWizard() {
                 currentStep={currentStep}
                 onBack={showTopBack ? handleBack : undefined}
               >
-                {renderStepContent()}
+                {stepContent}
               </PaymentFlowLayout>
             ) : (
-              renderStepContent()
+              stepContent
             )}
           </div>
         );
