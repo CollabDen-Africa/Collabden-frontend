@@ -57,11 +57,11 @@ export default function CrewAllocations({
 
     return {
       id: userId,
-      name: collabMeta?.user?.displayName || collabMeta?.legalName || collabMeta?.user?.email || "Unknown User",
+      name: collabMeta?.user?.displayName || collabMeta?.user?.legalName || collabMeta?.user?.email || "Unknown User",
       role: collabMeta?.role || "Collaborator",
       status,
-      allocated: alloc.totalAmount,
-      paid: alloc.releasedAmount,
+      allocated,
+      paid,
       progress,
       royaltyShare,
       statusColorClass,
