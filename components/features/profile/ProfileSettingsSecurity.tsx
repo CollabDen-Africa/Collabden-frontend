@@ -7,6 +7,7 @@ import { FiSmartphone, FiLock, FiKey, FiLoader, FiMail } from "react-icons/fi";
 import { useSecurity } from "@/hooks/security/useSecurity";
 import { useProfile } from "@/hooks/profile/useProfile";
 import profileService from "@/services/profile.service";
+import { CLIENT_MESSAGES, getFriendlyMessage } from "@/lib/error-messages";
 
 export default function ProfileSettingsSecurity() {
   const { useSetup2FA, useVerify2FA } = useSecurity();
@@ -23,7 +24,7 @@ export default function ProfileSettingsSecurity() {
   const [showBackupEmailForm, setShowBackupEmailForm] = useState(false);
   const [backupEmailInput, setBackupEmailInput] = useState("");
   const [backupEmailToken, setBackupEmailToken] = useState("");
-  const [backupEmailStatus, setBackupEmailStatus] = useState<string | null>(null);
+  const [backupEmailStatus, setBackupEmailStatus] = useState<{ text: string; isError: boolean } | null>(null);
   const [awaitingBackupEmailVerification, setAwaitingBackupEmailVerification] = useState(false);
 
   const existingBackupEmail: string | null = currentProfile?.backupEmail ?? null;
@@ -77,15 +78,10 @@ export default function ProfileSettingsSecurity() {
     if (!backupEmailInput.trim()) return;
     try {
       await addBackupEmailMutation.mutateAsync(backupEmailInput.trim());
-      setBackupEmailStatus("Verification code sent — check that inbox.");
+      setBackupEmailStatus({ text: "Verification code sent — check that inbox.", isError: false });
       setAwaitingBackupEmailVerification(true);
-    } catch (err: any) {
-      setBackupEmailStatus(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          err.message ||
-          "Failed to add backup email"
-      );
+    } catch (err) {
+      setBackupEmailStatus({ text: getFriendlyMessage(err, "profile.backupEmail"), isError: true });
     }
   };
 
@@ -94,7 +90,7 @@ export default function ProfileSettingsSecurity() {
     if (!backupEmailToken.trim()) return;
     try {
       await verifyBackupEmailMutation.mutateAsync(backupEmailToken.trim());
-      setBackupEmailStatus("Backup email verified!");
+      setBackupEmailStatus({ text: "Backup email verified!", isError: false });
       setAwaitingBackupEmailVerification(false);
       setBackupEmailInput("");
       setBackupEmailToken("");
@@ -103,31 +99,26 @@ export default function ProfileSettingsSecurity() {
         setBackupEmailStatus(null);
       }, 1500);
     } catch (err: any) {
-      setBackupEmailStatus(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          err.message ||
-          "Verification failed"
-      );
+      setBackupEmailStatus({ text: getFriendlyMessage(err, "profile.backupEmail"), isError: true });
     }
   };
 
   const handleRemoveBackupEmail = async () => {
     try {
       await removeBackupEmailMutation.mutateAsync();
-      setBackupEmailStatus("Backup email removed.");
+      setBackupEmailStatus({ text: "Backup email removed.", isError: false });
       setAwaitingBackupEmailVerification(false);
       setBackupEmailInput("");
       setBackupEmailToken("");
     } catch (err: any) {
-      setBackupEmailStatus(err.response?.data?.message || "Failed to remove backup email");
+       setBackupEmailStatus({ text: getFriendlyMessage(err, "profile.backupEmail"), isError: true });
     }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setPasswordStatus("Passwords do not match");
+      setPasswordStatus(CLIENT_MESSAGES.passwordMismatch);
       return;
     }
     try {
@@ -142,7 +133,7 @@ export default function ProfileSettingsSecurity() {
       setConfirmPassword("");
       setTimeout(() => setShowPasswordForm(false), 2000);
     } catch (err: any) {
-      setPasswordStatus(err.response?.data?.message || "Failed to change password");
+      setPasswordStatus(getFriendlyMessage(err, "settings.changePassword"));
     }
   };
 
@@ -464,12 +455,12 @@ export default function ProfileSettingsSecurity() {
             {backupEmailStatus && (
               <span
                 className={`text-[14px] ${
-                  backupEmailStatus.toLowerCase().includes("fail") || backupEmailStatus.toLowerCase().includes("failed")
+                  backupEmailStatus.isError
                     ? "text-red-400"
                     : "text-primary-green"
                 }`}
               >
-                {backupEmailStatus}
+                {backupEmailStatus.text}
               </span>
             )}
           </div>

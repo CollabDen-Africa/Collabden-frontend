@@ -7,6 +7,7 @@ import NotificationItem from '@/components/features/dashboard/NotificationsItem'
 import OnboardingTooltip from './Tooltip';
 import { useNotifications } from '@/hooks/notifications/useNotifications';
 import type { Notification } from '@/types/api.types';
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NotificationBellProps {
   isOpenExternally?: boolean;
@@ -24,6 +25,7 @@ export default function NotificationBell({
   onSkip
 }: NotificationBellProps) {
 
+  const queryClient = useQueryClient();
   const { useAllNotifications, useMarkOneRead, useMarkAllRead } = useNotifications();
   const { data: notifications = [], isLoading } = useAllNotifications();
   const markOneReadMutation = useMarkOneRead();
@@ -48,6 +50,7 @@ export default function NotificationBell({
   const handleMarkAllRead = async () => {
     try {
       await markAllReadMutation.mutateAsync();
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     } catch (err) {
       console.error('Failed to mark all as read:', err);
     }
@@ -93,7 +96,7 @@ export default function NotificationBell({
             )}
           </div>
 
-          <div className="flex flex-col gap-4 overflow-y-auto min-h-0 flex-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="flex flex-col gap-4 overflow-y-auto min-h-0 max-h-80 custom-scrollbar">
             {isLoading ? (
               <div className="flex items-center justify-center py-6">
                 <div className="w-5 h-5 border-2 border-foreground/20 border-t-primary-green rounded-full animate-spin" />
@@ -123,31 +126,32 @@ export default function NotificationBell({
           )}
 
           {/* Link to the full page */}
-                    <div className="pt-2 mt-2 border-t border-white/10 w-full">
-                      <Link 
-                        href="/notifications" 
-                        onClick={() => setIsOpen(false)} // Close the dropdown when they navigate away
-                        className="block w-full text-center font-medium text-[14px] leading-4.75 text-text-muted hover:text-white transition-colors"
-                      >
-                        View all notifications
-                      </Link>
-                    </div>
-
-          {/* STEP 5 ANCHOR */}
-          {currentStep === 5 && (
-            <OnboardingTooltip
-              step={5}
-              title="Stay in the loop"
-              description="Get updates on activity, messages, and project changes"
-              onNext={() => setStep?.(6)}
-              onSkip={() => onSkip?.()}
-              direction="left-of"
-              arrowOffset="40px"
-            />
-          )}
+          <div className="pt-2 mt-2 border-t border-white/10 w-full">
+            <Link 
+              href="/notifications" 
+              onClick={() => setIsOpen(false)} // Close the dropdown when they navigate away
+              className="block w-full text-center font-medium text-[14px] leading-4.75 text-text-muted hover:text-white transition-colors"
+            >
+              View all notifications
+            </Link>
+          </div>
 
         </div>
       )}
+
+      {/* STEP 5 ANCHOR */}
+      {currentStep === 5 && (
+        <OnboardingTooltip
+          step={5}
+          title="Stay in the loop"
+          description="Get updates on activity, messages, and project changes"
+          onNext={() => setStep?.(6)}
+          onSkip={() => onSkip?.()}
+          direction="left-of"
+          arrowOffset="40px"
+        />
+      )}
+      
     </div>
   );
 }

@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import NotificationBell from "../ui/Notifications";
 import OnboardingTooltip from "../ui/Tooltip";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FiSearch } from "react-icons/fi";
 import ProfileMenu from "../ui/ProfileMenu";
+
 
 export interface UserProfile {
   firstName: string;
@@ -31,6 +32,8 @@ export default function DashboardHeader({
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
   const isMainDashboard = pathname === "/dashboard";
   const isMessagesPage = pathname === "/messages";
   const greetingName = user?.firstName || user?.email?.split("@")[0] || "there";
@@ -57,6 +60,13 @@ export default function DashboardHeader({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [currentStep]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <header
@@ -97,7 +107,7 @@ export default function DashboardHeader({
 
           <div className="w-full xl:w-103.25 flex shrink-0 justify-end">
             <div
-              className={`relative flex items-center gap-5 md:gap-10 lg:gap-18.75 ${isMessagesPage ? "mt-0" : "mt-1"}`}
+              className={`relative flex items-center gap-4 md:gap-6 ${isMessagesPage ? "mt-0" : "mt-1"}`}
             >
               {/* Notification Bell Area - Anchor for Step 5 */}
               <div
@@ -124,18 +134,24 @@ export default function DashboardHeader({
         {isMainDashboard && (
           <div className="w-full flex">
             <div className="w-full xl:max-w-177.75">
-              <div className="flex items-center gap-2.5 bg-black/20 w-full h-13 pl-5 lg:pl-6.25 pr-5 lg:pr-7.5 rounded-[50px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] focus-within:border-primary-green backdrop-blur-md">
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center gap-2.5 bg-black/20 w-full h-13 pl-5 lg:pl-6.25 pr-5 lg:pr-7.5 rounded-[50px] border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] focus-within:border-primary-green backdrop-blur-md">
+                <button type="submit" className="shrink-0 outline-none">
                 <FiSearch
-                  className="text-foreground/30 shrink-0"
+                  className="text-foreground/30 hover:text-primary-green transition-colors"
                   size={18}
                   strokeWidth={2.5}
                 />
+                </button>  
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search projects, collaborators..."
                   className="bg-transparent border-none outline-none text-foreground text-[14px] placeholder:text-foreground/30 w-full font-medium font-sans min-w-0"
                 />
-              </div>
+              </form>
             </div>
           </div>
         )}

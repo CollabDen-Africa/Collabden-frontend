@@ -1,4 +1,4 @@
-export type AgreementStatus = "DRAFT" | "PENDING_SIGNATURE" | "SIGNED";
+export type AgreementStatus = "DRAFT" | "PENDING_SIGNATURE" | "SIGNED" | "EXPIRED" | "CANCELLED";
 
 export interface LegalAgreement {
   id: string;
@@ -12,6 +12,7 @@ export interface LegalAgreement {
   createdAt: string;
   updatedAt: string;
   signatures?: AgreementSignature[];
+  cancellation?: AgreementCancellationSummary | null; 
 }
 
 export interface AgreementSignature {
@@ -21,4 +22,13 @@ export interface AgreementSignature {
   legalName: string;
   signedAt: string;
   user?: { id: string; email: string };
+}
+
+export interface AgreementCancellationSummary {
+  requestedById: string | null;
+  requestedAt: string | null;
+  reason: string | null;
+  approvals: string[];
+  pendingFrom: string[];
+  cancelledAt: string | null;
 }

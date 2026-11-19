@@ -26,6 +26,8 @@ import {
   wasJustFailed,
   clearLastAttempt,
 } from "@/lib/kyc-guard";
+import { CLIENT_MESSAGES, getFriendlyError } from "@/lib/error-messages";
+
 
 interface VerificationModalProps {
   isOpen: boolean;
@@ -124,7 +126,7 @@ export default function VerificationModal({
     const { nin, dateOfBirth } = getValues();
     if (wasJustFailed(userId, fingerprintAttempt(nin, dateOfBirth))) {
       showToast(
-        "You just tried these exact details. Edit at least one field before retrying.",
+        CLIENT_MESSAGES.kycRepeatAttempt,
         "warning"
       );
       return;
@@ -134,7 +136,7 @@ export default function VerificationModal({
 
   const submitVerified = (data: NinjaKYCInput) => {
     if (getCooldownRemaining(userId) > 0) {
-      showToast("Please wait a moment before trying again.", "warning");
+      showToast(CLIENT_MESSAGES.kycCooldown, "warning");
       return;
     }
 
@@ -159,7 +161,7 @@ export default function VerificationModal({
           setCooldownMs(getCooldownRemaining(userId));
           setStep("form");
           showToast(
-            "Details do not match our records. Please double-check your NIN and date of birth.",
+            CLIENT_MESSAGES.kycMismatch,
             "error"
           );
         }
@@ -178,18 +180,8 @@ export default function VerificationModal({
         setCooldownMs(getCooldownRemaining(userId));
         setStep("form");
 
-        let message = "Verification failed. Please check your details and try again.";
-        if (code === "NIN_ALREADY_LINKED" || status === 409) {
-          message =
-            code === "ALREADY_VERIFIED"
-              ? "Your identity has already been verified."
-              : "This NIN is already linked to another account. If this is yours, contact support.";
-        } else if (status === 429) {
-          message = "Too many attempts. Please try again in 24 hours.";
-        } else if (!status || status >= 500) {
-          message = "Verification service is temporarily unavailable. Please try again later.";
-        }
-        showToast(message, "error");
+        
+        showToast(getFriendlyError(error, "settings.verifyIdentity").message, "error");
       },
     });
   };

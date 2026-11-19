@@ -6,39 +6,63 @@ import Avatar from "@/components/ui/Avatar";
 import Input from "@/components/ui/Input";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useRoyalties } from "@/hooks/escrow/useRoyalties";
+import { getFriendlyMessage } from "@/lib/error-messages";
 
 interface RoyaltySettingsViewProps {
   onBack?: () => void;
 }
 
 
+const NO_SPLITS: any[] = [];
+
+// The owner automatically receives whatever isn't allocated, so they can never hold a share
+// themselves
+const isOwnerEntry = (collaborator: any, ownerId?: string) =>
+  (collaborator.user?.id || collaborator.userId) === ownerId || collaborator.role === "OWNER";
+
 export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps) {
 
   const { activeProject } = useWorkspace();
-  const projectId = activeProject?.id || ""; 
+  const projectId = activeProject?.id || "";
   const { useProjectRoyalties, useUpdateRoyaltySplits } = useRoyalties();
-  const { data: royaltyData, isLoading: isFetching } = useProjectRoyalties(projectId);
+  const { data: royaltyData, isLoading: isFetching, isError: loadFailed, error: loadError } = useProjectRoyalties(projectId);
   const updateMutation = useUpdateRoyaltySplits();
   const [splits, setSplits] = useState<any[]>([]);
-  const [saveError, setSaveError] = useState<string | null>(null); 
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Initialize splits from activeProject collaborators
+  // Whatever shape the API sends back, only trust a real array
+  const rawSplits = royaltyData?.splits;
+  const savedSplits: any[] = Array.isArray(rawSplits) ? rawSplits : NO_SPLITS;
+
+  const ownerId: string | undefined = activeProject?.owner?.id || (activeProject as any)?.ownerId;
+  const owner = (activeProject as any)?.owner;
+  const ownerName: string | null = owner
+    ? owner.displayName || owner.legalName || owner.email?.split("@")[0] || "Project Owner"
+    : null;
+
+  // Build one editable row per collaborator (never the owner)
   useEffect(() => {
-    const collaborators = activeProject?.collaborators || [];
-    const existingSplits = royaltyData.splits || [];
-    
-    const mappedSplits = collaborators.map((c: any) => {
-      const savedSplit = existingSplits.find((s: any) => s.userId === c.userId);
-      return {
-        userId: c.userId,
+    const collaborators: any[] = activeProject?.collaborators || [];
+    const seen = new Set<string>();
+    const rows: any[] = [];
+
+    for (const c of collaborators) {
+      if (isOwnerEntry(c, ownerId)) continue; // the owner can't be given a share
+      const userId = c.userId || c.user?.id;
+      if (!userId || seen.has(userId)) continue; // no blank or duplicate rows
+      seen.add(userId);
+
+      const savedSplit = savedSplits.find((s: any) => s.userId === userId);
+      rows.push({
+        userId,
         name: c.user?.displayName || c.user?.legalName || c.user?.email || "Unknown User",
         role: c.role || "Collaborator",
-        share: savedSplit ? Number(savedSplit.royaltyShare) : 0
-      }
-    })
+        share: Number(savedSplit?.royaltyShare) || 0, // never NaN
+      });
+    }
 
-      setSplits(mappedSplits);
-    }, [activeProject?.collaborators, royaltyData?.splits]);
+    setSplits(rows);
+  }, [activeProject?.collaborators, savedSplits, ownerId]);
 
   const handleShareChange = (userId: string, newShare: string) => {
     // Clear any previous save errors as soon as the user starts typing again
@@ -58,27 +82,27 @@ export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps
   const isOverAllocated = totalAllocated > 100;
 
   const handleSave = async () => {
-    if (isOverAllocated) return;
-      setSaveError(null);
-      
+    // Never save while the current splits failed to load: we'd overwrite data we couldn't see
+    if (isOverAllocated || loadFailed) return;
+    setSaveError(null);
+
     try {
-        const splitsPayload = splits
-          .filter(s => s.share > 0) 
-          .map(s => ({
-            userId: s.userId,
-            royaltyShare: s.share,
-            role: s.role
-          }));
-  
-        await updateMutation.mutateAsync({ projectId, splitsData: splitsPayload });
-        
-        onBack?.();
-  } catch (error: any) {
-        // Safely capture the standardized error message thrown by our handleApiError wrapper
-        setSaveError(error.message || "An unexpected error occurred while saving royalties.");
-      }
-    };
-  
+      const splitsPayload = splits
+        .filter((s) => s.share > 0 && s.userId !== ownerId) // owner never gets an explicit share
+        .map((s) => ({
+          userId: s.userId,
+          royaltyShare: s.share,
+          role: s.role,
+        }));
+
+      await updateMutation.mutateAsync({ projectId, splitsData: splitsPayload });
+
+      onBack?.();
+    } catch (error) {
+      setSaveError(getFriendlyMessage(error, "royalties.save"));
+    }
+  };
+
   return (
     <div className="w-full min-h-screen relative overflow-x-hidden p-5 flex flex-col">
 
@@ -107,13 +131,23 @@ export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps
           <Button
             variant="primary"
             onClick={handleSave}
-            disabled={updateMutation.isPending || isOverAllocated || isFetching}
+            disabled={updateMutation.isPending || isOverAllocated || isFetching || loadFailed}
             className="w-full sm:w-auto rounded-full px-6 py-3 flex items-center justify-center"
             icon={FiSave}
             iconPosition="left">
               {updateMutation.isPending ? "Saving to Smart Contract..." : "Save Changes"}
           </Button>
         </div>
+
+        {/* Couldn't load the saved splits */}
+        {loadFailed && (
+          <div className="mb-6 w-full bg-red-500/10 border border-red-500/30 rounded-[20px] p-4 flex items-start gap-3">
+            <FiAlertCircle className="text-red-400 shrink-0 mt-0.5" size={18} />
+            <span className="font-raleway font-medium text-[14px] text-red-200">
+              {getFriendlyMessage(loadError, "royalties.load")} Saving is turned off until the current splits load, so nothing gets overwritten.
+            </span>
+          </div>
+        )}
 
         {/* Global Error Alert */}
         {saveError && (
@@ -165,6 +199,24 @@ export default function RoyaltySettingsView({ onBack }: RoyaltySettingsViewProps
               )}
             </div>
             
+            {/* The owner can't be allocated a share: they receive the unallocated remainder */}
+            {!isFetching && ownerName && (
+              <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 bg-white/5 border border-dashed border-white/10 rounded-[20px] p-4">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <Avatar name={ownerName} className="w-10 h-10 md:w-12 md:h-12 shrink-0" />
+                  <div className="flex flex-col">
+                    <h4 className="font-raleway font-bold text-[14px] md:text-[16px] text-white">{ownerName}</h4>
+                    <span className="font-raleway font-normal text-[12px] md:text-[13px] text-text-muted">
+                      Project Owner · receives the unallocated remainder
+                    </span>
+                  </div>
+                </div>
+                <span className="font-raleway font-black text-[18px] md:text-[20px] text-white/80 sm:w-35 sm:text-center">
+                  {unallocated.toFixed(2)}%
+                </span>
+              </div>
+            )}
+
             {/* Total Indicator */}
             <div className="mt-6 pt-5 border-t border-white/10 flex justify-between items-center">
               <div className="flex justify-between items-center">

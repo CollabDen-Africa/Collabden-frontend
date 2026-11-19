@@ -25,7 +25,7 @@ export interface NotificationItemProps {
 const TYPE_ROUTES: Record<NotificationType, string> = {
   'MESSAGE': '/messages',
   'INVITE': '/connections',
-  'PROJECT_CREATED': '/projects',
+  'PROJECT_CREATED': '/workspace',
   'TASK_ASSIGNED': '/workspace/tasks',
   'SYSTEM': '/dashboard',
 };
@@ -38,6 +38,7 @@ const TYPE_ICONS: Record<NotificationType, React.ElementType> = {
   'TASK_ASSIGNED': FaHandshake,
   'SYSTEM': FaBell,
 };
+
 
 // Format ISO timestamp to relative time (e.g. "2 hours ago")
 const formatRelativeTime = (isoDate: string): string => {
@@ -65,41 +66,65 @@ export default function NotificationItem({
     if (!isRead && onMarkRead) {
       onMarkRead(id);
     }
-    const destination = TYPE_ROUTES[type] ?? (link || null);
-    if (destination) {
-      router.push(destination);
-    }
-  };
+    
+    // Set a default fallback using TYPE_ROUTES
+        let finalRoute = TYPE_ROUTES[type] || '/dashboard';
+    
+        // If the backend provided a link, sanitize and normalize it
+        if (link) {
+          let formattedLink = link.startsWith('http') || link.startsWith('/') ? link : `/${link}`;
+          
+          // --- ROUTE NORMALIZATION ALIASES ---
+          // Intercept incomplete backend links and patch them to the correct frontend paths
+          
+          if (formattedLink.includes('/wallet')) {
+            formattedLink =  '/payment/wallet';
+          } 
+          else if (formattedLink.includes('/escrow')) {
+            formattedLink = formattedLink.replace('/escrow', '/payment');
+          }
+          else if (formattedLink.includes('/agreements')) {
+            formattedLink =  '/workspace/agreements'; 
+          }
+          // Add more aliases here as you discover backend mismatches
+    
+          finalRoute = formattedLink;
+        }
+    
+        // Execute the redirect
+        router.push(finalRoute);
+  }
+    
 
   return (
     <div 
       onClick={handleClick}
-      className={`${isRead ? 'bg-white/5' : 'bg-white/10 border-primary-green/20'} hover:bg-white/15 transition-colors cursor-pointer rounded-[20px] px-[16px] py-[12px] flex items-start gap-[12px] w-full border border-white/5`}
+      className={`${isRead ? 'bg-white/5' : 'bg-white/10 border-primary-green/20'} hover:bg-white/15 transition-colors cursor-pointer rounded-[20px] px-4 py-3 flex items-start gap-3 w-full border border-white/5`}
     >
       
       {/* Activity Icon Badge */}
-      <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 ${isRead ? 'bg-black/50' : 'bg-primary-green/20'}`}>
-        <IconComponent className={`w-[12px] h-[12px] ${isRead ? 'text-foreground' : 'text-primary-green'}`} />
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isRead ? 'bg-black/50' : 'bg-primary-green/20'}`}>
+        <IconComponent className={`w-3 h-3 ${isRead ? 'text-foreground' : 'text-primary-green'}`} />
       </div>
       
       {/* Notification Content */}
-      <div className="flex flex-col gap-[8px] flex-1 min-w-0">
-        <div className="flex flex-col gap-[2px]">
-          <span className={`font-sans text-[14px] leading-[17px] ${isRead ? 'font-medium text-foreground/70' : 'font-bold text-foreground'}`}>
+      <div className="flex flex-col gap-2 flex-1 min-w-0">
+        <div className="flex flex-col gap-0.5">
+          <span className={`font-sans text-[14px] leading-4.25 ${isRead ? 'font-medium text-foreground/70' : 'font-bold text-foreground'}`}>
             {title}
           </span>
-          <span className="font-sans font-normal text-[14px] leading-[17px] text-foreground/60 wrap-break-word">
+          <span className="font-sans font-normal text-[14px] leading-4.25 text-foreground/60 wrap-break-word">
             {message}
           </span>
         </div>
         
         {/* Timestamp */}
-        <div className="flex items-center gap-[8px]">
-          <span className="font-medium text-[12px] leading-[14px] text-foreground/40 font-sans">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-[12px] leading-3.5 text-foreground/40 font-sans">
             {formatRelativeTime(createdAt)}
           </span>
           {!isRead && (
-            <div className="w-[6px] h-[6px] rounded-full bg-primary-green" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary-green" />
           )}
         </div>
         

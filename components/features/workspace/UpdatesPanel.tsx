@@ -106,11 +106,11 @@ export default function UpdatesPanel({ isOpen, onClose }: UpdatesPanelProps) {
   return (
     <>
       <div 
-        className="fixed inset-0 bg-black/60 z-[90] lg:hidden backdrop-blur-sm animate-in fade-in duration-300"
+        className="fixed inset-0 bg-black/60 z-90 lg:hidden backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       />
 
-      <aside className="fixed inset-y-0 right-0 z-[100] w-[85vw] sm:w-[322px] bg-[#162026] border-l border-white/10 p-[26px_17px] shadow-2xl animate-in slide-in-from-right-8 duration-300 flex flex-col shrink-0 lg:sticky lg:top-6 lg:inset-auto lg:z-auto lg:w-[322px] lg:h-auto lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto lg:bg-white/10 lg:border-none lg:rounded-[30px] lg:shadow-none custom-scrollbar">
+      <aside className="fixed inset-y-0 right-0 z-[100] w-[85vw] sm:w-80.5 bg-[#162026] border-l border-white/10 p-[26px_17px] shadow-2xl animate-in slide-in-from-right-8 duration-300 flex flex-col shrink-0 lg:sticky lg:top-6 lg:inset-auto lg:z-auto lg:w-80.5 lg:h-auto lg:max-h-[calc(100vh-100px)] lg:overflow-y-auto lg:bg-white/10 lg:border-none lg:rounded-[30px] lg:shadow-none custom-scrollbar">
         
         <div className="flex lg:hidden justify-between items-center mb-4 px-2 shrink-0">
           <h2 className="font-sans font-semibold text-[18px] text-white">Updates</h2>
@@ -119,7 +119,7 @@ export default function UpdatesPanel({ isOpen, onClose }: UpdatesPanelProps) {
           </button>
         </div>
 
-        <h2 className="hidden lg:block font-sans font-semibold text-[18px] leading-[21px] text-white mb-6 shrink-0 ml-1">
+        <h2 className="hidden lg:block font-sans font-semibold text-[18px] leading-5.25 text-white mb-6 shrink-0 ml-1">
           Updates
         </h2>
 
@@ -151,20 +151,20 @@ export default function UpdatesPanel({ isOpen, onClose }: UpdatesPanelProps) {
                     <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-primary-green" />
                   )}
 
-                  <div className="flex items-start gap-3 w-full pr-4">
+                  <div className="flex items-start gap-3 w-full pr-4 min-w-0">
                     <div className="shrink-0 relative">
                       {update.avatarUrl || update.user ? (
-                        <div className="w-[30px] h-[30px] rounded-full border border-primary-green overflow-hidden relative">
+                        <div className="w-7.5 h-7.5 rounded-full border border-primary-green overflow-hidden relative">
                           <Avatar name={update.user || "User"} src={update.avatarUrl} className="w-full h-full text-[10px]" />
                         </div>
                       ) : (
-                        <div className={"w-[30px] h-[30px] rounded-full border border-current flex items-center justify-center " + (update.systemColor || "text-[#F9A620]") + " " + (update.systemBg || "bg-accent-yellow/20")}>
+                        <div className={"w-7.5 h-7.5 rounded-full border border-current flex items-center justify-center " + (update.systemColor || "text-[#F9A620]") + " " + (update.systemBg || "bg-accent-yellow/20")}>
                            {update.type === 'system-warning' ? <FiClock size={14} /> : <FiAlertCircle size={14} />}
                         </div>
                       )}
                     </div>
 
-                    <p className="font-sans font-bold text-[12px] leading-[14px] text-white">
+                    <p className="font-sans font-bold text-[12px] leading-[14px] text-white wrap-break-word min-w-0">
                       {update.text}
                     </p>
                   </div>

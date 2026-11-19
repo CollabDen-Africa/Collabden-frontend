@@ -6,7 +6,6 @@ import type {
   UpdateBankAccountPayload,
   RequestWithdrawalPayload,
 } from "@/types/api.types";
-import { handleApiError } from "@/lib/error-handler";
 
 export const usePayment = () => {
   const queryClient = useQueryClient();
@@ -16,6 +15,7 @@ export const usePayment = () => {
     useQuery({
       queryKey: ["payments", "wallet"],
       queryFn: () => paymentService.getWallet(),
+      meta: { errorContext: "wallet.load" },
     });
 
   // Fetch Transaction History
@@ -23,13 +23,14 @@ export const usePayment = () => {
     useQuery({
       queryKey: ["payments", "transactions", { type, status, page, limit }],
       queryFn: () => paymentService.getTransactions(type, status, page, limit),
+      meta: { errorContext: "payments.load" },
     });
 
   // Initialize Funding (Flutterwave checkouts)
   const useInitializeFunding = () =>
     useMutation({
       mutationFn: (data: InitializeFundingPayload) => paymentService.initializeFunding(data),
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "payments.fundWallet" },
     });
 
   // List Registered Bank Accounts
@@ -37,6 +38,7 @@ export const usePayment = () => {
     useQuery({
       queryKey: ["payments", "bank-accounts"],
       queryFn: () => paymentService.listBankAccounts(),
+      meta: { errorContext: "bank.load" },
     });
 
   // Add Bank Account
@@ -46,7 +48,7 @@ export const usePayment = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["payments", "bank-accounts"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "bank.add" },
     });
 
   // Update Bank Account
@@ -57,7 +59,7 @@ export const usePayment = () => {
       onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["payments", "bank-accounts"] });
         },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "bank.update" },
       });
 
   // Remove Bank Account
@@ -67,7 +69,7 @@ export const usePayment = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["payments", "bank-accounts"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "bank.remove" },
     });
 
   // Request Payout Withdrawal
@@ -79,7 +81,7 @@ export const usePayment = () => {
         queryClient.invalidateQueries({ queryKey: ["payments", "transactions"] });
         queryClient.invalidateQueries({ queryKey: ["payments", "withdrawals"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "withdrawals.create" },
     });
 
   // Fetch Withdrawal Payout History
@@ -87,6 +89,7 @@ export const usePayment = () => {
     useQuery({
       queryKey: ["payments", "withdrawals", { page, limit }],
       queryFn: () => paymentService.getWithdrawals(page, limit),
+      meta: { errorContext: "withdrawals.load" },
     });
 
   // Fetch Supported Banks
@@ -95,6 +98,7 @@ export const usePayment = () => {
       queryKey: ["payments", "supported-banks"],
       queryFn: () => paymentService.getSupportedBanks(),
       staleTime: 24 * 60 * 60 * 1000, // 24 hours caching since bank list rarely changes
+      meta: { errorContext: "bank.load" },
     });
 
   return {

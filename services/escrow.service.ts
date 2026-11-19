@@ -49,7 +49,7 @@ const escrowService = {
    * Approve, request changes, or reject escrow proposal as a collaborator.
    */
   approveEscrowProposal: async (projectId: string, status: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED", comment?: string): Promise<EscrowAllocation> => {
-    const response = await proxyAxios.post(PROXY_ENDPOINTS.ESCROW.APPROVE_PROPOSAL(projectId), {
+    const response = await proxyAxios.patch(PROXY_ENDPOINTS.ESCROW.APPROVE_PROPOSAL(projectId), {
       status,
       comment,
     });
@@ -105,6 +105,21 @@ const escrowService = {
     });
     return response.data?.data || response.data;
   },
+
+  remindCollaborator: async (projectId: string, userId: string): Promise<any> => {
+    const response = await proxyAxios.post(`/projects/${projectId}/escrow/collaborators/${userId}/remind`);
+    return response.data?.data || response.data;
+    },
+  
+  removeCollaborator: async (projectId: string, userId: string): Promise<any> => {
+    const response = await proxyAxios.delete(`/projects/${projectId}/escrow/collaborators/${userId}`);
+    return response.data?.data || response.data;
+    },
+  
+  updateEscrowTerms: async (projectId: string, payload: ConfigureEscrowPayload): Promise<Escrow> => {
+    const response = await proxyAxios.put(`/projects/${projectId}/escrow`, payload);
+    return response.data?.data || response.data;
+    },
 };
 
 export default escrowService;

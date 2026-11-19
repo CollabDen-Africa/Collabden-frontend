@@ -111,6 +111,22 @@ const agreementService = {
     const raw = response.data;
     return raw?.agreement || raw?.data || (raw as LegalAgreement);
   },
+
+  /**
+  * Request mutual cancellation of an agreement (any party).
+  */
+  requestCancellation: async (projectId: string, agreementId: string, reason?: string): Promise<any> => {
+    const response = await proxyAxios.post(`/projects/${projectId}/agreements/${agreementId}/cancel`, { reason });
+    return response.data;
+  },
+  
+  /**
+  * Approve or decline a pending cancellation request.
+  */
+  respondToCancellation: async (projectId: string, agreementId: string, decision: "APPROVE" | "DECLINE"): Promise<any> => {
+    const response = await proxyAxios.post(`/projects/${projectId}/agreements/${agreementId}/cancel/respond`, { decision });
+    return response.data;
+  },
 };
 
 export default agreementService;

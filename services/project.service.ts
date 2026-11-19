@@ -84,6 +84,9 @@ const projectService = {
     await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.INVITE(projectId), data);
   },
 
+  /**
+   * Invite a collaborator to a project.
+   */
   uploadFile: async (projectId: string, file: File): Promise<void> => {
     const formData = new FormData();
     formData.append("file", file);

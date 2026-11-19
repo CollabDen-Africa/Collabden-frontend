@@ -17,6 +17,7 @@ export interface ProjectCardProps {
   progress?: number;
   updated: string;
   status?: string; 
+  role?: string;
 }
 
 
@@ -39,7 +40,8 @@ export default function ProjectCard({
   collaborators, 
   progress, 
   updated,
-  status = 'Active' 
+  status = 'Active',
+ role = 'Collaborator' 
 }: ProjectCardProps) {
 
   
@@ -47,25 +49,28 @@ export default function ProjectCard({
   const badgeBg = isReview ? 'bg-accent-yellow/20' : 'bg-accent-green-success/50';
   const badgeText = isReview ? 'text-accent-yellow' : 'text-accent-green-bright/70';
 
+  const roleBadgeBg = role === "Project Owner" ? "bg-primary-green/20 border-primary-blue/50" : "bg-white/10 border-white/20";
+  const roleBadgeText = role === "Project Owner" ? "text-primary-green" : "text-white/70";
+
   return (
     <div className="w-full bg-white/5 hover:bg-white/10 transition-colors rounded-[20px] px-5 md:px-8 py-6 md:py-8 flex flex-col gap-4.75">
           
       {/* TOP SECTION */}
       <div className="flex justify-between items-start w-full">
         
-        <div className="flex flex-1 min-w-0 gap-[20px] md:gap-[24px] items-start">
-          <div className="w-[54px] h-[54px] bg-black/50 rounded-[9px] flex items-center justify-center shrink-0">
+        <div className="flex flex-1 min-w-0 gap-5 md:gap-6 items-start">
+          <div className="w-13.5 h-13.5 bg-black/50 rounded-[9px] flex items-center justify-center shrink-0">
             <AudioLinesIcon />
           </div>
           
-          <div className="flex flex-1 min-w-0 flex-col gap-[12px] md:gap-[16px]">
+          <div className="flex flex-1 min-w-0 flex-col gap-3 md:gap-4">
             <h3 className="font-semibold text-[18px] md:text-[20px] text-foreground leading-none">
               <Truncate text={title} />
             </h3>
             
             <div className="flex min-w-0 items-center gap-[10px] text-foreground/60 font-medium text-[14px] md:text-[16px] leading-none">
               <span className="shrink-0">{genre}</span>
-              <div className="w-[8px] h-[8px] flex items-center justify-center">
+              <div className="w-2 h-2 flex items-center justify-center">
                 <span className="w-[6.4px] h-[6.4px] bg-foreground/60 rounded-full" /> 
               </div>
               <Truncate text={tracks} className="flex-1" />
@@ -89,6 +94,13 @@ export default function ProjectCard({
               </div>
               <span className="text-foreground/60 font-medium text-[14px] md:text-[16px]">
                 {collaborators.length} collaborators
+              </span>
+            </div>
+
+            {/* User Role Indicator */}
+            <div className={`px-2.5 py-1 rounded-lg max-w-fit border ${roleBadgeBg}`}>
+              <span className={`font-semibold text-[11px] uppercase tracking-wider ${roleBadgeText}`}>
+                  {role}
               </span>
             </div>
           </div>
@@ -131,7 +143,7 @@ export default function ProjectCard({
           </div>
           
           {/* Open Project Dropdown */}
-          <Link href={`/projects/${id}`} className="flex items-center gap-1 hover:opacity-80 transition-opacity group">
+          <Link href={`/workspace?projectId=${id}`} className="flex items-center gap-1 hover:opacity-80 transition-opacity group">
             <span className="text-primary-green font-medium text-[12px] group-hover:underline">Open Project</span>
             <span className="w-3.75 h-1.75 bg-primary-green" style={{ clipPath: 'polygon(0 0, 50% 100%, 100% 0, 80% 0, 50% 60%, 20% 0)' }} />
           </Link>

@@ -14,7 +14,6 @@ const ESCROW_STEPS = [
   { id: "escrow_milestones", label: "Milestones" },
   { id: "escrow_allocations", label: "Allocations" },
   { id: "escrow_review", label: "Review" },
-  { id: "escrow_approvals", label: "Approvals" },
   { id: "escrow_funding", label: "Funding" },
 ];
 

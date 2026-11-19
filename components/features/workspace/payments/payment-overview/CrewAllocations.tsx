@@ -5,19 +5,33 @@ interface CrewAllocationsProps {
   currencySymbol?: string;
   allocations?: any[];
   collaborators?: any[];
+  royaltySplits?: any[];
 }
 
 
 export default function CrewAllocations({ 
   currencySymbol = "₦", 
   allocations = [], 
-  collaborators = [] 
+  collaborators = [],
+ royaltySplits = [] 
 }: CrewAllocationsProps) {
   const formatAmount = (val: number) => `${currencySymbol}${val.toLocaleString()}`;
 
-  const liveCrew = allocations.map((alloc) => {
-    const collabMeta = collaborators.find(c => c.userId === alloc.userId);
-    const progress = alloc.totalAmount > 0 ? Math.round((alloc.releasedAmount / alloc.totalAmount) * 100) : 0;
+  // Merge users who have either an upfront allocation or a royalty split
+  const activeUserIds = Array.from(new Set([
+    ...allocations.map(a => a.userId),
+    ...royaltySplits.map(r => r.userId)
+    ]));
+
+  const liveCrew = activeUserIds.map((userId) => {
+    const collabMeta = collaborators.find(c => c.userId === userId || c.user?.id === userId);
+    const alloc = allocations.find(a => a.userId === userId);
+    const royaltyRecord = royaltySplits.find(r => r.userId === userId);
+    
+    const allocated = alloc?.totalAmount || 0;
+    const paid = alloc?.releasedAmount || 0;
+    const progress = allocated > 0 ? Math.round((paid / allocated) * 100) : 0;
+    const royaltyShare = royaltyRecord ? Number(royaltyRecord.royaltyShare) : 0;
     
     let status = "Payout Pending";
     let statusColorClass = "text-white/60";
@@ -34,16 +48,22 @@ export default function CrewAllocations({
       statusColorClass = "text-secondary-blue";
       bgBadge = "bg-primary-blue/10";
       borderBadge = "border-primary-blue/20";
+    } else if (allocated === 0 && royaltyShare > 0) {
+      status = "Royalties Only";
+      statusColorClass = "text-accent-pink";
+      bgBadge = "bg-accent-pink/10";
+      borderBadge = "border-accent-pink/20";
     }
 
     return {
-      id: alloc.id,
-      name: collabMeta?.user?.displayName || collabMeta?.legalName || collabMeta?.user?.email || "Unknown User",
+      id: userId,
+      name: collabMeta?.user?.displayName || collabMeta?.user?.legalName || collabMeta?.user?.email || "Unknown User",
       role: collabMeta?.role || "Collaborator",
       status,
-      allocated: alloc.totalAmount,
-      paid: alloc.releasedAmount,
+      allocated,
+      paid,
       progress,
+      royaltyShare,
       statusColorClass,
       bgBadge,
       borderBadge
@@ -88,6 +108,10 @@ export default function CrewAllocations({
                       
                       {/* Financial Numbers */}
                       <div className="flex flex-col gap-3 mb-5">
+                          <div className="flex justify-between items-center w-full pb-2.5 border-b border-white/5">
+                          <span className="font-raleway font-medium text-[13px] md:text-[14px] text-text-muted">Master Royalty</span>
+                          <span className="font-raleway font-bold text-[14px] md:text-[15px] text-accent-pink">{member.royaltyShare}%</span>
+                        </div>
                         <div className="flex justify-between items-center w-full pb-2.5 border-b border-white/5">
                           <span className="font-raleway font-medium text-[13px] md:text-[14px] text-text-muted">Allocated Budget</span>
                           <span className="font-raleway font-bold text-[14px] md:text-[15px] text-white">{formatAmount(member.allocated)}</span>

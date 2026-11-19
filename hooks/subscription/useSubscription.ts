@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import subscriptionService from "@/services/subscription.service";
 import { SavePaymentMethodPayload } from "@/types/api.types";
-import { handleApiError } from "@/lib/error-handler";
 
 export const useSubscription = () => {
   const queryClient = useQueryClient();
@@ -10,6 +9,7 @@ export const useSubscription = () => {
     useQuery({
       queryKey: ["subscriptions", "plans"],
       queryFn: () => subscriptionService.getPlans(),
+      meta: { errorContext: "subscription.load"},
     });
 
   const useMySubscription = () =>
@@ -25,7 +25,7 @@ export const useSubscription = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "me"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "subscription.subscribe"},
     });
 
   const useCancelSubscription = () =>
@@ -34,7 +34,7 @@ export const useSubscription = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "me"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "subscription.cancel"},
     });
 
   const useReactivateSubscription = () =>
@@ -43,19 +43,21 @@ export const useSubscription = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "me"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "subscription.reactivate"},
     });
 
   const useBillingHistory = (page = 1, limit = 20) =>
     useQuery({
       queryKey: ["subscriptions", "billing-history", page, limit],
       queryFn: () => subscriptionService.getBillingHistory(page, limit),
+      meta: { errorContext: "subscription.load"},
     });
 
   const usePaymentMethods = () =>
     useQuery({
       queryKey: ["subscriptions", "payment-methods"],
       queryFn: () => subscriptionService.getPaymentMethods(),
+      meta: { errorContext: "paymentMethods.load"},
     });
 
   const useSavePaymentMethod = () =>
@@ -65,7 +67,7 @@ export const useSubscription = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "payment-methods"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "paymentMethods.save"},
     });
 
   const useSetDefaultPaymentMethod = () =>
@@ -74,7 +76,7 @@ export const useSubscription = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "payment-methods"] });
       },
-      onError: (error) => handleApiError(error),
+     meta: { errorContext: "paymentMethods.setDefault"},
     });
 
   const useRemovePaymentMethod = () =>
@@ -83,7 +85,7 @@ export const useSubscription = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["subscriptions", "payment-methods"] });
       },
-      onError: (error) => handleApiError(error),
+      meta: { errorContext: "paymentMethods.remove"},
     });
 
   return {
