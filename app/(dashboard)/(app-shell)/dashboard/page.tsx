@@ -35,8 +35,8 @@ export default function DashboardPage() {
   const { useCollaborators } = useCollaborator();
   const { useMarketplaceProjects } = useProjects();
   const { data: apiData, isLoading, error } = useDashboardData();
-  const { data: marketplaceCollaborators = [] } = useCollaborators({ openToCollaborate: 'true' });
-  const { data: marketplaceProjects } = useMarketplaceProjects({ page: 1, limit: 10 });
+  const { data: marketplaceCollaborators = [] } = useCollaborators({ openToCollaborate: 'true', excludeConnected: true });
+  const { data: marketplaceProjects } = useMarketplaceProjects({ page: 1, limit: 10, excludeJoined: true });
 
   if (error) {
     handleApiError(error);
@@ -219,16 +219,18 @@ export default function DashboardPage() {
       </div>
 
       {/* --- BOTTOM ROW --- */}
-      <div className="w-full flex flex-col xl:flex-row gap-2.5 items-stretch">
-        <div className="flex-1 w-full flex flex-col xl:max-w-175">
-          <h3 className="text-foreground text-[23px] font-bold font-sans transform rotate-1 mb-4 origin-left">
-            Suggested For You
-          </h3>
-          <SuggestedProjectsPanel projects={suggestedProjects} />
-        </div>
-        
-        <div className="w-full xl:w-125 flex flex-col shrink-0">
-          <SuggestedCollaboratorsPanel collaborators={suggestedCollaborators} />
+      <div className="w-full flex flex-col gap-4">
+        <h3 className="text-foreground text-[23px] font-bold font-sans transform rotate-1 origin-left leading-none">
+          Suggested For You
+        </h3>
+        <div className="w-full flex flex-col xl:flex-row gap-10 2xl:gap-17.5 items-stretch">
+          <div className="flex-1 w-full xl:max-w-177.75">
+            <SuggestedProjectsPanel projects={suggestedProjects} />
+          </div>
+
+          <div className="w-full xl:w-103.25 shrink-0">
+            <SuggestedCollaboratorsPanel collaborators={suggestedCollaborators} />
+          </div>
         </div>
       </div>
       

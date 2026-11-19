@@ -52,11 +52,20 @@ export const useMessaging = () => {
       onMutate: async (payload: SendMessagePayload) => {
         if (!chatId) return;
 
-        await queryClient.cancelQueries({ queryKey: ["messaging", "chats", chatId, "messages"] });
-        await queryClient.cancelQueries({ queryKey: ["messaging", "chats"] });
+        const messagesKey = ["messaging", "chats", chatId, "messages"];
+        const infiniteKey = ["messaging", "chats", chatId, "messages", "infinite"];
+        const chatsKey = ["messaging", "chats"];
 
-        const previousMessages = queryClient.getQueryData<DirectMessage[]>(["messaging", "chats", chatId, "messages"]) || [];
-        const previousChats = queryClient.getQueryData<DirectChat[]>(["messaging", "chats"]);
+        await queryClient.cancelQueries({ queryKey: messagesKey });
+        await queryClient.cancelQueries({ queryKey: infiniteKey });
+        await queryClient.cancelQueries({ queryKey: chatsKey });
+
+        const previousMessages = queryClient.getQueryData<DirectMessage[]>(messagesKey) || [];
+        const previousInfinite = queryClient.getQueryData<{
+          pages: DirectMessage[][];
+          pageParams: unknown[];
+        }>(infiniteKey);
+        const previousChats = queryClient.getQueryData<DirectChat[]>(chatsKey);
 
         const optimisticMsg: DirectMessage = {
           id: `temp-${Date.now()}`,
@@ -71,13 +80,28 @@ export const useMessaging = () => {
         };
 
         queryClient.setQueryData<DirectMessage[]>(
-          ["messaging", "chats", chatId, "messages"],
+          messagesKey,
           [...previousMessages, optimisticMsg]
         );
 
+        // ChatWindow prefers the infinite query when it has data, so the
+        // optimistic message must also land there or it won't render until
+        // the server round-trip invalidates and refetches.
+        queryClient.setQueryData<{
+          pages: DirectMessage[][];
+          pageParams: unknown[];
+        }>(infiniteKey, (old) => {
+          if (!old || !old.pages || old.pages.length === 0) {
+            return { pages: [[optimisticMsg]], pageParams: [undefined] };
+          }
+          const pages = [...old.pages];
+          pages[0] = [...pages[0], optimisticMsg];
+          return { ...old, pages };
+        });
+
         if (previousChats) {
           queryClient.setQueryData<DirectChat[]>(
-            ["messaging", "chats"],
+            chatsKey,
             previousChats.map((c) => {
               if (c.id === chatId) {
                 return {
@@ -91,12 +115,18 @@ export const useMessaging = () => {
           );
         }
 
-        return { previousMessages, previousChats };
+        return { previousMessages, previousInfinite, previousChats };
       },
 
       onError: (err, payload, context) => {
         if (context?.previousMessages) {
           queryClient.setQueryData(["messaging", "chats", chatId, "messages"], context.previousMessages);
+        }
+        if (context?.previousInfinite !== undefined) {
+          queryClient.setQueryData(
+            ["messaging", "chats", chatId, "messages", "infinite"],
+            context.previousInfinite,
+          );
         }
         if (context?.previousChats) {
           queryClient.setQueryData(["messaging", "chats"], context.previousChats);
@@ -106,6 +136,7 @@ export const useMessaging = () => {
 
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats", chatId, "messages"] });
+        queryClient.invalidateQueries({ queryKey: ["messaging", "chats", chatId, "messages", "infinite"] });
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
     });
@@ -140,22 +171,54 @@ export const useMessaging = () => {
       onError: (error) => handleApiError(error),
     });
 
-  // Archive chat session
+  // Archive chat session (optimistic)
   const useArchiveChat = () =>
     useMutation({
       mutationFn: ({ chatId, isArchived }: { chatId: string; isArchived: boolean }) =>
         messagingService.archiveChat(chatId, isArchived),
-      onSuccess: () => {
+      onMutate: async ({ chatId, isArchived }) => {
+        await queryClient.cancelQueries({ queryKey: ["messaging", "chats"] });
+        const previousChats = queryClient.getQueryData<DirectChat[]>(["messaging", "chats"]);
+        if (previousChats) {
+          queryClient.setQueryData<DirectChat[]>(
+            ["messaging", "chats"],
+            previousChats.map((c) => (c.id === chatId ? { ...c, isArchived } : c))
+          );
+        }
+        return { previousChats };
+      },
+      onError: (_err, _vars, context) => {
+        if (context?.previousChats) {
+          queryClient.setQueryData(["messaging", "chats"], context.previousChats);
+        }
+      },
+      onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
       onError: (error) => handleApiError(error),
     });
 
-  // Delete chat history
+  // Delete chat history (optimistic)
   const useDeleteChat = () =>
     useMutation({
       mutationFn: (chatId: string) => messagingService.deleteChat(chatId),
-      onSuccess: () => {
+      onMutate: async (chatId) => {
+        await queryClient.cancelQueries({ queryKey: ["messaging", "chats"] });
+        const previousChats = queryClient.getQueryData<DirectChat[]>(["messaging", "chats"]);
+        if (previousChats) {
+          queryClient.setQueryData<DirectChat[]>(
+            ["messaging", "chats"],
+            previousChats.filter((c) => c.id !== chatId)
+          );
+        }
+        return { previousChats };
+      },
+      onError: (_err, _chatId, context) => {
+        if (context?.previousChats) {
+          queryClient.setQueryData(["messaging", "chats"], context.previousChats);
+        }
+      },
+      onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["messaging", "chats"] });
       },
       onError: (error) => handleApiError(error),

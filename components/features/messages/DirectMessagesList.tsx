@@ -1,8 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
-import { FiSearch, FiPlus } from "react-icons/fi";
+import {
+  FiSearch,
+  FiPlus,
+  FiMoreVertical,
+  FiArchive,
+  FiTrash2,
+  FiRotateCcw,
+} from "react-icons/fi";
 import { useTypingStatus } from "@/context/RealtimeContext";
 
 // Double checkmark SVG for sent messages
@@ -53,6 +61,8 @@ interface DirectMessagesListProps {
   onRespondRequest?: (id: string, status: "ACCEPTED" | "DECLINED") => void;
   isRespondingRequest?: boolean;
   onCreateMessage?: () => void;
+  onArchiveChat?: (chatId: string, isArchived: boolean) => void;
+  onDeleteChat?: (chatId: string) => void;
   className?: string;
 }
 
@@ -72,6 +82,8 @@ export default function DirectMessagesList({
   onRespondRequest,
   isRespondingRequest = false,
   onCreateMessage,
+  onArchiveChat,
+  onDeleteChat,
   className = "",
 }: DirectMessagesListProps) {
   return (
@@ -216,6 +228,8 @@ export default function DirectMessagesList({
               isPinned={pinnedChats.includes(chat.id) || !!chat.isPinned}
               onSelectChat={onSelectChat}
               togglePinChat={togglePinChat}
+              onArchiveChat={onArchiveChat}
+              onDeleteChat={onDeleteChat}
             />
           ))
         )}
@@ -230,6 +244,8 @@ interface DirectMessageRowProps {
   isPinned: boolean;
   onSelectChat: (id: string) => void;
   togglePinChat: (e: React.MouseEvent, chatId: string) => void;
+  onArchiveChat?: (chatId: string, isArchived: boolean) => void;
+  onDeleteChat?: (chatId: string) => void;
 }
 
 function DirectMessageRow({
@@ -238,13 +254,55 @@ function DirectMessageRow({
   isPinned,
   onSelectChat,
   togglePinChat,
+  onArchiveChat,
+  onDeleteChat,
 }: DirectMessageRowProps) {
   const isTyping = useTypingStatus(chat.id);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const isDraftChat =
+    chat.isRequestDraft ||
+    chat.id.startsWith("connected-") ||
+    chat.id.startsWith("request-") ||
+    chat.id.startsWith("mock-");
+  const showMenu = !isDraftChat && (!!onArchiveChat || !!onDeleteChat);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [menuOpen]);
+
+  const handleRowActivate = () => {
+    if (menuOpen) return;
+    onSelectChat(chat.id);
+  };
 
   return (
-    <button
-      onClick={() => onSelectChat(chat.id)}
-      className={`group flex items-center justify-between p-3 sm:p-3.5 rounded-[20px] transition-all border text-left cursor-pointer w-full shrink-0 ${
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleRowActivate}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleRowActivate();
+        }
+      }}
+      className={`group relative flex items-center justify-between p-3 sm:p-3.5 rounded-[20px] transition-all border text-left cursor-pointer w-full shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-green/60 ${
         isSelected
           ? "bg-[#283238] border-white/15 shadow-md"
           : "bg-[#20272B] hover:bg-[#252E34] border-transparent hover:border-white/10"
@@ -252,15 +310,34 @@ function DirectMessageRow({
     >
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
         <div className="relative shrink-0">
-          <Avatar
-            name={chat.name}
-            src={chat.avatarUrl}
-            className={`w-10 h-10 rounded-full object-cover text-xs font-bold ${
-              isSelected || isTyping
-                ? "border-2 border-primary-green"
-                : "border border-white/10"
-            }`}
-          />
+          {chat.recipientId && !isDraftChat ? (
+            <Link
+              href={`/profile?id=${encodeURIComponent(chat.recipientId)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="block rounded-full transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-green/60"
+              title={`View ${chat.name}'s profile`}
+            >
+              <Avatar
+                name={chat.name}
+                src={chat.avatarUrl}
+                className={`w-10 h-10 rounded-full object-cover text-xs font-bold ${
+                  isSelected || isTyping
+                    ? "border-2 border-primary-green"
+                    : "border border-white/10"
+                }`}
+              />
+            </Link>
+          ) : (
+            <Avatar
+              name={chat.name}
+              src={chat.avatarUrl}
+              className={`w-10 h-10 rounded-full object-cover text-xs font-bold ${
+                isSelected || isTyping
+                  ? "border-2 border-primary-green"
+                  : "border border-white/10"
+              }`}
+            />
+          )}
         </div>
 
         <div className="flex flex-col min-w-0 flex-1">
@@ -290,6 +367,74 @@ function DirectMessageRow({
           {chat.unread > 0 && (
             <span className="w-2 h-2 rounded-full bg-primary-green shadow-sm" />
           )}
+          {showMenu && (
+            <div ref={menuRef} className="relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen((prev) => !prev);
+                }}
+                aria-label="Chat actions"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                className={`p-0.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer ${
+                  menuOpen
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                }`}
+              >
+                <FiMoreVertical size={14} />
+              </button>
+              {menuOpen && (
+                <div
+                  role="menu"
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 top-full mt-1.5 z-20 min-w-[168px] bg-[#1F282E] border border-white/10 rounded-xl shadow-xl py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+                >
+                  {onArchiveChat && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        onArchiveChat(chat.id, !chat.isArchived);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-white/85 hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                      {chat.isArchived ? (
+                        <>
+                          <FiRotateCcw size={13} className="text-white/60" />
+                          <span>Unarchive</span>
+                        </>
+                      ) : (
+                        <>
+                          <FiArchive size={13} className="text-white/60" />
+                          <span>Archive</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  {onDeleteChat && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        onDeleteChat(chat.id);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                    >
+                      <FiTrash2 size={13} />
+                      <span>Delete chat</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 mt-auto">
@@ -308,6 +453,6 @@ function DirectMessageRow({
           ) : null}
         </div>
       </div>
-    </button>
+    </div>
   );
 }

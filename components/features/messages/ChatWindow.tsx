@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useState, useRef, useEffect, useMemo } from "react";
+import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import { FiMic, FiCornerUpLeft, FiX, FiChevronLeft, FiSquare, FiTrash2, FiDownload, FiFile } from "react-icons/fi";
 import { useMessaging } from "@/hooks/messaging/useMessaging";
@@ -563,16 +564,39 @@ export default function ChatWindow({
             </button>
           )}
           <div className="relative shrink-0">
-            <Avatar
-              name={chatInfo?.name || "Chat"}
-              src={chatInfo?.avatarUrl}
-              className="w-8 h-8 rounded-full object-cover text-xs font-bold border border-white/10"
-            />
+            {recipientId ? (
+              <Link
+                href={`/profile?id=${encodeURIComponent(recipientId)}`}
+                className="block rounded-full transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-green/60"
+                title={`View ${chatInfo?.name || "profile"}`}
+              >
+                <Avatar
+                  name={chatInfo?.name || "Chat"}
+                  src={chatInfo?.avatarUrl}
+                  className="w-8 h-8 rounded-full object-cover text-xs font-bold border border-white/10"
+                />
+              </Link>
+            ) : (
+              <Avatar
+                name={chatInfo?.name || "Chat"}
+                src={chatInfo?.avatarUrl}
+                className="w-8 h-8 rounded-full object-cover text-xs font-bold border border-white/10"
+              />
+            )}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-raleway font-bold text-xs sm:text-sm text-white truncate">
-              {chatInfo?.name || "Conversation"}
-            </span>
+            {recipientId ? (
+              <Link
+                href={`/profile?id=${encodeURIComponent(recipientId)}`}
+                className="font-raleway font-bold text-xs sm:text-sm text-white truncate hover:text-primary-green transition-colors"
+              >
+                {chatInfo?.name || "Conversation"}
+              </Link>
+            ) : (
+              <span className="font-raleway font-bold text-xs sm:text-sm text-white truncate">
+                {chatInfo?.name || "Conversation"}
+              </span>
+            )}
             {otherIsTyping && (
               <span className="text-[11px] text-primary-green truncate font-medium">
                 typing...

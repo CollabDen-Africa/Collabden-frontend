@@ -22,12 +22,13 @@ import type {
   UserSpaceItem,
   UserSpaceItemType,
 } from "@/services/userSpace.service";
+import FileViewerOverlay from "@/components/features/my-space/FileViewerOverlay";
 
 const TAB_TO_TYPE: Record<string, UserSpaceItemType | undefined> = {
   "All Files": undefined,
   Agreements: "agreement",
   "Saved Files": "saved-file",
-  "Message Attachments": "dm-attachment",
+  Files: "my-file",
 };
 
 const formatFileSize = (bytes?: number | null) => {
@@ -46,19 +47,26 @@ const formatDate = (iso: string) =>
     year: "numeric",
   });
 
-const TypeIcon: React.FC<{ type: UserSpaceItemType }> = ({ type }) => {
-  if (type === "agreement") return <FiFileText className="text-primary-green" size={22} />;
-  if (type === "dm-attachment") return <FiMessageSquare className="text-primary-green" size={22} />;
+const TypeIcon: React.FC<{ item: UserSpaceItem }> = ({ item }) => {
+  if (item.type === "agreement") return <FiFileText className="text-primary-green" size={22} />;
+  if (item.type === "dm-attachment") return <FiMessageSquare className="text-primary-green" size={22} />;
+  if (item.type === "my-file" && item.meta.source === "dm")
+    return <FiMessageSquare className="text-primary-green" size={22} />;
   return <FiFolder className="text-primary-green" size={22} />;
 };
 
-const typeLabel = (type: UserSpaceItemType) =>
-  type === "agreement" ? "Agreement" : type === "saved-file" ? "Saved File" : "Message";
+const typeLabel = (item: UserSpaceItem) => {
+  if (item.type === "agreement") return "Agreement";
+  if (item.type === "saved-file") return "Saved File";
+  if (item.type === "dm-attachment") return "Message";
+  return item.meta.source === "dm" ? "Message Upload" : "Project Upload";
+};
 
 export default function MySpacePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("All Files");
   const [search, setSearch] = useState("");
+  const [viewingItem, setViewingItem] = useState<UserSpaceItem | null>(null);
 
   const typeFilter = TAB_TO_TYPE[activeTab];
   const { data, isLoading } = useUserSpace({
@@ -72,7 +80,7 @@ export default function MySpacePage() {
   const items = data?.items || [];
 
   const handleOpen = (item: UserSpaceItem) => {
-    if (item.url) window.open(item.url, "_blank");
+    if (item.url) setViewingItem(item);
   };
 
   const handleDownload = async (item: UserSpaceItem) => {
@@ -121,7 +129,7 @@ export default function MySpacePage() {
         <div className="flex flex-col gap-2 px-3">
           <h1 className="font-raleway font-bold text-[32px] text-white">My Space</h1>
           <p className="font-raleway text-[14px] text-white/60">
-            All your agreements, saved project files, and message attachments in one place.
+            All your agreements and uploaded files, from projects and messages, in one place.
           </p>
         </div>
 
@@ -161,7 +169,7 @@ export default function MySpacePage() {
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="bg-black/20 p-2.5 rounded-md shrink-0">
-                    <TypeIcon type={item.type} />
+                    <TypeIcon item={item} />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="font-raleway font-semibold text-[16px] text-white truncate">
@@ -169,7 +177,7 @@ export default function MySpacePage() {
                     </span>
                     <div className="flex items-center gap-3 text-white/50 text-[12px] font-raleway flex-wrap">
                       <span className="px-2 py-0.5 bg-white/5 rounded-full text-[11px]">
-                        {typeLabel(item.type)}
+                        {typeLabel(item)}
                       </span>
                       {item.project && (
                         <>
@@ -238,6 +246,16 @@ export default function MySpacePage() {
           )}
         </div>
       </div>
+
+      <FileViewerOverlay
+        isOpen={!!viewingItem}
+        onClose={() => setViewingItem(null)}
+        fileUrl={viewingItem?.url}
+        title={viewingItem?.title}
+        mimeType={viewingItem?.mimeType}
+        typeLabel={viewingItem ? typeLabel(viewingItem) : undefined}
+        onDownload={viewingItem ? () => handleDownload(viewingItem) : undefined}
+      />
     </div>
   );
 }

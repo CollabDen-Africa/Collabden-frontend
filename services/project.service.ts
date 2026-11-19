@@ -10,6 +10,8 @@ import type {
   ProjectTask,
   CreateProjectTaskPayload,
   MarketplaceProjectsResponse,
+  SendProjectMessagePayload,
+  ProjectVoiceUploadResponse,
 } from "@/types/api.types";
 
 const projectService = {
@@ -101,9 +103,35 @@ const projectService = {
     await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.SAVE_FILE_TO_SPACE(projectId, fileId));
   },
 
-  sendMessage: async (projectId: string, content: string): Promise<ProjectMessage> => {
-    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.MESSAGES(projectId), { content });
+  sendMessage: async (
+    projectId: string,
+    payload: SendProjectMessagePayload
+  ): Promise<ProjectMessage> => {
+    const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.MESSAGES(projectId), payload);
     return response.data?.message || response.data?.data || response.data;
+  },
+
+  /**
+   * Upload a recorded voice note for a project. Runs the owner's storage quota check
+   * before writing to Supabase, so a 413 here means the project has hit its tier limit.
+   * Submit the returned `path` as `voiceUrl` and `size` as `voiceSize` when calling
+   * `sendMessage`.
+   */
+  uploadProjectVoiceNote: async (
+    projectId: string,
+    file: Blob,
+    durationSeconds: number,
+    filename = "voice-note.webm"
+  ): Promise<ProjectVoiceUploadResponse> => {
+    const formData = new FormData();
+    formData.append("voice", file, filename);
+    formData.append("durationSeconds", String(Math.max(1, Math.round(durationSeconds))));
+    const response = await proxyAxios.post(
+      PROXY_ENDPOINTS.PROJECTS.MESSAGES_VOICE(projectId),
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data?.data || response.data;
   },
 
   createTask: async (projectId: string, data: CreateProjectTaskPayload): Promise<ProjectTask> => {
@@ -116,7 +144,7 @@ const projectService = {
     return response.data?.task || response.data?.data || response.data;
   },
 
-  getMarketplace: async (params?: { page?: number; limit?: number; genre?: string; role?: string; search?: string; sortBy?: string; sortOrder?: "asc" | "desc" }): Promise<MarketplaceProjectsResponse> => {
+  getMarketplace: async (params?: { page?: number; limit?: number; genre?: string; role?: string; search?: string; sortBy?: string; sortOrder?: "asc" | "desc"; excludeJoined?: boolean }): Promise<MarketplaceProjectsResponse> => {
     const response = await proxyAxios.get(PROXY_ENDPOINTS.PROJECTS.MARKETPLACE, { params });
     const raw = response.data;
     return { projects: raw?.projects || raw?.data?.projects || [], meta: raw?.meta || raw?.data?.meta || { total: 0, page: 1, limit: 20, totalPages: 0 } };
