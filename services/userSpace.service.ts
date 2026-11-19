@@ -1,7 +1,11 @@
 import { proxyAxios } from "@/lib/axios";
 import { PROXY_ENDPOINTS } from "@/constants/api-endpoints";
 
-export type UserSpaceItemType = "agreement" | "saved-file" | "dm-attachment";
+export type UserSpaceItemType =
+  | "agreement"
+  | "saved-file"
+  | "dm-attachment"
+  | "my-file";
 
 export interface UserSpaceItem {
   id: string;
@@ -20,6 +24,7 @@ export interface UserSpaceItem {
     messageId?: string;
     chatId?: string;
     senderId?: string;
+    source?: "project" | "dm";
   };
 }
 

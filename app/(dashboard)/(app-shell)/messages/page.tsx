@@ -11,7 +11,7 @@ import ProjectMessagesList, {
 } from "@/components/features/messages/ProjectMessagesList";
 import ChatWindow from "@/components/features/messages/ChatWindow";
 import Avatar from "@/components/ui/Avatar";
-import { FiX, FiSearch, FiUsers, FiUser, FiChevronLeft } from "react-icons/fi";
+import { FiX, FiSearch, FiUsers, FiUser, FiChevronLeft, FiTrash2 } from "react-icons/fi";
 import { useMessaging } from "@/hooks/messaging/useMessaging";
 import { useProjects } from "@/hooks/projects/useProjects";
 import { useConnections } from "@/hooks/connections/useConnections";
@@ -94,6 +94,7 @@ function DashboardMessagesContent() {
   const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
   const [connectionSearchQuery, setConnectionSearchQuery] = useState("");
   const [draftChats, setDraftChats] = useState<DirectMessageItem[]>([]);
+  const [chatPendingDelete, setChatPendingDelete] = useState<string | null>(null);
 
   // Messaging queries
   const {
@@ -101,6 +102,8 @@ function DashboardMessagesContent() {
     useMessageRequests,
     useRespondRequest,
     useCreateChat,
+    useArchiveChat,
+    useDeleteChat,
   } = useMessaging();
 
   const { data: apiChats = [], isLoading: isLoadingChats } = useChats();
@@ -108,6 +111,21 @@ function DashboardMessagesContent() {
   const { data: sentRequests = [] } = useMessageRequests("sent");
   const respondRequestMutation = useRespondRequest();
   const createChatMutation = useCreateChat();
+  const archiveChatMutation = useArchiveChat();
+  const deleteChatMutation = useDeleteChat();
+
+  const handleArchiveChat = (chatId: string, isArchived: boolean) => {
+    if (selectedChatId === chatId) setSelectedChatId(null);
+    archiveChatMutation.mutate({ chatId, isArchived });
+  };
+
+  const handleConfirmDeleteChat = () => {
+    if (!chatPendingDelete) return;
+    const chatId = chatPendingDelete;
+    if (selectedChatId === chatId) setSelectedChatId(null);
+    setChatPendingDelete(null);
+    deleteChatMutation.mutate(chatId);
+  };
 
   // Handle message request from query parameters (User A viewing User B's profile)
   useEffect(() => {
@@ -199,6 +217,17 @@ function DashboardMessagesContent() {
   // Determine whether user has project messages
   const hasProjectMessages = projectConversations.length > 0;
 
+  // The /messaging/chats endpoint sometimes returns otherParticipant without avatarUrl
+  // even when the user has a profile picture. Build a lookup from the connections
+  // response (which does include avatarUrl) to patch the gap.
+  const connectionAvatarMap = useMemo(() => {
+    const map = new Map<string, string>();
+    userConnections.forEach((conn) => {
+      if (conn.id && conn.avatarUrl) map.set(conn.id, conn.avatarUrl);
+    });
+    return map;
+  }, [userConnections]);
+
   // 2. Process Direct Messages: ONLY real backend chats and live drafts
   const allChats = useMemo<DirectMessageItem[]>(() => {
     // Filter out draft chats if a real chat with this user now exists in apiChats
@@ -212,15 +241,19 @@ function DashboardMessagesContent() {
         if (!list.some((d) => d.id === c.id)) {
           const isFromMe = c.lastMessage?.senderId === user?.id;
           const isRead = selectedChatId === c.id || readChatIds.has(c.id);
+          const participantId = c.otherParticipant?.id;
           list.push({
             id: c.id,
-            recipientId: c.otherParticipant?.id,
+            recipientId: participantId,
             name:
               c.otherParticipant?.displayName ||
               (c.otherParticipant as any)?.legalName ||
               c.otherParticipant?.email?.split("@")[0] ||
               "Collaborator",
-            avatarUrl: c.otherParticipant?.avatarUrl,
+            avatarUrl:
+              c.otherParticipant?.avatarUrl ||
+              (participantId ? connectionAvatarMap.get(participantId) : null) ||
+              null,
             lastMsg:
               c.lastMessage?.content ||
               (c.lastMessage?.voiceUrl
@@ -241,7 +274,7 @@ function DashboardMessagesContent() {
     }
 
     return list;
-  }, [apiChats, draftChats, user?.id, selectedChatId, readChatIds]);
+  }, [apiChats, draftChats, user?.id, selectedChatId, readChatIds, connectionAvatarMap]);
 
   // Tabs definitions: Real counts only
   const tabs = useMemo(() => {
@@ -428,6 +461,8 @@ function DashboardMessagesContent() {
                   onRespondRequest={handleRespondRequest}
                   isRespondingRequest={respondRequestMutation.isPending}
                   onCreateMessage={() => setIsNewMessageModalOpen(true)}
+                  onArchiveChat={handleArchiveChat}
+                  onDeleteChat={setChatPendingDelete}
                   className="h-full"
                 />
               </div>
@@ -462,6 +497,8 @@ function DashboardMessagesContent() {
                 onRespondRequest={handleRespondRequest}
                 isRespondingRequest={respondRequestMutation.isPending}
                 onCreateMessage={() => setIsNewMessageModalOpen(true)}
+                onArchiveChat={handleArchiveChat}
+                onDeleteChat={setChatPendingDelete}
                 className="h-full"
               />
             </div>
@@ -489,6 +526,8 @@ function DashboardMessagesContent() {
                 onRespondRequest={handleRespondRequest}
                 isRespondingRequest={respondRequestMutation.isPending}
                 onCreateMessage={() => setIsNewMessageModalOpen(true)}
+                onArchiveChat={handleArchiveChat}
+                onDeleteChat={setChatPendingDelete}
                 className="h-full"
               />
             </div>
@@ -582,6 +621,49 @@ function DashboardMessagesContent() {
                   </button>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Chat Confirmation Modal */}
+      {chatPendingDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#182228] border border-white/10 rounded-3xl p-5 sm:p-6 w-full max-w-md shadow-2xl flex flex-col gap-4 text-white">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-red-500/15 text-red-400 flex items-center justify-center">
+                  <FiTrash2 size={15} />
+                </div>
+                <h3 className="font-bold text-base text-white">Delete chat?</h3>
+              </div>
+              <button
+                onClick={() => setChatPendingDelete(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/70 hover:text-white transition-colors cursor-pointer"
+              >
+                <FiX size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs sm:text-[13px] text-white/70 leading-relaxed">
+              This removes the chat from your inbox. The other person will still
+              see the conversation, and it will reappear for you if they send a
+              new message.
+            </p>
+
+            <div className="flex gap-2 w-full pt-1">
+              <button
+                onClick={() => setChatPendingDelete(null)}
+                className="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full text-xs transition-all cursor-pointer border border-white/5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDeleteChat}
+                className="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full text-xs transition-all cursor-pointer shadow-sm"
+              >
+                Delete chat
+              </button>
             </div>
           </div>
         </div>

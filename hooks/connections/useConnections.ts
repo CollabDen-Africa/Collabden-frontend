@@ -29,6 +29,7 @@ export const useConnections = () => {
       // Invalidate both to refresh state immediately
       queryClient.invalidateQueries({ queryKey: ['connections', 'pending'] });
       queryClient.invalidateQueries({ queryKey: ['connections', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['collaborators'] });
     },
     meta: { errorContext: 'connections.send' },
   });
@@ -42,6 +43,7 @@ export const useConnections = () => {
       queryClient.invalidateQueries({ queryKey: ['connections', 'list'] });
       queryClient.invalidateQueries({ queryKey: ['connections', 'pending'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['collaborators'] });
     },
     meta: { errorContext: 'connections.respond' },
   });

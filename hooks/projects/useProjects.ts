@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import projectService from '@/services/project.service';
-import { CreateProjectPayload, CreateProjectTaskPayload, InviteCollaboratorPayload, Project, ProjectMessage, ProjectTask } from '@/types/api.types';
+import { handleApiError } from '@/lib/error-handler';
+import { CreateProjectPayload, CreateProjectTaskPayload, InviteCollaboratorPayload, Project, ProjectMessage, ProjectTask, SendProjectMessagePayload } from '@/types/api.types';
 
 export const useProjects = () => {
   const queryClient = useQueryClient();
@@ -67,7 +68,7 @@ export const useProjects = () => {
     enabled: !!id,
   });
 
-  const useMarketplaceProjects = (filters?: { page?: number; limit?: number; genre?: string; role?: string; search?: string; sortBy?: string; sortOrder?: "asc" | "desc" }) => useQuery({
+  const useMarketplaceProjects = (filters?: { page?: number; limit?: number; genre?: string; role?: string; search?: string; sortBy?: string; sortOrder?: "asc" | "desc"; excludeJoined?: boolean }) => useQuery({
     queryKey: ['marketplace', 'projects', filters],
     queryFn: () => projectService.getMarketplace(filters),
     staleTime: 0,
@@ -104,7 +105,7 @@ export const useProjects = () => {
     });
 
   const useSendProjectMessage = (projectId: string) => useMutation({
-    mutationFn: (content: string) => projectService.sendMessage(projectId, content),
+    mutationFn: (payload: SendProjectMessagePayload) => projectService.sendMessage(projectId, payload),
     onSuccess: (message: ProjectMessage) => {
       queryClient.setQueryData<Project>(['projects', projectId], (project) => {
         if (!project || project.messages?.some((existing) => existing.id === message.id)) {
@@ -189,6 +190,7 @@ export const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['projects', 'my-invites'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
     },
     meta: { errorContext: 'invites.respond' },
   });

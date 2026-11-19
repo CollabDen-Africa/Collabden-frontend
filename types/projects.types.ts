@@ -37,13 +37,37 @@ export interface ProjectMessageSender {
   avatarUrl?: string | null;
 }
 
+export type ProjectMessageType = "TEXT" | "VOICE";
+
 export interface ProjectMessage {
   id: string;
   projectId: string;
   senderId: string;
-  content: string;
+  content: string | null;
+  messageType?: ProjectMessageType;
+  voiceUrl?: string | null;
+  voiceDuration?: number | null;
+  voiceSize?: number | null;
+  parentId?: string | null;
   createdAt: string;
   sender?: ProjectMessageSender | null;
+}
+
+export interface SendProjectMessagePayload {
+  content?: string;
+  parentId?: string;
+  voiceUrl?: string;
+  voiceDuration?: number;
+  voiceSize?: number;
+}
+
+export interface ProjectVoiceUploadResponse {
+  path: string;
+  signedUrl: string;
+  mimeType: string;
+  size: number;
+  durationSeconds: number;
+  expiresInSeconds: number;
 }
 
 export type ProjectTaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";

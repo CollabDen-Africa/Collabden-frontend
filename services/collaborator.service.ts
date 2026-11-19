@@ -13,6 +13,7 @@ const collaboratorService = {
     role?: string;
     openToCollaborate?: "true" | "false" | "all";
     connectedOnly?: boolean;
+    excludeConnected?: boolean;
   }): Promise<MarketplaceCollaborator[]> => {
     const { connectedOnly, ...queryParams } = params || {};
     const url = connectedOnly

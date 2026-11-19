@@ -39,6 +39,12 @@ const forceMetadataLoad = (audio: HTMLAudioElement) =>
     }
   });
 
+const PLAYBACK_SPEEDS = [1, 1.5, 2] as const;
+type PlaybackSpeed = (typeof PLAYBACK_SPEEDS)[number];
+
+const formatSpeed = (speed: PlaybackSpeed) =>
+  speed === 1 ? "1x" : speed === 1.5 ? "1.5x" : "2x";
+
 export default function VoiceNotePlayer({
   src,
   durationSeconds,
@@ -49,18 +55,41 @@ export default function VoiceNotePlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [metadataReady, setMetadataReady] = useState(false);
+  const [speed, setSpeed] = useState<PlaybackSpeed>(1);
 
   const isLight = variant === "light";
   const barBg = isLight ? "bg-slate-200" : "bg-white/15";
   const barFill = isLight ? "bg-[#204F99]" : "bg-primary-green";
   const btnBg = isLight ? "bg-[#204F99] text-white" : "bg-primary-green text-white";
   const textMuted = isLight ? "text-slate-500" : "text-white/60";
+  const speedChipBg = isLight
+    ? "bg-[#204F99]/10 text-[#204F99] hover:bg-[#204F99]/20"
+    : "bg-white/10 text-white/80 hover:bg-white/20";
 
   useEffect(() => {
     setIsPlaying(false);
     setCurrentTime(0);
     setMetadataReady(false);
+    setSpeed(1);
   }, [src]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.playbackRate = speed;
+    // Keep pitch natural at non-1x speeds (default in most browsers, but set
+    // defensively — Safari has historically reset preservesPitch on seek).
+    if ("preservesPitch" in audio) {
+      (audio as HTMLAudioElement & { preservesPitch: boolean }).preservesPitch = true;
+    }
+  }, [speed, src, metadataReady]);
+
+  const cycleSpeed = () => {
+    setSpeed((prev) => {
+      const idx = PLAYBACK_SPEEDS.indexOf(prev);
+      return PLAYBACK_SPEEDS[(idx + 1) % PLAYBACK_SPEEDS.length];
+    });
+  };
 
   const play = async () => {
     const audio = audioRef.current;
@@ -117,6 +146,16 @@ export default function VoiceNotePlayer({
       <span className={`text-[11px] font-semibold shrink-0 tabular-nums ${textMuted}`}>
         {formatClock(isPlaying ? currentTime : durationSeconds)}
       </span>
+
+      <button
+        type="button"
+        onClick={cycleSpeed}
+        className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums shrink-0 transition-colors cursor-pointer ${speedChipBg}`}
+        aria-label={`Playback speed ${formatSpeed(speed)}, click to change`}
+        title={`Playback speed ${formatSpeed(speed)}`}
+      >
+        {formatSpeed(speed)}
+      </button>
 
       <audio
         ref={audioRef}

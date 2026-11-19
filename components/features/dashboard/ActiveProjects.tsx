@@ -45,7 +45,7 @@ export default function ActiveProjectsPanel({
     );
   
   return (
-    <section className="flex flex-col gap-4 w-full max-w-171 md:ml-13.25">
+    <section className="flex flex-col gap-4 w-full max-w-171">
       
       {/* Header */}
       <div className="relative flex justify-between items-center w-full mb-2">

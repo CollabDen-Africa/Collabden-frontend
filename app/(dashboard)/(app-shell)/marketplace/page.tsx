@@ -102,7 +102,7 @@ function MarketplaceContent() {
             className="inline-flex items-center gap-2 rounded-full border border-primary-green/60 bg-black/20 px-4 py-2  text-[13px] font-semibold text-primary-green transition-colors hover:bg-primary-green hover:text-white md:translate-y-15"
           >
             <HiUserGroup size={17} />
-            Connection requests
+            Connections
           </Link>
         </div>
 

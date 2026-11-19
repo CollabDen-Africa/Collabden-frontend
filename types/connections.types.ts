@@ -1,5 +1,13 @@
 export type ConnectionStatus = "PENDING" | "ACCEPTED" | "REJECTED";
 
+export interface ConnectionPartyProfile {
+  id: string;
+  email: string;
+  displayName?: string | null;
+  legalName?: string | null;
+  avatarUrl?: string | null;
+}
+
 export interface UserConnection {
   id: string;
   senderId: string;
@@ -7,8 +15,8 @@ export interface UserConnection {
   status: ConnectionStatus;
   createdAt: string;
   updatedAt: string;
-  sender?: { id: string; email: string };
-  receiver?: { id: string; email: string };
+  sender?: ConnectionPartyProfile;
+  receiver?: ConnectionPartyProfile;
 }
 
 export interface ConnectedUser {

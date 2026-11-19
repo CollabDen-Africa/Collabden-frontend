@@ -345,6 +345,7 @@ export const PROXY_ENDPOINTS = {
     SAVE_FILE_TO_SPACE: (id: string, fileId: string) =>
       `/projects/${id}/files/${fileId}/save-to-space`,
     MESSAGES: (id: string) => `/projects/${id}/messages`,
+    MESSAGES_VOICE: (id: string) => `/projects/${id}/messages/voice`,
     COVER: (id: string) => `/projects/${id}/cover`,
     APPLY: (id: string) => `/projects/${id}/apply`,
     APPLICATIONS: (projectId: string) => `/projects/${projectId}/applications`,
