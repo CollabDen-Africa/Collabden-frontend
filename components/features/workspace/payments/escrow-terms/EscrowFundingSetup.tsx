@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { 
-  FiCheck, 
-  FiArrowLeft, 
-  FiShield, 
+import {
+  FiArrowLeft,
+  FiShield,
   FiCalendar,
   FiMoreHorizontal,
   FiMessageSquare,

@@ -4,8 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ProjectCard, { ProjectCollaborator } from './ProjectCard';
-import OnboardingTooltip from '@/components/ui/Tooltip'; 
+import OnboardingTooltip from '@/components/ui/Tooltip';
 import EmptyState from '@/components/ui/EmptyState';
+import Skeleton from '@/components/ui/Skeleton';
 
 // Active Project data structure
 export interface ActiveProject {
@@ -19,15 +20,17 @@ export interface ActiveProject {
   status?: string;
 }
 
-export default function ActiveProjectsPanel({ 
+export default function ActiveProjectsPanel({
   projects = [],
   isVerified = false,
-  currentStep, 
+  isLoading = false,
+  currentStep,
   setStep,
-  onSkip 
-}: { 
+  onSkip
+}: {
   projects: ActiveProject[];
   isVerified?: boolean;
+  isLoading?: boolean;
   currentStep?: number;
   setStep?: (s: number) => void;
   onSkip?: () => void;
@@ -78,15 +81,28 @@ export default function ActiveProjectsPanel({
         )}
       </div>
       
-      {/* List Wrapper or Empty State */}
-      {hasProjects ? (
+      {/* List Wrapper, Loading Skeleton, or Empty State */}
+      {isLoading ? (
+        <div className="flex flex-col gap-4 w-full max-w-167.5 bg-black/10 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md rounded-[30px] p-5 lg:p-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 w-full">
+              <Skeleton className="h-16 w-16 rounded-2xl shrink-0" />
+              <div className="flex-1 flex flex-col gap-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-3/4" />
+              </div>
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+          ))}
+        </div>
+      ) : hasProjects ? (
         <div className="flex flex-col gap-4 w-full max-w-167.5 bg-black/10 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-md rounded-[30px] p-5 lg:p-8">
             {projects.map((project) => (
               <ProjectCard key={project.id} {...project} />
                 ))}
               </div>
             ) : (
-              <EmptyState 
+              <EmptyState
                 icon={FolderIcon}
                 title="No Active Projects"
                 description="You haven't started or joined any projects yet. Create one to begin collaborating."

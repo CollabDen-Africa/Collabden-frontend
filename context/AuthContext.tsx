@@ -17,6 +17,10 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
+  displayName?: string | null;
+  displayNameMode?: "LEGAL" | "STAGE" | null;
+  whoCanMessage?: "EVERYONE" | "CONNECTIONS" | "PROJECT_COLLABORATORS" | "NOBODY" | null;
+  showLocation?: boolean;
   hasCompletedOnboarding?: boolean;
   onboardingCompleted?: boolean;
   identityVerified?: boolean;

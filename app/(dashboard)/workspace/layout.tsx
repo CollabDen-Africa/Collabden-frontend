@@ -27,6 +27,7 @@ import WorkspaceVerificationBanner from "@/components/features/workspace/Workspa
 import { useProjects } from "@/hooks/projects/useProjects";
 
 import { handleApiError } from "@/lib/error-handler";
+import { resolveUserName } from "@/lib/display-name";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -202,7 +203,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
     if (proj.owner) {
 
-      const name = proj.owner.displayName || proj.owner.legalName || proj.owner.email?.split("@")[0] || "Owner";
+      const name = resolveUserName(proj.owner, "Owner");
 
       map.set(proj.owner.id, { id: proj.owner.id, name, avatarUrl: proj.owner.avatarUrl || undefined });
 
@@ -212,7 +213,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
 
       if (c.user) {
 
-        const name = c.user.displayName || c.user.legalName || c.user.email?.split("@")[0] || "Collaborator";
+        const name = resolveUserName(c.user, "Collaborator");
 
         map.set(c.user.id, { id: c.user.id, name, avatarUrl: c.user.avatarUrl || undefined });
 

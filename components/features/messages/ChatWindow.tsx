@@ -15,6 +15,7 @@ import { MAX_DM_ATTACHMENT_BYTES, MAX_ATTACHMENTS_PER_MESSAGE } from "@/types/me
 import type { DirectMessageItem } from "./DirectMessagesList";
 import VoiceNotePlayer from "./VoiceNotePlayer";
 import MessageReactions from "./MessageReactions";
+import FileViewerOverlay from "@/components/features/my-space/FileViewerOverlay";
 import { useRealtime, useTypingStatus } from "@/context/RealtimeContext";
 
 const formatDuration = (totalSeconds: number) => {
@@ -132,6 +133,7 @@ export default function ChatWindow({
   const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const [isUploadingAttachments, setIsUploadingAttachments] = useState(false);
+  const [viewer, setViewer] = useState<{ url: string; name: string | null; mimeType: string | null } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -546,6 +548,7 @@ export default function ChatWindow({
   };
 
   return (
+    <>
     <div
       className={`flex flex-col bg-[#1A2328]/90 border border-white/10 rounded-[32px] p-5 sm:p-6 shadow-2xl backdrop-blur-md overflow-hidden relative ${className}`}
     >
@@ -745,24 +748,27 @@ export default function ChatWindow({
                           const isImage = att.mimeType?.startsWith("image/");
                           if (isImage) {
                             return (
-                              <a key={i} href={att.url} target="_blank" rel="noopener noreferrer" className="block">
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => setViewer({ url: att.url, name: att.name ?? null, mimeType: att.mimeType ?? null })}
+                                className="block text-left"
+                              >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={att.url}
                                   alt={att.name || "Image"}
                                   className="rounded-xl max-w-[220px] max-h-52 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                 />
-                              </a>
+                              </button>
                             );
                           }
                           return (
-                            <a
+                            <button
                               key={i}
-                              href={att.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download={att.name || true}
-                              className={`flex items-center gap-2.5 p-2.5 rounded-xl hover:opacity-80 transition-opacity ${isMe ? "bg-[#153B75]" : "bg-slate-100"}`}
+                              type="button"
+                              onClick={() => setViewer({ url: att.url, name: att.name ?? null, mimeType: att.mimeType ?? null })}
+                              className={`flex items-center gap-2.5 p-2.5 rounded-xl hover:opacity-80 transition-opacity text-left ${isMe ? "bg-[#153B75]" : "bg-slate-100"}`}
                             >
                               <FileDocIcon className={`shrink-0 ${isMe ? "text-[#93C5FD]" : "text-[#2B4B77]"}`} />
                               <div className="flex flex-col min-w-0 flex-1">
@@ -776,7 +782,7 @@ export default function ChatWindow({
                                 )}
                               </div>
                               <FiDownload size={14} className={`shrink-0 ${isMe ? "text-white/60" : "text-slate-400"}`} />
-                            </a>
+                            </button>
                           );
                         })}
                       </div>
@@ -1079,5 +1085,28 @@ export default function ChatWindow({
         )}
       </div>
     </div>
+    <FileViewerOverlay
+      isOpen={!!viewer}
+      onClose={() => setViewer(null)}
+      fileUrl={viewer?.url}
+      title={viewer?.name || "Attachment"}
+      mimeType={viewer?.mimeType}
+      typeLabel={viewer?.mimeType || "File"}
+      onDownload={viewer?.url ? async () => {
+        try {
+          const res = await fetch(viewer.url);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = viewer.name || "attachment";
+          a.click();
+          URL.revokeObjectURL(blobUrl);
+        } catch {
+          window.open(viewer.url, "_blank");
+        }
+      } : undefined}
+    />
+    </>
   );
 }

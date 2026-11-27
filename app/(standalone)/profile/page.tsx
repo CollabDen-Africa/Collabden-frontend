@@ -13,6 +13,7 @@ import TestimonialsSection from "@/components/features/profile/TestimonialsSecti
 import ProfileEditModal from "@/components/features/profile/ProfileEditModal";
 import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/hooks/profile/useProfile";
+import { resolveUserName } from "@/lib/display-name";
 
 const toList = (value: unknown): string[] =>
   Array.isArray(value)
@@ -138,11 +139,7 @@ export default function ProfileOverview() {
     );
   }
 
-  const displayName =
-    [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") ||
-    profile?.legalName ||
-    profile?.email?.split("@")[0] ||
-    "User Profile";
+  const displayName = resolveUserName(profile, "User Profile");
 
   return (
     <div className="w-full flex flex-col gap-8 pt-4 animate-in fade-in duration-300 mt-5 relative">
@@ -197,9 +194,12 @@ export default function ProfileOverview() {
             user={{
               firstName: profile?.firstName || "",
               lastName: profile?.lastName || "",
+              displayName: profile?.displayName,
+              displayNameMode: profile?.displayNameMode,
               role: profile?.role,
               avatarUrl: profile?.avatarUrl,
               location: profile?.location,
+              showLocation: profile?.showLocation,
               bio: profile?.bio,
               skills,
               specializations: toList(profile?.specializations),

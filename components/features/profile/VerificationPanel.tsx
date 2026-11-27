@@ -34,7 +34,6 @@ export default function VerificationPanel({
 
   const fullName =
     [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") ||
-    profile?.legalName ||
     profile?.displayName ||
     [(user as any)?.firstName, (user as any)?.lastName].filter(Boolean).join(" ") ||
     "Not Set";

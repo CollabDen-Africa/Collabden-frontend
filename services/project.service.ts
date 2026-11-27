@@ -137,6 +137,27 @@ const projectService = {
     return response.data?.data || response.data;
   },
 
+  /**
+   * Upload a file attachment for a project message. Stored in the project's storage
+   * bucket and counted against its quota. The backend endpoint enforces the
+   * per-project size limit (50 MB per file, higher than the 10 MB DM limit).
+   * Submit the returned `path` as `url` inside the `attachments` array when
+   * calling `sendMessage`.
+   */
+  uploadProjectAttachment: async (
+    projectId: string,
+    file: File
+  ): Promise<{ path: string; name: string; mimeType: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("file", file, file.name);
+    const response = await proxyAxios.post(
+      PROXY_ENDPOINTS.PROJECTS.MESSAGES_ATTACHMENT(projectId),
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+    return response.data?.data || response.data;
+  },
+
   createTask: async (projectId: string, data: CreateProjectTaskPayload): Promise<ProjectTask> => {
     const response = await proxyAxios.post(PROXY_ENDPOINTS.PROJECTS.TASKS(projectId), data);
     return response.data?.task || response.data?.data || response.data;

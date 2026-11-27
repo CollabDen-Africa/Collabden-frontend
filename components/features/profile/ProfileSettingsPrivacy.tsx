@@ -9,11 +9,14 @@ import { useProfile } from "@/hooks/profile/useProfile";
 import { useSecurity } from "@/hooks/security/useSecurity";
 import { useAuth } from "@/context/AuthContext";
 
-const MESSAGE_OPTIONS = [
-  "Everyone",
-  "Connections Only",
-  "Project Collaborators Only",
-  "Nobody"
+type DisplayNameMode = "LEGAL" | "STAGE";
+type MessagePrivacy = "EVERYONE" | "CONNECTIONS" | "PROJECT_COLLABORATORS" | "NOBODY";
+
+const MESSAGE_OPTIONS: { value: MessagePrivacy; label: string }[] = [
+  { value: "EVERYONE", label: "Everyone" },
+  { value: "CONNECTIONS", label: "Connections Only" },
+  { value: "PROJECT_COLLABORATORS", label: "Project Collaborators Only" },
+  { value: "NOBODY", label: "Nobody" },
 ];
 
 export default function ProfileSettingsPrivacy() {
@@ -32,9 +35,9 @@ export default function ProfileSettingsPrivacy() {
 
   // State
   const [openToCollaborate, setOpenToCollaborate] = useState(false);
-  const [displayNameMode, setDisplayNameMode] = useState<"legal" | "stage">("legal");
+  const [displayNameMode, setDisplayNameMode] = useState<DisplayNameMode>("LEGAL");
   const [showLocation, setShowLocation] = useState(true);
-  const [whoCanMessage, setWhoCanMessage] = useState("Everyone");
+  const [whoCanMessage, setWhoCanMessage] = useState<MessagePrivacy>("EVERYONE");
 
   // Modals & Toasts
   const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
@@ -72,12 +75,12 @@ export default function ProfileSettingsPrivacy() {
     });
   };
 
-  const handleDisplayNameModeChange = async (mode: "legal" | "stage") => {
+  const handleDisplayNameModeChange = async (mode: DisplayNameMode) => {
     const previous = displayNameMode;
     setDisplayNameMode(mode);
     try {
       await updateProfileMutation.mutateAsync({ displayNameMode: mode });
-      showToast(`Display name mode set to ${mode === "legal" ? "Legal Name" : "Stage Name"}.`, "success");
+      showToast(`Display name mode set to ${mode === "LEGAL" ? "Legal Name" : "Stage Name"}.`, "success");
     } catch {
       setDisplayNameMode(previous);
     }
@@ -94,12 +97,12 @@ export default function ProfileSettingsPrivacy() {
     }
   };
 
-  const handleMessageOptionChange = async (option: string) => {
+  const handleMessageOptionChange = async (value: MessagePrivacy, label: string) => {
     const previous = whoCanMessage;
-    setWhoCanMessage(option);
+    setWhoCanMessage(value);
     try {
-      await updateProfileMutation.mutateAsync({ whoCanMessage: option });
-      showToast(`Messaging privacy updated to "${option}".`, "success");
+      await updateProfileMutation.mutateAsync({ whoCanMessage: value });
+      showToast(`Messaging privacy updated to "${label}".`, "success");
     } catch {
       setWhoCanMessage(previous);
     }
@@ -185,26 +188,26 @@ export default function ProfileSettingsPrivacy() {
           </div>
           
           <div className="flex flex-col gap-3">
-            <button 
-              onClick={() => handleDisplayNameModeChange("legal")}
+            <button
+              onClick={() => handleDisplayNameModeChange("LEGAL")}
               className="flex items-center gap-3 w-fit group"
             >
-              <div className={`w-4.5 h-4.5 rounded-full border-[1.6px] flex items-center justify-center transition-colors ${displayNameMode === "legal" ? "border-primary-green" : "border-text-muted group-hover:border-white/50"}`}>
-                {displayNameMode === "legal" && <div className="w-2.5 h-2.5 bg-primary-green rounded-full" />}
+              <div className={`w-4.5 h-4.5 rounded-full border-[1.6px] flex items-center justify-center transition-colors ${displayNameMode === "LEGAL" ? "border-primary-green" : "border-text-muted group-hover:border-white/50"}`}>
+                {displayNameMode === "LEGAL" && <div className="w-2.5 h-2.5 bg-primary-green rounded-full" />}
               </div>
-              <span className={`font-raleway font-medium text-[17.6px] ${displayNameMode === "legal" ? "text-white" : "text-text-muted"}`}>
-                Verified Legal Name
+              <span className={`font-raleway font-medium text-[17.6px] ${displayNameMode === "LEGAL" ? "text-white" : "text-text-muted"}`}>
+                Legal Name
               </span>
             </button>
-            
-            <button 
-              onClick={() => handleDisplayNameModeChange("stage")}
+
+            <button
+              onClick={() => handleDisplayNameModeChange("STAGE")}
               className="flex items-center gap-3 w-fit group"
             >
-              <div className={`w-4.5 h-4.5 rounded-full border-[1.6px] flex items-center justify-center transition-colors ${displayNameMode === "stage" ? "border-primary-green" : "border-text-muted group-hover:border-white/50"}`}>
-                {displayNameMode === "stage" && <div className="w-2.5 h-2.5 bg-primary-green rounded-full" />}
+              <div className={`w-4.5 h-4.5 rounded-full border-[1.6px] flex items-center justify-center transition-colors ${displayNameMode === "STAGE" ? "border-primary-green" : "border-text-muted group-hover:border-white/50"}`}>
+                {displayNameMode === "STAGE" && <div className="w-2.5 h-2.5 bg-primary-green rounded-full" />}
               </div>
-              <span className={`font-raleway font-medium text-[17.6px] ${displayNameMode === "stage" ? "text-white" : "text-text-muted"}`}>
+              <span className={`font-raleway font-medium text-[17.6px] ${displayNameMode === "STAGE" ? "text-white" : "text-text-muted"}`}>
                 Stage Name / Alias
               </span>
             </button>
@@ -236,18 +239,18 @@ export default function ProfileSettingsPrivacy() {
           Who Can Message Me?
         </span>
         <div className="flex flex-row flex-wrap items-center gap-3">
-          {MESSAGE_OPTIONS.map((option) => (
+          {MESSAGE_OPTIONS.map(({ value, label }) => (
             <button
-              key={option}
-              onClick={() => handleMessageOptionChange(option)}
+              key={value}
+              onClick={() => handleMessageOptionChange(value, label)}
               disabled={updateProfileMutation.isPending}
               className={`flex items-center justify-center px-4.5 py-3 rounded-[23.4px] border-[1.6px] font-raleway font-medium text-[17.6px] transition-all duration-200 disabled:opacity-60 ${
-                whoCanMessage === option
+                whoCanMessage === value
                   ? "bg-primary-green border-primary-green text-white"
                   : "bg-transparent border-white/10 text-text-muted hover:bg-white/5 hover:text-white"
               }`}
             >
-              {option}
+              {label}
             </button>
           ))}
         </div>

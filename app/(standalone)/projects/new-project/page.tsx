@@ -30,7 +30,6 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { ROUTES } from "@/constants/routes";
 import { getErrorMessage } from "@/lib/error-handler";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
 
 interface ProjectDateFieldProps {
   label: string;
@@ -111,8 +110,6 @@ export default function CreateProjectPage() {
     Record<string, { id: string; name: string; avatarUrl?: string }>
   >({});
   const debouncedSearch = useDebounce(collaboratorSearch, 300);
-
-  const { user } = useAuth();
 
   const { useCreateProject, useUploadProjectCover } = useProjects();
   const { useCollaborators, useMarketplaceGenres } = useCollaborator();

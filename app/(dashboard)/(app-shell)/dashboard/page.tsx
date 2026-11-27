@@ -33,10 +33,10 @@ export default function DashboardPage() {
 
   const { useDashboardData } = useDashboard();
   const { useCollaborators } = useCollaborator();
-  const { useMarketplaceProjects, useAllProjects } = useProjects();
+  const { useMarketplaceProjects } = useProjects();
   const { data: apiData, isLoading, error } = useDashboardData();
-  const { data: marketplaceCollaborators = [] } = useCollaborators({ openToCollaborate: 'true', excludeConnected: true });
-  const { data: marketplaceProjects } = useMarketplaceProjects({ page: 1, limit: 10, excludeJoined: true });
+  const { data: marketplaceCollaborators = [], isLoading: isCollaboratorsLoading } = useCollaborators({ openToCollaborate: 'true', excludeConnected: true });
+  const { data: marketplaceProjects, isLoading: isMarketplaceLoading } = useMarketplaceProjects({ page: 1, limit: 10, excludeJoined: true });
 
   if (error) {
     handleApiError(error);
@@ -188,7 +188,7 @@ export default function DashboardPage() {
       <div className="w-full flex flex-col xl:flex-row gap-10 2xl:gap-17.5">
         {/* Left Column */}
         <div className="flex-1 w-full flex flex-col gap-12.5 xl:max-w-177.75">
-          <TopStatsPanel stats={topStats} /> 
+          <TopStatsPanel stats={topStats} isLoading={isLoading} />
 
           {/* STEP 6 TOOLTIP: Final */}
           {currentStep === 6 && (
@@ -209,8 +209,9 @@ export default function DashboardPage() {
           
           {/* Active Projects */}
           <div className={`transition-all duration-300 ${currentStep === 4 ? "relative z-50" : "relative z-10"}`}>
-            <ActiveProjectsPanel 
-              projects={activeProjects} 
+            <ActiveProjectsPanel
+              projects={activeProjects}
+              isLoading={isLoading}
               currentStep={currentStep}
               setStep={setStep}
               onSkip={onSkip}
@@ -221,7 +222,7 @@ export default function DashboardPage() {
         
         {/* Right Column */}
         <div className="w-full xl:w-103.25 flex flex-col shrink-0">
-          <RecentCollaboratorActivityPanel activities={recentActivity} />
+          <RecentCollaboratorActivityPanel activities={recentActivity} isLoading={isLoading} />
         </div>
       </div>
 
@@ -232,11 +233,11 @@ export default function DashboardPage() {
         </h3>
         <div className="w-full flex flex-col xl:flex-row gap-10 2xl:gap-17.5 items-stretch">
           <div className="flex-1 w-full xl:max-w-177.75">
-            <SuggestedProjectsPanel projects={suggestedProjects} />
+            <SuggestedProjectsPanel projects={suggestedProjects} isLoading={isMarketplaceLoading} />
           </div>
 
           <div className="w-full xl:w-103.25 shrink-0">
-            <SuggestedCollaboratorsPanel collaborators={suggestedCollaborators} />
+            <SuggestedCollaboratorsPanel collaborators={suggestedCollaborators} isLoading={isCollaboratorsLoading} />
           </div>
         </div>
       </div>
