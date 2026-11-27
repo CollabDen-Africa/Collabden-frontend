@@ -1,5 +1,10 @@
 export type ProjectVisibility = "PUBLIC" | "PRIVATE";
 
+// Project message attachment limits — intentionally higher than DM limits
+// to reflect the collaborative, file-heavy nature of project workspaces.
+export const MAX_PROJECT_ATTACHMENT_BYTES = 50 * 1024 * 1024; // 50 MB per file
+export const MAX_PROJECT_ATTACHMENTS_PER_MESSAGE = 10;
+
 export interface ProjectOwner {
   id: string;
   email: string;
@@ -39,6 +44,14 @@ export interface ProjectMessageSender {
 
 export type ProjectMessageType = "TEXT" | "VOICE";
 
+export interface ProjectMessageAttachment {
+  id?: string;
+  url: string;
+  name?: string | null;
+  mimeType?: string | null;
+  size?: number | null;
+}
+
 export interface ProjectMessage {
   id: string;
   projectId: string;
@@ -51,6 +64,7 @@ export interface ProjectMessage {
   parentId?: string | null;
   createdAt: string;
   sender?: ProjectMessageSender | null;
+  attachments?: ProjectMessageAttachment[] | null;
 }
 
 export interface SendProjectMessagePayload {
@@ -59,6 +73,7 @@ export interface SendProjectMessagePayload {
   voiceUrl?: string;
   voiceDuration?: number;
   voiceSize?: number;
+  attachments?: { url: string; name?: string | null; mimeType?: string | null; size?: number | null }[];
 }
 
 export interface ProjectVoiceUploadResponse {

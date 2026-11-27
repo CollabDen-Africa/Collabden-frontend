@@ -1,13 +1,17 @@
 "use client";
 import { FiMapPin, FiCheckCircle } from "react-icons/fi";
+import { resolveUserName, type DisplayNameMode } from "@/lib/display-name";
 
 
 interface UserProfile {
   firstName: string;
   lastName: string;
+  displayName?: string | null;
+  displayNameMode?: DisplayNameMode | null;
   role?: string;
   avatarUrl?: string | null;
   location?: string;
+  showLocation?: boolean;
   bio?: string | null;
   skills?: string[];
   specializations?: string[];
@@ -24,10 +28,8 @@ export default function ProfileLeftColumn({
   user,
   isOwnProfile = true,
 }: ProfileLeftColumnProps) {
-  const displayName =
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    "Your profile";
-  const location = user?.location;
+  const displayName = resolveUserName(user, "Your profile");
+  const location = user?.showLocation === false && !isOwnProfile ? undefined : user?.location;
   const coverImage = user?.avatarUrl;
   const primaryRoles = user?.primaryRoles || (user?.role ? [user.role] : []);
   const specializations = user?.specializations || user?.skills || [];

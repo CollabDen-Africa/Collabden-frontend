@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef } from "react";
 import { FiLoader, FiLock } from "react-icons/fi";
+import { useQueryClient } from "@tanstack/react-query";
 import Avatar from "@/components/ui/Avatar";
 import VerificationPanel from "@/components/features/profile/VerificationPanel";
 import ThemePreference from "@/components/features/profile/ThemePreference";
@@ -12,9 +13,10 @@ import { getFriendlyMessage } from "@/lib/error-messages";
 
 export default function ProfileSettingsContent() {
   const { user } = useAuth();
-  const { useUserProfile, useUpdateProfile, useUpdateAvatar } = useProfile();
-  
-  const { data: profile, isLoading } = useUserProfile(user?.id || "");
+  const queryClient = useQueryClient();
+  const { useCurrentProfile, useUpdateProfile, useUpdateAvatar } = useProfile();
+
+  const { data: profile, isLoading } = useCurrentProfile();
   const updateProfileMutation = useUpdateProfile(user?.id || "");
   const updateAvatarMutation = useUpdateAvatar(user?.id || "");
 
@@ -32,19 +34,60 @@ export default function ProfileSettingsContent() {
       setToast(null);
     }, 4000);
   };
-
+console.log("Profile data:", profile);
   // Map the backend profile data into the form structure
   const formFields = useMemo(() => {
     if (!profile) return [];
     return [
-      { id: "email", label: "Email Address", value: profile.email, readonly: true, locked: false },
-      { id: "firstName", label: "First Name", value: profile.firstName || "Not set", readonly: isVerified, locked: isVerified },
-      { id: "lastName", label: "Last Name", value: profile.lastName || "Not set", readonly: isVerified, locked: isVerified },
-      { id: "phoneNumber", label: "Phone Number", value: profile.phoneNumber || "Not set", readonly: false, locked: false },
-      { id: "legalName", label: "Legal Name", value: profile.legalName || "Not set", readonly: false, locked: false },
-      { id: "displayName", label: "Stage / Display Name", value: profile.displayName || "Not set", readonly: false, locked: false },
-      { id: "role", label: "Role", value: profile.role || "Not set", readonly: false, locked: false },
-      { id: "bio", label: "Bio", value: profile.bio || "Not set", readonly: false, locked: false },
+      {
+        id: "email",
+        label: "Email Address",
+        value: profile.email,
+        readonly: true,
+        locked: false,
+      },
+      {
+        id: "firstName",
+        label: "First Name",
+        value: profile.firstName || "Not set",
+        readonly: isVerified,
+        locked: isVerified,
+      },
+      {
+        id: "lastName",
+        label: "Last Name",
+        value: profile.lastName || "Not set",
+        readonly: isVerified,
+        locked: isVerified,
+      },
+      {
+        id: "phoneNumber",
+        label: "Phone Number",
+        value: profile?.phoneNumber || "Not set",
+        readonly: false,
+        locked: false,
+      },
+      {
+        id: "displayName",
+        label: "Stage / Display Name",
+        value: profile.displayName || "Not set",
+        readonly: false,
+        locked: false,
+      },
+      {
+        id: "role",
+        label: "Role",
+        value: profile.role || "Not set",
+        readonly: false,
+        locked: false,
+      },
+      {
+        id: "bio",
+        label: "Bio",
+        value: profile.bio || "Not set",
+        readonly: false,
+        locked: false,
+      },
     ];
   }, [profile, isVerified]);
 
@@ -57,19 +100,19 @@ export default function ProfileSettingsContent() {
     if (!profile) return;
     try {
       if (fieldId === "phoneNumber") {
-        await profileService.updatePhone(editValue || null);
+        const trimmed = editValue.trim();
+        await profileService.updatePhone(trimmed || null);
+        queryClient.invalidateQueries({ queryKey: ["profile", user?.id || ""] });
+        queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
       } else {
-        await updateProfileMutation.mutateAsync({
-          [fieldId]: editValue,
-        });
+        await updateProfileMutation.mutateAsync({ [fieldId]: editValue });
       }
       showToast("Profile information updated successfully.", "success");
       setEditingField(null);
     } catch (err: any) {
       console.error("Failed to update profile field:", err);
-      if (fieldId === "phoneNumber") {
-             showToast(getFriendlyMessage(err, "profile.updatePhone"), "error");
-        }
+      const context = fieldId === "phoneNumber" ? "profile.updatePhone" : "profile.update";
+      showToast(getFriendlyMessage(err, context), "error");
     }
   };
 

@@ -81,9 +81,8 @@ export default function ConnectionsPage() {
         </Link>
       </div>
 
-      {/* Pending requests — only shown when there are any, or during initial load */}
-      {(isLoading || pendingRequests.length > 0) && (
-        <section className="rounded-[24px] border border-foreground/10 bg-foreground/10 p-5 backdrop-blur-md sm:p-6">
+      {/* Pending requests — always visible */}
+      <section className="rounded-[24px] border border-foreground/10 bg-foreground/10 p-5 backdrop-blur-md sm:p-6">
           <div className="mb-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-green/20 text-primary-green">
@@ -168,7 +167,6 @@ export default function ConnectionsPage() {
             </div>
           )}
         </section>
-      )}
 
       {/* Your connections */}
       <section className="rounded-[24px] border border-foreground/10 bg-foreground/10 p-5 backdrop-blur-md sm:p-6">

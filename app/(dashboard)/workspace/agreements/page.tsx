@@ -109,8 +109,8 @@ const AgreementCard = ({
   onDelete,
   isDeleting,
   onRequestCancel,
-  onRespondCancel,
-  isRespondingCancel
+  onRespondCancel: _onRespondCancel,
+  isRespondingCancel: _isRespondingCancel
 }: {
   agreement: any;
   isOwner: boolean;
@@ -122,7 +122,7 @@ const AgreementCard = ({
   isDeleting: boolean;
   onRequestCancel: (agreementId: string) => void;
   onRespondCancel: (agreementId: string, decision: "APPROVE" | "DECLINE") => void;
-  isRespondingCancel: boolean;  
+  isRespondingCancel: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { activeProject } = useWorkspace();
@@ -439,11 +439,8 @@ export default function AgreementsOverviewPage() {
   const isUserVerified =
     fundingStatus === "unfunded" ? true : user?.identityVerified || false;
 
-  // Use KYC-verified legalName when available; fall back to profile first + last name
   const verifiedLegalName =
-    user?.legalName ||
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    undefined;
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || undefined;
 
   const projectId = activeProject?.id || "";
 

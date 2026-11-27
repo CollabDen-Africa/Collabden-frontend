@@ -170,8 +170,6 @@ export default function VerificationModal({
         const err = error as {
           response?: { status?: number; data?: { code?: string; attemptsRemaining?: number; retryAfter?: number } };
         };
-        const status = err?.response?.status;
-        const code = err?.response?.data?.code;
         const remaining = err?.response?.data?.attemptsRemaining;
         if (typeof remaining === "number") setAttemptsRemaining(remaining);
 
